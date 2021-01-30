@@ -1,0 +1,188 @@
+Label				Addr	Bank
+-----				----	----
+BG_CYAN				0000	 f0
+ARG_REG				0001	 f0
+Intro_Text			e196	 00
+psg_noise			0807	 f0
+DEVELO				0000	 f0
+BORD_DKBLU			0000	 f0
+psg_lfofreq			0808	 f0
+_dl				20fe	 f0
+vdc_int				ff39	 00
+	.exit			ff4f	 00
+	.vsync_test		ff49	 00
+	.hsync_test		ff41	 00
+BATWIDTH			0020	 f0
+_ah				20f9	 f0
+_bank_base			0000	 f0
+color_reg_h			0403	 f0
+video_data_h			0003	 f0
+lsrw				0000	 f0
+BG_BLACK			0000	 f0
+psg_freqhi			0803	 f0
+Setup_Sprites			e238	 00
+colorport			0400	 f0
+MY_VSYNC			e0ac	 00
+	.x_00047		e12e	 00
+	.line_moved		e132	 00
+	.x_00045		e111	 00
+	.x_00044		e107	 00
+	.dec_line		e117	 00
+	.no_move		e132	 00
+_decw				0000	 f0
+bhi				0000	 f0
+rorw				0000	 f0
+_vsr				20f6	 f0
+sub				0000	 f0
+vb_count			2003	 f8
+Clear_BAT			e1d7	 00
+	.clrlp			e1ef	 00
+_adcw				0000	 f0
+_cx				20fc	 f0
+Init_VDC			fef0	 00
+	.init_end		ff11	 00
+	.l1			fef9	 00
+_al				20f8	 f0
+timer_cnt			0c00	 f0
+_si				20ee	 f0
+psg_ch				0800	 f0
+timerport			0c00	 f0
+_call_bank			0004	 f0
+MY_HSYNC			e142	 00
+decw				0000	 f0
+ARG_LABEL			0006	 f0
+color_reg_l			0402	 f0
+video_data_l			0002	 f0
+_tstw				0000	 f0
+timer_ctrl			0c01	 f0
+set_bgpal			0000	 f0
+TOP_LINE			0040	 f0
+setvwaddr			0000	 f0
+BonkPal				5420	 02
+tstw				0000	 f0
+adcw				0000	 f0
+video_reg			0000	 f0
+videoport			0000	 f0
+lblo				0000	 f0
+ARG_INDIRECT			0004	 f0
+setcolor			0000	 f0
+lbhs				0000	 f0
+CDROM				0000	 f0
+direction			2002	 f8
+lbpl				0000	 f0
+color_reg			0402	 f0
+satb				2200	 f8
+lbcc				0000	 f0
+map				0000	 f0
+_bh				20fb	 f0
+batcpy				0000	 f0
+stwz				0000	 f0
+MAGICKIT			0001	 f0
+_nb_bank			0005	 f0
+lbmi				0000	 f0
+BATHEIGHT			0020	 f0
+lbeq				0000	 f0
+rolw				0000	 f0
+BG_GREY2			0000	 f0
+ARG_IMMED			0002	 f0
+irq_disable			1402	 f0
+_vreg				20f7	 f0
+BORD_RED			0000	 f0
+neg				0000	 f0
+SCREEN_OFF			0000	 f0
+INTS_OFF			0000	 f0
+BG_DKGRN			0000	 f0
+_sbcw				0000	 f0
+irq_status			1403	 f0
+_addw				0000	 f0
+_dx				20fe	 f0
+psg_freqlo			0802	 f0
+bhs				0000	 f0
+_bl				20fa	 f0
+vreg				0000	 f0
+irqport				1400	 f0
+SCREEN_ON			0000	 f0
+SprCHR				5000	 02
+negw				0000	 f0
+blo				0000	 f0
+MAIN				e000	 00
+	.loop			e0aa	 00
+BORD_WHITE			0000	 f0
+lbne				0000	 f0
+_subw				0000	 f0
+joyport				1000	 f0
+sbcw				0000	 f0
+set_write			fe99	 00
+color_data_h			0405	 f0
+add				0000	 f0
+addw				0000	 f0
+setvraddr			0000	 f0
+subw				0000	 f0
+load_vram			fe58	 00
+	.next			fe6c	 00
+	.loop			fe5c	 00
+stw				0000	 f0
+set_read			fe80	 00
+_ch				20fd	 f0
+_ax				20f8	 f0
+psg_lfoctrl			0809	 f0
+vdc_table			ff17	 00
+RESET				feb2	 00
+BORD_BLUE			0000	 f0
+my_rti				ff5e	 00
+Draw_BonkBG			e1fa	 00
+	.x_00068		e221	 00
+	.bonklp1		e211	 00
+	.bonklp0		e20f	 00
+color_data_l			0404	 f0
+SPRPal				5440	 02
+vload				0000	 f0
+psg_wave			0806	 f0
+color_data			0404	 f0
+video_data			0002	 f0
+color_ctrl			0400	 f0
+BG_GREEN			0000	 f0
+psg_pan				0805	 f0
+_incw				0000	 f0
+_cl				20fc	 f0
+FontPal				5400	 02
+timer_int			ff58	 00
+ARG_ABS				0003	 f0
+MyFont				4000	 02
+_cmpw				0000	 f0
+_stw				0000	 f0
+ARG_STRING			0005	 f0
+aslw				0000	 f0
+psg_ctrl			0804	 f0
+video_reg_h			0001	 f0
+BONKBG_VRAM			1000	 f0
+incw				0000	 f0
+ARG_NONE			0000	 f0
+BG_ON				0000	 f0
+BONKSP_VRAM			3000	 f0
+stb				0000	 f0
+ARG_ABSOLUTE			0003	 f0
+SATB_VRAM			0f00	 f0
+_irq_m				20f5	 f0
+set_sprpal			0000	 f0
+cmpw				0000	 f0
+lbcs				0000	 f0
+_bss_end			2400	 f0
+_dh				20ff	 f0
+_bx				20fa	 f0
+BonkBG				4000	 03
+Update_SATB_BLOCKTRANSFER	e295	 00
+set_palette			fe00	 00
+	.next			fe25	 00
+	.loop_b			fe15	 00
+	.loop_a			fe13	 00
+psgport				0800	 f0
+load_bat			fe2d	 00
+	.n1			fe43	 00
+	.l2			fe33	 00
+	.l1			fe2e	 00
+_di				20f0	 f0
+psg_mainvol			0801	 f0
+hsync_line			2000	 f8
+video_reg_l			0000	 f0
+BOT_LINE			0130	 f0
