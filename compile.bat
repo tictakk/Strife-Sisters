@@ -1,0 +1,1 @@
+..\huc\bin\huc -fno-recursive -msmall promotion.c

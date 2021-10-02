@@ -1,0 +1,2 @@
+bgmap.tiles.pcx
+C:\Users\matthew\Projects\huc\game\testgame\map\bgmap.Untitled 1.layer-Layer 1.map001.stm

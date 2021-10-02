@@ -1,1 +1,1 @@
-C:\Users\matthew\Downloads\mednafen-1.24.3-win64\mednafen.exe TurboForce.pce
+C:\Users\matthew\Downloads\mednafen-1.24.3-win64\mednafen.exe promotion.pce

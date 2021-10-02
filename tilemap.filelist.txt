@@ -1,0 +1,2 @@
+tilemap.tiles.pcx
+C:\Users\matthew\Projects\huc\game\testgame\tilemap.tilemap.layer-Layer 1.map001.stm
