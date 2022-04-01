@@ -1,213 +1,210 @@
-// #include <stdlib.h>
-#include "malloc.c"
-#include "pathing.h"
+struct Node neighbors[8];
+struct Node map[200];
+// struct Node path[20];
 
-// int x, y, exit;
-// struct Node neighbors;
-// struct Node path;
-// struct Node tmp;
-// struct Location goal;
+// char path_counter = 0;
 
-
-// struct Node get_path()
-// {
-//     int x, y, exit;
-//     struct Node neighbors;
-//     struct Node path;
-//     struct Node tmp;
-//     struct Location goal;
-
-//     while(map && !exit){
-//     neighbors = get_neighbors(map);
-//         while(neighbors){
-//         x = neighbors->key->x;
-//         y = neighbors->key->y;
-//         if(grid[x][y] != 1){
-//             if(put_visited(neighbors->key,neighbors->value,visited)){
-//             put_visited(neighbors->key,neighbors->value,map);
-//             }
-//         }
-//         if(grid[x][y] == 2){
-//             exit = 1;
-//             goal->x = x;
-//             goal->y = y;
-//         }
-//         neighbors = neighbors->next;
-//         }
-//         map = map->next;
-//     }
-
-//     path->key = goal;
-//     // printf("x: %lu, y: %lu\n", goal.x,goal.y);
-
-//     while(!cmp(goal,start)){
-//         tmp = get_node(goal,visited);
-//         goal = tmp->value;
-//         put_visited(tmp->key,tmp->value,path);
-//         // printf("x: %lu, y: %lu\n", goal.x,goal.y);
-//     }
-//     path = path->next;
-// }
-
-struct Location *get_neighbors(int x, int y)
+int get_neighbors(unsigned char x, unsigned char y, char size)
 {
-  struct Location from;
-  struct Node *tmp, *results;
-
-  int i;
-  from.x = x;
-  from.y = y;
-  i = 0;
-  results->key.x = x;
-  results->key.y = y;
-  tmp = results;
-
-  if((x - 1) > -1){
-    tmp->key.x = x-1;
-    tmp->key.y = y;
-    tmp->value.x = from.x;
-    tmp->value.y = from.y;
-    i++;
-  }
-  if((y - 1) > -1){
-    if(i!=0){
-      tmp->next = malloc(sizeof(struct Node));
-      tmp = tmp->next;
-    }
-    tmp->key.x = x;
-    tmp->key.y = y-1;
-    tmp->value.x = from.x;
-    tmp->value.y = from.y;
-    i++;
-  }
-  if((y + 1) < 10){
-    if(i!=0){
-      tmp->next = malloc(sizeof(struct Node));
-      tmp = tmp->next;
-    }
-    tmp->key.y = y+1;
-    tmp->key.x = x;
-    tmp->value.x = from.x;
-    tmp->value.y = from.y;
-    i++;
-  }
-  if((x + 1) < 10){
-    if(i!=0){
-      tmp->next = malloc(sizeof(struct Node));
-      tmp = tmp->next;
-    }
-    tmp = tmp->next;
-    tmp->key.x = x+1;
-    tmp->key.y = y;
-    tmp->value.x = from.x;
-    tmp->value.y = from.y;
-  }
-  free(tmp);
-  return *results;
-}
-
-int get_neighbors(int x, int y)
-{
-	struct Node tmp, results;
-	int i, counter;
-
+	int i, counter, width;
+	width = 32;
+	// width = (size)? 16 : 32;
 	counter = 0;
-	tmp = results;
 
-
+	//left
 	if((x - 1) > -1)
 	{
-
-		neighbors[counter].ownX = x-1; 
-		neighbors[counter].ownY = y; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
+		neighbors[counter].ownX = x-1;
+		neighbors[counter].ownY = y;
+		neighbors[counter].fromX = x;
+		neighbors[counter].fromY = y;
 		neighbors[counter].checked = 1;
 		counter++;
-		// if(map_counter == 0)
-		// {
-		// 	put_number(neighbors[0].ownX,2,1,1);
-		// 	put_number(neighbors[0].checked,2,0,0);
-		// }
 	}
+
+	//up
 	if((y - 1) > -1)
 	{
-		neighbors[counter].ownX = x; 
-		neighbors[counter].ownY = y-1; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
+		neighbors[counter].ownX = x;
+		neighbors[counter].ownY = y-1;
+		neighbors[counter].fromX = x;
+		neighbors[counter].fromY = y;
 		neighbors[counter].checked = 1;
 		counter++;
 	}
-	if((y + 1) < 10)
+
+	//down
+	if((y + 1) < width)
 	{
-		neighbors[counter].ownX = x; 
-		neighbors[counter].ownY = y+1; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
+		neighbors[counter].ownX = x;
+		neighbors[counter].ownY = y+1;
+		neighbors[counter].fromX = x;
+		neighbors[counter].fromY = y;
 		neighbors[counter].checked = 1;
 		counter++;
 	}
-	if((x + 1) < 10)
+
+	//right
+	if((x + 1) < width)
 	{
-		neighbors[counter].ownX = x+1; 
-		neighbors[counter].ownY = y; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
+		neighbors[counter].ownX = x+1;
+		neighbors[counter].ownY = y;
+		neighbors[counter].fromX = x;
+		neighbors[counter].fromY = y;
 		neighbors[counter].checked = 1;
 		counter++;
 	}
-	for(i=counter; i<4; i++)
+
+	// if(size)
+	// {
+	// 	for(i=counter; i<4; i++)
+	// 	{
+	// 		neighbors[i].checked = 0;
+	// 	}
+	// 	return counter;
+	// }
+
+	//up, left
+	if((x - 1) >= 0 && (y - 1) >= 0)
+	{
+	  neighbors[counter].ownX = x-1;
+	  neighbors[counter].ownY = y-1;
+	  neighbors[counter].fromX = x;
+	  neighbors[counter].fromY = y;
+	  neighbors[counter].checked = 1;
+	  counter++;
+	}
+
+	//up, right
+	if((x + 1) < width && (y - 1) >= 0)
+	{
+	  neighbors[counter].ownX = x+1;
+	  neighbors[counter].ownY = y-1;
+	  neighbors[counter].fromX = x;
+	  neighbors[counter].fromY = y;
+	  neighbors[counter].checked = 1;
+	  counter++;
+	}
+
+	//down, right
+  if((x+1) < width && (y+1) < width)
+  {
+    neighbors[counter].ownX = x+1;
+    neighbors[counter].ownY = y+1;
+    neighbors[counter].fromX = x;
+    neighbors[counter].fromY = y;
+    neighbors[counter].checked = 1;
+    counter++;
+  }
+
+	//down, left
+  if((x - 1) >= 0 && (y + 1) < width)
+  {
+    neighbors[counter].ownX = x-1;
+    neighbors[counter].ownY = y+1;
+    neighbors[counter].fromX = x;
+    neighbors[counter].fromY = y;
+    neighbors[counter].checked = 1;
+    counter++;
+  }
+
+	for(i=counter; i<9; i++)
 	{
 		neighbors[i].checked = 0;
 	}
-	return counter-1;
-}	
+	return counter;
+}
 
-get_path(int pos)
+int get_path(int pos, int desired, int paths[20], char *big_map, char size)
 {
-	int x, y, fx, fy;
+  struct Node *node;
+	struct Node path[20];
+
+	int x, y, fx, fy, v, width;
 	int p = 0;
 	int i = 0;
 	int count = 0;
 	int exit = 1;
-	// struct Node node;
-	// put_number(pos,3,0,0);
+	int path_counter = 0;
+  v = 0;
 
-	map[map_size].ownX = get_x_from_pos(pos);
-	map[map_size].ownY = get_y_from_pos(pos);
-	map[map_size].fromX = get_x_from_pos(pos);
-	map[map_size].fromY = get_y_from_pos(pos);
+	// width = (size)? 16 : 32;
+	width = 32;
+  map_counter = 0;
+  map_size = 0;
+
+	map[map_size].ownX = pos & 31;//width-1;
+	map[map_size].ownY = pos / 32;//width;
+	map[map_size].fromX = pos & 31;//width-1;
+	map[map_size].fromY = pos / 32;//width;
 	map[map_size].checked = 1;
+	// put_number(width,3,15,15);
 
-	while(map[map_counter].checked == 1 && exit == 1)
+	while(map[map_counter].checked == 1 && exit == 1 && map_counter < 200)
 	{
 		//THIS HAS TO BE FIXED HERE, IT'S EXITING EARLY BEFORE FINDING WHAT WE NEED BECAUSE AN "UNCHECKED" NODE IS BEING PUT IN SOMEWHERE (LIKELY INDEX 2) LOOK AT PUT NUMBER AT THE END OF THIS FUNCTION
-		count = get_neighbors(map[map_size].ownX,map[map_size].ownY);
+		count = get_neighbors(map[map_counter].ownX,map[map_counter].ownY,size);
+
 		i = 0;
-		while(i < count-1)
+		while(i < count)
 		{
-			p = (neighbors[i].ownY * 128) + neighbors[i].ownX;
+			p = (neighbors[i].ownY * 32) + neighbors[i].ownX;
 			x = neighbors[i].ownX;
 			y = neighbors[i].ownY;
 			fx = neighbors[i].fromX;
 			fy = neighbors[i].fromY;
 
-			if(neighbors[i].checked == 1){
-				if(grid[p] != 2){
-					put_visited(x,y,fx,fy);
-				}else{
-					put_visited(x,y,fx,fy);
-					exit = 0;
-					map_counter--;
-					i=count;
-				}
+			if(neighbors[i].checked == 1)
+			{
+          if(p == desired)
+          {
+  					put_visited(x,y,fx,fy);
+            exit = 0;
+            map_counter--;
+            i=count;
+  				}
+					else if(*(big_map+p) != 0)
+					// else if(overworld[p] != 0)
+					{
+            if(put_visited(x,y,fx,fy))
+						{
+							// put_number(p,3,12+(4*(v/20)),6+v%20);
+							v++;
+						}
+  				}
 			}
 			i++;
 		}
 		map_counter++;
 	}
 
+  i = 0;
+  node = &map[map_size];
+
+	paths[i] = (node->ownY * 32) + node->ownX;
+  path[i].ownX = node->ownX;
+  path[i].ownY = node->ownY;
+  path[i].fromX = node->fromX;
+  path[i++].fromY = node->fromY;
+  x = map[0].ownX;
+  y = map[0].ownY;
+
+  while(!compare(x, y, node->ownX, node->ownY))
+  {
+    node = &map[get(node->fromX,node->fromY)];
+		paths[i] = (node->ownY * 32) + node->ownX;
+    path[i].ownX = node->ownX;
+    path[i].ownY = node->ownY;
+    path[i].fromX = node->fromX;
+    path[i++].fromY = node->fromY;
+    path_counter++;
+  }
+	return path_counter - 1;
+}
+
+char compare(char ownX, char ownY, char fromX, char fromY)
+{
+  return ((ownX == fromX) && (ownY == fromY));
 }
 
 int put_visited(int x, int y, int fx, int fy)
@@ -227,4 +224,17 @@ int put_visited(int x, int y, int fx, int fy)
 	map[map_size].fromY = fy;
 	map[map_size].checked = 1;
 	return 1;
+}
+
+unsigned char get(char x, char y)
+{
+  unsigned char i = 0;
+  for(i=0; i<map_size; i++){
+    if(map[i].ownX == x && map[i].ownY == y)
+    {
+      return i;
+      //return 0;
+    }
+  }
+  return 0;
 }

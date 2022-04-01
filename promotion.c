@@ -1,48 +1,220 @@
-#include <stdlib.h>
-#include "huc.h"
-#include "malloc.c"
+#include <huc.h>
+#include "paths.h"
 
-/* vram allocation */
-#define TILE_VRAM    0x1000
-#define TILES_PER_LINE 128
-#define NUMBER_OF_TILES 2000//5120
+// #define STRENGTH 1
+// #define RECOVERY 2
+// #define LUCK 3
+// #define INTELLIGENCE 4
+// #define WILL 5
+// #define HP 6
+// #define AP 7
+// #define ATTACK 8
+// #define DEFENSE 9
+
+#define CMDR 0
+#define BEAST 1
+#define SAMURAI 2
+
+#define PORTRAIT_VRAM 0x3500
+#define CMDR_PANEL_VRAM 0x3600
+#define FONT_VRAM 0x5200
+#define DIALOGUE_VRAM 0x4000
+#define P_BORDER_VRAM 0x4000
+#define CMDR_VRAM_SIZE 0x800
+#define MAX_CAPTURED 20
+#define NO_OF_MENUS 20
+#define NO_OF_MENU_ITEMS 30
+
+#incspr(cmdr, "map/sprites/commander.pcx");
+#incpal(cmdrpal, "map/sprites/commander.pcx");
+
+#incspr(beast, "map/sprites/beasts.pcx");
+#incpal(beastpal, "map/sprites/beasts.pcx");
+
+#incspr(samurai, "map/sprites/samurai.pcx");
+#incpal(samuraipal, "map/sprites/samurai.pcx");
+
+// #incchr(bdisplay,"map/backgrounds/battle_display.pcx");
+// #incpal(bdisplaypal,"map/backgrounds/battle_display.pcx");
+
+#incchr(healthbar,"map/backgrounds/healthbars.pcx");
+#incpal(healthbarpal,"map/backgrounds/healthbars.pcx");
+
+#incchr(panel_gfx, "map/sprites/deploy_menu.pcx")
+#incpal(panel_pal, "map/sprites/deploy_menu.pcx")
+#incbat(panel_bat, "map/sprites/deploy_menu.pcx", 0x2100, 0, 0, 24, 12)
+// #incchr(panel_gfx, "map/sprites/infobox.pcx")
+// #incpal(panel_pal, "map/sprites/infobox.pcx")
+// #incbat(panel_bat, "map/sprites/infobox.pcx", 0x2100, 0, 0, 32, 4)
+
+#define MAP_WIDTH 32
+#define TILE_WIDTH 16
+#define TILE_VRAM 0x1000
+#define OVERWORLD_MAP_HEIGHT 32
+#define NO_OF_CASTLES 15
+
+#define MAX_ARMY_SIZE 45
+#define MAX_COMMANDERS 6
+#define TOTAL_COMMANDERS 20
+
+#define TAROS 0 //purple
+#define KODEN 1 //dark green
+#define BAKURIA 2 //yeller
+#define SANGAI 3 //blue
+#define KAYTOKEN 4 //red
+
+// #define MAP_32x32 0
+// #define MAP_16x16 1
+
+#incspr(cursor, "map/cursor.pcx");
+#incpal(cursorpal, "map/cursor.pcx");
+
+#incpal(menupal, "map/sprites/inbattle.pcx");
+
+enum GAME_STATE{
+	OVERWORLD, BATTLE_SELECT, BATTLE
+};
+
+enum Unit_Type{
+	INFANTRY, CALVARY, SPEARS, MUSKETS, ENGINEERS
+};
+
+typedef struct{
+	char atk, def, hp;
+	enum Unit_Type unit_type;
+} Unit;
+
+struct Commander{
+	char id;
+	char kingdom;
+	char lvl;
+	// char sprite;
+	char army_size, army_type;
+	Unit *unit;
+	char hp;
+	char ap;
+	char str;
+	char rec;
+	char lck;
+	char int;
+	char will;
+	char *name;
+};
+
+struct Castle{
+	int x, y;
+	char level, no_of_commanders, no_of_soldiers, population, id;
+	char owner;
+	char commanders[MAX_COMMANDERS];
+};
+
+//Map images
+#incpal(overworldpal,"map/overworldtilemap1.tiles.pcx");
+#inctile(overworldtiles,"map/overworldtilemap.tiles.pcx");
+// #inctilepal(overworldtable,"map/overworldtilemap.tiles.pcx");
+#incbin(overworldmap,"map/overworldtilemap.Untitled 6.layer-Layer 1.map001.stm")
+
+// #incchr(battlefield,"map/sprites/battlefield2.pcx")
+// #incpal(battlefieldpal, "map/sprites/battlefield2.pcx")
+// #incbat(battlefieldbat, "map/sprites/battlefield2.pcx",0x1000,32,28)
+#inctile(battlefield,"map/backgrounds/battlefieldmap.tiles.pcx")
+#incpal(battlefieldpal, "map/backgrounds/battlefieldmap.tiles.pcx")
+#incbin(battlefieldbat, "map/backgrounds/battlefieldmap.Untitled 4.layer-Layer 1.map001.stm")
+
+#incchr(castle,"map/sprites/castle.pcx");
+#incchr(castle1,"map/sprites/castle1.pcx");
+#incchr(castle2,"map/sprites/castle2.pcx");
+#incchr(castle3,"map/sprites/castle3.pcx");
+#incchr(castle4,"map/sprites/castle4.pcx");
+#incpal(castlepal, "map/sprites/castle.pcx");
+
+#incspr(selector,"map/sprites/selector.pcx");
+#incpal(selectorpal,"map/sprites/selector.pcx");
+
+char j_1, j_2;
+int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
+struct Castle castles[NO_OF_CASTLES];
+struct Commander commanders[TOTAL_COMMANDERS];
+char captured[20];
+char current_captured = 0;
+
+int total_sprites = 0;
+int counter = 0;
+char current_menu_size = 0;
+
+/*
+	MENU STUFF
+*/
+
+#define CASTLE_MENU 1
+#define CASTLE_INFO_MENU 2
+#define PRE_BATTLE_MENU 4
+#define BATTLE_MENU 8
+#define ARTS_MENU 16
+#define FORMATION_MENU 32
+
+#define EXIT_OPTION 1
+#define SELECT_OPTION 2
+
+#define CURSOR_SIZE 1
+#define MAX_SPRITES 63
+
+extern unsigned char current_menu = 0;
+extern unsigned char menu_state = 0;
+extern unsigned char menu_select = 0;
+
+#incspr(borders, "map/sprites/boarders.pcx");
+#incspr(menu, "map/sprites/inbattle.pcx");
+#incspr(pre, "map/sprites/prebattlemenu.pcx");
+#incspr(formation, "map/sprites/formationmenu.pcx");
+#incspr(artsmenu, "map/sprites/artsmenu.pcx");
+#incspr(castleinfo, "map/sprites/castleinfo.pcx");
+#incspr(castlemenu, "map/sprites/castlemenu.pcx");
+#incspr(walker, "map/sprites/walker.pcx");
+
+#incspr(taros, "map/sprites/Taros.pcx");
+#incspr(koden, "map/sprites/Koden.pcx");
+#incspr(kaytoken, "map/sprites/Kaytoken.pcx");
+#incspr(sangai, "map/sprites/Sangai.pcx");
+#incspr(bakuria, "map/sprites/Bakuria.pcx");
+
+#incspr(dialog,"map/sprites/dialog.pcx");
+#incpal(walkerpal, "map/sprites/walker.pcx");
+
+// struct Castle *current_castle;
+// struct Stack stk;
+char current_menu = 0;
+char current_menu_length = 0;
+char current_menu_width = 0;
+char current_menu_choices = 0;
+char current_menu_x = 0;
+char current_menu_y = 0;
+char cursor_pointer = 0;
+char kingdom = 0;
+
+// struct Commander brendt;
+// struct Commander lucious;
+// struct Commander sophia;
+//
+// struct Commander metaron;
+// struct Commander falc;
+// struct Commander camile;
+
+int menu_min = 0;
+int menu_max = 0;
+int cursor_vram = 0;
+// int z = 0;
+
+/*
+	BATTLE STUFF
+*/
+#define NUMBER_OF_TILES 70//5120
 #define SOLDIER_SIZE 32
-#define ARMY_ONE_SIZE 4
-#define ARMY_TWO_SIZE 2
-
-/* promotion's exported tileset */
-#define TILE_WIDTH 8
-#incpal(testpal,"map/bgmap.tiles.pcx");
-#inctile(testtiles,"map/bgmap.tiles.pcx");
-#inctilepal(testtable,"map/bgmap.tiles.pcx");
-
-/* promotion's exported map */
-#define MAP_WIDTH  128
-#define MAP_HEIGHT 64
-#incbin(testmap,"map/bgmap.Untitled 1.layer-Layer 1.map001.stm");
-
-/* sprites */
-#incspr(sold, "map/sprites/soldierorg.pcx", 0, 0, 2, 8);
-#incspr(attack, "map/sprites/soldierorg.pcx", 0, 128, 2, 8);
-#incpal(soldierpal, "map/sprites/soldier.pcx");
-
-int sprite_memory_start = 0x5000;
-int sprite_size = 0x800;
-int army_one_x_start = 0;
-int army_one_y_start = 0;
-int army_two_x_start = 0;
-int army_two_y_start = 0;
-int opp = 0;
-int current_army_id = 0;
-char army_one_current_size = ARMY_ONE_SIZE;
-char army_two_current_size = ARMY_TWO_SIZE;
-char current_opp_army_size = 0;
-
-char grid[NUMBER_OF_TILES];
+#define BATTLE_MAP_HEIGHT 16
 
 struct Node{
 	int ownX, ownY, fromX, fromY;
-	int checked;
+	char checked;
 };
 
 enum SoldierState{
@@ -51,187 +223,232 @@ enum SoldierState{
 
 enum Direction{
 	UP, RIGHT, DOWN, LEFT
-};	
-
-struct Location{
-    int x, y;
 };
 
-// struct Node{
-//     struct Location key, value;
-//     struct Node *next;
-// };
+enum Commands{
+	ADVANCE, IDLE, SKIRMISH, MELEE, ARTS, RECALL
+};
 
 struct soldier{
-	int x, y, pos, tic, id;
-	char vx, vy;
+	int pos, x, y, frame;
+	char tic, id;
 	enum SoldierState state;
 	enum Direction direction;
 	char walk, attack, die, active;
 };
 
-struct Node map[200];
-// struct Node visited[50];
-struct Node neighbors[4];
-// struct Node path[15];
+// struct battle_group{
+//   char group_size;
+//   char commanders[5];
+//   char defeated[5];
+// };
 
-struct soldier *armyOne[ARMY_ONE_SIZE]; 
-struct soldier *armyTwo[ARMY_TWO_SIZE];
-struct soldier *opp_army;
-// struct Location *locations[1];
+// #incpal(testpal,"map/battlemap5.tiles.pcx")
+// #inctile(testtiles,"map/battlemap5.tiles.pcx")
+// #inctilepal(testtable,"map/battlemap5.tiles.pcx")
+
+// #incchr(battleselectchr,"map/sprites/prebattleconcept2.pcx")
+// #incpal(battleselectpal,"map/sprites/prebattleconcept2.pcx")
+// #incbat(battleselectbat,"map/sprites/prebattleconcept2.pcx",0x1000)
+
+// #incbin(testmap,"map/battlemap5.Untitled 2.layer-Layer 1.map001.stm")
+
+/* sprites */
+#incspr(attack, "map/sprites/unit_test.pcx")
+#incpal(soldierpal, "map/sprites/unit_test.pcx")
+
+#incspr(attack2, "map/sprites/unit_test2.pcx")
+
+#incspr(musketbtl, "map/sprites/msktbtl.pcx")
+#incpal(musketbtlpal, "map/sprites/msktbtl.pcx")
+
+// #incpal(soldierpal2, "map/sprites/unit_test.pcx");
+#incspr(commander, "map/sprites/commander1.pcx")
+#incpal(commanderpal, "map/sprites/commander1.pcx")
+
+#incchr(portraitgfx, "map/sprites/portrait.pcx", 0, 0, 4, 4)
+#incchr(portraitm, "map/sprites/portraitm.pcx", 0, 0, 4, 4)
+// #incspr(portrait2, "map/sprites/portrait2.pcx")
+// #incspr(portrait1, "map/sprites/portrait1.pcx")
+#incpal(portraitpal, "map/sprites/portrait.pcx")
+#incpal(portraitmpal, "map/sprites/portraitm.pcx")
+
+#incchr(cmdr_info_panel, "map/sprites/cmdr_info_panel.pcx",0,0,8,12)
+#incbat(cmdr_info_panel_bat, "map/sprites/cmdr_info_panel.pcx",0x3600,0,0,8,12)
+
+#incspr(brskr, "map/sprites/berserker.pcx")
+#incpal(brskrpal, "map/sprites/berserker.pcx")
+
+// #incspr(ball, "map/sprites/ball.pcx");
+// #incpal(ballpal, "map/sprites/ball.pcx");
+
+const int sprite_memory_start = 0x5000;
+const int sprite_size = 0x800;
+
+int army_one_x_start = 0;
+int army_one_y_start = 0;
+int army_two_x_start = 0;
+int army_two_y_start = 0;
+int avg = 0;
+// char army_one_current_size = ARMY_ONE_SIZE;
+// char army_two_current_size = ARMY_TWO_SIZE;
+int commander_one_pos = 0; //1,3
+int commander_two_pos = 0; //15,3
+
+char team_one_arts_flag = 0;
+char team_two_arts_flag = 0;
+
+int menu_size = 0;
+
+// char grid[NUMBER_OF_TILES];
+
+enum Commands comm_1 = 1;
+enum Commands comm_2 = 1;
+enum Commands commands = 1;
+
+Unit spears;
+Unit calvary;
+Unit infantry;
+Unit muskets;
+Unit engineers;
+
+// struct Node map[100];
+// struct Node neighbors[4];
+
+struct soldier armyOne[15]; //9 is max?
+struct soldier armyTwo[15];
+struct soldier *sp;
+
+// 	INFANTRY, CALVARY, SPEARS, MISSLES, ENGINEERS
 
 int map_counter = 0;
 int map_size = 0;
-int soldierFrame = 0x5000;
-int altFrame = 0x5800;
+// int soldierFrame = 0x4000;
+int soldierFrame = 0;
+// int altFrame = 0x5000;
+int altFrame = 0;
 int frame = 0x5000;
 int tic = 0;
 int sx = 0;
 int sy = 0;
 int yOffset = 0;
-int j1 = 0;
+char j1 = 0;
+int j2 = 0;
 int xOffset = 0;
-// int path_pointer = 0;
+int z = 0;
+int j = 0;
+
+int team_id = 0;
+int opp = 0;
+int opp_area = 0;
+int opp_army_size = 0;
+int opp_attack_area = 0;
+int team_area = 0;
+int team_army_size = 0;
+int total_units = 0;
+
+char commander_one_hp = 10;
+char commander_two_hp = 10;
+char sprite_offset = 0;
+char commander_select = 0;
+
+int TEAM_ONE_ID = 1;
+int TEAM_TWO_ID = 2;
+int ATTACK_AREA_ONE = 4;
+int ATTACK_AREA_TWO = 8;
+
+// struct Menu menus[NO_OF_MENUS];
+// struct Menu_Item menu_items[NO_OF_MENU_ITEMS];
 
 main()
 {
-	int soldierx = 160; //5
-	int soldiery = 128; //4
-	
-	int pattern = 0;
+	// struct Commander *cmdr;
+	char deploy_one[2];
+	char deploy_two[2];
+	selector_x = 0;
+	selector_y = 64;
+	cursor_vram = 0x68C0;
 
-	int altx = 0;
-	int alty = 32;
+	spears.hp  = 135;
+	spears.atk = 22;
+	spears.def = 27;
+	spears.unit_type = SPEARS;
 
-	int i = 0;
-	int z;
-	// int path_pointer = 0;
-	int movex = 0;
-	int movey = 0;
-	int attack_pos = 0;
+	calvary.hp  = 95;
+	calvary.atk = 26;
+	calvary.def = 22;
+	calvary.unit_type = CALVARY;
 
-	//init army
-	struct soldier *sp;
-	// struct Node *node;
+	infantry.hp  = 105;
+	infantry.atk = 20;
+	infantry.def = 29;
+	infantry.unit_type = INFANTRY;
 
-	int j;
+	muskets.hp  = 70;
+	muskets.atk = 30;
+	muskets.def = 13;
+	muskets.unit_type = MUSKETS;
 
-	int p;
-	int row;
-	int column;
+	engineers.atk = 15;
+	engineers.def = 27;
+	engineers.hp  = 60;
+	engineers.unit_type = ENGINEERS;
 
-	row = 2;
-	column = 1;
-	for(j=0, sp = armyOne; j<ARMY_ONE_SIZE; ++j, ++sp)
-	{
-		p = ((j + row) * 128) + column;
-		sp->pos = p;
-		sp->active = 1;
-		sp->id = j;
-		grid[p] = 1;
-		grid[p+1] = 3;
-		grid[p-1] = 3;
-	}
-	row = 5;
-	column = 5;
-	for(j=0, sp = armyTwo; j<ARMY_TWO_SIZE; ++j, ++sp)
-	{
-		p = ((j + row) * 128) + column;
-		sp->pos = p;
-		sp->active = 1;
-		sp->id = j;
-		grid[p] = 2;
-	}
-	p = 0;
-
-	/* disable display */
+	deploy_one[0] = 1;
+	deploy_two[0] = 2;
+	deploy_one[1] = 3;
+	deploy_two[1] = 4;
+	// make_menus();
+	initialize_commanders();
+	// commanders[1].unit = &spears;
+	commanders[1].army_size = 16;
+	commanders[2].army_size = 15;
+	commanders[3].army_size = 17;
+	// commanders[1].army_type = 1;
+	commanders[6].army_type = 1;
+	commanders[9].army_type = 2;
+	commanders[0].name = "Sammie";
+	// commanders[0].army_type = 1;
+	commanders[1].name = "Alucard";
+	// commanders[1].army_type = 2;
+	commanders[2].name = "Ren";
+	// commanders[2].army_type = &calvary;
+	commanders[3].name = "Violet";
+	// commanders[3]->unit = &infantry;
+	commanders[4].name = "Stimpy";
+	commanders[5].name = "Sacha";
+	commanders[6].name = "Oli";
+	commanders[7].name = "Venric";
+	commanders[8].name = "Phalc";
+	commanders[9].name = "Keely";
+	commanders[0].unit = &spears;
+	// cmdr = commanders;
+	// cmdr->unit = &spears;
+	// cmdr++;
+	// cmdr->unit = &spears;
+	// (*commanders[0].unit) = &spears;
+	// (*commanders[1].unit) = &spears;
 	disp_off();
-
-	/* disable display */
-	set_screen_size(SCR_SIZE_64x64);
-
-	/* clear display */
 	cls();
-
-	/* sprite atribute table */
 	init_satb();
 
-	/* init map */
-	// set_map_data(testmap,MAP_WIDTH,MAP_HEIGHT);
-	// set_tile_data(testtiles,238,testtable,TILE_WIDTH);
-	// load_tile(TILE_VRAM);
-	// load_map(0,0,0,0,MAP_WIDTH,MAP_HEIGHT);
-	// load_palette(0,testpal,1);
+	commanders[6].army_size = 18;
 
-	/* init sprites */
-	load_palette(16, soldierpal, 1);
-	// populate_armies(3,soldierx,soldiery,0x400,0x5000,2,1);
-	sp = armyOne;
-	populate_army(sp,0x400,0x5000,2,1,ARMY_ONE_SIZE,0);
-
-	load_palette(17, soldierpal, 2);
-
-	sp = armyTwo;
-	//(0x5000 + ((ARMY_ONE_SIZE) * 0x400))sprite start for army two
-	populate_army(sp,0x400,0x5000,1,0,ARMY_TWO_SIZE,ARMY_ONE_SIZE);
+	load_palette(19, cursorpal, 1);
+	load_palette(20, menupal, 1);
+	load_palette(17, walkerpal,1);
+	load_vram(0x68C0,cursor,0x40);
 	satb_update();
 
-	set_color_rgb(1, 7, 7, 7);
-	set_font_color(1, 0);
-	set_font_pal(0);
-	load_default_font();
-
-	/* enable display */
-	disp_on();
-	vsync();
-	// get_neighbors(8,5);
-
-	// get_path(648);
-
-	// put_number(node->ownX,2,6,0);
-	// put_number(node->ownY,2,8,0);
+	// set_font_color(2, 1);
+	// set_font_pal(1);
+	// load_default_font(1,0x1B00);
 
 	for(;;)
 	{
-		// put_number(1,1,0,0);
-		tick();
-		vsync();
-		controls();
-
-		// opp_army = armyTwo;
-		// opp = 2;
-		// current_opp_army_size = ARMY_TWO_SIZE;
-		// current_army_id = 1;
-		// if(frame==3){
-		// get_path(645);
-		// }
-		for(z=0, sp = armyOne; z<ARMY_ONE_SIZE; ++z, ++sp)
-		{
-			if(sp->active){
-				spr_set(z);
-				spr_pattern(soldierFrame);
-				// soldier_state_machine(sp);
-				// get_path(648);
-			}
-		}
-
-		// opp_army = armyOne;
-		// opp = 1;
-		// current_opp_army_size = ARMY_ONE_SIZE;
-		// current_army_id = 2;
-		for(z=ARMY_ONE_SIZE, sp = armyTwo; z<(ARMY_ONE_SIZE + ARMY_TWO_SIZE); ++z, ++sp)
-		{ //have to offset army one's size
-			if(sp->active){
-				spr_set(z);
-				spr_pattern(soldierFrame);
-				// put_number(node->ownX,2,0,0);
-				// put_number(node->ownY,2,2,0);
-				// put_number(sp->pos,3,0,0);
-				soldier_state_machine(sp);
-			}
-		}
-
-		satb_update();
+		overworld_loop();
+		// battle_loop(0,0);
+		// battlefield_loop(deploy_one,2,deploy_two,2);
 	}
 }
 
@@ -247,553 +464,373 @@ int spriteno,spritex,spritey,spritepattern,ctrl1,ctrl2,sprpal,sprpri;
 	spr_pri(sprpri);
 }
 
-int populate_army(struct soldier *soldiers, int sprite_size, int sprite_start, int pal, int flip, int army_size, int spriteno)
+char get_pal_by_sprite_no(int sprite_no)
 {
-	int i;
-	for(i = spriteno; i<(army_size + spriteno); ++i, ++soldiers){
-		spr_make(i, ((soldiers->pos & 127)*SOLDIER_SIZE), ((soldiers->pos / 128)*SOLDIER_SIZE), (sprite_start + (i * sprite_size)), FLIP_MAS|SIZE_MAS, NO_FLIP|SZ_32x32, pal, 1);
-		if(flip){
-			spr_ctrl(FLIP_X_MASK,FLIP_X);
-		}
-		load_vram((sprite_start + (i * sprite_size)), attack, sprite_size);
+	switch(sprite_no)
+	{
+		case CMDR: return 20;
+		case BEAST: return 21;
+		case SAMURAI: return 22;
+		default: return 20;
 	}
 }
 
-int find_nearest_opponent(int unitPos, struct soldier *soldiers)
+void display_sprite(int x_pos, int y_pos, int location, char flip, char pal)
 {
-	// int armySize = current_opp_army_size;//ARMY_ONE_SIZE;
-	int i = 0;
-	int oppPos = 0;
-	int distance = 0;
-	int nearestPos = 5120; //258
-	int nearestOpp = 0;
-	// nearestPos = soldiers->pos;
-
-	for(i = 0; i<current_opp_army_size; ++i, ++soldiers)
-	{
-		if(soldiers->active && !is_opp_adjacent(soldiers->pos)){
-			oppPos = soldiers->pos;
-			if(oppPos > unitPos){
-				distance = oppPos - unitPos;
-			}else{
-				distance = unitPos - oppPos;
-			}
-			if(distance < nearestPos){
-				nearestPos = distance;
-				nearestOpp = oppPos;
-			}
-		}
-	}
-	return nearestOpp;
+	spr_make(total_sprites++,x_pos,y_pos,location,flip,NO_FLIP|SZ_16x16,pal,0);
+	spr_pri(1);
 }
 
-int move_to(int nearestOpp, struct soldier *s)
+print_unit_type(enum Unit_Type type, int x, int y)
 {
-	int dstY, dstX, currentY, currentX, pos, moved; 
-	pos = s->pos;
-	dstY = get_y_from_pos(nearestOpp);
-	dstX = get_x_from_pos(nearestOpp);
-	currentY = get_y_from_pos(pos);
-	currentX = get_x_from_pos(pos);
+	switch(type)
+	{
+		case INFANTRY:
+		put_string("inftry",x,y);
+		break;
 
-	// if(current_army_id == 1 && s->id == 1)
-	// {
-	// 	put_number(currentX,2,0,0);
-	// 	put_number(currentY,2,0,2);
-	// 	put_number(dstX,2,2,0);
-	// 	put_number(dstY,2,2,2);
-	// }
+		case CALVARY:
+		put_string("calvary",x,y);
+		break;
 
-	if((dstX) < currentX && grid[pos--] == 0)//move left
-	{
-		if(can_move_left(pos) == 1)
-		{
-			grid[pos] = 0;
-			pos = s->pos--;
-			grid[s->pos] = current_army_id;
-			s->state = 1;//WALKING
-			s->walk = SOLDIER_SIZE;//pixel DISTANCE
-			s->direction = 3;//West / Left	
-		}
-	}
-	else if((dstY < currentY) && grid[pos-128] == 0)//move up
-	{
-		if(can_move_up(pos) == 1)
-		{
-			grid[pos] = 0;
-			pos = s->pos -= 128;
-			grid[s->pos] = current_army_id;
-			s->state = 1;
-			s->walk = SOLDIER_SIZE;
-			s->direction = 0;	
-		}
-	}
-	else if(dstX > currentX && grid[pos++] == 0) //right
-	{
-		if(can_move_right(pos)==1)
-		{
-			grid[pos] = 0;
-			pos = s->pos++;
-			grid[s->pos] = current_army_id;
-			s->state = 1;
-			s->walk = SOLDIER_SIZE;
-			s->direction = 1;
-		}
-	}
-	else if((dstY > currentY) && grid[pos+128] == 0) // moved down
-	{
-		if(can_move_down(pos) == 1)
-		{
-			grid[pos] = 0;
-			pos = s->pos+=128;
-			grid[s->pos] = current_army_id;
-			s->state = 1;
-			s->walk = SOLDIER_SIZE;
-			s->direction = 2;
-		}
+		case SPEARS:
+		put_string("spears",x,y);
+		break;
+
+		case MUSKETS:
+		put_string("archer",x,y);
+		break;
+
+		case ENGINEERS:
+		put_string("enginr",x,y);
+		break;
 	}
 }
 
-int get_y_from_pos(int pos){
-	return ((pos) / 128);
+void display_sprite_by_no(int x_pos, int y_pos, int location, char flip, char pal, char sprite_no)
+{
+	spr_make(sprite_no,x_pos,y_pos,location,flip,NO_FLIP|SZ_16x16,pal,0);
+	spr_pri(1);
 }
 
-int get_x_from_pos(int pos){
-	return ((pos) & 127);
+void clear_sprite(int sprite_size)
+{
+	while(sprite_size-- > 0)
+	{
+		spr_set(--total_sprites);
+		spr_hide();
+	}
+}
+
+void load_cursor(int x, int y)
+{
+	display_sprite(x,y,cursor_vram,FLIP_MAS|SIZE_MAS,3);
+}
+
+void clear_menu()
+{
+	clear_sprite(current_menu_size);
+	current_menu_size = 0 ;
 }
 
 void tick(){
+	// int i = 0;
 	if(++tic > 6)
 	{
-		tic = 0; 
+		tic = 0;
 		++frame;
 		soldierFrame += 0x100;
 		altFrame += 0x100;
 	}
 	if(frame > 3){
 		frame = 0;
-		soldierFrame = 0x5000;
-		altFrame = 0x5800;
+		soldierFrame = 0;
+		altFrame = 0;
+		// soldierFrame = 0x4000;
+		// altFrame = 0x5000;
 	}
 }
 
-void controls(){
-	j1 = joy(0);
-	if (j1 & JOY_LEFT)
+void write_text(char x, char y, char *text)
+{
+	char i, text_y, text_x, sprite_no;
+	sprite_no = 2;
+	text_x = x;
+	text_y = y;
+	i=0;
+	for(;;)
 	{
-		if(sx > 0){
-			xOffset += 2;
-			sx = (sx -= 2) & 1023;
-			scroll(0, (sx >> 1), (sy >> 1), 0, 223, 0xC0);
-		}
-	}
-	if (j1 & JOY_RIGHT)
-	{
-		if(sx < 1022){
-			xOffset -= 2;
-			sx = (sx +=2) & 1023;
-			scroll(0, (sx >> 1), (sy >> 1), 0, 223, 0xC0);
-		}
-	}
-	if (j1 & JOY_UP)
-	{
-		if(sy > 0)
+		if(text[i] == 0)
 		{
-			yOffset += 2;
-			sy = (sy -= 2) & 511;
-			scroll(0, (sx >> 1), (sy >> 1), 0, 223, 0xC0);
-		}
-	}
-	if (j1 & JOY_DOWN)
-	{
-		if(sy < 511)
-		{
-			yOffset -= 2;
-			sy = (sy += 2) & 511;
-			scroll(0, (sx >> 1), (sy >> 1), 0, 223, 0xC0);
-		}
-	}
-}
-
-int is_opp_adjacent(int gridpos){
-	if(grid[gridpos-1] == 1) return gridpos-1;
-	if(grid[gridpos+1] == 1) return gridpos+1;
-	return 0;
-}
-
-/*************************************************************
- * 															 *
- *  				Soldier State Functions					 *
- * 															 *
- ************************************************************/
-
-void soldier_state_machine(struct soldier *soldier){
-	// if (soldier->state == 0) get_path(soldier->pos); soldier->state = 1;
-	if(soldier->state == 0) soldier_idle_state(soldier);
-	if(soldier->state == 1) soldier_move_state(soldier);
-	if(soldier->state == 2) soldier_attack_state(soldier);
-	if(soldier->state == 3) soldier_die_state(soldier);
-}
-
-void soldier_idle_state(struct soldier *soldier){
-	int x;
-	int y;
-	struct Node *n;
-	// n.ownX = 4;
-	// n.ownY = 5;
-	// n.fromX = 8;	// n.fromY = 5;
-	// n.checked = 1;
-	//node = malloc(sizeof(struct Node));// = {7, 5, 8, 5, 1};
-
-	if(is_opp_adjacent(soldier->pos))
-	{//then attack
-		// put_number(1,1,0,0);
-		soldier->state = 2;
-		free(n);
-	}
-	else
-	{
-		// put_number(2,1,0,0);
-		x = get_x_from_pos(soldier->pos);
-		y = get_y_from_pos(soldier->pos);
-		grid[soldier->pos] = 0;
-		// if(opp++ <1){
-		n = get_path(soldier->pos);
-
-		// }
-		
-		if(x > n->ownX)
-		{
-			soldier->direction = 3;
-		}
-		else if (y > n->ownY)
-		{
-			soldier->direction = 0;	
-		}
-		else if (y < n->ownY)
-		{
-			soldier->direction = 2;
-		}
-		else if (x < n->ownX)
-		{
-			soldier->direction = 1;
-		}
-		// soldier->direction = 3;
-		soldier->pos = (n->ownY * 128) + n->ownX;
-		soldier->state = 1;
-		soldier->walk = 32;
-		grid[soldier->pos] = 2;
-		free(n);
-	}
-}
-
-void soldier_move_state(struct soldier *soldier){
-	// put_number(3,2,5,0);
-	if(soldier->walk == 0){
-		soldier->state = 0;	
-		spr_y((((soldier->pos) / 128) * SOLDIER_SIZE));
-		spr_x((((soldier->pos) & 127) * SOLDIER_SIZE));
-	}
-	switch(soldier->direction)
-	{
-		case 0: 
-			spr_y((((soldier->pos) / 128) * SOLDIER_SIZE) + soldier->walk);
-			soldier->walk--;
-			// (((sp->pos) / 128) * 32) + sp->walk;
+			// put_number(0,1,1,1);
 			break;
-		case 1: 
-			spr_x((((soldier->pos) & 127) * SOLDIER_SIZE) - soldier->walk);
-			soldier->walk--;
-			break;
-		case 2: 
-			spr_y((((soldier->pos) / 128) * SOLDIER_SIZE) - soldier->walk);
-			soldier->walk--;
-			break;
-		case 3: 
-			spr_x((((soldier->pos) & 127) * SOLDIER_SIZE) + soldier->walk);		
-			soldier->walk--;
+		}
+		if(text[i] == 10)
+		{
+			text_y++;
+			text_x = x;
+			i++;
+			continue;
+		}
+		put_char(text[i],text_x,text_y);
+		i++;
+		text_x++;
+		vsync(2);
+	}
+}
+
+initialize_commanders()
+{
+	char i;
+	struct Commander *cmdr;
+	for(i=0, cmdr = commanders; i<TOTAL_COMMANDERS; i++, cmdr++)
+	{
+		cmdr->hp = 5+i;
+		cmdr->ap = 5;
+		cmdr->str = 5;
+		cmdr->rec = 5;
+		cmdr->lck = 5;
+		cmdr->int = 5;
+		cmdr->will = 5;
+		// cmdr->sprite = i%3;
+		cmdr->army_size = 10 + (i%5);
+		// cmdr->army_size = 15;
+		cmdr->army_type = 0;
+		cmdr->kingdom = i/6;
+		// cmdr->name = "steve";
+		cmdr->unit = &calvary;
+		cmdr->id = i;
+	}
+}
+
+// void load_commander(char cmdr_no, int cmdr_vram, char pal_no, int amt_to_load)
+// {
+// 	switch(cmdr_no)
+// 	{
+// 		case CMDR:
+// 		load_palette(pal_no,cmdrpal,1);
+// 		load_vram(cmdr_vram,cmdr,amt_to_load);
+// 		break;
+//
+// 		case BEAST:
+// 		load_palette(pal_no,beastpal,1);
+// 		load_vram(cmdr_vram,beast,amt_to_load);
+// 		break;
+//
+// 		case SAMURAI:
+// 		load_palette(pal_no,samuraipal,1);
+// 		load_vram(cmdr_vram,samurai,amt_to_load);
+// 		break;
+// 	}
+// }
+
+void darken_palette(int pal_num)
+{
+	modify_palette(pal_num,-1);
+}
+
+void lighten_palette(int pal_num)
+{
+	modify_palette(pal_num,2);
+}
+
+void modify_palette(int pal_num, char modifier)
+{
+	int rgb;
+	char i, r, g, b;
+
+	for(i=0; i<16; i++)
+	{
+		rgb = get_color((pal_num*16)+i);
+
+		g = (((rgb >> 6) & 0x7) + modifier);
+		r = (((rgb >> 3) & 0x7) + modifier);
+		b = ((rgb & 0x7) + modifier);
+
+		if(g > 7 && g < 255)
+		{
+			g = 7;
+		}
+		else if(g < 0)
+		{
+			g = 0;
+		}
+		else if(g == 255)
+		{
+			g = 0;
+		}
+
+		if(r > 7 && r < 255)
+		{
+			r = 7;
+		}
+		else if(r < 0)
+		{
+			r = 0;
+		}
+		else if(r == 255)
+		{
+			r = 0;
+		}
+
+		if(b > 7 && b < 255)
+		{
+			b = 7;
+		}
+		else if(b < 0)
+		{
+			b = 0;
+		}
+		else if(b == 255)
+		{
+			b = 0;
+		}
+		set_color_rgb((pal_num*16)+i,r,g,b);
+	}
+}
+
+void capture_commander(char cmdr_id, char kingdom)
+{
+	captured[current_captured++] = cmdr_id;
+}
+
+void load_portrait(char cmdr_id)
+{
+	switch(cmdr_id)
+	{
+
+		case 2:
+		load_vram(PORTRAIT_VRAM,portraitm,0x100);
+		load_palette(4,portraitmpal,1);
+		break;
+
+		default:
+		load_vram(PORTRAIT_VRAM,portraitgfx,0x100);
+		load_palette(4,portraitpal,1);
 		break;
 	}
 }
 
-void soldier_attack_state(struct soldier *soldier){
-	int r, nearest_opp;
-	struct soldier* opponent;
-	// spr_pattern(soldierFrame+0x400);
+void display_portrait(char cmdr_id, int x, int y)
+{
+	int bat[16];
+	int offset, i;
+	offset = (x>>1)/8 + (((y>>1)/8)*64);
+	offset += 26;
 
-	if(soldier->tic++ == 24){
-		r = rand() & 255;
-		nearest_opp = is_opp_adjacent(soldier->pos);
-		if(nearest_opp == 0){
-			// put_number(r,3,0,0);
-			soldier->tic = 0;
-			soldier->state = 0;
-			return;
+	for(i=0; i<16; i++)
+	{
+		bat[i] = ((PORTRAIT_VRAM>>4)+0x4000) + i;
+	}
+	load_bat(offset,bat,4,4);
+}
+
+void display_cmdr_info_panel(int x, int y)
+{
+	int offset, i;
+	int bat[96];
+
+	offset = (x>>1)/8 + (((y>>1)/8)*64);
+	offset += 24;
+
+	for(i=0; i<96; i++)
+	{
+		bat[i] = ((CMDR_PANEL_VRAM >> 4) + 0x1000) + i;
+	}
+
+	load_vram(CMDR_PANEL_VRAM,cmdr_info_panel,0x600);
+	load_bat(offset,bat,8,12);
+}
+
+// load_information_panel()
+// {
+// 	int j, vaddr;
+// 	int ptr[1];
+//
+// 	load_palette(1,bdisplaypal,1);
+// 	load_vram(0x6000,bdisplay,4096);
+// 	for(j=0; j<256; j++)
+// 	{
+// 		vaddr = vram_addr((j&31),(j/32));
+// 		ptr[0] = (0x6000 >> 4) + j + 0x1000;
+// 		load_vram(vaddr,ptr,1);
+// 	}
+// }
+
+void change_background_palette(int tile, int pal)
+{
+	int vaddr;
+	int ptr[2];
+	vaddr = vram_addr((tile%16)*2,((tile/16)*2));
+
+	// ptr[0] = (pal + 0x180) + (((tile)/16) * 0x40) + ((tile%16) * 2);
+	// ptr[1] = (pal + 0x180) + (((tile)/16) * 0x40) + ((tile%16) * 2) + 1;
+	ptr[0] = (pal + 0xE0) + ((battlefieldbat[tile] * 4));
+	ptr[1] = (pal + 0xE0) + ((battlefieldbat[tile] * 4) + 1);
+	load_vram(vaddr,ptr,2);
+
+	ptr[0] += 2;
+	ptr[1] += 2;
+	load_vram(vaddr+0x20,ptr,2);
+}
+
+load_healthbars()
+{
+	load_palette(2,healthbarpal,1);
+	// load_vram(0x1300,healthbar,0xC0);
+	load_vram(0xe00,healthbar,0xC0);
+}
+
+void display_healthbar(char x, char y)
+{
+	int j, vaddr;
+	int ptr[1];
+
+	for(j=0; j<7; j++)
+	{
+		vaddr = vram_addr(x+j,y);
+		// ptr[0] = (0x1360 >> 4) + ((j+6) / (7 - ((j+5)/6))) + 0x2000;
+		ptr[0] = (0xe60 >> 4) + ((j+6) / (7 - ((j+5)/6))) + 0x2000;
+		load_vram(vaddr,ptr,1);
+	}
+}
+
+void reduce_healthbar(char x, char y, char dmg, char i, char id)
+// void reduce_healthbar(char army_no, char dmg)
+{
+	int j, vaddr,z;
+	int ptr[1];
+	z=0;
+	for(j=i+dmg-1; j >= dmg; j--)
+	{
+		if(id==2){
+			put_number(j,3,0,z++);
 		}
-		// put_number(r,3,0,0);
-		opponent = get_unit_from_position(nearest_opp);
-
-		if(r > 190) {
-			//opponent->active = 0;
-			kill_unit(opponent);
-		}
-		soldier->tic = 0;
-		soldier->state = 0;
-		free(opponent);
+		vaddr = vram_addr(x+j,y);
+		// ptr[0] = (0x1390 >> 4) + ((j+6) / (7 - ((j+5)/6))) + 0x2000;
+		ptr[0] = (0xe90 >> 4) + ((j+6) / (7 - ((j+5)/6))) + 0x2000;
+		load_vram(vaddr,ptr,1);
 	}
 }
 
-void soldier_die_state(struct soldier *soldier){
-
-}
-
-struct soldier* get_unit_from_position(int unit_position){
-	int c;
-	struct soldier *opponent;
-	for(c=0, opponent = armyOne; c<ARMY_ONE_SIZE; ++c, ++opponent) //army one stuff
-	{
-		// put_number(opponent->pos,3,0,2);
-		if(opponent->pos == unit_position){
-			return opponent;
-		}
-	}
-}
-
-void kill_unit(struct soldier* soldier){
-	soldier->active = 0;
-	// put_number(soldier->pos,5,0,0);
-	grid[soldier->pos] = 0;
-	soldier->pos = 0;
-	// current_opp_army_size -= 1;
-	// spr_hide();
-}
-
-int can_move_up(int pos)
+int min(int a, int b)
 {
-	if(pos > 128 && !grid[pos - 128])
+	(a<b)? a : b;
+}
+
+void set_sprite_to_location(char id, int location, char pal_num)
+{
+	switch(id)
 	{
-		return 1;
-	}else{
-		return 0;
+		// case 1:
+		default:
+		load_vram(location,brskr,0x200);
+		load_palette(pal_num,brskrpal,1);
+		break;
 	}
 }
 
-int can_move_right(int pos)
-{
-	if(get_x_from_pos(pos) < 128 && !grid[pos+1])
-	{
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-int can_move_left(int pos)
-{
-	if(get_x_from_pos(pos) > 0 && !grid[pos - 1])
-	{
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-int can_move_down(int pos)
-{
-	if(pos < 20 && !grid[pos + 128])
-	{
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-/*************************************************************
- * 															 *
- *  				Soldier Move Functions                   *
- * 															 *
- ************************************************************/
-
-int get_neighbors(int x, int y)
-{
-	int i, counter;
-
-	counter = 0;
-	
-	if((x - 1) > -1)
-	{
-		neighbors[counter].ownX = x-1; 
-		neighbors[counter].ownY = y; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
-		neighbors[counter].checked = 1;
-		counter++;
-	}
-	if((y - 1) > -1)
-	{
-		neighbors[counter].ownX = x; 
-		neighbors[counter].ownY = y-1; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
-		neighbors[counter].checked = 1;
-		counter++;
-	}
-	if((y + 1) < 10)
-	{
-		neighbors[counter].ownX = x; 
-		neighbors[counter].ownY = y+1; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
-		neighbors[counter].checked = 1;
-		counter++;
-	}
-	if((x + 1) < 10)
-	{
-		neighbors[counter].ownX = x+1; 
-		neighbors[counter].ownY = y; 
-		neighbors[counter].fromX = x; 
-		neighbors[counter].fromY = y; 
-		neighbors[counter].checked = 1;
-		counter++;
-	}
-
-	for(i=counter-1; i<3; i++)
-	{
-		neighbors[i].checked = 0;
-	}
-	return counter-1;
-}	
-
-struct Node *get_path(int pos)
-{
-	struct Node path[100];
-	struct Node *node;
-	int x, y, fx, fy;
-	int p = 0;
-	int i = 0;
-	int count = 0;
-	int exit = 1;
-	int path_pointer = 0;
-
-	map[map_size].ownX = get_x_from_pos(pos);
-	map[map_size].ownY = get_y_from_pos(pos);
-	map[map_size].fromX = get_x_from_pos(pos);
-	map[map_size].fromY = get_y_from_pos(pos);
-	map[map_size].checked = 1;
-
-	// put_number(map[map_size].ownX,2,12,0);
-	// put_number(map[map_size].ownY,2,14,0);
-
-	while(map[map_counter].checked == 1 && exit == 1)
-	{	
-		//THIS HAS TO BE FIXED HERE, IT'S EXITING EARLY BEFORE FINDING WHAT WE NEED BECAUSE AN "UNCHECKED" NODE IS BEING PUT IN SOMEWHERE (LIKELY INDEX 2) LOOK AT PUT NUMBER AT THE END OF THIS FUNCTION
-		count = get_neighbors(map[map_counter].ownX,map[map_counter].ownY);
-		i = 0;
-		while(i <= count)	
-		{
-			p = (neighbors[i].ownY * 128) + neighbors[i].ownX;
-			x = neighbors[i].ownX;
-			y = neighbors[i].ownY;
-			fx = neighbors[i].fromX;
-			fy = neighbors[i].fromY;
-
-			if(neighbors[i].checked == 1){
-				if(grid[p] == 2 || grid[p] == 1) //if unit in this grid is current army id
-				{
-
-				}
-				else if(grid[p] == 0) //if there is nothing in this grid
-				{
-					put_visited(x,y,fx,fy);
-				}
-				else
-				{
-					// put_number(map[0].ownX,2,8,0);
-					// put_number(map[0].ownY,2,10,0);
-					// put_number(fx,2,8,2);
-					// put_number(fy,2,10,2);
-					put_visited(x,y,fx,fy);
-					exit = 0;
-
-					i=10;
-				}
-			}
-			i++;
-		}
-		map_counter++;
-	}
-
-	// put_number(map_size,2,0,0);
-	// for(i=0; i<map_size+1; i++)
-	// {
-	// 	put_number(map[i].ownX,2,0,i);
-	// 	put_number(map[i].ownY,2,2,i);		
-	// 	put_number(map[i].fromX,2,4,i);
-	// 	put_number(map[i].fromY,2,6,i);
-	// }
-	// put_number(map[map_size].ownX,2,0,0);
-	// put_number(map[map_size].ownY,2,2,0);
-	
-	node = get(map[map_size].ownX,map[map_size].ownY);
-
-	while(node->ownX != map[0].ownX || node->ownY != map[0].ownY){
-		path[path_pointer].ownX = node->ownX;
-		path[path_pointer++].ownY = node->ownY;
-		node = get(node->fromX,node->fromY);
-	}
-
-	// for(i=0; i<path_pointer+1; i++)
-	// {
-	// 	put_number(path[i].ownX,2,0,i);
-	// 	put_number(path[i].ownY,2,2,i);
-	// }
-	free(node);
-
-	// for(i=0; i<path_pointer; i++)
-	// {
-	// }
-	// put_number(node->ownY,3,0,0);
-	map_counter=0;
-	map_size=0;
-	p = (path[path_pointer-1].ownY * 128) + path[path_pointer-1].ownX;
-	// path_pointer=0;
-	// put_number(path[path_pointer-1].ownX,2,12,2);
-	// put_number(path[path_pointer-1].ownY,2,14,2);
-	// if(is_opp_adjacent(p)){
-
-	// }
-	return &path[path_pointer-1];
-}
-
-int put_visited(int x, int y, int fx, int fy)
-{
-	int i = 0;
-	int counter = 0;
-	for(i=0; i<map_size+1; i++){
-		if(map[i].ownX == x && map[i].ownY == y)
-		{
-			return 0;
-		}
-	}
-
-	++map_size;
-	map[map_size].ownX = x;
-	map[map_size].ownY = y;
-	map[map_size].fromX = fx;
-	map[map_size].fromY = fy;
-	map[map_size].checked = 1;
-	return 1;
-}
-
-struct Node *get(int x, int y)
-{
-	int i = 0;
-	//struct Node *node;// = malloc(sizeof(struct Node));
-	for(i=0; i<map_size+1; i++){
-		if(map[i].ownX == x && map[i].ownY == y)
-		{
-			return &map[i];//node;
-		}
-	}
-	return -1;
-}
+#include "menu.c"
+#include "overworld.c"
+// #include "battle_select.c"
+#include "battle.c"
