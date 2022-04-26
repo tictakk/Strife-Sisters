@@ -197,7 +197,6 @@ void menu_loop(char ms)
 				spr_hide(--total_sprites);
 				// clear_menu(20);
 				clear_menu();
-				exit = in_battle_select(selection);
 				break;
 
 				case FORMATION_MENU:
@@ -211,7 +210,6 @@ void menu_loop(char ms)
 				spr_hide(--total_sprites);
 				// clear_menu(15);
 				clear_menu();
-				exit = arts_select(selection);
 				break;
 
 				case CASTLE_MENU:

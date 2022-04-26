@@ -37,20 +37,20 @@ struct Deployment{
 	char active, path_size, invul, no_of_commanders, kingdom, last_castle, dance;
 	int posX, posY, dstX, dstY, walk, castX, castY, absX, absY, sprite_no;
 	char commanders[5];
-	int path[20];
+	int path[10];
 };
 
 char current_deployments = 0;
 char current = 0;
-char current_selected_castle = -1;
+char current_selected_castle = 0;
 char current_command_group = 0;
 char selector_sprite_no = -1;
 char overworld_state = OVERWORLD;
 char hz = 60;
 int secs = 180;
 
-char battle_army_one;
-char battle_army_two;
+// char battle_army_one;
+// char battle_army_two;
 
 // int darkpal[16];
 
@@ -65,8 +65,8 @@ void overworld_loop()
 	TOP_SCREEN_SIZE = 0;//= 96;
 	i = 0;
 	chk = 1;
-	battle_army_one = 255;
-	battle_army_two = 255;
+	// battle_army_one = 255;
+	// battle_army_two = 255;
 	s_y = 0;
 	selector_y = 0;
 	// s_y = 96;
@@ -386,7 +386,7 @@ void display_commanders_in_castle(char castle_no)
 	char i;
 	menu_state = 1;
 	commander_select_cursor = 0;
-
+	put_number(castle_no,3,15,15);
 	display_info_panel();
 	display_cmdr_info_panel(s_x,s_y);
 	load_portrait(castles[castle_no].commanders[0]);
@@ -1071,6 +1071,7 @@ void overworld_controls(){
 
 			if(castle_no != 255)
 			{
+				// put_number(castle_no,3,15,15);
 				spr_hide(0);
 				current = get_first_available_deployment();
 				load_castle_menu(castles[castle_no].owner);

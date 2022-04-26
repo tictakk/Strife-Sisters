@@ -11,8 +11,8 @@
 #define MERGE_MODE 5
 
 #define MAX_ENTITIES 36
-#define PLAYER 0
-#define CPU 1
+#define PLAYER 1
+#define CPU 2
 #define INF 0
 #define SPEAR 1
 #define MUSKET 2
@@ -39,13 +39,17 @@ struct Map{
 
 typedef struct{
   Unit *unit;
-  char unit_type, army_size, team, pal, is_cmdr, id;
+  int pos;
+  char unit_type, army_size, team, pal, is_cmdr, id, actionable, stamina, nearby_engaged;
 } Entity;
 
 char battle_grid[223];
 Entity entities[MAX_ENTITIES];
+// Entity *entities;
+// Entity player_entities[MAX_ENTITIES/2];
+// Entity ai_entities[MAX_ENTITIES/2];
 struct Map cmdr_vram_mapper[12];
-char untraversable_terrain[15];
+// char untraversable_terrain[15];
 char selector_mode, actions;
 int sel_x, sel_y, turn, menu_x, menu_y, cursor_x, cursor_y, unit_selected;
 char num_of_entities, menu_option;
@@ -53,12 +57,19 @@ char size_one;
 char size_two;
 char one_total;
 char two_total;
+char cost;
 int cmdr_fig_current;
 char cmdr_fig_pal;
-char num_of_bad_terrains;
+// char num_of_bad_terrains;
 char current_turn;
+int ai_timer;
+int path[20];
+// int u;
+// char done;
+char choice;
+char target;
 
-void add_entity(char type, char size, char team, char pal, Unit *unit, char cmdr, char id)
+void add_entity(char type, char size, char team, char pal, Unit *unit, char cmdr, char id, int pos)
 {
   entities[num_of_entities].unit_type = type;
   entities[num_of_entities].army_size = size;
@@ -67,6 +78,10 @@ void add_entity(char type, char size, char team, char pal, Unit *unit, char cmdr
   entities[num_of_entities].unit = unit;
   entities[num_of_entities].is_cmdr = cmdr;
   entities[num_of_entities].id = id;
+  entities[num_of_entities].pos = pos;
+  entities[num_of_entities].actionable = 1;
+  entities[num_of_entities].stamina = 3;
+  entities[num_of_entities].nearby_engaged = 1; //should start at 0
   num_of_entities += 1;
 }
 
@@ -229,15 +244,88 @@ void remove_unit_from_grid(int grid_pos)
   num_of_entities--;
 }
 
-char is_traversable(int pos)
+// char is_traversable(int pos)
+// {
+//   char i;
+//   for(i=0; i<num_of_bad_terrains; i++)
+//   {
+//     if(battlefieldbat[pos] == untraversable_terrain[i])
+//     {
+//       return 0;
+//     }
+//   }
+//   return 1;
+// }
+
+void deduct_actions(char num_of_actions)
 {
-  char i;
-  for(i=0; i<num_of_bad_terrains; i++)
+  char i, action_offset, actions_left;
+  actions_left = 6 - actions;
+  action_offset = 10 - actions_left;
+  actions -= num_of_actions;
+
+  for(i=num_of_actions; i>0; i--)
   {
-    if(battlefieldbat[pos] == untraversable_terrain[i])
-    {
-      return 0;
-    }
+    spr_set(action_offset-i);
+    spr_hide();
   }
-  return 1;
 }
+
+void move_unit(char abs, char unit_selected)
+{
+  highlight_near_squares(unit_selected,0,3);//actions/MOVE_COST
+  deduct_actions(1);
+  // deduct_actions(0);
+  battle_grid[abs] = battle_grid[unit_selected];
+  battle_grid[unit_selected] = 0;
+  entities[battle_grid[abs]-1].pos = abs;
+  entities[battle_grid[abs]-1].actionable = 0;
+  selector_mode = SELECT_MODE;
+  update_map();
+  // load_battlefield_map();
+}
+
+void select_unit(char unit)
+{
+  selector_mode = PLACE_MODE;
+  menu_option = MENU_ATTACK;
+  // hide_menu();
+  highlight_near_squares(unit,0x1000,3);
+  display_selector();
+}
+
+int calc_move_cost(int origin, int dest)
+{
+  int o_x, o_y, d_x, d_y, x, y;
+  o_x = origin % 16;
+  o_y = origin / 16;
+  d_x = dest % 16;
+  d_y = dest / 16;
+  return (char)(abs(o_x - d_x) + abs(o_y - d_y)) * 2;
+}
+
+void attack_unit(int src, int dst)
+{
+  char attacker, target;
+  attacker = battle_grid[dst]-1;
+  target = battle_grid[src]-1;
+  if(entities[attacker].team != entities[target].team)
+  {
+    hide_menu();
+    menu_x = -64;
+    menu_y = -64;
+    cursor_x = -32;
+    cursor_y = -32;
+    begin_battle(attacker,target,src,dst);
+    selector_mode = SELECT_MODE;
+    entities[attacker].actionable = 0;
+  }
+  else
+  {
+    display_error_message("invalid target");
+  }
+}
+
+void update_map();
+void begin_battle(int src, int dst);
+char square_adjacent(int origin, int desired);

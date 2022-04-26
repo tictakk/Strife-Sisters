@@ -21,7 +21,7 @@
 #define DIALOGUE_VRAM 0x4000
 #define P_BORDER_VRAM 0x4000
 #define CMDR_VRAM_SIZE 0x800
-#define MAX_CAPTURED 20
+#define MAX_CAPTURED 10
 #define NO_OF_MENUS 20
 #define NO_OF_MENU_ITEMS 30
 
@@ -53,7 +53,7 @@
 #define OVERWORLD_MAP_HEIGHT 32
 #define NO_OF_CASTLES 15
 
-#define MAX_ARMY_SIZE 45
+#define MAX_ARMY_SIZE 15
 #define MAX_COMMANDERS 6
 #define TOTAL_COMMANDERS 20
 
@@ -80,7 +80,7 @@ enum Unit_Type{
 };
 
 typedef struct{
-	char atk, def, hp;
+	const char atk, def, hp;
 	enum Unit_Type unit_type;
 } Unit;
 
@@ -93,17 +93,17 @@ struct Commander{
 	Unit *unit;
 	char hp;
 	char ap;
-	char str;
-	char rec;
-	char lck;
-	char int;
-	char will;
+	// char str;
+	// char rec;
+	// char lck;
+	// char int;
+	// char will;
 	char *name;
 };
 
 struct Castle{
 	int x, y;
-	char level, no_of_commanders, no_of_soldiers, population, id;
+	char level, no_of_commanders, no_of_soldiers, id;
 	char owner;
 	char commanders[MAX_COMMANDERS];
 };
@@ -135,12 +135,13 @@ char j_1, j_2;
 int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 struct Castle castles[NO_OF_CASTLES];
 struct Commander commanders[TOTAL_COMMANDERS];
-char captured[20];
+char captured[MAX_CAPTURED];
 char current_captured = 0;
-
 int total_sprites = 0;
 int counter = 0;
 char current_menu_size = 0;
+char num_of_bad_terrains;
+char untraversable_terrain[15];
 
 /*
 	MENU STUFF
@@ -187,9 +188,9 @@ char current_menu = 0;
 char current_menu_length = 0;
 char current_menu_width = 0;
 char current_menu_choices = 0;
-char current_menu_x = 0;
-char current_menu_y = 0;
-char cursor_pointer = 0;
+// char current_menu_x = 0;
+// char current_menu_y = 0;
+// char cursor_pointer = 0;
 char kingdom = 0;
 
 // struct Commander brendt;
@@ -218,7 +219,7 @@ struct Node{
 };
 
 enum SoldierState{
-	WAITING, MOVING, ATTACKING, DYING
+	IDLE, ATTACKING, DYING
 };
 
 enum Direction{
@@ -230,18 +231,12 @@ enum Commands{
 };
 
 struct soldier{
-	int pos, x, y, frame;
+	int x, y, frame;
 	char tic, id;
 	enum SoldierState state;
 	enum Direction direction;
-	char walk, attack, die, active;
+	char attack, active;
 };
-
-// struct battle_group{
-//   char group_size;
-//   char commanders[5];
-//   char defeated[5];
-// };
 
 // #incpal(testpal,"map/battlemap5.tiles.pcx")
 // #inctile(testtiles,"map/battlemap5.tiles.pcx")
@@ -254,8 +249,8 @@ struct soldier{
 // #incbin(testmap,"map/battlemap5.Untitled 2.layer-Layer 1.map001.stm")
 
 /* sprites */
-#incspr(attack, "map/sprites/unit_test.pcx")
-#incpal(soldierpal, "map/sprites/unit_test.pcx")
+#incspr(attack, "map/sprites/swordy.pcx")
+#incpal(soldierpal, "map/sprites/swordy.pcx")
 
 #incspr(attack2, "map/sprites/unit_test2.pcx")
 
@@ -314,7 +309,8 @@ Unit engineers;
 
 // struct Node map[100];
 // struct Node neighbors[4];
-
+char d_one[2];
+char d_two[2];
 struct soldier armyOne[15]; //9 is max?
 struct soldier armyTwo[15];
 struct soldier *sp;
@@ -335,16 +331,16 @@ int yOffset = 0;
 char j1 = 0;
 int j2 = 0;
 int xOffset = 0;
-int z = 0;
-int j = 0;
+// int z = 0;
+// int j = 0;
 
 int team_id = 0;
-int opp = 0;
-int opp_area = 0;
-int opp_army_size = 0;
-int opp_attack_area = 0;
-int team_area = 0;
-int team_army_size = 0;
+// int opp = 0;
+// int opp_area = 0;
+// int opp_army_size = 0;
+// int opp_attack_area = 0;
+// int team_area = 0;
+// int team_army_size = 0;
 int total_units = 0;
 
 char commander_one_hp = 10;
@@ -363,8 +359,11 @@ int ATTACK_AREA_TWO = 8;
 main()
 {
 	// struct Commander *cmdr;
-	char deploy_one[2];
-	char deploy_two[2];
+	d_one[0] = 1;
+	d_two[0] = 2;
+	d_one[1] = 3;
+	d_two[1] = 4;
+
 	selector_x = 0;
 	selector_y = 64;
 	cursor_vram = 0x68C0;
@@ -393,17 +392,13 @@ main()
 	engineers.def = 27;
 	engineers.hp  = 60;
 	engineers.unit_type = ENGINEERS;
-
-	deploy_one[0] = 1;
-	deploy_two[0] = 2;
-	deploy_one[1] = 3;
-	deploy_two[1] = 4;
 	// make_menus();
 	initialize_commanders();
 	// commanders[1].unit = &spears;
-	commanders[1].army_size = 16;
-	commanders[2].army_size = 15;
-	commanders[3].army_size = 17;
+	commanders[1].army_size = 2;
+	commanders[2].army_size = 2;
+	commanders[3].army_size = 2;
+	commanders[0].army_size = 2;
 	// commanders[1].army_type = 1;
 	commanders[6].army_type = 1;
 	commanders[9].army_type = 2;
@@ -446,9 +441,9 @@ main()
 
 	for(;;)
 	{
-		overworld_loop();
+		// overworld_loop();
 		// battle_loop(0,0);
-		// battlefield_loop(deploy_one,2,deploy_two,2);
+		battlefield_loop(d_one,2,d_two,2);
 	}
 }
 
@@ -562,7 +557,6 @@ void write_text(char x, char y, char *text)
 	{
 		if(text[i] == 0)
 		{
-			// put_number(0,1,1,1);
 			break;
 		}
 		if(text[i] == 10)
@@ -587,11 +581,11 @@ initialize_commanders()
 	{
 		cmdr->hp = 5+i;
 		cmdr->ap = 5;
-		cmdr->str = 5;
-		cmdr->rec = 5;
-		cmdr->lck = 5;
-		cmdr->int = 5;
-		cmdr->will = 5;
+		// cmdr->str = 5;
+		// cmdr->rec = 5;
+		// cmdr->lck = 5;
+		// cmdr->int = 5;
+		// cmdr->will = 5;
 		// cmdr->sprite = i%3;
 		cmdr->army_size = 10 + (i%5);
 		// cmdr->army_size = 15;
@@ -632,6 +626,19 @@ void darken_palette(int pal_num)
 void lighten_palette(int pal_num)
 {
 	modify_palette(pal_num,2);
+}
+
+char is_traversable(int pos)
+{
+  char i;
+  for(i=0; i<num_of_bad_terrains; i++)
+  {
+    if(battlefieldbat[pos] == untraversable_terrain[i])
+    {
+      return 0;
+    }
+  }
+  return 1;
 }
 
 void modify_palette(int pal_num, char modifier)

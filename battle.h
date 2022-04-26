@@ -31,8 +31,8 @@ Army c_c_army;
   // char c_right_size;
   // char c_center_size;
 
-char army_one_current_size;
-char army_two_current_size;
+// char army_one_current_size;
+// char army_two_current_size;
 
 // struct Commander *p_center_army;
 // struct Commander *p_left_army;

@@ -26,15 +26,17 @@
 const char tile_pal[28];
 char g;
 char id;
-char cost;
 char first;
 char *army_one;
 char *army_two;
 char mapper_size;
-int path[20];
 
 void battlefield_loop(char *deploy_one, char s_one, char *deploy_two, char s_two)
 {
+  turn = CPU;
+  ai_timer = 20;
+  // u = 198;
+  done = 1;
   army_one = deploy_one;
   army_two = deploy_two;
   size_one = s_one;
@@ -72,13 +74,21 @@ void battlefield_loop(char *deploy_one, char s_one, char *deploy_two, char s_two
   vsync();
   // put_string("actions:",17,2);
   entities[1].is_cmdr = 1;
-
+  // init_ai();
+  start_turn(CPU);
+  entities[0].stamina = 2;
+  entities[1].stamina = 1;
   while(one_total > 0 && one_total > 0)
   {
-    ctrls();
-    display_abs();
-    // put_number(abs_y_from_graph(graph_from_x_y(s_x,s_y)),4,1,1);
-    // put_number(battlefieldbat[115],4,1,2);
+    if(turn == CPU)
+    {
+      ai();
+    }
+    else
+    {
+      ctrls();
+      display_abs();
+    }
 
     draw_selector();
     satb_update();
@@ -100,6 +110,7 @@ void init_units()
 {
   char *u;
   char i;
+  // entities = player_entities;
 
   for(i=0, u = army_one; i<size_one; i++, u++)
   {
@@ -124,54 +135,54 @@ void init_units()
     switch(commanders[*u].army_type)
     {
       case 0:
-      add_entity(INF,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&infantry,1,*u);
+      add_entity(INF,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&infantry,1,*u,37+i);
       battle_grid[37+i] = num_of_entities;
       break;
 
       case 1:
-      add_entity(SPEAR,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&spears,1,*u);
+      add_entity(SPEAR,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&spears,1,*u,37+i);
       battle_grid[37+i] = num_of_entities;
       break;
 
       case 2:
-      add_entity(MUSKET,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&muskets,1,*u);
+      add_entity(MUSKET,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&muskets,1,*u,37+i);
       battle_grid[37+i] = num_of_entities;
       break;
 
       default:
-      add_entity(INF,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&infantry,1,*u);
+      add_entity(INF,commanders[*u].army_size,PLAYER,cmdr_fig_pal+i,&infantry,1,*u,37+i);
       battle_grid[37+i] = num_of_entities;
       break;
     }
   }
-
+  // entities = ai_entities;
   for(i=0, u=army_two; i<size_two; i++,u++)
   {
     // put_number(commanders[*u].army_type,3,0,10+i);
     switch(commanders[*u].army_type)
     {
       case 0:
-      add_entity(INF,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&infantry,1,*u);
-      battle_grid[213+i] = num_of_entities;
+      add_entity(INF,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&infantry,1,*u,198+i);
+      battle_grid[198+i] = num_of_entities;
       break;
 
       case 1:
-      add_entity(SPEAR,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&spears,1,*u);
-      battle_grid[213+i] = num_of_entities;
+      add_entity(SPEAR,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&spears,1,*u,198+i);
+      battle_grid[198+i] = num_of_entities;
       break;
 
       case 2:
-      add_entity(MUSKET,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&muskets,1,*u);
-      battle_grid[213+i] = num_of_entities;
+      add_entity(MUSKET,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&muskets,1,*u,198+i);
+      battle_grid[198+i] = num_of_entities;
       break;
 
       default:
-      add_entity(INF,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&infantry,1,*u);
-      battle_grid[213+i] = num_of_entities;
+      add_entity(INF,commanders[*u].army_size,CPU,cmdr_fig_pal+i,&infantry,1,*u,198+i);
+      battle_grid[198+i] = num_of_entities;
       break;
     }
   }
-
+  // entities = player_entities;
   cmdr_fig_pal = 19;
 }
 
@@ -188,7 +199,6 @@ void init_battlefield()
   cursor_x = -16;
   cursor_y = -16;
   actions = ACTIONS_PER_TURN;
-  cost = 0;
   menu_option = 0;
 }
 
@@ -265,14 +275,12 @@ void update_map()
   {
     if(battle_grid[i] != 0)
     {
-
       entity_no = battle_grid[i]-1;
+
       s = entities[entity_no].army_size/15;//max_army_size
       if(entities[entity_no].is_cmdr)
       {
         p = get_address_from_id(entities[entity_no].id);
-        // put_number(69,3,0,i);
-        // put_number(entities[entity_no].id,3,0,z++);
       }
       else
       {
@@ -367,24 +375,12 @@ void ctrls()
         update_map();
       }
     }
+
     else if(selector_mode == PLACE_MODE)
     {
       if(battle_grid[abs] == 0 && is_traversable(abs))
       {
-        char size, i;
-        size = get_path(unit_selected,abs,path,battle_grid,1);
-        for(i=0; i<size+1; i++)
-        {
-          // put_number(path[i],3,15,15+i);
-        }
-        highlight_near_squares(unit_selected,0,actions/MOVE_COST);
-        // actions -= cost;
-        deduct_actions(cost);
-        // put_number(cost,1,1);
-        battle_grid[abs] = battle_grid[unit_selected];
-        battle_grid[unit_selected] = 0;
-        selector_mode = SELECT_MODE;
-        update_map();
+        move_unit(abs,unit_selected);
       }
     }
     else if(selector_mode == ATTACK_MODE)
@@ -411,11 +407,14 @@ void ctrls()
         case MENU_MOVE:
         if(check_action_cost(MOVE_COST))
         {
-          selector_mode = PLACE_MODE;
-          menu_option = MENU_ATTACK;
+          // selector_mode = PLACE_MODE;
+          // menu_option = MENU_ATTACK;
+          // hide_menu();
+          // highlight_near_squares(unit_selected,0x1000,actions/MOVE_COST);
+          // display_selector();
+
+          select_unit(unit_selected);
           hide_menu();
-          highlight_near_squares(unit_selected,0x1000,actions/MOVE_COST);
-          display_selector();
         }
         else
         {
@@ -466,6 +465,7 @@ void ctrls()
         highlight_near_squares(unit_selected,0,1);
         hide_menu();
         display_selector();
+        start_turn(CPU);
         break;
       }
     }
@@ -502,7 +502,7 @@ void ctrls()
     {
       s_x = abs_x_from_graph(unit_selected);
       s_y = abs_y_from_graph(unit_selected);
-      highlight_near_squares(unit_selected,0,actions/MOVE_COST);
+      highlight_near_squares(unit_selected,0,3);
       spr_set(0);
       spr_x(s_x);
       spr_y(s_y);
@@ -540,26 +540,26 @@ void ctrls()
   }
 }
 
-void attack_unit(int src, int dst)
-{
-  char attacker, target;
-  attacker = battle_grid[dst]-1;
-  target = battle_grid[src]-1;
-  if(entities[attacker].team != entities[target].team)
-  {
-    hide_menu();
-    menu_x = -64;
-    menu_y = -64;
-    cursor_x = -32;
-    cursor_y = -32;
-    begin_battle(attacker,target,src,dst);
-    selector_mode = SELECT_MODE;
-  }
-  else
-  {
-    display_error_message("invalid target");
-  }
-}
+// void attack_unit(int src, int dst)
+// {
+//   char attacker, target;
+//   attacker = battle_grid[dst]-1;
+//   target = battle_grid[src]-1;
+//   if(entities[attacker].team != entities[target].team)
+//   {
+//     hide_menu();
+//     menu_x = -64;
+//     menu_y = -64;
+//     cursor_x = -32;
+//     cursor_y = -32;
+//     begin_battle(attacker,target,src,dst);
+//     selector_mode = SELECT_MODE;
+//   }
+//   else
+//   {
+//     display_error_message("invalid target");
+//   }
+// }
 
 void split_unit(int src, int dst)
 {
@@ -569,7 +569,7 @@ void split_unit(int src, int dst)
   reduce_army_size(entity_id,15);
   highlight_near_squares(dst,0,1);
   pal = entities[entity_id].unit_type + 16;
-  add_entity(entities[entity_id].unit_type,15,entities[entity_id].team,pal,entities[entity_id].unit,0,entities[entity_id].id);
+  add_entity(entities[entity_id].unit_type,15,entities[entity_id].team,pal,entities[entity_id].unit,0,entities[entity_id].id,src);
   battle_grid[src] = num_of_entities;
   deduct_actions(SPLIT_COST);
   if(entities[entity_id].team == PLAYER)
@@ -601,21 +601,6 @@ void merge_units(int src, int dst)
       two_total--;
     }
   }
-
-}
-
-void deduct_actions(char num_of_actions)
-{
-  char i, action_offset, actions_left;
-  actions_left = 6 - actions;
-  action_offset = 10 - actions_left;
-  actions -= num_of_actions;
-
-  for(i=num_of_actions; i>0; i--)
-  {
-    spr_set(action_offset-i);
-    spr_hide();
-  }
 }
 
 void selector_left()
@@ -625,7 +610,7 @@ void selector_left()
     if(selector_mode == PLACE_MODE)
     {
       // if((valid_distance(-16,0,actions/MOVE_COST) && battle_grid[graph_from_x_y(s_x-16,s_y)] == 0) || battle_grid[graph_from_x_y(s_x-16,s_y)] == id)
-      if(check_neighbors(graph_from_x_y(s_x-16,s_y),actions/MOVE_COST,0) && is_traversable(graph_from_x_y(s_x-16,s_y)))
+      if(check_neighbors(graph_from_x_y(s_x-16,s_y),3,0) && is_traversable(graph_from_x_y(s_x-16,s_y)))
       {
         calc_move_cost(unit_selected,graph_from_x_y(s_x-16,s_y));
         update_selector_pos(-16,0);
@@ -652,7 +637,7 @@ void selector_right()
     if(selector_mode == PLACE_MODE)
     {
       // if((valid_distance(16,0,actions/MOVE_COST) && battle_grid[graph_from_x_y(s_x+16,s_y)] == 0) || battle_grid[graph_from_x_y(s_x+16,s_y)] == id) //WORKS IF OTHER DIRECTIONS ARE DOING THIS TOO
-      if(check_neighbors(graph_from_x_y(s_x+16,s_y),actions/MOVE_COST,0) && is_traversable(graph_from_x_y(s_x+16,s_y)))
+      if(check_neighbors(graph_from_x_y(s_x+16,s_y),3,0) && is_traversable(graph_from_x_y(s_x+16,s_y)))
       {
         calc_move_cost(unit_selected,graph_from_x_y(s_x+16,s_y));
         update_selector_pos(16,0);
@@ -679,7 +664,7 @@ void selector_down()
     if(selector_mode == PLACE_MODE)
     {
       // if((valid_distance(0,16,actions/MOVE_COST) && battle_grid[graph_from_x_y(s_x,s_y+16)] == 0) || battle_grid[graph_from_x_y(s_x,s_y+16)] == id) //WORKS IF OTHER DIRECTIONS ARE DOING THIS TOO
-      if(check_neighbors(graph_from_x_y(s_x,s_y+16),actions/MOVE_COST,0) && is_traversable(graph_from_x_y(s_x,s_y+16)))
+      if(check_neighbors(graph_from_x_y(s_x,s_y+16),3,0) && is_traversable(graph_from_x_y(s_x,s_y+16)))
       {
         calc_move_cost(unit_selected,graph_from_x_y(s_x,s_y+16));
         update_selector_pos(0,16);
@@ -706,7 +691,7 @@ void selector_up()
     if(selector_mode == PLACE_MODE)
     {
       // if((valid_distance(0,-16,actions/MOVE_COST) && battle_grid[graph_from_x_y(s_x,s_y-16)] == 0) || battle_grid[graph_from_x_y(s_x,s_y-16)] == id)
-      if(check_neighbors(graph_from_x_y(s_x,s_y-16),actions/MOVE_COST,0) && is_traversable(graph_from_x_y(s_x,s_y-16)))
+      if(check_neighbors(graph_from_x_y(s_x,s_y-16),3,0) && is_traversable(graph_from_x_y(s_x,s_y-16)))
       {
         calc_move_cost(unit_selected,graph_from_x_y(s_x,s_y-16));
         update_selector_pos(0,-16);
@@ -874,17 +859,6 @@ char check_neighbors(int square, int distance, int c)
     if((square)/16 < 13 && (battle_grid[(square)+16] == 0 || battle_grid[(square)+16] == id)){ result |= check_neighbors(square+16,distance-1, c+1); }
   }
   return result;
-}
-
-int calc_move_cost(int origin, int dest)
-{
-  int o_x, o_y, d_x, d_y, x, y;
-  o_x = origin % 16;
-  o_y = origin / 16;
-  d_x = dest % 16;
-  d_y = dest / 16;
-
-  cost = (char)(abs(o_x - d_x) + abs(o_y - d_y)) * 2;
 }
 
 char square_adjacent(int origin, int desired)
