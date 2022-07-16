@@ -1,1 +1,8 @@
 map/*
+tiles/*
+script/*
+concepts.rtf
+*.pce
+*.s
+*.sym
+*.vgm

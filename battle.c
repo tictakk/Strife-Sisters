@@ -10,6 +10,7 @@
 // char grid[NUMBER_OF_TILES];
 char army_one_size;
 char army_two_size;
+char can_attack;
 // char cmdr_one_attack = 0;
 // char cmdr_two_attack = 0;
 // char surrender_army_one = 0;
@@ -35,10 +36,15 @@ void calc_stats(Army *army_one, Army *army_two)
 	{
 		return;
 	}
+
 	one_dmg = rand() % army_one->atk_total;
 	two_dmg = rand() % army_two->atk_total;
-	// put_number(one_dmg,3,1,1);
-	// put_number(two_dmg,3,1,2);
+
+	if(!can_attack)
+	{
+		two_dmg = 0;
+	}
+
 	one_dmg = one_dmg - ((one_dmg * army_two->def_total)/100);
 	two_dmg = two_dmg - ((two_dmg * army_one->def_total)/100);
 
@@ -216,17 +222,23 @@ void intro()
 			change_army_frame(armyTwo,army_two_size,CPU_SPRITE_VRAM,1);
 
 			randomize_army_attacks(armyOne,army_one_size,PLAYER_SPRITE_VRAM + 0x300);
-			randomize_army_attacks(armyTwo,army_two_size,CPU_SPRITE_VRAM + 0x300);
+
+			if(can_attack)
+			{
+				randomize_army_attacks(armyTwo,army_two_size,CPU_SPRITE_VRAM + 0x300);
+			}
 		}
 		if(i++ % 24 == 0)
 		{
 			calc_stats(&p_c_army, &c_c_army);
-			put_number(p_c_army.current_army_size,3,0,0);
-			put_number(c_c_army.current_army_size,3,24,0);
-			// put_number(p_c_army.to_kill,3,0,1);
-			// put_number(c_c_army.to_kill,3,24,1);
-			update_army_size(&p_c_army,armyOne);
-			update_army_size(&c_c_army,armyTwo);
+			// put_number(p_c_army.atk_total,3,0,0);
+			// put_number(c_c_army.atk_total,3,24,0);
+			// put_number(p_c_army.def_total,3,0,1);
+			// put_number(c_c_army.def_total,3,24,1);
+			// put_number(p_c_army.hp_total,6,0,2);
+			// put_number(c_c_army.hp_total,6,24,2);
+			update_army_size(&p_c_army,armyOne,PLAYER_SPRITE_VRAM+0x800);
+			update_army_size(&c_c_army,armyTwo,CPU_SPRITE_VRAM+0x800);
 			p_c_army.to_kill = 0;
 			c_c_army.to_kill = 0;
 			moves--;
@@ -279,7 +291,7 @@ void randomize_army_attacks(struct soldier *army, char army_size, int frame)
 	}
 }
 
-void update_army_size(Army *army, struct soldier *soldiers)
+void update_army_size(Army *army, struct soldier *soldiers,int frame)
 {
 	struct soldier *soldier;
 	char i;
@@ -291,7 +303,7 @@ void update_army_size(Army *army, struct soldier *soldiers)
 		soldier = (soldiers + num);
 		// soldier->active = 0;
 		soldier->state = DYING;
-		soldier->frame = 0x6800;
+		soldier->frame = frame;
 	}
 }
 
@@ -413,9 +425,9 @@ void reset_camera()
 	BATTLE ROUTINE
 */
 
-char battle_loop(char i1, char i2)
+char battle_loop(char i1, char i2, char target_attack)
 {
-	// entity_id_one = i1;
+	// entity_id_one = i1;s
 	// entity_id_two = i2;
 	// p_left_reserve_size = 3;
 	// p_right_reserve_size = 3;
@@ -429,6 +441,7 @@ char battle_loop(char i1, char i2)
 	army_one_size = 0;
 	army_one_size = 0;
 	total_sprites = 0;
+	can_attack = target_attack;
 	xOffset = -96;
 	// xOffset = 0;
 	// disp_off();
@@ -441,8 +454,8 @@ char battle_loop(char i1, char i2)
 
 	// display_menu(&menus[0]);
 
-	comm_1 = 0;
-	comm_2 = 0;
+	// comm_1 = 0;
+	// comm_2 = 0;
 	one_dmg = 0;
 	two_dmg = 0;
 	one_health = 60;
@@ -456,11 +469,11 @@ char battle_loop(char i1, char i2)
 
 	cleanup_battle(i1,i2);
 
-	if(p_c_army.current_army_size == 0)
+	if(p_c_army.current_army_size == 0)//attacker
 	{
 		return 0;
 	}
-	else if(c_c_army.current_army_size == 0)
+	else if(c_c_army.current_army_size == 0)//target
 	{
 		return 1;
 	}
@@ -479,33 +492,20 @@ void load_battle_scene(int i1, int i2)
 	// reset_camera();
 	/* load menu */
 	// load_vram(PLAYER_SPRITE_VRAM, attack2, 0xC00);
-	load_unit_type_to_vram(PLAYER_SPRITE_VRAM,entities[i1]->unit.unit_type);
-	if(entities[i1]->unit.unit_type != MUSKETS)
+	if(entities[i1].team == PLAYER)
 	{
-		load_palette(16, soldierpal, 1);
+		load_unit_type_to_vram(PLAYER_SPRITE_VRAM,entities[i1]->unit.unit_type,16,0);
+		load_unit_type_to_vram(CPU_SPRITE_VRAM,entities[i2]->unit.unit_type,17,16);
 	}
 	else
 	{
-		load_palette(16, musketbtlpal, 1);
-	}
-
-	/* init sprites */
-	// load_palette(16, soldierpal, 1);
-	// load_vram(CPU_SPRITE_VRAM, attack, 0xC00);
-	load_unit_type_to_vram(CPU_SPRITE_VRAM,entities[i2]->unit.unit_type);
-
-	if(entities[i2]->unit.unit_type != MUSKETS)
-	{
-		load_palette(17, soldierpal, 1);
-	}
-	else
-	{
-		load_palette(17, musketbtlpal, 1);
+		load_unit_type_to_vram(PLAYER_SPRITE_VRAM,entities[i1]->unit.unit_type,16,16);
+		load_unit_type_to_vram(CPU_SPRITE_VRAM,entities[i2]->unit.unit_type,17,0);
 	}
 
 	set_font_color(0, 12);
 	set_font_pal(0);
-	load_default_font(0,0x800);
+	load_default_font(0,0x490);
 
 	init_armies(i1,i2);
 	disp_on();
@@ -514,45 +514,57 @@ void load_battle_scene(int i1, int i2)
 	// surrender_army_two = 1;
 }
 
-void load_unit_type_to_vram(int vram_location, enum Unit_Type type)
+void load_unit_type_to_vram(int vram_location, enum Unit_Type type, char pal,char offset)
 {
 	switch(type)
 	{
 		case INFANTRY:
 		load_vram(vram_location, attack, 0xC00);
+		load_palette(pal, soldierpal+offset, 1);
 		break;
 		case SPEARS:
 		load_vram(vram_location, attack2, 0xC00);
+		load_palette(pal, spearpal+offset, 1);
 		break;
-		case CALVARY:
+		case FLYERS:
+		load_vram(vram_location, demonbtl, 0xC00);
+		load_palette(pal, demonbtlpal+offset, 1);
+		break;
 		case MUSKETS:
-		case ENGINEERS:
 		load_vram(vram_location, musketbtl, 0xC00);
+		load_palette(pal, musketbtlpal+offset, 1);
 		break;
+		case HOUNDS:
+		load_vram(vram_location, houndbtl, 0xC00);
+		load_palette(pal, houndbtlpal+offset, 1);
+		break;
+		case MAGES:
 		deafult:
 		load_vram(vram_location, attack, 0xC00);
+		load_palette(pal, spearpal, 1);
 		break;
 	}
 }
 
-// void calc_army_stats(struct Commander *commander, Army *army, char x, char y)
 void calc_army_stats(char id, Army *army, char x, char y)
 {
 	Unit unit;
 	int army_size;
-	army_size = min(entities[id].army_size, 15);
+	army_size = entities[id].army_size;
+	// army_size = min(entities[id].army_size, 15);
 
-	memcpy(&unit,entities[id].unit,sizeof(Unit));
+	// memcpy(&unit,entities[id].unit,sizeof(Unit));
 
-	army->atk_total   = unit.atk;// * army_size;
-	army->def_total   = unit.def;// * army_size;
-	army->hp_total    = unit.hp  * army_size;
+	army->atk_total   = unit_list[entities[id].id].atk;
+	army->def_total   = unit_list[entities[id].id].def;
+	army->hp_total    = unit_list[entities[id].id].hp  * army_size;
 	army->hp_current  = army->hp_total;
+
 	army->current_army_size = army_size;
 	army->unit_type = entities[id]->unit.unit_type;
 	army->atk_buff = 0;
 	army->def_buff = 0;
-	army->commander = &commanders[id];
+	// army->commander = &commanders[id];
 	army->army_start_size = army_size;
 	army->x = x;
 	army->y = y;
@@ -565,34 +577,14 @@ void init_armies(int player, int cpu)
 	int row;
 	int column;
 	char j;
-	// p_c_army = 0;
-	// c_c_army = 0;
 
 	calc_army_stats(player,&p_c_army,4,2);
 	calc_army_stats(cpu,&c_c_army,24,2);
 
-	// calc_army_stats(&commanders[2],&p_l_army,4,4);
-	// calc_army_stats(&commanders[3],&c_l_army,24,4);
-	//
-	// calc_army_stats(&commanders[4],&p_r_army,4,6);
-	// calc_army_stats(&commanders[5],&c_r_army,24,6);
-
 	army_one_size = p_c_army.army_start_size; //MAX_ARMY_SIZE;
 	army_two_size = c_c_army.army_start_size; //MAX_ARMY_SIZE;
 
-	// army_one_size = commanders[group_one.commanders[player_selected_index]].army_size;
-	// army_two_size = commanders[group_two.commanders[cpu_selected_index]].army_size;
-
-	// army_one_current_size = army_one_size;
-	// army_two_current_size = army_two_size;
-
-	// total_units = army_one_current_size + army_two_current_size;
 	total_units = army_one_size + army_two_size;
-	//sprite_offset = MAX_SPRITES - (total_units + 2); //2 commanders
-	// sprite_offset = ARMY_ONE_START;
-	// total_sprites = total_units;
-	// commander_one_pos = (2 * TILES_PER_LINE) + 3;
-	// commander_two_pos = (2 * TILES_PER_LINE) + 10;
 
 	p = 0;
 	row = 0;
@@ -627,28 +619,9 @@ void init_armies(int player, int cpu)
 		sp->frame = CPU_SPRITE_VRAM;
 	}
 
-	// grid[commander_one_pos] ^= 1;
-	// grid[commander_one_pos-1] ^= 4;
-	// grid[commander_one_pos] ^= 4;
-	//
-	// grid[commander_two_pos] ^= 2;
-	// grid[commander_two_pos-1] ^= 8;
-	// grid[commander_two_pos] ^= 8;
-
 	sp = armyOne;
-	populate_army(sp,0x400,PLAYER_SPRITE_VRAM,0,0,army_one_size,5);
-
-	// load_palette(17, soldierpal, 2);
-	// load_palette(21, samuraipal, 5);
-	// load_palette(22, ballpal, 6);
-	// load_palette(23, cmdrpal, 1);
-
+	populate_army(sp,0x400,PLAYER_SPRITE_VRAM,16,0,army_one_size,5);
 	sp = armyTwo;
-	// p = 0;
-	// row = 0;
-	// column = 0;
-	//(0x5000 + ((ARMY_ONE_SIZE) * 0x400))sprite start for army two
-	// put_number(j + ARMY_TWO_START,2,26,5);
 	populate_army(sp,0x400,CPU_SPRITE_VRAM,17,1,army_two_size,21);
 
 	satb_update();
@@ -656,18 +629,7 @@ void init_armies(int player, int cpu)
 	vsync();
 }
 
-void toggle_position(int pos, int id)
-{
-	// if((pos & 31) > 0)
-	// {
-	// 	grid[pos-1] ^= id;
-	// }
-	// if((pos & 31) < 31)
-	// {
-	// 	grid[pos+1] ^= id;
-	// }
-	// grid[pos] ^= id;
-}
+void toggle_position(int pos, int id){}
 
 void load_battle_bg()
 {
@@ -704,12 +666,9 @@ char prebattle_select(char selection)
 	switch(selection)
 	{
 		case 2:
-		load_formation_menu();
 		return 1;
 
 		default:
-		comm_1 = selection;
-		comm_2 = selection;
 		return 0;
 	}
 }
@@ -740,17 +699,15 @@ int populate_army(struct soldier *soldiers, int sprite_size, int sprite_start, i
 	}
 }
 
-void update_sprite_pos(struct soldier *soldier)
-{
-	// spr_y(get_y_from_pos(soldier->pos) * 32 + soldier->y + 64);
-	// spr_x(get_x_from_pos(soldier->pos) * 32 + soldier->x + (xOffset));
-}
+void update_sprite_pos(struct soldier *soldier){}
 
 void cleanup_battle(int player_selected_index, int cpu_selected_index)
 {
 	int i;
-	entities[player_selected_index].army_size -= (char)(p_c_army.army_start_size - p_c_army.current_army_size);
-	entities[cpu_selected_index].army_size -= (char)(c_c_army.army_start_size - c_c_army.current_army_size);
+	// entities[player_selected_index].army_size -= (char)(p_c_army.army_start_size - p_c_army.current_army_size);
+	// entities[cpu_selected_index].army_size -= (char)(c_c_army.army_start_size - c_c_army.current_army_size);
+	entities[player_selected_index].army_size = p_c_army.current_army_size;
+	entities[cpu_selected_index].army_size = c_c_army.current_army_size;
 	for(i=5; i<26; i++)
 	{
 		spr_hide(i);

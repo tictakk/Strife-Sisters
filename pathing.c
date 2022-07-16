@@ -1,8 +1,7 @@
+#include "battlefield.h"
 struct Node neighbors[8];
-struct Node map[250];
+struct Node map[100];
 // struct Node path[20];
-
-// char path_counter = 0;
 
 int get_neighbors(unsigned char x, unsigned char y, char size)
 {
@@ -34,7 +33,7 @@ int get_neighbors(unsigned char x, unsigned char y, char size)
 	}
 
 	//down
-	if((y + 1) < width)
+	if((y + 1) < 14) //BREAKS OVERWORLD
 	{
 		neighbors[counter].ownX = x;
 		neighbors[counter].ownY = y+1;
@@ -115,10 +114,9 @@ int get_neighbors(unsigned char x, unsigned char y, char size)
 	return counter;
 }
 
-int get_path(int pos, int desired, int paths[20], char *big_map, char size)
+int get_path(int pos, int desired, int paths[20], char *big_map, char size, int depth, char ignore)
 {
   struct Node *node;
-	struct Node path[20];
 
 	int x, y, fx, fy, v, width;
 	int p = 0;
@@ -126,8 +124,12 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char size)
 	int count = 0;
 	int exit = 1;
 	int path_counter = 0;
+	int d_count = 0;
+	int d_level = 0;
+	int next_d = 0;
+	char found = 0;
+	char id = 0;
   v = 0;
-
 	width = (size)? 16 : 32;
   map_counter = 0;
   map_size = 0;
@@ -139,83 +141,104 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char size)
 	map[map_size].checked = 1;
 	// put_number(width,3,15,15);
 
-	while(map[map_counter].checked == 1 && exit == 1 && map_counter < 300)
+	while(exit == 1 && d_level < depth)
+	// while(map[map_counter].checked == 1 && exit == 1 && d_level < depth)
 	{
 		//THIS HAS TO BE FIXED HERE, IT'S EXITING EARLY BEFORE FINDING WHAT WE NEED BECAUSE AN "UNCHECKED" NODE IS BEING PUT IN SOMEWHERE (LIKELY INDEX 2) LOOK AT PUT NUMBER AT THE END OF THIS FUNCTION
 		count = get_neighbors(map[map_counter].ownX,map[map_counter].ownY,size);
-
 		i = 0;
-		while(i < count)
-		{
-			p = (neighbors[i].ownY * width) + neighbors[i].ownX;
-			x = neighbors[i].ownX;
-			y = neighbors[i].ownY;
-			fx = neighbors[i].fromX;
-			fy = neighbors[i].fromY;
-
-			if(neighbors[i].checked == 1 && is_traversable(p))
+		if(map[map_counter].checked){ //this could probably go above count = get_ne... to make it more effecient
+			while(i < count)
 			{
-          if(p == desired)
-          {
-  					put_visited(x,y,fx,fy);
-            exit = 0;
-            map_counter--;
-            i=count;
-  				}
-					else if(is_zero(*(big_map+p),size))
-					// else if(*(big_map+p) == 0)
-					// else if(overworld[p] != 0)
-					{
-            if(put_visited(x,y,fx,fy))
+				p = (neighbors[i].ownY * width) + neighbors[i].ownX;
+				x = neighbors[i].ownX;
+				y = neighbors[i].ownY;
+				fx = neighbors[i].fromX;
+				fy = neighbors[i].fromY;
+
+				if(is_traversable(p) || ignore)
+				// if(neighbors[i].checked == 1 && is_traversable(p))
+				{
+					id = *(big_map+p);
+	          if(p == desired)
+	          {
+	  					put_visited(x,y,fx,fy,1);
+	            exit = 0;
+	            map_counter--;
+	            i=count;
+							found = 1;
+	  				}
+						else if(is_zero(id,size))//THIS BREAKS PATHING FOR OVERWORLD
 						{
-							// put_number(p,3,5+(4*(v/20)),5+v%20);
-							v++;
-						}
-  				}
+							if(entities[id-1].team != size && id != 0)
+							{
+								if(put_visited(x,y,fx,fy,0))
+								{
+									d_count++;
+								}
+							}
+							else
+							{
+								if(put_visited(x,y,fx,fy,1))
+								{
+									d_count++;
+								}
+							}
+							// if(put_visited(x,y,fx,fy))
+							// {
+							// 	d_count++;
+							// }
+	  				}
+				}
+				i++;
 			}
-			i++;
+		}
+		if(map_counter == next_d)
+		{
+			next_d = d_count;
+			d_level++;
 		}
 		map_counter++;
 	}
-	// put_number(map_size,3,15,15);
-
+	if(!found)
+	{
+		return -1;
+	}
   i = 0;
   node = &map[map_size];
 
-	paths[i] = (node->ownY * width) + node->ownX;
-  path[i].ownX = node->ownX;
-  path[i].ownY = node->ownY;
-  path[i].fromX = node->fromX;
-  path[i++].fromY = node->fromY;
+	paths[i++] = (node->ownY * width) + node->ownX;
   x = map[0].ownX;
   y = map[0].ownY;
 
   while(!compare(x, y, node->ownX, node->ownY))
   {
     node = &map[get(node->fromX,node->fromY)];
-		paths[i] = (node->ownY * width) + node->ownX;
-    path[i].ownX = node->ownX;
-    path[i].ownY = node->ownY;
-    path[i].fromX = node->fromX;
-    path[i++].fromY = node->fromY;
+		paths[i++] = (node->ownY * width) + node->ownX;
     path_counter++;
   }
-	return path_counter - 1;
+
+	return path_counter-1;
 }
 
 char is_zero(char num, char size)
 {
 	if(size)
 	{
-		if(num == 0)
-		{
-			return 1;
-		}
+		// if(num == 0)
+		// {
+		// 	return 1;
+		// }
+		// else if(size == entities[num-1].team || size == entities[num-1].team)
+		// {
+		// 	return 1;
+		// }
+		return 1;
 	}
 	else
 	{
-		return 0;
-		// return num != 0;
+		// return 0;
+		return num != 0;
 	}
 }
 
@@ -224,11 +247,11 @@ char compare(char ownX, char ownY, char fromX, char fromY)
   return ((ownX == fromX) && (ownY == fromY));
 }
 
-int put_visited(int x, int y, int fx, int fy)
+int put_visited(int x, int y, int fx, int fy, char checked)
 {
 	int i = 0;
 	int counter = 0;
-	for(i=0; i<map_size; i++){
+	for(i=0; i<map_size+1; i++){
 		if(map[i].ownX == x && map[i].ownY == y)
 		{
 			return 0;
@@ -239,7 +262,7 @@ int put_visited(int x, int y, int fx, int fy)
 	map[map_size].ownY = y;
 	map[map_size].fromX = fx;
 	map[map_size].fromY = fy;
-	map[map_size].checked = 1;
+	map[map_size].checked = checked;
 	return 1;
 }
 

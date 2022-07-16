@@ -1,12 +1,12 @@
-all: promotion.pce
+all: sisterstrife.pce
 
 include ../Make_ex.inc
 
 # SRC = promotion.c menu.c overworld.c battle.c
-SRC = promotion.c
+SRC = sisterstrife.c
 CFLAGS ?= -v -fno-recursive -msmall
 
-promotion.pce: $(SRC)
+sisterstrife.pce: $(SRC)
 	$(CC) $(CFLAGS) $(SRC) $(LIBS)
 
 # menu.o: $(CC) $(CFLAGS) menu.c $(LIBS)
