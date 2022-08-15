@@ -4,9 +4,9 @@
 #define PASS_PTS 50
 
 // int attackable_squares[4];
-char ai_units[8];
-char player_units[10];
-char units_in_range[10];
+char ai_units[21];
+char player_units[21];
+char units_in_range[16];
 char num_of_units_in_range;
 char num_of_ai;
 char num_of_players;
@@ -48,11 +48,11 @@ int determine_unit_action(char id)
   int target, len;
   target = -1;
 
-  if(entities[id].stamina < 0)
-  {
-    action = PASS;
-    return target;
-  }
+  // if(entities[id].stamina < 0)
+  // {
+  //   action = PASS;
+  //   return target;
+  // }
 
   units_in_atk_zone(id);
 

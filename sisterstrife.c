@@ -2,24 +2,18 @@
 #include "paths.h"
 #include "strifesisters.h"
 
-#define CMDR 0
-#define SWORD_UNIT 1
-#define SPEAR_UNIT 2
-#define ARCHER_UNIT 3
-#define DEMON_UNIT 4
-#define MAGE_UNIT 5
-#define HOUND_UNIT 6
-#define PORTRAIT_VRAM 0x3C00
-#define CMDR_PANEL_VRAM 0x3600
+// #define UNIT_VRAM_START 0x3800
+#define PORTRAIT_VRAM 0x4400//0x3C00
 #define RECRUIT_VRAM 0x4600
-#define FONT_VRAM 0x5200
 #define DIALOGUE_VRAM 0x4000
 #define P_BORDER_VRAM 0x4000
-#define CMDR_VRAM_SIZE 0x800
-#define MAX_GLOBAL_UNITS 50
+#define MAX_GLOBAL_UNITS 30
 #define MAX_PARTY_SIZE 8
-#define NUM_OF_ITEMS 25
+#define NUM_OF_ITEMS 20
 #define MAX_INVENTORY 24
+// #define UNIT_LIST_SIZE 8
+#define UNIT_LIST_SIZE 16
+#define MAX_COMMANDERS_PER_BATTLE 6
 
 #define AGI_STONE 0
 #define STR_STONE 1
@@ -55,6 +49,19 @@
 #incspr(rei_walk, "map/sprites/reiwalk.pcx")
 #incpal(rei_walk_pal, "map/sprites/reiwalk.pcx")
 
+#incspr(cat_walk, "characters/cat.pcx")
+#incpal(cat_walk_pal, "characters/cat.pcx")
+
+#incspr(violet_walk, "characters/violetwalk.pcx")
+#incpal(violet_walk_pal, "characters/violetwalk.pcx")
+
+#incchr(king_gfx, "characters/king.pcx")
+#incpal(king_pal, "characters/king.pcx")
+
+// #incpal(npc_pal, "characters/mannpc.pcx")
+// #incspr(man_walk, "characters/mannpc.pcx")
+// #incspr(woman_walk, "characters/womannpc.pcx")
+
 #define MAP_WIDTH 32
 #define TILE_WIDTH 16
 #define TILE_VRAM 0x1000
@@ -63,7 +70,7 @@
 
 #define MAX_ARMY_SIZE 15
 #define MAX_COMMANDERS 3
-#define TOTAL_COMMANDERS 20
+#define TOTAL_COMMANDERS 25
 
 #define TAROS 0 //purple
 #define KODEN 1 //dark green
@@ -71,26 +78,17 @@
 #define SANGAI 3 //blue
 #define KAYTOKEN 4 //red
 
-// #define MAP_32x32 0
-// #define MAP_16x16 1
-
 #incspr(cursor, "map/cursor.pcx");
 #incpal(cursorpal, "map/cursor.pcx");
 
-// #incpal(menupal, "map/sprites/inbattle.pcx");
-
-enum GAME_STATE{
-	OVERWORLD, BATTLE_SELECT, BATTLE
-};
-
 enum Unit_Type{
-	INFANTRY, FLYERS, SPEARS, MUSKETS, MAGES, HOUNDS, COMMANDER
+	INFANTRY, FLYERS, SPEARS, MUSKETS, MAGES, HOUNDS, COMMANDER, BLOBS
 };
 
-typedef struct{
-	unsigned char atk, def, spd;
-	int hp;
-} Stats;
+// typedef struct{
+// 	unsigned char atk, def, spd;
+// 	int hp;
+// } Stats;
 
 typedef struct{
 	unsigned char atk, def, mov, rng, ign, spd, p_group, id;
@@ -99,10 +97,10 @@ typedef struct{
 } Unit;
 
 // typedef struct{
-  // Unit *unit;
-  // char army_size, stars;
-	// unsigned int exp;
-	// Stats stat;
+//   Unit *unit;
+//   char army_size, stars;
+// 	unsigned int exp;
+// 	Stats stat;
 // } GEntity;
 
 typedef struct{
@@ -117,8 +115,9 @@ struct Commander{
 	char lvl;
 	char id;
 	char no_of_items;
+	char no_of_units;
 	char ap;
-	char hp;
+	// char hp;
 	char equipable;
 	char *name;
 	char units[6];
@@ -128,8 +127,8 @@ struct Commander{
 
 struct Castle{
 	char buyable_units[MAX_COMMANDERS];
-	int x, y;
-	char no_of_commanders, no_of_soldiers, id, owner, no_of_items, no_of_units;
+	int x, y, map_no;
+	char no_of_commanders, no_of_soldiers, id, metadata_id, no_of_items, no_of_units;
 	char commanders[MAX_COMMANDERS];
 	char buyable_items[MAX_COMMANDERS];
 };
@@ -140,31 +139,20 @@ struct Castle{
 #incpal(overworldpal,"tiles/strifesisters_overworld.tiles.pcx")
 #inctile(overworldtiles,"tiles/strifesisters_overworld.tiles.pcx")
 
-// #inctile(battlefield,"map/backgrounds/battlefieldmap.tiles.pcx")
-// #incpal(battlefieldpal, "map/backgrounds/battlefieldmap.tiles.pcx")
 #incbin(battlefieldbat, "tiles/battlefield1.Untitled 3.layer-Layer 1.map001.stm")
-
-// #inctile(battlefield,"map/backgrounds/battlefieldmap.tiles.pcx")
-// #incpal(battlefieldpal, "map/backgrounds/battlefieldmap.tiles.pcx")
-// #incbin(battlefieldbat, "map/backgrounds/battlefieldmap.Untitled 4.layer-Layer 1.map001.stm")
-
-// #incchr(castle,"map/sprites/castle.pcx");
-// #incchr(castle1,"map/sprites/castle1.pcx");
-// #incchr(castle2,"map/sprites/castle2.pcx");
-// #incchr(castle3,"map/sprites/castle3.pcx");
-// #incchr(castle4,"map/sprites/castle4.pcx");
-// #incpal(castlepal, "map/sprites/castle.pcx");
+#incbin(m1, "map/backgrounds/map1.map1.layer-Layer 1.map001.stm")
+#incbin(m2, "map/backgrounds/town1.castlbattle.layer-Layer 1.map001.stm")
+#incbin(m3, "map/backgrounds/map3.map1.layer-Layer 1.map001.stm")
+#incbin(m4, "map/backgrounds/map4.map1.layer-Layer 1.map001.stm")
+#incbin(m5, "map/backgrounds/map5.map1.layer-Layer 1.map001.stm")
 
 #incspr(selector,"map/sprites/selector.pcx");
 #incpal(selectorpal,"map/sprites/selector.pcx");
 
-#incchr(build_screen, "map/sprites/build_screen.pcx")
-#incpal(build_pal, "map/sprites/build_screen.pcx")
-#incbat(build_bat, "map/sprites/build_screen.pcx",0x1000,32,28)
-//
-// #incchr(explain_menu, "map/sprites/explain_menu.pcx")
-// #incpal(explain_pal, "map/sprites/explain_menu.pcx")
-// #incbat(explain_bat, "map/sprites/explain_menu.pcx",0x1000,32,28)
+// #incbin(script, "script/script.txt")
+// #incchr(build_screen, "map/sprites/build_screen.pcx")
+// #incpal(build_pal, "map/sprites/build_screen.pcx")
+// #incbat(build_bat, "map/sprites/build_screen.pcx",0x1000,32,28)
 
 //font
 #incchr(font, "map/sprites/font.pcx")
@@ -178,29 +166,33 @@ struct Castle{
 char j_1, j_2;
 int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 struct Castle castles[NO_OF_CASTLES];
-struct Commander commanders[TOTAL_COMMANDERS+5];
+struct Commander commanders[TOTAL_COMMANDERS];
 int total_sprites = 0;
-// int counter = 0;
-// char current_menu_size = 0;
+
 char no_of_party_items;
 char num_of_bad_terrains;
 char untraversable_terrain[15];
 
 Item items[NUM_OF_ITEMS];
-char global_units[MAX_GLOBAL_UNITS];
+// char global_units[MAX_GLOBAL_UNITS];
 char troops[12];
 char party[MAX_PARTY_SIZE];
 char party_items[MAX_INVENTORY];
 char party_size;
+// char **party_party;
 char no_of_troops;
 char enemy[5];
+char enemy_cmdrs[3];
+char enemy_cmdrs_size;
+int screen_dimensions = 0;
 
 //spawns
 char num_of_spawns = 0;
+int script_pointer = 0;
 int spawn_positions[6];
-char enemy_spawns[30];
+char enemy_spawns[6];
 char spawn_commanders[6];
-char spawn_group_size[6];
+// char spawn_group_size[6];
 
 //merge_units
 char merge_units[2];
@@ -210,51 +202,12 @@ char merge_pointer;
 	MENU STUFF
 */
 
-#define CASTLE_INFO_MENU 2
-#define PRE_BATTLE_MENU 4
-#define BATTLE_MENU 8
-#define ARTS_MENU 16
-#define FORMATION_MENU 32
-
-#define EXIT_OPTION 1
-#define SELECT_OPTION 2
-
-#define CURSOR_SIZE 1
-#define MAX_SPRITES 63
-
 #define CONSUMABLE 0
 #define EQUIPABLE 1
 #define ANY_ITEM 2
 
-extern unsigned char current_menu = 0;
-extern unsigned char menu_state = 0;
-extern unsigned char menu_select = 0;
-
-// #incspr(castleinfo, "map/sprites/castleinfo.pcx")
-// #incspr(castlemenu, "map/sprites/castlemenu.pcx")
-// #incpal(castlemenupal, "map/sprites/castlemenu.pcx")
-
-// #incspr(taros, "map/sprites/Taros.pcx");
-// #incspr(koden, "map/sprites/Koden.pcx");
-// #incspr(kaytoken, "map/sprites/Kaytoken.pcx");
-// #incspr(sangai, "map/sprites/Sangai.pcx");
-// #incspr(bakuria, "map/sprites/Bakuria.pcx");
-
-// #incspr(dialog,"map/sprites/dialog.pcx");
-// #incpal(walkerpal, "map/sprites/walker.pcx");
-
-char current_menu = 0;
-char current_menu_length = 0;
-char current_menu_width = 0;
-char current_menu_choices = 0;
-
-char kingdom = 0;
-
-int menu_min = 0;
-int menu_max = 0;
 int cursor_vram = 0;
 int current_global_units = 0;
-// int z = 0;
 
 /*
 	BATTLE STUFF
@@ -335,17 +288,32 @@ struct soldier{
 #incspr(hnd1,"map/sprites/houndpiece2.pcx")
 #incspr(arch0,"map/sprites/archpiece0.pcx")
 #incspr(arch2,"map/sprites/archpiece2.pcx")
-// #incspr(actionbtn, "map/sprites/action.pcx")
+#incspr(blob,"map/sprites/blob.pcx")
+#incspr(blob2,"map/sprites/blob2.pcx")
 
-#incpal(sldpal, "map/sprites/sldpiece.pcx",0,2)
-#incpal(sprpal, "map/sprites/sprpiece.pcx",0,2)
+#incpal(sldpal, "map/sprites/sldpiece.pcx",0,3)
+#incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
+#incpal(sprpal, "map/sprites/sprpiece.pcx",0,3)
 // #incpal(actionpal, "map/sprites/action.pcx")
 #incpal(mskpal,"map/sprites/msktpiece.pcx",0,2)
 #incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
-#incpal(hndpal,"map/sprites/houndpiece.pcx",0,2)
+#incpal(blobpal,"map/sprites/blob.pcx",0,2)
+// spawn_enemy(1,SWORD_UNIT,4,4,20,3,2);
+// spawn_enemy(2,SWORD_UNIT,4,4,20,3,2);
+// spawn_group_size[0] = 3;
+// spawn_commanders[0] = 24;
+// spawn_positions[0] = 407;
 
-const int sprite_memory_start = 0x5000;
-const int sprite_size = 0x800;
+const char area_one[] = {
+	7, 6, SWORD_UNIT, 17,
+	1, 3, SWORD_UNIT, 17,
+	3, 0, SPEAR_UNIT, 17,
+	9, 3, ARCHER_UNIT, 17,
+	12, 5, SPEAR_UNIT, 17,
+	11, 11, ARCHER_UNIT, 17,
+	255
+};
+
 const int valid_spawn_points[] = { 421, 466, 355, 359, 329, 425 };
 
 int army_one_x_start = 0;
@@ -353,27 +321,11 @@ int army_one_y_start = 0;
 int army_two_x_start = 0;
 int army_two_y_start = 0;
 int avg = 0;
-// char army_one_current_size = ARMY_ONE_SIZE;
-// char army_two_current_size = ARMY_TWO_SIZE;
-int commander_one_pos = 0; //1,3
-int commander_two_pos = 0; //15,3
-
-char team_one_arts_flag = 0;
-char team_two_arts_flag = 0;
 
 int menu_size = 0;
 unsigned int player_gold = 0;
+Unit unit_list[UNIT_LIST_SIZE+MAX_COMMANDERS_PER_BATTLE];
 
-// Unit spears;
-// Unit flyers;
-// Unit infantry;
-// Unit muskets;
-// Unit mages;
-// Unit hounds;
-Unit unit_list[8];
-
-char d_one[4];
-char d_two[4];
 struct soldier armyOne[15]; //9 is max?
 struct soldier armyTwo[15];
 struct soldier *sp;
@@ -392,32 +344,42 @@ int j2 = 0;
 int xOffset = 0;
 int total_units = 0;
 
-// int team_id = 0;
-// char commander_one_hp = 10;
-// char commander_two_hp = 10;
-// char sprite_offset = 0;
-// char commander_select = 0;
-
-// int TEAM_ONE_ID = 1;
-// int TEAM_TWO_ID = 2;
-// int ATTACK_AREA_ONE = 4;
-// int ATTACK_AREA_TWO = 8;
-
-main()
+void main()
 {
-	party_size = 7;
-	d_one[0] = 3;
-	d_two[0] = 2;
-	d_one[1] = 1;
-	d_two[1] = 4;
-	d_one[2] = 5;
-	d_two[2] = 6;
-	d_one[3] = 7;
-	d_two[3] = 8;
-
 	selector_x = 0;
 	selector_y = 64;
 	cursor_vram = 0x68C0;
+	init_map_data();
+	untraversable_terrain[0] = 89;
+	untraversable_terrain[1] = 90;
+	untraversable_terrain[3] = 91;
+	untraversable_terrain[4] = 92;
+	untraversable_terrain[5] = 93;
+	untraversable_terrain[6] = 98;
+	num_of_bad_terrains = 7;
+
+	// battle_map_metadata[0].player_start_pos[0] = 71;
+	// battle_map_metadata[0].player_start_pos[1] = 51;
+	// battle_map_metadata[0].player_start_pos[2] = 60;
+	//
+	// battle_map_metadata[0].cpu_start_pos[0] = 199;
+	// battle_map_metadata[0].cpu_start_pos[1] = 210;
+	// battle_map_metadata[0].cpu_start_pos[2] = 218;
+	// battle_map_metadata[0].map_type = WILD;
+	// battle_map_metadata[0].map_no = 0;
+
+	castles[1].commanders[0] = 8;
+	castles[1].commanders[1] = 3;
+	castles[1].commanders[2] = 4;
+	castles[1].no_of_commanders = 3;
+	castles[1].map_no = 5;
+
+	castles[2].commanders[0] = 5;
+	castles[2].commanders[1] = 6;
+	castles[2].commanders[2] = 7;
+	castles[2].no_of_commanders = 3;
+	castles[2].map_no = 2;
+	castles[0].no_of_commanders = 0;
 
 	unit_list[SPEAR_UNIT].hp  = 100;
 	unit_list[SPEAR_UNIT].atk = 16;
@@ -426,9 +388,11 @@ main()
 	unit_list[SPEAR_UNIT].mov = 3;
 	unit_list[SPEAR_UNIT].ign = 0;
 	unit_list[SPEAR_UNIT].spd = 10;
-	unit_list[SPEAR_UNIT].p_group = 0;
-	unit_list[SPEAR_UNIT].address = 0x3A00;
+	unit_list[SPEAR_UNIT].p_group = 18;
+	unit_list[SPEAR_UNIT].address = 0x3900;
 	unit_list[SPEAR_UNIT].unit_type = SPEARS;
+	unit_list[SPEAR_UNIT].id = SPEAR_UNIT;
+
 
 	unit_list[DEMON_UNIT].hp  = 70;
 	unit_list[DEMON_UNIT].atk = 16;
@@ -437,9 +401,11 @@ main()
 	unit_list[DEMON_UNIT].mov = 4;
 	unit_list[DEMON_UNIT].ign = 1;
 	unit_list[DEMON_UNIT].spd = 15;
-	unit_list[DEMON_UNIT].p_group = 4;
-	unit_list[DEMON_UNIT].address = 0x3E00;
+	unit_list[DEMON_UNIT].p_group = 20;
+	unit_list[DEMON_UNIT].address = 0x3B00;
 	unit_list[DEMON_UNIT].unit_type = FLYERS;
+	unit_list[DEMON_UNIT].id = DEMON_UNIT;
+
 
 	unit_list[SWORD_UNIT].hp  = 90;
 	unit_list[SWORD_UNIT].atk = 14;
@@ -448,9 +414,11 @@ main()
 	unit_list[SWORD_UNIT].rng = 1;
 	unit_list[SWORD_UNIT].ign = 0;
 	unit_list[SWORD_UNIT].spd = 12;
-	unit_list[SWORD_UNIT].p_group = 0;
+	unit_list[SWORD_UNIT].p_group = 18;
 	unit_list[SWORD_UNIT].address = 0x3800;
 	unit_list[SWORD_UNIT].unit_type = INFANTRY;
+	unit_list[SWORD_UNIT].id = SWORD_UNIT;
+
 
 	unit_list[ARCHER_UNIT].hp  = 70;
 	unit_list[ARCHER_UNIT].atk = 17;
@@ -459,9 +427,10 @@ main()
 	unit_list[ARCHER_UNIT].mov = 3;
 	unit_list[ARCHER_UNIT].ign = 0;
 	unit_list[ARCHER_UNIT].spd = 8;
-	unit_list[ARCHER_UNIT].p_group = 0;
-	unit_list[ARCHER_UNIT].address = 0x3C00;
+	unit_list[ARCHER_UNIT].p_group = 18;
+	unit_list[ARCHER_UNIT].address = 0x3A00;
 	unit_list[ARCHER_UNIT].unit_type = MUSKETS;
+	unit_list[ARCHER_UNIT].id = ARCHER_UNIT;
 
 	unit_list[MAGE_UNIT].atk = 20;
 	unit_list[MAGE_UNIT].def = 10;
@@ -469,8 +438,9 @@ main()
 	unit_list[MAGE_UNIT].ign = 0;
 	unit_list[MAGE_UNIT].spd = 5;
 	unit_list[MAGE_UNIT].mov = 3;
-	unit_list[MAGE_UNIT].p_group = 0;
+	unit_list[MAGE_UNIT].p_group = 18;
 	unit_list[MAGE_UNIT].unit_type = MAGES;
+	unit_list[MAGE_UNIT].id = MAGE_UNIT;
 
 	unit_list[HOUND_UNIT].atk = 15;
 	unit_list[HOUND_UNIT].def = 27;
@@ -478,37 +448,243 @@ main()
 	unit_list[HOUND_UNIT].ign = 0;
 	unit_list[HOUND_UNIT].mov = 4;
 	unit_list[HOUND_UNIT].spd = 11;
-	unit_list[HOUND_UNIT].p_group = 4;
-	unit_list[HOUND_UNIT].address = 0x4000;
+	unit_list[HOUND_UNIT].p_group = 20;
+	unit_list[HOUND_UNIT].address = 0x3C00;
 	unit_list[HOUND_UNIT].unit_type = HOUNDS;
+	unit_list[HOUND_UNIT].id = HOUND_UNIT;
+
+	unit_list[BLOB_UNIT].atk = 16;
+	unit_list[BLOB_UNIT].def = 14;
+	unit_list[BLOB_UNIT].hp  = 65;
+	unit_list[BLOB_UNIT].ign = 0;
+	unit_list[BLOB_UNIT].mov = 3;
+	unit_list[BLOB_UNIT].spd = 16;
+	unit_list[BLOB_UNIT].p_group = 22;
+	unit_list[BLOB_UNIT].address = 0x3D00;
+	unit_list[BLOB_UNIT].unit_type = BLOBS;
+	unit_list[BLOB_UNIT].id = BLOB_UNIT;
 	// make_menus();
 	initialize_commanders();
 
-	commanders[0].name = "Rei";
+	commanders[0].name = "Rei    ";
 	commanders[0].no_of_items = 1;
 	commanders[0].equipable = 1;
-	commanders[1].name = "Violet";
+	commanders[1].name = "Violet ";
 	// commanders[1].no_of_items = 0;
-	commanders[2].name = "Scen";
+	commanders[2].name = "King   ";
 	commanders[3].name = "Alucard";
-	commanders[4].name = "Stimpy";
-	commanders[5].name = "Sacha";
-	commanders[6].name = "Almer"; //Olimar :)
-	commanders[7].name = "Ven";
-	commanders[8].name = "Phalc";
-	commanders[9].name = "Keely";
+	commanders[4].name = "Stimpy ";
+	commanders[5].name = "Sacha  ";
+	commanders[6].name = "Almer  "; //Olimar :)
+	commanders[7].name = "Ven    ";
+	commanders[8].name = "Phalc  ";
+	commanders[9].name = "Keely  ";
+	commanders[23].name = "A.Hound";
+	commanders[24].name = "Bandit ";
 
-	add_unit_to_pool(1,15,1,SPEAR_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,SWORD_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,ARCHER_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,SWORD_UNIT,0,0,0,0);
+	commanders[1].units[0] = SWORD_UNIT;
+	commanders[1].units[1] = SWORD_UNIT;
+	commanders[1].no_of_units = 2;
 
-	add_unit_to_pool(1,15,1,SPEAR_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,SWORD_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,SWORD_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,SWORD_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,SPEAR_UNIT,0,0,0,0);
-	add_unit_to_pool(1,15,1,DEMON_UNIT,0,0,0,0);
+	commanders[0].unit.hp = 90*10;
+	commanders[0].unit.atk = 7;
+	commanders[0].unit.def = 10;
+	commanders[0].unit.spd = 15;
+	commanders[0].unit.mov = 3;
+	commanders[0].unit.rng = 3;
+	commanders[0].unit.ign = 0;
+	commanders[0].unit.p_group = 16;
+	commanders[0].unit.address = 0x3E00;//0x6A00;
+	commanders[0].unit.unit_type = COMMANDER;
+	commanders[0].unit.id = REI;
+
+	commanders[1].unit.hp = 90*10;
+	commanders[1].unit.atk = 11;
+	commanders[1].unit.def = 11;
+	commanders[1].unit.spd = 13;
+	commanders[1].unit.mov = 3;
+	commanders[1].unit.rng = 3;
+	commanders[1].unit.ign = 0;
+	commanders[1].unit.p_group = 16;
+	commanders[1].unit.address = 0x3E00;//0x6A00;
+	commanders[1].unit.unit_type = COMMANDER;
+	commanders[1].unit.id = 1;
+
+	commanders[0].units[0] = SWORD_UNIT;
+	commanders[0].units[1] = SWORD_UNIT;
+	commanders[0].units[2] = ARCHER_UNIT;
+	commanders[0].units[3] = ARCHER_UNIT;
+	commanders[0].units[4] = SPEAR_UNIT;
+	commanders[0].units[5] = DEMON_UNIT;
+	commanders[0].no_of_units = 4;
+
+	commanders[1].units[0] = SWORD_UNIT;
+	commanders[1].units[1] = SWORD_UNIT;
+	commanders[1].no_of_units = 2;
+
+	commanders[2].unit.hp = 50*10;
+	commanders[2].unit.atk = 8;
+	commanders[2].unit.def = 8;
+	commanders[2].unit.spd = 13;
+	commanders[2].unit.mov = 3;
+	commanders[2].unit.rng = 3;
+	commanders[2].unit.ign = 0;
+	commanders[2].unit.p_group = 16;
+	commanders[2].unit.address = 0x3E00;//0x6A00;
+	commanders[2].unit.unit_type = COMMANDER;
+	commanders[2].unit.id = 2;
+
+	commanders[2].units[0] = ARCHER_UNIT;
+	commanders[2].units[1] = ARCHER_UNIT;
+	commanders[2].units[2] = ARCHER_UNIT;
+	commanders[2].no_of_units = 3;
+
+	commanders[3].unit.hp = 60*10;
+	commanders[3].unit.atk = 9;
+	commanders[3].unit.def = 7;
+	commanders[3].unit.spd = 12;
+	commanders[3].unit.mov = 3;
+	commanders[3].unit.rng = 3;
+	commanders[3].unit.ign = 0;
+	commanders[3].unit.p_group = 0;
+	commanders[3].unit.address = 0x3E00;//0x6A00;
+	commanders[3].unit.unit_type = COMMANDER;
+	commanders[3].unit.id = 3;
+
+	commanders[3].units[0] = SPEAR_UNIT;
+	commanders[3].units[1] = SPEAR_UNIT;
+	commanders[3].no_of_units = 2;
+
+	commanders[4].unit.hp = 60*10;
+	commanders[4].unit.atk = 19;
+	commanders[4].unit.def = 20;
+	commanders[4].unit.spd = 15;
+	commanders[4].unit.mov = 3;
+	commanders[4].unit.rng = 3;
+	commanders[4].unit.ign = 0;
+	commanders[4].unit.p_group = 0;
+	commanders[4].unit.address = 0x3E00;//0x6A00;
+	commanders[4].unit.unit_type = COMMANDER;
+	commanders[4].unit.id = 4;
+
+	commanders[4].units[0] = SPEAR_UNIT;
+	commanders[4].units[1] = SPEAR_UNIT;
+	commanders[4].units[2] = ARCHER_UNIT;
+	commanders[4].units[3] = ARCHER_UNIT;
+	commanders[4].no_of_units = 4;
+
+	commanders[5].unit.hp = 850;
+	commanders[5].unit.atk = 16;
+	commanders[5].unit.def = 21;
+	commanders[5].unit.spd = 25;
+	commanders[5].unit.mov = 3;
+	commanders[5].unit.rng = 3;
+	commanders[5].unit.ign = 0;
+	commanders[5].unit.p_group = 0;
+	commanders[5].unit.address = 0x3E00;//0x6A00;
+	commanders[5].unit.unit_type = COMMANDER;
+	commanders[5].unit.id = 5;
+
+	commanders[5].units[0] = SWORD_UNIT;
+	commanders[5].units[1] = SWORD_UNIT;
+	commanders[5].units[2] = ARCHER_UNIT;
+	commanders[5].units[3] = ARCHER_UNIT;
+	commanders[5].no_of_units = 4;
+
+	commanders[6].unit.hp = 950;
+	commanders[6].unit.atk = 12;
+	commanders[6].unit.def = 12;
+	commanders[6].unit.spd = 15;
+	commanders[6].unit.mov = 3;
+	commanders[6].unit.rng = 3;
+	commanders[6].unit.ign = 0;
+	commanders[6].unit.p_group = 0;
+	commanders[6].unit.address = 0x3E00;//0x6A00;
+	commanders[6].unit.unit_type = COMMANDER;
+	commanders[6].unit.id = 6;
+
+	commanders[6].units[0] = SPEAR_UNIT;
+	commanders[6].units[1] = SPEAR_UNIT;
+	commanders[6].units[2] = SPEAR_UNIT;
+	commanders[6].units[3] = SPEAR_UNIT;
+	commanders[6].no_of_units = 4;
+
+	commanders[7].unit.hp = 750;
+	commanders[7].unit.atk = 14;
+	commanders[7].unit.def = 11;
+	commanders[7].unit.spd = 15;
+	commanders[7].unit.mov = 3;
+	commanders[7].unit.rng = 3;
+	commanders[7].unit.ign = 0;
+	commanders[7].unit.p_group = 0;
+	commanders[7].unit.address = 0x3E00;//0x6A00;
+	commanders[7].unit.unit_type = COMMANDER;
+	commanders[7].unit.id = 7;
+
+	commanders[7].units[0] = ARCHER_UNIT;
+	commanders[7].units[1] = ARCHER_UNIT;
+	commanders[7].units[2] = ARCHER_UNIT;
+	commanders[7].units[3] = ARCHER_UNIT;
+	commanders[7].no_of_units = 4;
+
+	commanders[8].unit.hp = 750;
+	commanders[8].unit.atk = 14;
+	commanders[8].unit.def = 11;
+	commanders[8].unit.spd = 15;
+	commanders[8].unit.mov = 3;
+	commanders[8].unit.rng = 3;
+	commanders[8].unit.ign = 0;
+	commanders[8].unit.p_group = 0;
+	commanders[8].unit.address = 0x3E00;//0x6A00;
+	commanders[8].unit.unit_type = COMMANDER;
+	commanders[8].unit.id = 8;
+
+	commanders[8].units[0] = SPEAR_UNIT;
+	commanders[8].units[1] = SPEAR_UNIT;
+	commanders[8].units[2] = SPEAR_UNIT;
+	commanders[8].units[3] = SPEAR_UNIT;
+	commanders[8].no_of_units = 3;
+
+	commanders[24].ap = 5;
+	commanders[24].unit.id = 24;
+	commanders[24].unit.hp = 90*10;
+	commanders[24].unit.atk = 8;
+	commanders[24].unit.def = 11;
+	commanders[24].unit.spd = 13;
+	commanders[24].unit.mov = 3;
+	commanders[24].unit.rng = 1;
+	commanders[24].unit.ign = 0;
+	commanders[24].unit.p_group = 0;
+	commanders[24].unit.address = 0x4200;//0x6A00;
+	commanders[24].unit.unit_type = COMMANDER;
+	commanders[24].units[0] = SWORD_UNIT;
+	commanders[24].units[1] = SWORD_UNIT;
+	commanders[24].units[2] = SWORD_UNIT;
+	commanders[24].units[3] = SWORD_UNIT;
+	commanders[24].units[4] = SWORD_UNIT;
+	commanders[24].units[5] = SWORD_UNIT;
+	commanders[24].no_of_units = 0;
+
+	commanders[23].ap = 5;
+	commanders[23].unit.id = 23;
+	commanders[23].unit.hp = 80*10;
+	commanders[23].unit.atk = 9;
+	commanders[23].unit.def = 12;
+	commanders[23].unit.spd = 13;
+	commanders[23].unit.mov = 3;
+	commanders[23].unit.rng = 1;
+	commanders[23].unit.ign = 0;
+	commanders[23].unit.p_group = 0;
+	commanders[23].unit.address = 0x4200;//0x6A00;
+	commanders[23].unit.unit_type = COMMANDER;
+	commanders[23].units[0] = HOUND_UNIT;
+	commanders[23].units[1] = HOUND_UNIT;
+	commanders[23].units[2] = HOUND_UNIT;
+	commanders[23].units[3] = HOUND_UNIT;
+	commanders[23].units[4] = HOUND_UNIT;
+	commanders[23].units[5] = HOUND_UNIT;
+	commanders[23].no_of_units = 0;
+	// add_unit_to_pool(1,15,1,SPEAR_UNIT,0,0,0,0);
 
 	troops[0] = SPEAR_UNIT;
 	troops[1] = SWORD_UNIT;
@@ -558,12 +734,7 @@ main()
 	castles[8].buyable_items[2] = 4;
 
 	castles[8].no_of_units = 2;
-	// castles[8].buyable_units[0].stars = 2;
-	// castles[8].buyable_units[0].level = 1;
 	castles[8].buyable_units[0] = SPEAR_UNIT;
-
-	// castles[8].buyable_units[1].stars = 4;
-	// castles[8].buyable_units[1].level = 1;
 	castles[8].buyable_units[1] = SWORD_UNIT;
 
 	items[3].cost = 125;
@@ -571,13 +742,16 @@ main()
 	items[4].cost = 500;
 
 	player_gold = 10000;
+
 	party[0] = 0;
 	party[1] = 1;
-	party[2] = 3;
-	party[3] = 5;
-	party[4] = 2;
-	party[5] = 4;
-	party[6] = 6;
+	party[2] = 2;
+	party_size = 3;
+
+	enemy_cmdrs[0] = 23;//TOTAL_COMMANDERS+4;
+	enemy_cmdrs[1] = 24;//TOTAL_COMMANDERS+3;
+	enemy_cmdrs_size = 2;
+
 	party_items[0] = 2; //thing3 -> equip
 	party_items[1] = 4; //elixir -> consume
 	party_items[2] = 5; //thing6 -> consume
@@ -594,12 +768,10 @@ main()
 	disp_off();
 	cls();
 	init_satb();
-
 	load_palette(19, cursorpal, 1);
 	// load_palette(17, walkerpal,1);
 	load_vram(0x68C0,cursor,0x40);
 	satb_update();
-
 	// display_intro();
 	for(;;)
 	{
@@ -612,7 +784,7 @@ main()
 
 void display_intro()
 {
-	load_background(build_screen,build_pal,build_bat,32,28);
+	// load_background(build_screen,build_pal,build_bat,32,28);
 	disp_on();
 	sync(60*10);
 
@@ -639,6 +811,17 @@ void display_sprite(int x_pos, int y_pos, int location, char flip, char pal)
 	spr_pri(1);
 }
 
+int range(char min, char max)
+{
+	return (rand()%(max-min+1)) + min;
+}
+
+char random_enemy_id(char na)//will eventually be hound types, blobs and bandits
+{
+	// return HOUND_UNIT;
+	return 23;//hound cmdr
+}
+
 void print_unit_type(enum Unit_Type type, int x, int y)
 {
 	switch(type)
@@ -654,7 +837,7 @@ void print_unit_type(enum Unit_Type type, int x, int y)
 		break;
 
 		case SPEARS:
-		put_string("SPR ",x,y);
+		put_string("SPR",x,y);
 		// put_number(2,2,x,y);
 		break;
 
@@ -671,6 +854,14 @@ void print_unit_type(enum Unit_Type type, int x, int y)
 		case HOUNDS:
 		put_string("HND",x,y);
 		// put_number(6,2,x,y);
+		break;
+
+		case COMMANDER:
+		put_string("CMD",x,y);
+		break;
+
+		case BLOBS:
+		put_string("BLB",x,y);
 		break;
 
 		default:
@@ -717,10 +908,10 @@ void tick(){
 	}
 }
 
-void write_text(char x, char y, char *text)
+int write_text(char x, char y, char *text)
 {
-	char i, text_y, text_x, sprite_no;
-	sprite_no = 2;
+	int i;
+	char text_y, text_x;
 	text_x = x;
 	text_y = y;
 	i=0;
@@ -739,63 +930,28 @@ void write_text(char x, char y, char *text)
 		}
 		// put_number(text[i],3,0,5+(g++));
 		put_char(text[i],text_x,text_y);
+		// put_number(text[i],3,text_x,text_y);
 		i++;
 		text_x++;
+		// text_x += 3;
 		vsync(2);
 	}
-}
-
-void add_unit_to_pool(char stars, char size, char level, char unit_number, char atk, char def, int hp, char spd)
-{
-	// memcpy(&global_units[i],&global_units[i+1],sizeof(GEntity));
-  // global_units[current_global_units].army_size = size;
-	// global_units[current_global_units].atk = unit->atk+atk;
-	// global_units[current_global_units].def = unit->def+def;
-	// global_units[current_global_units].hp = unit->hp+hp;
-	// global_units[current_global_units].spd = unit->spd+spd;
-	// set_unit_stats(&global_units[current_global_units]);
-
-	// memcpy(&global_units[current_global_units],unit,sizeof(Unit));
-
-	global_units[current_global_units] = unit_number;
-  current_global_units += 1;
+	return i;
 }
 
 initialize_commanders()
 {
 	char i;
 	struct Commander *cmdr;
-	// infantry.hp  = 90;
-	// infantry.atk = 14;
-	// infantry.def = 14;
-	// infantry.mov = 3;
-	// infantry.rng = 1;
-	// infantry.ign = 0;
-	// infantry.spd = 12;
-	// infantry.p_group = 0;
-	// infantry.address = 0x3800;
-	// infantry.unit_type = INFANTRY;
 	for(i=0, cmdr = commanders; i<TOTAL_COMMANDERS; i++, cmdr++)
 	{
-		// cmdr->hp = 5+i;
 		cmdr->ap = 5;
-		// cmdr->unit.hp = 90 * 15;
-		// cmdr->unit.atk = 14;
-		// cmdr->unit.def = 14;
-		// cmdr->unit.mov = 3;
-		// cmdr->unit.ign = 0;
-		// cmdr->unit.spd = 12;
-		// cmdr->unit.p_group = 0;
-		// cmdr->unit.address = 0x00;
-		// cmdr->exp = 0;
-
 		cmdr->lvl = 1;
 		cmdr->id = i;
 		cmdr->no_of_items = 0;
+		cmdr->unit.address = 0x3E00;
+		cmdr->unit.p_group = 16;
 	}
-	commanders[TOTAL_COMMANDERS+4].ap = 5;
-	commanders[TOTAL_COMMANDERS+4].id = 25;
-	commanders[TOTAL_COMMANDERS+4].name = "Bandit";
 }
 
 void darken_palette(int pal_num)
@@ -899,48 +1055,50 @@ void load_item(char item_id, int index)
 
 void display_spawn(int index, int spawn_x, int spawn_y, int sprite_offset, int spawn_offset)
 {
-	switch((unit_list[index]).unit_type)
+	int sprite_location, sprite_no;
+	sprite_location = 0;//UNIT_VRAM_START;
+	sprite_no = 18;
+	switch(index)
 	{
-		case INFANTRY:
-		load_vram(0x3800+(spawn_offset*0x200),sld0,0x100);
-		load_vram(0x3900+(spawn_offset*0x200),sld2,0x100);
-		load_palette(18+spawn_offset,sldpal,1);
+		case SWORD_UNIT:
+		sprite_location = 0;//UNIT_VRAM_START;
+		sprite_no = 18;
 		break;
-		case SPEARS:
-		load_vram(0x3800+(spawn_offset*0x200),spr0,0x100);
-		load_vram(0x3900+(spawn_offset*0x200),spr2,0x100);
-		load_palette(18+spawn_offset,sprpal,1);
+		case SPEAR_UNIT:
+		sprite_location = 0;//UNIT_VRAM_START + 0x100;
+		sprite_no = 18;
 		break;
-		case FLYERS:
-		load_vram(0x3800+(spawn_offset*0x200),dmn0,0x100);
-		load_vram(0x3900+(spawn_offset*0x200),dmn2,0x100);
-		load_palette(18+spawn_offset,dmnpal,1);
+		case DEMON_UNIT:
+		sprite_location = 0;//UNIT_VRAM_START + 0x300;
+		sprite_no = 22;
 		break;
-		case MUSKETS:
-		load_vram(0x3800+(spawn_offset*0x200),arch0,0x100);
-		load_vram(0x3900+(spawn_offset*0x200),arch2,0x100);
-		load_palette(18+spawn_offset,mskpal,1);
+		case ARCHER_UNIT:
+		sprite_location = 0;//UNIT_VRAM_START + 0x200;
+		sprite_no = 18;
 		break;
-		case HOUNDS:
-		load_vram(0x3800+(spawn_offset*0x200),hnd,0x100);
-		load_vram(0x3900+(spawn_offset*0x200),hnd1,0x100);
-		load_palette(18+spawn_offset,hndpal,1);
+		case HOUND_UNIT:
+		sprite_location = 0;//UNIT_VRAM_START + 0x400;
+		sprite_no = 22;
 		break;
 	}
-	spr_make(10+spawn_offset,spawn_x,spawn_y,0x3800+(spawn_offset*0x200),FLIP_MAS|SIZE_MAS,SZ_16x32,18+spawn_offset,1);
+	// spr_make(10+spawn_offset,spawn_x,spawn_y,0x3800+(spawn_offset*0x200),FLIP_MAS|SIZE_MAS,SZ_16x32,18+spawn_offset,1);
+	spr_make(10+spawn_offset,spawn_x,spawn_y,sprite_location,FLIP_MAS|SIZE_MAS,SZ_16x32,sprite_no,1);
 }
 
 void display_item(char cmdr_id, int index, int x, int y)
 {
 	int bat[16];
 	int offset, i;
-	offset = s_x/8 + ((s_y/8)*32) + (x*32) + y;
+	// offset = (((s_x/8)+x)*16) + (((s_y/8)+y)*16);
+	offset = ((s_x+x) + ((s_y/8)*screen_dimensions)) + (y*screen_dimensions);
+	// put_number(vram_addr(0,36),4,0,36);
 
 	for(i=0; i<16; i++)
 	{
 		bat[i] = (((PORTRAIT_VRAM + (index*0x100))>>4)+(0xC000+(0x1000 * index))) + i;
 	}
 	load_bat(offset,bat,4,4);
+	// load_bat(2304,bat,4,4);
 }
 
 void load_portrait(char cmdr_id)
@@ -955,6 +1113,11 @@ void load_portrait(char cmdr_id)
 		case 1:
 		load_vram(PORTRAIT_VRAM,violet_gfx,0x100);
 		load_palette(12,violet_pal,1);
+		break;
+
+		case 2:
+		load_vram(PORTRAIT_VRAM,king_gfx,0x100);
+		load_palette(12,king_pal,1);
 		break;
 
 		default:
@@ -998,10 +1161,21 @@ void display_cmdr_info(char cmdr_id, int x, int y)
 	}
 }
 
+void do_story(int x, int y, char *str)
+{
+	if(str[0] == 0)
+	{
+		display_info_panel(x,y,32,6);
+		load_portrait(str[1]);
+		display_item(str[1],0,x+1,y+1);
+		return write_text((s_x/8)+6,(s_y/8)+1,str+2) + 3;
+	}
+}
+
 void display_dialog(int x, int y, char *str)
 {
 	display_info_panel(x,y,32,8);
-	// put_string("dialog, in this economy?",1,1);
+	// put_number(str[1],4,10,45);
 	write_text((s_x/8)+1,(s_y/8)+1,str);
 }
 
@@ -1051,7 +1225,7 @@ void load_information_panel(char box)
 	}
 }
 
-void change_background_palette(int tile, int pal)
+void change_background_palette(int tile, int pal, int map_offset)
 {
 	int vaddr, x, y;
 	int ptr[2];
@@ -1060,10 +1234,8 @@ void change_background_palette(int tile, int pal)
 	if(y < 6){ return; }
 	vaddr = vram_addr(x,y);
 
-	// ptr[0] = (pal + 0x180) + (((tile)/16) * 0x40) + ((tile%16) * 2);
-	// ptr[1] = (pal + 0x180) + (((tile)/16) * 0x40) + ((tile%16) * 2) + 1;
-	ptr[0] = (pal + 0x100) + ((battlefieldbat[tile-32] * 4));
-	ptr[1] = (pal + 0x100) + ((battlefieldbat[tile-32] * 4) + 1);
+	ptr[0] = (pal + 0x100) + ((battlefieldbat[map_offset+tile-32] * 4));
+	ptr[1] = (pal + 0x100) + ((battlefieldbat[map_offset+tile-32] * 4) + 1);
 	load_vram(vaddr,ptr,2);
 
 	ptr[0] += 2;
@@ -1133,48 +1305,6 @@ int max(int a, int b)
 	(a>b)? a : b;
 }
 
-void set_sprite_to_location(char id, int location, char pal_num, char offset)
-{
-	switch((unit_list[id]).unit_type)
-	{
-		case INFANTRY:
-		load_vram(location,sld,0x200);
-		load_vram(location-0x200,sld1,0x200);
-		// load_palette(pal_num,sldpal+offset,1);
-		break;
-
-		case SPEARS:
-		load_vram(location,spr,0x200);
-		load_vram(location-0x200,spr1,0x200);
-		// load_palette(pal_num,sprpal+offset,1);
-		break;
-
-		case MUSKETS:
-		load_vram(location,msk,0x200);
-		load_vram(location-0x200,msk1,0x200);
-		// load_palette(pal_num,mskpal+offset,1);
-		break;
-
-		case FLYERS:
-		load_vram(location,dmn,0x200);
-		load_vram(location-0x200,dmn1,0x200);
-		// load_palette(pal_num,dmnpal+offset,1);
-		break;
-
-		case HOUNDS:
-		load_vram(location,hnd,0x200);
-		load_vram(location-0x200,hnd1,0x200);
-		// load_palette(pal_num,hndpal+offset,1);
-		break;
-
-		default:
-		load_vram(location,sld,0x200);
-		load_vram(location-0x200,sld1,0x200);
-		// load_palette(pal_num,sldpal+offset,1);
-		break;
-	}
-}
-
 int get_unit_cost(char id)
 {
 	switch(unit_list[id].unit_type)
@@ -1223,15 +1353,11 @@ void consume_item(int cmdr_index, int item_index, char item_type)
 
 void remove_spawn_by_index(int index)
 {
-	int i, j;
+	int i;
 	for(i=index; i<num_of_spawns; i++)
 	{
-		for(j=0; j<5; j++)
-		{
-			enemy_spawns[i*5+j] = enemy_spawns[(i+1)*5+j];
-		}
+		enemy_spawns[i] = enemy_spawns[i+1];
 		spawn_positions[i] = spawn_positions[i+1];
-		spawn_group_size[i] = spawn_group_size[i+1];
 	}
 	num_of_spawns--;
 }
@@ -1259,7 +1385,7 @@ void remove_unit_from_game(int unit_index)
 	for(i=unit_index; i<current_global_units-1; i++)
 	{
 		// memcpy(&global_units[i],&global_units[i+1],sizeof(Unit));
-		global_units[i] = global_units[i+1];
+		// global_units[i] = global_units[i+1];
 	}
 	current_global_units--;
 }
@@ -1286,18 +1412,6 @@ void remove_item_from_inventory(char item_index)//, char item_type)
 {
 	char i = 0;//, j = 0, real_index = 0;
 
-	// for(i=0; i<no_of_party_items; i++)
-	// {
-	// 	if(items[party_items[i]].type == item_type)
-	// 	{
-	// 		if(j++ == item_index)
-	// 		{
-	// 			real_index = i;
-	// 		}
-	// 	}
-	// }
-	// real_index = get_item_real_index(item_index,item_type);
-
 	for(i=item_index; i<no_of_party_items; i++)
 	{
 		party_items[i] = party_items[i+1];
@@ -1321,38 +1435,59 @@ char get_item_real_index(char item_index, char item_type)
 	return real_index;
 }
 
-// void combine_units(GEntity *unit_one, GEntity *unit_two)
-// {
-	// char atk, def, spd, hp;
-	// atk = (unit_one->stat.atk + unit_two->stat.atk)/2;
-	// def = (unit_one->stat.def + unit_two->stat.def)/2;
-	// spd = (unit_one->stat.spd + unit_two->stat.spd)/2;
-	// hp  = (unit_one->stat.hp + unit_two->stat.hp)/2;
-	// add_gentity(0,15,0,unit_one->unit,atk,def,hp,spd);
-// }
-
 void load_palette_groups()
 {
-	load_palette(17,sprpal,4);
-	load_palette(21,dmnpal,4);
-	load_palette(25,hndpal,4);
+	// load_palette(18,sprpal,2);
+	// load_palette(20,dmnpal,2);
+	// load_palette(22,blobpal,2);
+	// load_palette(24,rei_walk_pal,1);
+	// load_palette(25,cat_walk_pal,1);
+}
+
+void load_commanders_gfx(int cmdr_id, int address, int pal)
+{
+	// put_number(cmdr_id,3,10,5);
+	switch(cmdr_id)
+	{
+		case REI:
+		load_vram(address,rei_walk,0x100);
+		load_palette(pal,rei_walk_pal,1);
+		break;
+
+		case VIOLET:
+		load_vram(address,violet_walk,0x100);
+		load_palette(pal,violet_walk_pal,1);
+		break;
+
+		case KING:
+		load_vram(address,cat_walk,0x100);
+		load_palette(pal,cat_walk_pal,1);
+		break;
+
+		default:
+		load_vram(address,sld,0x100);
+		load_palette(pal,sprpal,1);
+		// load_vram(address,sld0,0x40);
+		// load_vram(address+0x80,sld0+0x40,0x40);
+		// load_vram(address+0x40,sld2,0x40);
+		// load_vram(address+0xC0,sld2+0x40,0x40);
+		// load_palette(pal,cmdrpal,1);
+		break;
+	}
 }
 
 void load_units(int l)
 {
-	int location;
-	location = l;
-	load_vram((location),sld0,0x100);
-	load_vram((location+=0x100),sld2,0x100);
-	load_vram((location+=0x100),spr0,0x100);
-	load_vram((location+=0x100),spr2,0x100);
-	load_vram((location+=0x100),arch0,0x100);
-	load_vram((location+=0x100),arch2,0x100);
-	load_vram((location+=0x100),dmn0,0x100);
-	load_vram((location+=0x100),dmn2,0x100);
-	load_vram((location+=0x100),hnd,0x100);
-	load_vram((location+=0x100),hnd1,0x100);
 }
+
+// void load_npc_units(int l)
+// {
+// 	int location;
+// 	location = l;
+// 	load_vram(0x3800,man_walk,0x200);
+// 	location+=0x200;
+// 	load_vram(0x3A00,woman_walk,0x200);
+// }
 
 int next_level(int level)
 {
@@ -1411,6 +1546,13 @@ unsigned char get_random_stat_percent()
 	{
 		return 255;
 	}
+}
+
+void move_sprite(int sprite_no, int x, int y)
+{
+  spr_set(sprite_no);
+  spr_y(x);
+  spr_x(y);
 }
 
 #include "overworld.c"

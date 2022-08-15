@@ -1,6 +1,6 @@
 #include "battlefield.h"
 struct Node neighbors[8];
-struct Node map[100];
+struct Node map[70];
 // struct Node path[20];
 
 int get_neighbors(unsigned char x, unsigned char y, char size)

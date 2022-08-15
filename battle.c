@@ -8,8 +8,8 @@
 #include "battle.h"
 // #include "battle_menu.c"
 // char grid[NUMBER_OF_TILES];
-char army_one_size;
-char army_two_size;
+int army_one_size;
+int army_two_size;
 char can_attack;
 // char cmdr_one_attack = 0;
 // char cmdr_two_attack = 0;
@@ -231,12 +231,12 @@ void intro()
 		if(i++ % 24 == 0)
 		{
 			calc_stats(&p_c_army, &c_c_army);
-			// put_number(p_c_army.atk_total,3,0,0);
-			// put_number(c_c_army.atk_total,3,24,0);
-			// put_number(p_c_army.def_total,3,0,1);
-			// put_number(c_c_army.def_total,3,24,1);
-			// put_number(p_c_army.hp_total,6,0,2);
-			// put_number(c_c_army.hp_total,6,24,2);
+			put_number(p_c_army.atk_total,3,0,0);
+			put_number(c_c_army.atk_total,3,24,0);
+			put_number(p_c_army.def_total,3,0,1);
+			put_number(c_c_army.def_total,3,24,1);
+			put_number(p_c_army.hp_current,6,0,2);
+			put_number(c_c_army.hp_current,6,24,2);
 			update_army_size(&p_c_army,armyOne,PLAYER_SPRITE_VRAM+0x800);
 			update_army_size(&c_c_army,armyTwo,CPU_SPRITE_VRAM+0x800);
 			p_c_army.to_kill = 0;
@@ -425,7 +425,7 @@ void reset_camera()
 	BATTLE ROUTINE
 */
 
-char battle_loop(char i1, char i2, char target_attack)
+char battle_loop(int i1, int i2, char target_attack)
 {
 	// entity_id_one = i1;s
 	// entity_id_two = i2;
@@ -443,6 +443,7 @@ char battle_loop(char i1, char i2, char target_attack)
 	total_sprites = 0;
 	can_attack = target_attack;
 	xOffset = -96;
+
 	// xOffset = 0;
 	// disp_off();
 	scroll(0, 0, 0, 0, 223, 0xC0);
@@ -518,6 +519,7 @@ void load_unit_type_to_vram(int vram_location, enum Unit_Type type, char pal,cha
 {
 	switch(type)
 	{
+		case BLOBS:
 		case INFANTRY:
 		load_vram(vram_location, attack, 0xC00);
 		load_palette(pal, soldierpal+offset, 1);
@@ -557,7 +559,7 @@ void calc_army_stats(char id, Army *army, char x, char y)
 
 	army->atk_total   = unit_list[entities[id].id].atk;
 	army->def_total   = unit_list[entities[id].id].def;
-	army->hp_total    = unit_list[entities[id].id].hp  * army_size;
+	army->hp_total    = entities[id].hp;//unit_list[entities[id].id].hp  * army_size;
 	army->hp_current  = army->hp_total;
 
 	army->current_army_size = army_size;
@@ -581,6 +583,9 @@ void init_armies(int player, int cpu)
 	calc_army_stats(player,&p_c_army,4,2);
 	calc_army_stats(cpu,&c_c_army,24,2);
 
+	put_number(entities[player].id,2,8,1);
+	put_number(entities[cpu].id,2,11,1);
+
 	army_one_size = p_c_army.army_start_size; //MAX_ARMY_SIZE;
 	army_two_size = c_c_army.army_start_size; //MAX_ARMY_SIZE;
 
@@ -601,7 +606,7 @@ void init_armies(int player, int cpu)
 		sp->y = (get_y_from_pos(p)*32)+64;
 		sp->frame = PLAYER_SPRITE_VRAM;
 	}
-	sp--;
+	// sp--;
 	j--;
 	p = 0;
 	row = 0;
@@ -620,7 +625,10 @@ void init_armies(int player, int cpu)
 	}
 
 	sp = armyOne;
+	//still zero here
 	populate_army(sp,0x400,PLAYER_SPRITE_VRAM,16,0,army_one_size,5);
+	//not zero here
+
 	sp = armyTwo;
 	populate_army(sp,0x400,CPU_SPRITE_VRAM,17,1,army_two_size,21);
 
@@ -688,37 +696,33 @@ char formation_select(char selection)
 int populate_army(struct soldier *soldiers, int sprite_size, int sprite_start, int pal, int flip, int army_size, int spriteno)
 {
 	int i;
-	for(i = spriteno; i<(army_size + spriteno); ++i, ++soldiers){
+	for(i = spriteno; i<(army_size + spriteno); i++, soldiers++){
 		// spr_make(i, ((soldiers->pos & (TILES_PER_LINE-1))*SOLDIER_SIZE), ((soldiers->pos / TILES_PER_LINE)*SOLDIER_SIZE), sprite_start, FLIP_MAS|SIZE_MAS, NO_FLIP|SZ_32x32, pal, 1);
 		spr_make(i, soldiers->x, soldiers->y, sprite_start, FLIP_MAS|SIZE_MAS, NO_FLIP|SZ_32x32, pal, 1);
-		spr_pri(1);
-		// spr_show();
+		if(the_sy_val == 0 && sy > 192)
+		{
+			the_sy_val = path;
+		}
 		if(flip){
 			spr_ctrl(FLIP_X_MASK,FLIP_X);
 		}
 	}
 }
 
-void update_sprite_pos(struct soldier *soldier){}
-
 void cleanup_battle(int player_selected_index, int cpu_selected_index)
 {
 	int i;
-	// entities[player_selected_index].army_size -= (char)(p_c_army.army_start_size - p_c_army.current_army_size);
-	// entities[cpu_selected_index].army_size -= (char)(c_c_army.army_start_size - c_c_army.current_army_size);
 	entities[player_selected_index].army_size = p_c_army.current_army_size;
 	entities[cpu_selected_index].army_size = c_c_army.current_army_size;
-	for(i=5; i<26; i++)
+	entities[player_selected_index].hp = p_c_army.hp_current;
+	entities[cpu_selected_index].hp = c_c_army.hp_current;
+	for(i=5; i<35; i++)
 	{
 		spr_hide(i);
 	}
-	// for(i=0; i<NUMBER_OF_TILES; i++)
-	// {
-	// 	grid[i] = 0;
-	// }
+
 	for(i=0, sp=armyOne; i<15; i++)
 	{
-		// sp->pos = 0;
 		sp->active = 0;
 		sp->id = 0;
 		sp->state = 0;
@@ -731,7 +735,6 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
 
 	for(i=0, sp=armyTwo; i<15; i++)
 	{
-		// sp->pos = 0;
 		sp->active = 0;
 		sp->id = 0;
 		sp->state = 0;
@@ -744,28 +747,14 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
 
 	sp = 0;
 	total_units = 0;
-	// army_one_size = 0;
-	// army_two_size = 0;
 
 	spr_set(62);
 	spr_hide();
 	spr_set(63);
 	spr_hide();
 	satb_update();
-	disp_off();
-	vsync();
-
-	// grid[commander_one_pos] ^= 1;
-	// grid[commander_one_pos-1] ^= 4;
-	// grid[commander_one_pos] ^= 4;
-	//
-	// grid[commander_two_pos] ^= 2;
-	// grid[commander_two_pos-1] ^= 8;
-	// grid[commander_two_pos] ^= 8;
-	// commanders[group_one.commanders[player_selected_index]].army_size = army_one_current_size;
-	// commanders[group_two.commanders[cpu_selected_index]].army_size = army_two_current_size;
 
 	total_sprites = 0;
 	reset_satb();
-	cls();
+	// cls();
 }

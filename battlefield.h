@@ -14,7 +14,7 @@
 #define EXPLORE_MODE 8
 #define EXPLORE_MENU_MODE 9
 
-#define MAX_ENTITIES 18
+#define MAX_ENTITIES 42
 #define PLAYER 1
 #define CPU 2
 #define INF 0
@@ -43,35 +43,27 @@
 
 typedef struct{
   Unit *unit;
-  int pos, stamina;
+  int pos, hp, stamina;
   char army_size, team, id, actionable, nearby_engaged;
 } Entity;
 
-char battle_grid[MAP_SIZE];
+int the_sy_val;
+unsigned char battle_grid[MAP_SIZE];
 Entity entities[MAX_ENTITIES];
-int cmdr_vram_mapper[24];
-// struct Map cmdr_vram_mapper[12];
-// char untraversable_terrain[15];
 char selector_mode, actions;
 int sel_x, sel_y, turn, menu_x, menu_y, cursor_x, cursor_y, unit_selected;
 char num_of_entities, menu_option;
-char size_one;
-char size_two;
 char one_total;
 char two_total;
 char cost;
-int cmdr_fig_current;
 char cmdr_fig_pal;
 char current_turn;
 int ai_timer;
 int path[20];
-char target;
-char mapper_size;
 char g;
-
-char army_one[8]; //copy of army one
-char army_two[10]; //copy of army two
-
+char b_map_id;
+char no_of_spawns;
+char map_type;
 // const char spear_attack[4] = { 2, 0, 2, 0};
 
 const int archer_coord1[2] = {1,-16};
@@ -103,6 +95,7 @@ void load_coords(char id)
   switch((*entities[id].unit).unit_type)
   {
     default:
+    case BLOBS:
     case FLYERS:
     case INFANTRY:
     coords[0] = sword_coord1[0];
@@ -170,6 +163,7 @@ char get_pattern_length(char id)
 {
   switch((*entities[id].unit).unit_type)
   {
+    case BLOBS:
     case FLYERS:
     case INFANTRY: return SWORD_ATTACK;
     case SPEARS: return SPEAR_ATTACK;
@@ -184,12 +178,15 @@ void add_entity(char type, char size, char team, char pal, char unit_id, char cm
   entities[num_of_entities].team = team;
   // entities[num_of_entities].pal = pal;
   entities[num_of_entities].unit = &unit_list[unit_id];
-  entities[num_of_entities].id = id;
+  // entities[num_of_entities].unit = unit;
+  entities[num_of_entities].id = unit_list[unit_id].id;
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
   entities[num_of_entities].stamina = 3;
-  entities[num_of_entities].nearby_engaged = 1; //should start at 0
-  num_of_entities += 1;
+  entities[num_of_entities].hp = unit_list[unit_id].hp * (int)size;
+  entities[num_of_entities++].nearby_engaged = 1; //should start at 0
+  // num_of_entities += 1;
+  add_npc(pos%16,pos/16,unit_list[unit_id].id,pal);
 }
 
 void display_error_message(char *str)
@@ -260,7 +257,8 @@ void display_selector()
 
 char check_action_cost(char required_cost)
 {
-  return actions >= required_cost;
+  // return actions >= required_cost;
+  return 1;
 }
 
 void draw_actions()
@@ -409,7 +407,7 @@ void deduct_stamina(char id)
   // }
 }
 
-void select_unit(char unit)
+void select_unit(int unit)
 {
   selector_mode = PLACE_MODE;
   menu_option = MENU_ATTACK;
@@ -431,7 +429,7 @@ int calc_move_cost(int origin, int dest)
 
 char attack_unit(int src, int dst)
 {
-  char attacker, target;//, result;
+  int attacker, target;//, result;
   attacker = battle_grid[dst]-1;
   target = battle_grid[src]-1;
   if(entities[attacker].stamina < 0)
@@ -452,8 +450,8 @@ char attack_unit(int src, int dst)
       deduct_stamina(attacker);
       deduct_stamina(target);
       hide_menu();
-      menu_x = -64;
-      menu_y = -64;
+      // menu_x = -64;
+      // menu_y = -64;
       cursor_x = -32;
       cursor_y = -32;
       selector_mode = SELECT_MODE;
@@ -482,7 +480,12 @@ void clear_error_message()
   put_string("                    ",10,1);
 }
 
+void check_interaction(char n, char a, char o)
+{
+  return 0;
+}
+
 void update_map();
-void begin_battle(int src, int dst);
+void begin_battle(int src, int dst, int src_p, int dst_p);
 void set_cursor_pos(int pos);
 char square_adjacent(int origin, int desired);
