@@ -23,6 +23,11 @@
 #define CMDR_FIVE 20
 #define CMDR_SIX 21
 
+const int EXP_CHART[10] = //ten levels max
+{
+  50, 150, 350, 700, 1500, 2500, 5000, 10000, 25000, 50000
+};
+
 enum battle_map_type{
   CASTLE, VILLAGE, WILD, QUEST
 };

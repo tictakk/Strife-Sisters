@@ -16,31 +16,26 @@ const char npc_level_data[17] = {
   0xFF, 0xFF, 10, 7, MAN_NPC, 25, 8, 11, WOMAN_NPC, 25, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-const int NPC_FRAMES[6] =
-{
-  0x00, 0x00, 0x00, 0x80, 0x80, 0x80
-};
+const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x80, 0x80, 0x80 };
 
-const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,17,21,21,17,25,25,25,25,25,25,25,25,25};
+const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,19,21,22,22,25,25,25,25,25,25,25,25};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
 char npc_count = 0;
 char npc_type_count = 0;
 char cmdr_pal_count = 0;
-char npc_cmdr_count = 0;
 
 void init_npcs()
 {
   npc_count = 0;
   npc_type_count = 0;
-  npc_cmdr_count = 0;
   cmdr_pal_count = 26;
 
   load_palette(17,sldpal,2);
   load_palette(19,dmnpal,2);
-  load_palette(21,blobpal,2);
-  load_palette(23,blobpal,2);
+  load_palette(21,blobpal,1);
+  load_palette(22,banditpal,1);
   load_palette(25,npc_pal,2);
 }
 
@@ -129,19 +124,35 @@ void add_npc(char x, char y, char type, char pal)
           break;
 
           case BANDIT_UNIT:
+          load_vram(npc_vram[type],bnd,0x100);
+          // put_string("error bandit",5,5);
+          // put_number(npc_count,2,13,5);
+          break;
           case MAGE_UNIT:
+          put_string("error mage",5,5);
+          put_number(npc_count,2,13,6);
+          break;
           case BOY_NPC:
+          put_string("error boy",5,5);
+          put_number(npc_count,2,13,7);
+          break;
           case GIRL_NPC:
+          put_string("error girl",5,5);
+          put_number(npc_count,2,13,8);
+          break;
           default:
-          put_string("error",5,5);
+          put_string("error default",5,5);
+          put_number(npc_count,2,13,9);
           break;
         }
       }
       else
       {
-        put_string("not loading blob",10,5);
-        put_number(type,3,10,6);
-        load_commanders_gfx(type,npc_vram[type],pal);
+        // put_string("not loading blob",10,5);
+        // put_number(type,3,10,6);
+        // load_commanders_gfx(type,npc_vram[type],pal);
+        npcs[npc_count-1].pal = cmdr_pal_count;
+        load_commanders_gfx(type,npc_vram[type],cmdr_pal_count++);
       }
     }
   }
@@ -170,6 +181,16 @@ void draw_npc(char sprite_no, int x, int y, char index)
   pattern += NPC_FRAMES[frame];
 
   spr_make(sprite_no,x,y,pattern,FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
+}
+
+void destroy_npc(char index)
+{
+  char i;
+  for(i=index; i<npc_count; i++)
+  {
+    memcpy(&npcs[i],&npcs[i+1],sizeof(struct npc));
+  }
+  npc_count--;
 }
 
 char check_collision(int x, int y)

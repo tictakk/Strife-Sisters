@@ -202,21 +202,21 @@ void hide_spawns()
 	satb_update();
 }
 
-void cycle_spawn_animations(char spa[6], int to_cycle)
-{
-	char i;
-	cycler = (cycler+1)%3;
-	if(cycler == 0)
-	{
-		framer = (framer+1)%2;
-	}
-	for(i=0; i<to_cycle; i++)
-	{
-		spr_set(10+i);
+// void cycle_spawn_animations(char spa[6], int to_cycle)
+// {
+	// char i;
+	// cycler = (cycler+1)%3;
+	// if(cycler == 0)
+	// {
+	// 	framer = (framer+1)%2;
+	// }
+	// for(i=0; i<to_cycle; i++)
+	// {
+		// spr_set(10+i);
 		// spr_pattern(0x3800 + (0x100*framer) + (i*0x200));
-		spr_pattern(unit_list[spa[i]].address+(0x40*framer));
-	}
-}
+		// spr_pattern(unit_list[spa[i]].address+(0x40*framer));
+	// }
+// }
 
 void set_direction(int sprite_no, enum Direction direction)
 {
@@ -322,25 +322,25 @@ void display_spawns()
 void load_unit(char id, int address, int index)
 {
 	// print_unit_type(type,5,48);
-	switch(unit_list[id].unit_type)
-	{
-		case INFANTRY:
-		load_vram(address+(index*0x100),sld0,0x100);
-		load_palette(25+index,sldpal,1);
-		break;
-		case SPEARS:
-		load_vram(address+(index*0x100),spr0,0x100);
-		load_palette(25+index,sprpal,1);
-		break;
-		case FLYERS:
-		load_vram(address+(index*0x100),dmn0,0x100);
-		load_palette(25+index,dmnpal,1);
-		break;
-		case MUSKETS:
-		load_vram(address+(index*0x100),arch0,0x100);
-		load_palette(25+index,mskpal,1);
-		break;
-	}
+	// switch(unit_list[id].unit_type)
+	// {
+	// 	case INFANTRY:
+	// 	load_vram(address+(index*0x100),sld0,0x100);
+	// 	load_palette(25+index,sldpal,1);
+	// 	break;
+	// 	case SPEARS:
+	// 	load_vram(address+(index*0x100),spr0,0x100);
+	// 	load_palette(25+index,sprpal,1);
+	// 	break;
+	// 	case FLYERS:
+	// 	load_vram(address+(index*0x100),dmn0,0x100);
+	// 	load_palette(25+index,dmnpal,1);
+	// 	break;
+	// 	case MUSKETS:
+	// 	load_vram(address+(index*0x100),arch0,0x100);
+	// 	load_palette(25+index,mskpal,1);
+	// 	break;
+	// }
 }
 
 void display_unit(int x, int y, int spr_no, int index)
@@ -353,24 +353,23 @@ void spawn_enemy(char spawn_id, char unit_id, char atk, char def, char hp, char 
 	// int ran_n=0;
 	// enemy_spawns[spawn_id] = current_global_units;
 	// add_unit_to_pool(1,15,0,unit,atk,def,hp,spd);
-	enemy_spawns[spawn_id] = unit_id;
+	// enemy_spawns[spawn_id] = unit_id;
 }
 
 void randomize_spawn(int level)
 {
-	int r_swds, r_sprs, i, j, hp;
-	// Stats stats;
-
-	r_swds = rand() & 3;
-	r_sprs = 3 - r_swds;
-	for(i=0; i<r_swds; i++)
-	{
-		enemy[i] = HOUND_UNIT;
-	}
-	for(i=0; i<r_sprs; i++)
-	{
-		enemy[i+r_swds] = SPEAR_UNIT;
-	}
+	// int r_swds, r_sprs, i, j, hp;
+	//
+	// r_swds = rand() & 3;
+	// r_sprs = 3 - r_swds;
+	// for(i=0; i<r_swds; i++)
+	// {
+	// 	enemy[i] = HOUND_UNIT;
+	// }
+	// for(i=0; i<r_sprs; i++)
+	// {
+	// 	enemy[i+r_swds] = SPEAR_UNIT;
+	// }
 }
 
 void move_towards_direction()
@@ -692,7 +691,7 @@ char add_commander_to_castle(char cmdr_id, char castle_no)
 void load_castle_data(int index, char population, char x, char y,
                       char level, char kingdom)
 {
-	castles[index].no_of_soldiers = population;
+	// castles[index].no_of_soldiers = population;
 	castles[index].x = x;
 	castles[index].y = y;
 	// castles[index].
@@ -843,7 +842,7 @@ void print_commander_stats(char item_no, char i)
 	y = 3+(s_y/8);
 
 	put_string(items[item_no].name,x,y+i);
-	put_number(items[item_no].cost,3,x+9,y+i);
+	put_number(100,3,x+9,y+i);
 }
 
 void print_unit_data(char unit_id, char i, int x_off, int y_off, char disp_cost)
@@ -886,7 +885,7 @@ void print_castle_data(char castle_no)
 	x = 2+(s_x/8);
 	y = 4+(s_y/8);
 
-	put_number(castles[castle_no].no_of_soldiers,3,25,4);
+	// put_number(castles[castle_no].no_of_soldiers,3,25,4);
 	put_char('/',28,4);
 	put_number(100,3,29,4);
 
@@ -902,7 +901,8 @@ char buy_item(char item_index, char castle_id)
 	int cost;
 	char item_id;
 	item_id = castles[castle_id].buyable_items[item_index];
-	cost = items[item_id].cost;
+	// cost = items[item_id].cost;
+	cost = 100;
 	if(cost > player_gold){ return 0; }
 	if(no_of_party_items == MAX_INVENTORY ){ return 0; }
 	player_gold -= cost;
@@ -1366,6 +1366,12 @@ void overworld_controls(){
 				display_unit_stats(troops[0],25,3,0);
 				menu_state = ORDER_MENU;
 				load_cursor(66,20);
+				break;
+				case 4:
+				put_number(commanders[0].unit.atk,3,10,42);
+				put_number(commanders[0].unit.def,3,10,43);
+				put_number(commanders[0].unit.spd,3,10,44);
+				put_number(commanders[0].unit.hp,3,10,45);
 				break;
 			}
 		}

@@ -47,13 +47,6 @@ int determine_unit_action(char id)
   char weakest, i, j;
   int target, len;
   target = -1;
-
-  // if(entities[id].stamina < 0)
-  // {
-  //   action = PASS;
-  //   return target;
-  // }
-
   units_in_atk_zone(id);
 
   if(num_of_units_in_range != 0)
@@ -62,15 +55,8 @@ int determine_unit_action(char id)
     action = ATTACK;
     return weakest;
   }
-  switch(entities[id].stamina)
+  else
   {
-    case 0:
-    case 1:
-    target = -1;
-    action = PASS;
-    break;
-
-    case 2:
     target = find_weakest_opp_in_range(id,(*entities[id].unit).mov+(*entities[id].unit).rng);
     if(target == -1)
     {
@@ -80,39 +66,57 @@ int determine_unit_action(char id)
     {
       action = MOVE;
     }
-    break;
-
-    case 3:
-    target = find_weakest_opp_in_range(id,(*entities[id].unit).mov+(*entities[id].unit).rng);
-    if(target == -1)
-    {
-      // target = find_weakest_opp_in_range(id,((*entities[id].unit).mov*2)+(*entities[id].unit).rng);
-      target = find_critical_unit();
-      if(target != -1)
-      {
-        len = get_path(entities[id].pos,entities[target].pos,path,battle_grid,2,6,entities[id].unit->ign);
-        get_unit_radius(entities[id].pos,(*entities[id].unit).mov,CPU,0);
-
-        for(i=0; i<len; i++)
-        {
-          for(j=0; j<map_size+1; j++)
-          {
-            if(path[i] == map[j].ownX + (map[j].ownY*16) && battle_grid[path[i]] == 0)
-            {
-              action = MOVE;
-              return path[i];
-            }
-          }
-        }
-        action = PASS;
-        return -1;
-      }
-      action = PASS;
-      return -1;
-    }
-    action = MOVE;
-    break;
   }
+  // switch(entities[id].stamina)
+  // {
+  //   case 0:
+  //   case 1:
+  //   target = -1;
+  //   action = PASS;
+  //   break;
+
+    // case 2:
+    // target = find_weakest_opp_in_range(id,(*entities[id].unit).mov+(*entities[id].unit).rng);
+    // if(target == -1)
+    // {
+    //   action = PASS;
+    // }
+    // else
+    // {
+    //   action = MOVE;
+    // }
+    // break;
+
+    // case 3:
+    // target = find_weakest_opp_in_range(id,(*entities[id].unit).mov+(*entities[id].unit).rng);
+    // if(target == -1)
+    // {
+    //   target = find_critical_unit();
+    //   if(target != -1)
+    //   {
+    //     len = get_path(entities[id].pos,entities[target].pos,path,battle_grid,2,6,entities[id].unit->ign);
+    //     get_unit_radius(entities[id].pos,(*entities[id].unit).mov,CPU,0);
+    //
+    //     for(i=0; i<len; i++)
+    //     {
+    //       for(j=0; j<map_size+1; j++)
+    //       {
+    //         if(path[i] == map[j].ownX + (map[j].ownY*16) && battle_grid[path[i]] == 0)
+    //         {
+    //           action = MOVE;
+    //           return path[i];
+    //         }
+    //       }
+    //     }
+    //     action = PASS;
+    //     return -1;
+    //   }
+    //   action = PASS;
+    //   return -1;
+    // }
+    // action = MOVE;
+    // break;
+  // }
   // action = PASS;
   return target;
 }
@@ -136,6 +140,7 @@ int find_weakest_opp_in_range(char id, char range)
     }
   }
   // put_number(target_pos,3,0,9+(g++));
+  put_number(num_of_units_in_range,3,5,5);
   return target_pos;
 }
 
@@ -277,7 +282,7 @@ void ai_unit(char id)
   char d, result, continue_move;
   continue_move = 1;
   // if(entities[id].actionable)
-  while(continue_move && entities[id].stamina > 0)
+  while(continue_move)
   {
       pos = determine_unit_action(id);
       // put_number(pos,3,0,9+(g++));
@@ -345,21 +350,7 @@ void start_turn(char team)
   vsync();
 }
 
-void replenish_stamina(char id)
-{
-  // if(entities[id].stamina < 3)
-  // {
-  //   entities[id].stamina++;
-  // }
-  // if(entities[id].stamina > 0)
-  // {
-  //   set_color_rgb((entities[id].pal*16)+15,0,7,0);
-  // }
-  // else
-  // {
-  //   set_color_rgb((entities[id].pal*16)+15,7,0,0);
-  // }
-}
+void replenish_stamina(char id){}
 
 int furthest_can_travel(char path_length)
 {

@@ -43,11 +43,13 @@
 
 typedef struct{
   Unit *unit;
-  int pos, hp, stamina;
+  int pos, hp;
   char army_size, team, id, actionable, nearby_engaged;
 } Entity;
 
 int the_sy_val;
+int exp_gained;
+int gold_gained;
 unsigned char battle_grid[MAP_SIZE];
 Entity entities[MAX_ENTITIES];
 char selector_mode, actions;
@@ -64,6 +66,8 @@ char g;
 char b_map_id;
 char no_of_spawns;
 char map_type;
+char no_of_cpu_cmdrs;
+char no_of_player_cmdrs;
 // const char spear_attack[4] = { 2, 0, 2, 0};
 
 const int archer_coord1[2] = {1,-16};
@@ -182,7 +186,7 @@ void add_entity(char type, char size, char team, char pal, char unit_id, char cm
   entities[num_of_entities].id = unit_list[unit_id].id;
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
-  entities[num_of_entities].stamina = 3;
+  // entities[num_of_entities].stamina = 3;
   entities[num_of_entities].hp = unit_list[unit_id].hp * (int)size;
   entities[num_of_entities++].nearby_engaged = 1; //should start at 0
   // num_of_entities += 1;
@@ -191,8 +195,6 @@ void add_entity(char type, char size, char team, char pal, char unit_id, char cm
 
 void display_error_message(char *str)
 {
-  // hide_unit_info();
-  // put_string("cannot split unit",10,1);
   put_string(str,10,1);
   clear_error_message();
 }
@@ -220,10 +222,6 @@ void draw_selector()
 
 void hide_menu()
 {
-  // spr_set(2);
-  // spr_hide();
-  // spr_set(3);
-  // spr_hide();
   unhighlight();
   hide_selector();
 }
@@ -247,44 +245,14 @@ void hide_selector()
 
 void display_selector()
 {
-  // spr_set(0);
-  // load_vram(0x5000,selector,0x40);
-  // load_palette(16,selectorpal,1);
   spr_make(0,selector_x,selector_y,0x68C0,FLIP_MAS|SIZE_MAS,SZ_16x16,3,1);
-  // spr_make()
   spr_show(0);
 }
 
-char check_action_cost(char required_cost)
-{
-  // return actions >= required_cost;
-  return 1;
-}
+char check_action_cost(char required_cost){ return 1; }
 
-void draw_actions()
-{
-  // char i;
-  // for(i=4; i<4+actions; i++)
-  // {
-  //   spr_set(i);
-  //   spr_show();
-  // }
-}
-
-void load_actions()
-{
-  // char i, x, y;
-  // for(i=4; i<10; i++)
-  // {
-  //   x = 200 + (((i-4) / 2) * 18);
-  //   y = 11 + (((i-4) % 2) * 8);
-  //   spr_make(i,x,y,0x6600+(((i-4)%2)*0x40),FLIP_MAS|SIZE_MAS,NO_FLIP|SZ_16x16,31,1);
-  //   if((i-4) >= actions)
-  //   {
-  //     spr_hide();
-  //   }
-  // }
-}
+void draw_actions(){}
+void load_actions(){}
 
 char destroy_entity(int id)
 {
@@ -300,12 +268,15 @@ char destroy_entity(int id)
     // battle_grid[grid_pos] = 0;
     battle_grid[entities[id].pos] = 0;
     killed = 1;
-    if(entities[entity_id].team == PLAYER) //shoul we reduce size...?
+    if(entities[entity_id].team == PLAYER)
     {
       one_total--;
     }
     else
     {
+      get_random_item_by_level(0);
+      exp_gained += entities[entity_id].unit->exp;
+      gold_gained += range(0,20);
       two_total--;
     }
     for(i=0; i<MAP_SIZE; i++)
@@ -315,13 +286,12 @@ char destroy_entity(int id)
         battle_grid[i] -= 1;
       }
     }
-
+    destroy_npc(entity_id);
     for(i=entity_id; i<num_of_entities; i++)
     {
       memcpy(&entities[i],&entities[i+1],sizeof(Entity)); //cpy dst from src
     }
     num_of_entities--;
-
   }
   return killed;
 }
@@ -368,44 +338,22 @@ void deduct_actions(char num_of_actions)
 void move_unit(int to, int from)
 {
   char id;
-  if(entities[battle_grid[from]-1].stamina >= 0)
-  {
-    //highlight(from,0,entities[battle_grid[from]-1].unit->mov);//actions/MOVE_COST
-    hide_menu();
-    id = battle_grid[from] - 1;
-    // if(entities[id].stamina < 0){ return;}
+  //highlight(from,0,entities[battle_grid[from]-1].unit->mov);//actions/MOVE_COST
+  hide_menu();
+  id = battle_grid[from] - 1;
+  // if(entities[id].stamina < 0){ return;}
 
-    battle_grid[to] = battle_grid[from];
-    battle_grid[from] = 0;
-    entities[id].pos = to;
-    deduct_stamina(id);
+  battle_grid[to] = battle_grid[from];
+  battle_grid[from] = 0;
+  entities[id].pos = to;
+  deduct_stamina(id);
 
-    selector_mode = SELECT_MODE;
-    // put_number(battle_grid[to],3,5,5);
-    update_map();
-  }
-  else
-  {
-    display_error_message("not enough stamina");
-  }
-
+  selector_mode = SELECT_MODE;
+  // put_number(battle_grid[to],3,5,5);
+  update_map();
 }
 
-void deduct_stamina(char id)
-{
-  // if(entities[id].stamina > -3) //if stamina is any number over 0
-  // {
-  //   entities[id].stamina--;
-  // }
-  // if(entities[id].stamina > 0)
-  // {
-  //   set_color_rgb((entities[id].pal*16)+15,0,7,0);
-  // }
-  // else
-  // {
-  //   set_color_rgb((entities[id].pal*16)+15,7,0,0);
-  // }
-}
+void deduct_stamina(char id){}
 
 void select_unit(int unit)
 {
@@ -432,11 +380,11 @@ char attack_unit(int src, int dst)
   int attacker, target;//, result;
   attacker = battle_grid[dst]-1;
   target = battle_grid[src]-1;
-  if(entities[attacker].stamina < 0)
-  {
-    display_error_message("not enough stamina");
-    return 2;
-  }
+  // if(entities[attacker].stamina < 0)
+  // {
+  //   display_error_message("not enough stamina");
+  //   return 2;
+  // }
   if(entities[attacker].actionable == 0)
   {
     display_error_message("unit has attacked");
@@ -447,8 +395,8 @@ char attack_unit(int src, int dst)
     if(attackable(attacker,target,coords))
     {
       entities[attacker].actionable = 0;
-      deduct_stamina(attacker);
-      deduct_stamina(target);
+      // deduct_stamina(attacker);
+      // deduct_stamina(target);
       hide_menu();
       // menu_x = -64;
       // menu_y = -64;
@@ -477,12 +425,119 @@ char attack_unit(int src, int dst)
 void clear_error_message()
 {
   sync(60);
-  put_string("                    ",10,1);
+  put_string("              ",10,1);
 }
 
-void check_interaction(char n, char a, char o)
+void clear_text_field()
 {
-  return 0;
+  put_string("                ",1,1);
+  put_string("                ",1,2);
+}
+
+void post_battle_dialog()
+{
+  clear_text_field();
+  print_items_gained();
+  print_post_battle_info("Gold received",gold_gained);
+  print_post_battle_info("EXP received",exp_gained);
+  distribute_exp();
+
+  // print_post_battle_info("Rei exp",commanders[party[0]].exp);
+  // print_post_battle_info();
+
+  clear_text_field();
+  //items gained
+  //money gained
+  //exp gained
+  //level ups
+  //spells learned
+}
+
+void print_items_gained()
+{
+  char i=0;
+  while(i<drop_count)
+  {
+    clear_text_field();
+    write_text(1,1,"received ");
+    write_text(10,1,items[battle_items[i]].name);
+    i++;
+    wait_for_I_input();
+  }
+}
+
+void print_post_battle_info(char *str, int value)
+{
+  clear_text_field();
+  write_text(1,1,str);
+  put_number(value,4,1,2);
+  wait_for_I_input();
+}
+
+void print_level_up(){}
+void print_spells_learned(){}
+
+void distribute_exp()
+{
+  char i, lvl;
+  int exp_per, offset;
+  offset = 0;
+  exp_per = exp_gained / no_of_player_cmdrs;
+  for(i=0; i<no_of_player_cmdrs; i++)
+  {
+    lvl = commanders[party[i]].lvl;
+    commanders[party[i]].exp += exp_per;
+    commanders[party[i]].lvl = next_level(commanders[party[i]].lvl,commanders[party[i]].exp);
+    if(commanders[party[i]].lvl > lvl)
+    {
+      commanders[party[i]].exp = 0;
+      clear_text_field();
+      offset = write_text(1,1,commanders[party[i]].name);
+      write_text(1+offset,1," lvled up");
+      offset = write_text(1,2,"level ");
+      put_number(commanders[party[i]].lvl,2,1+offset,2);
+      wait_for_I_input();
+      print_new_stats(party[i]);
+      //THIS IS NOT UPDATING THE UNIT STATS
+      memcpy(&unit_list[entities[0].id],commanders[party[i]].unit,sizeof(Unit));
+      // wait_for_I_input();
+    }
+  }
+}
+
+void print_new_stats(char cmdr_id)
+{
+  int offset;
+  char i;
+
+  for(i=0; i<4; i++) //4 == num of attributes
+  {
+    clear_text_field();
+    scale_stat(cmdr_id,i);
+    switch(i)
+    {
+      case ATK_ATTRIBUTE:
+      offset = write_text(1,1,"Atk ");
+      put_number(commanders[cmdr_id].unit.atk,3,1+offset,1);
+      break;
+
+      case DEF_ATTRIBUTE:
+      offset = write_text(1,1,"Def ");
+      put_number(commanders[cmdr_id].unit.def,3,1+offset,1);
+      break;
+
+      case SPD_ATTRIBUTE:
+      offset = write_text(1,1,"Speed ");
+      put_number(commanders[cmdr_id].unit.spd,3,1+offset,1);
+      break;
+
+      case HP_ATTRIBUTE:
+      offset = write_text(1,1,"HP ");
+      put_number(commanders[cmdr_id].unit.hp,4,1+offset,1);
+      break;
+    }
+    wait_for_I_input();
+  }
 }
 
 void update_map();

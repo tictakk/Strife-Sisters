@@ -19,8 +19,8 @@ char exit_battlefield;
 int b_cycler = 0;
 int b_framer = 0;
 char t = 0;
-char no_of_cpu_cmdrs = 0;
-char no_of_player_cmdrs = 0;
+// char no_of_cpu_cmdrs = 0;
+// char no_of_player_cmdrs = 0;
 char framer = 0;
 
 void begin_explore(char map_id)
@@ -87,6 +87,8 @@ void begin_battlefield(char map_id, char enemy_cmdrs[3], char no_of_cmdrs)
 void battlefield_loop(char map_id)
 {
   char collide;
+  exp_gained = 75;
+  gold_gained = 75;
   display_sprites_();
   scroll(0, 0, 0, 0, 223, 0xC0);
   disp_on();
@@ -123,7 +125,7 @@ void battlefield_loop(char map_id)
           // put_number(collide,3,5,5);
           // npc_count = 0;
           clear_npcs();
-          startup_spawn_battle();
+          startup_spawn_battle(collide);
         }
         if(tic==0)
         {
@@ -150,8 +152,8 @@ void battlefield_loop(char map_id)
         }
         display_army_size(1,2);
         display_stats(6,2);
-        // display_type(4,1);
-        display_id(4,1);
+        display_type(4,1);
+        // display_id(4,1);
         ctrls();
         draw_selector();
         cycle_animations();
@@ -170,10 +172,21 @@ void battlefield_loop(char map_id)
 
 void randomize_enemy_npcs()
 {
-  char i;
+  int x, y;
+  char i, u_type;
   for(i=0; i<range(1,3); i++)
   {
-    add_npc(range(0,15),range(6,12),SWORD_UNIT,UNIT_PALS[SWORD_UNIT]);
+    x = range(0,15);
+    y = range(6,12);
+    u_type = range(HOUND_UNIT,BANDIT_UNIT);
+    if(x*16 != cmdr_x && y*16 != cmdr_y)
+    {
+      add_npc(x,y,u_type,UNIT_PALS[u_type]);
+    }
+    else
+    {
+      --i;
+    }
   }
 }
 
@@ -380,13 +393,14 @@ void walk()
   }
 }
 
-void startup_spawn_battle()
+void startup_spawn_battle(char u_type)
 {
   char list[6];
   char j;
   for(j=0; j<range(3,6); j++)
   {
-    list[j] = BLOB_UNIT;//HOUND_UNIT;//npcs[i];
+    list[j] = u_type;
+    // list[j] = BANDIT_UNIT;
   }
   load_group(&player_cmdr_list[0],party[0],PLAYER,player_start_positions[0],15);
   load_entities(15,CPU,list,j,cpu_start_positions[0],-17);
@@ -396,7 +410,6 @@ void startup_spawn_battle()
   load_sprites_();
   draw_selector();
   update_map();
-  // load_units(0x3800);
   load_commanders_to_vram();
   // load_palette_groups();
   selector_mode = 0;
@@ -411,13 +424,7 @@ void battle_start()
   cmdr_x += 16;
   one_total = 0;
   two_total = 0;
-  // if(c_cmdr_count == 1)
-  // {
-  //   one_total = commanders[party[0]].no_of_units + 1;//units plus commander
-  //   two_total = commanders[npcs[npc_id].id].no_of_units + 1;//commanders[enemy_cmdrs[0]].no_of_units + 1;
-  // }
-  // else
-  // {
+
   for(i=0; i<no_of_player_cmdrs; i++)
   {
     one_total += commanders[party[i]].no_of_units + 1;//units plus commander
@@ -426,7 +433,6 @@ void battle_start()
   {
     two_total += commanders[castles[b_map_id].commanders[i]].no_of_units + 1;//commanders[enemy_cmdrs[0]].no_of_units + 1;
   }
-// }
 
   reset_satb();
   init_units();
@@ -436,34 +442,29 @@ void battle_start()
   update_map();
 }
 
-void remove_npc()
-{
-  // char i;
-  // for(i=npc_id; i<no_of_npcs; i++)
-  // {
-  //   memcpy(&npcs[i],&npcs[i+1],sizeof(struct npc));
-  // }
-  // no_of_npcs--;
-}
-
 void check_battle_complete()
 {
   if(one_total > 0 && two_total > 0)
   {
     return;
   }
+  satb_update();
+  vsync();
   //if the battle is over and we're not at a castle, we go back to exploring
   if(battle_map_metadata[b_map_id].map_type != CASTLE)
   {
+    post_battle_dialog();
     cleanup_battlefield();
-    remove_npc();
+    clear_npcs();
     load_visible_units();
+    randomize_enemy_npcs();
     //remove npc enemy group killed
     selector_mode = EXPLORE_MODE;
   }
   //becaue if the battle is over and we're at a castle, we just leave the battlefield
   else if(battle_map_metadata[b_map_id].map_type == CASTLE)
   {
+    post_battle_dialog();
     cleanup_battlefield();
     exit_battlefield = 0;
   }
@@ -553,7 +554,7 @@ void load_commanders_to_unit_list(unsigned char no_of_cmdrs, unsigned char offse
   for(i=0, ids=cmdr_ids; i<no_of_cmdrs; i++, ids++)
   {
     cmdrs[i] = i+offset;
-    absolute_id = (offset-(UNIT_LIST_SIZE-8)+i);
+    // absolute_id = (offset-(UNIT_LIST_SIZE-8)+i);
     // commanders[*ids].unit.address = 0x3E00 + (absolute_id*0x100);
     // commanders[*ids].unit.p_group = 24 + absolute_id - (team - 1);
     // load_commanders_gfx(*ids,0x3E00 + (absolute_id*0x100),24 + absolute_id);
@@ -670,7 +671,7 @@ void update_map()
   int squares, i, sprite_counter, entity_no, p, z;
   char s;
   z=0;
-  squares = 224;
+  squares = MAP_SIZE;
   sprite_counter = 63;
 
   for(i = 0; i < squares; i++)
@@ -931,22 +932,20 @@ void ctrls()
     // actions = ACTIONS_PER_TURN;
     // draw_actions();
   }
+
+  if(j & JOY_SEL)
+  {
+    get_random_item_by_level(0);
+    get_random_item_by_level(0);
+    get_random_item_by_level(0);
+    get_random_item_by_level(0);
+
+    post_battle_dialog();
+    // put_number(drop_count,3,1,1);
+  }
 }
 
-void set_dialog_mode()
-{
-  // selector_mode = DIALOG_MODE;
-  // sx = -32;
-  // sy = -32;
-  // load_portrait(2);
-  // display_item(2,32,0);
-  //
-  // set_font_color(1,2);
-  // set_font_pal(5);
-  // load_default_font(0,0x800);
-}
-
-void get_next_dialog(int index)
+void get_next_dialog()
 {
   int value = 0;
   value = do_story(0,0,script+script_pointer);
@@ -1269,9 +1268,9 @@ void display_stats(int x, int y)
   if(id)
   {
     put_string(":",x,y);
-    put_number((*entities[id-1].unit).atk,2,x+1,y);
+    put_number(entities[id-1].unit->atk,2,x+1,y);
     put_string(";",x+4,y);
-    put_number((*entities[id-1].unit).def,2,x+5,y);
+    put_number(entities[id-1].unit->def,2,x+5,y);
     // change_palette(0,0);
   }
   else
@@ -1382,6 +1381,10 @@ void cleanup_battlefield()
     entities[i].army_size = 0;
     entities[i].team = 0;
     entities[i].id = 0;
+    entities[i].unit = 0;
+    entities[i].pos = 0;
+    entities[i].team = 0;
+    entities[i].hp = 0;
   }
   num_of_entities = 0;
   for(i=0; i<64; i++)
@@ -1394,5 +1397,6 @@ void cleanup_battlefield()
 
   s_x = s_x_holder;
   s_y = s_y_holder;
+  clear_battle_items();
   reset_satb();
 }
