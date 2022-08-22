@@ -1170,20 +1170,20 @@ void story(unsigned char area, unsigned char state, char id)
 
 int do_story(int x, int y, char *str)
 {
-	put_number(str[0],4,5,10);
-	put_number(str[1],4,5,11);
-	// put_number(str[2],4,10,44);
 	if(str[0] == 0)//dialog
 	{
 		display_info_panel(x,y,32,6);
-		load_portrait(str[1]);
-		display_item(str[1],0,x+1,y+1);
-		return write_text((s_x/8)+6,(s_y/8)+1,str+2) + 3;
+		if(str[1] != 0)
+		{
+			load_portrait(str[1]);
+			display_item(str[1],0,x+1,y+1);
+			return write_text((s_x/8)+6,(s_y/8)+1,str+2) + 3;
+		}
+		else
+		{
+			return write_text((s_x/8)+1,(s_y/8)+1,str+2) + 3;
+		}
 	}
-	// else if(str[0] == 1)//sound
-	// {
-	//
-	// }
 	return 0;
 }
 

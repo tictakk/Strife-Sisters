@@ -1611,12 +1611,9 @@ void overworld_controls(){
 
 	if(j_2 & JOY_SEL)
 	{
-		// display_dialog(0,0,"dialog, in this economy \nthat's madness!");
-		// put_number(find_offset_by_area(0),4,10,39);
-		// story(1);
-		// put_number(get_map_id_by_pos(get_absolute_pos()),3,5,39);
 		story(get_map_id_by_pos(get_absolute_pos()),PREBATTLE,0);
-		clear_commander_select();
+		load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+		// clear_commander_select();
 	}
 }
 

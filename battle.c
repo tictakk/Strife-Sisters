@@ -416,7 +416,7 @@ void reset_camera()
 	char z;
 	sx = 0;
 	sy = 0;
-	yOffset = 0;
+	// yOffset = 0;
 	xOffset = 0;
 
 	scroll(0, 0, 0, 0, 223, 0xC0);

@@ -201,7 +201,7 @@ void draw_npc(char sprite_no, int x, int y, char index)
   frame = npcs[index].frame;
   pattern += NPC_FRAMES[frame];
 
-  spr_make(sprite_no,x,y,pattern,FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
+  spr_make(sprite_no,x,y+yOffset,pattern,FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
 }
 
 void destroy_npc(char index)
@@ -221,7 +221,8 @@ char check_collision(int x, int y)
   {
     if(npcs[i].pos_x * 16 == x && npcs[i].pos_y * 16 == y)
     {
-      return npcs[i].type;
+      // return npcs[i].type;
+      return i;
     }
   }
   return -1;

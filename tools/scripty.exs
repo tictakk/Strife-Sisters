@@ -14,7 +14,7 @@ defmodule Formatter do
     "rei" => 16,
     "violet" => 17,
     "king" => 18,
-    "empty" => 26
+    "empty" => 0
   }
 
   @mapper %{
