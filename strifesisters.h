@@ -83,8 +83,6 @@ char *location_lookup(int position)
 
 void init_map_data()
 {
-  char i;
-
   battle_map_metadata[0].player_start_pos[0] = 71;
   battle_map_metadata[0].player_start_pos[1] = 51;
   battle_map_metadata[0].player_start_pos[2] = 60;
@@ -115,11 +113,18 @@ void init_map_data()
   battle_map_metadata[2].map_type = VILLAGE;
   battle_map_metadata[2].map_no = 2;
 
-  battle_map_metadata[0].pos = 903;
-  battle_map_metadata[1].pos = 833;
-  battle_map_metadata[2].pos = 807;
-  battle_map_metadata[3].pos = 705;
-  battle_map_metadata[4].pos = 713;
+  battle_map_metadata[0].pos = 994;
+  battle_map_metadata[1].pos = 903;
+  battle_map_metadata[2].pos = 833;
+  battle_map_metadata[3].pos = 807;
+  battle_map_metadata[4].pos = 705;
+  battle_map_metadata[5].pos = 713;
+
+  // battle_map_metadata[0].pos = 903;
+  // battle_map_metadata[1].pos = 833;
+  // battle_map_metadata[2].pos = 807;
+  // battle_map_metadata[3].pos = 705;
+  // battle_map_metadata[4].pos = 713;
 
   battle_map_metadata[3].map_no = 3;
   battle_map_metadata[4].map_no = 4;

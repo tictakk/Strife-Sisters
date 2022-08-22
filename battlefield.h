@@ -497,9 +497,9 @@ void distribute_exp()
       offset = write_text(1,2,"level ");
       put_number(commanders[party[i]].lvl,2,1+offset,2);
       wait_for_I_input();
-      print_new_stats(party[i]);
+      print_new_stats(party[i]-16);
       //THIS IS NOT UPDATING THE UNIT STATS
-      memcpy(&unit_list[entities[0].id],commanders[party[i]].unit,sizeof(Unit));
+      // memcpy(&unit_list[entities[0].id],commanders[party[i]].unit,sizeof(Unit));
       // wait_for_I_input();
     }
   }
@@ -518,22 +518,22 @@ void print_new_stats(char cmdr_id)
     {
       case ATK_ATTRIBUTE:
       offset = write_text(1,1,"Atk ");
-      put_number(commanders[cmdr_id].unit.atk,3,1+offset,1);
+      put_number(commanders[cmdr_id].unit->atk,3,1+offset,1);
       break;
 
       case DEF_ATTRIBUTE:
       offset = write_text(1,1,"Def ");
-      put_number(commanders[cmdr_id].unit.def,3,1+offset,1);
+      put_number(commanders[cmdr_id].unit->def,3,1+offset,1);
       break;
 
       case SPD_ATTRIBUTE:
       offset = write_text(1,1,"Speed ");
-      put_number(commanders[cmdr_id].unit.spd,3,1+offset,1);
+      put_number(commanders[cmdr_id].unit->spd,3,1+offset,1);
       break;
 
       case HP_ATTRIBUTE:
       offset = write_text(1,1,"HP ");
-      put_number(commanders[cmdr_id].unit.hp,4,1+offset,1);
+      put_number(commanders[cmdr_id].unit->hp,4,1+offset,1);
       break;
     }
     wait_for_I_input();

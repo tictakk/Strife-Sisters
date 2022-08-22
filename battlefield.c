@@ -8,6 +8,7 @@ const int player_start_positions[3] = {71,51,60};
 const int cpu_start_positions[3] = {198,210,219};
 
 int map_no;
+//PRETTY SURE THESE TWO CAN GO BYE BYE NOW, ALL UNITS (COMMANDERS INCLUDED ARE A PART OF THE UNIT_LIST)
 char player_cmdr_list[3];
 char cpu_cmdr_list[3];
 int id;
@@ -38,7 +39,7 @@ void begin_explore(char map_id)
   cmdr_x = 64;
   cmdr_y = 32;
   selector_mode = EXPLORE_MODE;
-  load_commanders_to_unit_list(1,UNIT_LIST_SIZE,player_cmdr_list,party,PLAYER);
+  // load_commanders_to_unit_list(1,UNIT_LIST_SIZE,player_cmdr_list,party,PLAYER);
   if(battle_map_metadata[map_id].map_type == WILD)
   {
     randomize_enemy_npcs();
@@ -78,7 +79,7 @@ void begin_battlefield(char map_id, char enemy_cmdrs[3], char no_of_cmdrs)
   clear_npcs();
   init_battlefield();
   selector_mode = 0;
-  load_commanders_to_unit_list(no_of_cmdrs,UNIT_LIST_SIZE+no_of_player_cmdrs,cpu_cmdr_list,enemy_cmdrs,CPU);
+  memcpy(cpu_cmdr_list,enemy_cmdrs,3);
   battle_start(no_of_player_cmdrs,no_of_cpu_cmdrs);//battle_map_metadata[b_map_id].no_of_npcs);
   battlefield_loop(map_id);
 }
@@ -122,9 +123,7 @@ void battlefield_loop(char map_id)
 
         if(collide != -1)
         {
-          // put_number(collide,3,5,5);
-          // npc_count = 0;
-          clear_npcs();
+          reset_npcs();
           startup_spawn_battle(collide);
         }
         if(tic==0)
@@ -140,7 +139,7 @@ void battlefield_loop(char map_id)
       {
         if(joytrg(0) & JOY_I)
         {
-          get_next_dialog();
+          get_next_dialog(0);
         }
       }
       else
@@ -264,7 +263,7 @@ void explore_menu()
         spr_hide(1);
         satb_update();
         selector_mode = DIALOG_MODE;
-        get_next_dialog();
+        get_next_dialog(npc_type-12);
       }
     }
     break;
@@ -402,10 +401,11 @@ void startup_spawn_battle(char u_type)
     list[j] = u_type;
     // list[j] = BANDIT_UNIT;
   }
-  load_group(&player_cmdr_list[0],party[0],PLAYER,player_start_positions[0],15);
+  load_group(&party[0],party[0]-16,PLAYER,player_start_positions[0],15);
   load_entities(15,CPU,list,j,cpu_start_positions[0],-17);
   one_total = commanders[party[0]].no_of_units + 1;
   two_total = j;
+  // reset_npcs();
   reset_satb();
   load_sprites_();
   draw_selector();
@@ -500,16 +500,14 @@ void cycle_animations()
 void init_units()
 {
   char i;
-  load_commanders_to_unit_list(no_of_player_cmdrs,UNIT_LIST_SIZE,player_cmdr_list,party,PLAYER);
-
   for(i=0; i<no_of_player_cmdrs; i++)
   {
-    load_group(&player_cmdr_list[i],party[i],PLAYER,player_start_positions[i],15);
+    load_group(&party[i],party[i]-16,PLAYER,player_start_positions[i],15);
   }
 
   for(i=0; i<no_of_cpu_cmdrs; i++)
   {
-    load_group(&cpu_cmdr_list[i],castles[b_map_id].commanders[i],CPU,cpu_start_positions[i],-17);
+    load_group(&cpu_cmdr_list[i],castles[b_map_id].commanders[i]-16,CPU,cpu_start_positions[i],-17);
   }
 }
 
@@ -547,19 +545,15 @@ void load_ents()
 
 void load_commanders_to_unit_list(unsigned char no_of_cmdrs, unsigned char offset, char cmdrs[3], char *cmdr_ids, char team)
 {
-  int absolute_id;
-  char *ids;
-  unsigned char i=0;
-  absolute_id = 0;
-  for(i=0, ids=cmdr_ids; i<no_of_cmdrs; i++, ids++)
-  {
-    cmdrs[i] = i+offset;
-    // absolute_id = (offset-(UNIT_LIST_SIZE-8)+i);
-    // commanders[*ids].unit.address = 0x3E00 + (absolute_id*0x100);
-    // commanders[*ids].unit.p_group = 24 + absolute_id - (team - 1);
-    // load_commanders_gfx(*ids,0x3E00 + (absolute_id*0x100),24 + absolute_id);
-    memcpy(&unit_list[i+offset],commanders[*ids].unit,sizeof(Unit));
-  }
+  // int absolute_id;
+  // char *ids;
+  // unsigned char i=0;
+  // absolute_id = 0;
+  // for(i=0, ids=cmdr_ids; i<no_of_cmdrs; i++, ids++)
+  // {
+  //   cmdrs[i] = i+offset;
+  //   memcpy(&unit_list[i+offset],commanders[*ids].unit,sizeof(Unit));
+  // }
 }
 
 void load_commanders_to_vram()
@@ -945,19 +939,12 @@ void ctrls()
   }
 }
 
-void get_next_dialog()
+void get_next_dialog(char n_type)
 {
-  int value = 0;
-  value = do_story(0,0,script+script_pointer);
-  script_pointer += value;
+  story(2,EXPLORE,n_type);
 
-  if(value == 0)
-  {
-    // spr_show(1);
-    load_battlefield_map();
-    script_pointer = 0;
-    selector_mode = EXPLORE_MODE;
-  }
+  load_battlefield_map();
+  selector_mode = EXPLORE_MODE;
 }
 
 void selector_left()

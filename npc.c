@@ -12,8 +12,8 @@
 struct npc{
   unsigned char pos_x, pos_y, type, active, frame, pal;
 };
-const char npc_level_data[17] = {
-  0xFF, 0xFF, 10, 7, MAN_NPC, 25, 8, 11, WOMAN_NPC, 25, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+const char npc_level_data[18] = {
+  0xFF, 0xFF, 0xFF, 10, 7, MAN_NPC, 25, 8, 11, WOMAN_NPC, 25, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x80, 0x80, 0x80 };
@@ -42,11 +42,35 @@ void init_npcs()
 void clear_npcs()
 {
   char i;
-  init_npcs();
+  // init_npcs();
   for(i=0; i<MAX_UNIT_TYPES; i++)
   {
     npc_vram[i] = 0;
   }
+}
+
+void hide_npcs(char offset)
+{
+  char i;
+  for(i=0; i<npc_count; i++)
+  {
+    spr_hide(offset+i);
+  }
+}
+
+void show_npcs(char offset)
+{
+  char i;
+  for(i=0; i<npc_count; i++)
+  {
+    spr_show(offset+i);
+  }
+}
+
+void reset_npcs()
+{
+  init_npcs();
+  clear_npcs();
 }
 
 // void load_npcs(int level)
@@ -148,9 +172,6 @@ void add_npc(char x, char y, char type, char pal)
       }
       else
       {
-        // put_string("not loading blob",10,5);
-        // put_number(type,3,10,6);
-        // load_commanders_gfx(type,npc_vram[type],pal);
         npcs[npc_count-1].pal = cmdr_pal_count;
         load_commanders_gfx(type,npc_vram[type],cmdr_pal_count++);
       }
