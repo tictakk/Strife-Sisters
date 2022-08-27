@@ -10,8 +10,14 @@
 #define NUM_OF_ITEMS 15
 #define MAX_DROPPABLE_ITEMS 3
 
+#define ATK_ATT 0
+#define DEF_ATT 1
+#define SPD_ATT 2
+#define AP_ATT 3
+#define HP_ATT 4
+
 typedef struct{
-	char type, attribute_num, modified, rarity;
+	char type, attribute, modifier, rarity;
 	const char *name;
 	const char *description;
 } Item;
@@ -48,6 +54,38 @@ void initialize_items()
   items[12].rarity = R_FOUR;
   items[13].rarity = R_QUEST;
   items[14].rarity = R_BOSS;
+
+	items[0].attribute = ATK_ATT;
+	items[1].attribute = DEF_ATT;
+	items[2].attribute = ATK_ATT;
+	items[3].attribute = HP_ATT;
+	items[4].attribute = DEF_ATT;
+	items[5].attribute = DEF_ATT;
+	items[6].attribute = DEF_ATT;
+	items[7].attribute = DEF_ATT;
+	items[8].attribute = SPD_ATT;
+	items[9].attribute = SPD_ATT;
+	items[10].attribute = SPD_ATT;
+	items[11].attribute = SPD_ATT;
+	items[12].attribute = HP_ATT;
+	items[13].attribute = HP_ATT;
+	items[14].attribute = HP_ATT;
+
+	items[0].modifier = 1;
+	items[1].modifier = 1;
+	items[2].modifier = 2;
+	items[3].modifier = 5;
+	items[4].modifier = 2;
+	items[5].modifier = 1;
+	items[6].modifier = 2;
+	items[7].modifier = 1;
+	items[8].modifier = 2;
+	items[9].modifier = 3;
+	items[10].modifier = 3;
+	items[11].modifier = 3;
+	items[12].modifier = 3;
+	items[13].modifier = 3;
+	items[14].modifier = 3;
 }
 
 char get_drop_by_odds(char unit_level)
@@ -105,4 +143,61 @@ void clear_battle_items()
 	}
 	drop_count = 0;
 	num_of_items_by_level = 0;
+}
+
+void display_attribute_string(char item_no, char x, char y)
+{
+	switch(items[item_no].attribute)
+	{
+		case ATK_ATT:
+		put_string("ATK+",x,y);
+		put_number(items[item_no].modifier,1,x+4,y);
+		break;
+
+		case DEF_ATT:
+		put_string("DEF+",x,y);
+		put_number(items[item_no].modifier,1,x+4,y);
+		break;
+
+		case SPD_ATT:
+		put_string("SPD+",x,y);
+		put_number(items[item_no].modifier,1,x+4,y);
+		break;
+
+		case AP_ATT:
+		put_string("AP+",x,y);
+		put_number(items[item_no].modifier,2,x+3,y);
+		break;
+
+		case HP_ATT:
+		put_string("HP+",x,y);
+		put_number(items[item_no].modifier,2,x+3,y);
+		break;
+	}
+}
+
+void display_item_info(char real_index, int x, int y)
+{
+	// put_string("       ",_sx,_sy+1);
+	// put_string("    ",_sx,_sy+2);
+	// put_string("    ",_sx+3,_sy+2);
+	// put_string("    ",_sx,_sy+3);
+	// put_string("    ",_sx+3,_sy+3);
+	// put_string("    ",_sx,_sy+4);
+	// put_string("    ",_sx+3,_sy+4);
+	// put_string("       ",_sx,_sy+7);
+
+	// put_string(commanders[cmdr_id].name,_sx,_sy+1);
+	// put_string("Lv:",_sx,_sy+2);
+	// put_number(commanders[cmdr_id].lvl,2,_sx+3,_sy+2);
+	// put_string("AP:",_sx,_sy+3);
+	// put_number(commanders[cmdr_id].ap,2,_sx+3,_sy+3);
+	// put_string("EX:",_sx,_sy+4);
+	// put_number(commanders[cmdr_id].exp,2,_sx+3,_sy+4);
+	// put_string("Item:",_sx,_sy+6);
+	//
+	// if(commanders[cmdr_id].no_of_items)
+	// {
+	// 	put_string(items[commanders[cmdr_id].equipable].name,_sx,_sy+7);
+	// }
 }

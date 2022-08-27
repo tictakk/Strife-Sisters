@@ -1,15 +1,14 @@
 #include "battlefield.h"
-struct Node neighbors[8];
-struct Node map[70];
+struct Node neighbors[4];
+struct Node map[100];
 // struct Node path[20];
 
 int get_neighbors(unsigned char x, unsigned char y, char size)
 {
 	int i, counter, width;
 	// width = 32;
-	width = (size)? 16 : 32;
+	width = 16;//(size)? 16 : 32;
 	counter = 0;
-
 	//left
 	if((x - 1) > -1)
 	{
@@ -31,9 +30,8 @@ int get_neighbors(unsigned char x, unsigned char y, char size)
 		neighbors[counter].checked = 1;
 		counter++;
 	}
-
 	//down
-	if((y + 1) < 14) //BREAKS OVERWORLD
+	if((y + 1) < 29) //BREAKS OVERWORLD
 	{
 		neighbors[counter].ownX = x;
 		neighbors[counter].ownY = y+1;
@@ -44,7 +42,7 @@ int get_neighbors(unsigned char x, unsigned char y, char size)
 	}
 
 	//right
-	if((x + 1) < width)
+	if((x + 1) < 16)
 	{
 		neighbors[counter].ownX = x+1;
 		neighbors[counter].ownY = y;
@@ -54,64 +52,64 @@ int get_neighbors(unsigned char x, unsigned char y, char size)
 		counter++;
 	}
 
-	if(size)
-	{
+	// if(size)
+	// {
 		for(i=counter; i<4; i++)
 		{
 			neighbors[i].checked = 0;
 		}
 		return counter;
-	}
+	// }
 
 	//up, left
-	if((x - 1) >= 0 && (y - 1) >= 0)
-	{
-	  neighbors[counter].ownX = x-1;
-	  neighbors[counter].ownY = y-1;
-	  neighbors[counter].fromX = x;
-	  neighbors[counter].fromY = y;
-	  neighbors[counter].checked = 1;
-	  counter++;
-	}
-
-	//up, right
-	if((x + 1) < width && (y - 1) >= 0)
-	{
-	  neighbors[counter].ownX = x+1;
-	  neighbors[counter].ownY = y-1;
-	  neighbors[counter].fromX = x;
-	  neighbors[counter].fromY = y;
-	  neighbors[counter].checked = 1;
-	  counter++;
-	}
-
-	//down, right
-  if((x+1) < width && (y+1) < width)
-  {
-    neighbors[counter].ownX = x+1;
-    neighbors[counter].ownY = y+1;
-    neighbors[counter].fromX = x;
-    neighbors[counter].fromY = y;
-    neighbors[counter].checked = 1;
-    counter++;
-  }
-
-	//down, left
-  if((x - 1) >= 0 && (y + 1) < width)
-  {
-    neighbors[counter].ownX = x-1;
-    neighbors[counter].ownY = y+1;
-    neighbors[counter].fromX = x;
-    neighbors[counter].fromY = y;
-    neighbors[counter].checked = 1;
-    counter++;
-  }
-
-	for(i=counter; i<9; i++)
-	{
-		neighbors[i].checked = 0;
-	}
-	return counter;
+	// if((x - 1) >= 0 && (y - 1) >= 0)
+	// {
+	//   neighbors[counter].ownX = x-1;
+	//   neighbors[counter].ownY = y-1;
+	//   neighbors[counter].fromX = x;
+	//   neighbors[counter].fromY = y;
+	//   neighbors[counter].checked = 1;
+	//   counter++;
+	// }
+	//
+	// //up, right
+	// if((x + 1) < width && (y - 1) >= 0)
+	// {
+	//   neighbors[counter].ownX = x+1;
+	//   neighbors[counter].ownY = y-1;
+	//   neighbors[counter].fromX = x;
+	//   neighbors[counter].fromY = y;
+	//   neighbors[counter].checked = 1;
+	//   counter++;
+	// }
+	//
+	// //down, right
+  // if((x+1) < width && (y+1) < width)
+  // {
+  //   neighbors[counter].ownX = x+1;
+  //   neighbors[counter].ownY = y+1;
+  //   neighbors[counter].fromX = x;
+  //   neighbors[counter].fromY = y;
+  //   neighbors[counter].checked = 1;
+  //   counter++;
+  // }
+	//
+	// //down, left
+  // if((x - 1) >= 0 && (y + 1) < width)
+  // {
+  //   neighbors[counter].ownX = x-1;
+  //   neighbors[counter].ownY = y+1;
+  //   neighbors[counter].fromX = x;
+  //   neighbors[counter].fromY = y;
+  //   neighbors[counter].checked = 1;
+  //   counter++;
+  // }
+	//
+	// for(i=counter; i<9; i++)
+	// {
+	// 	neighbors[i].checked = 0;
+	// }
+	// return counter;
 }
 
 int get_path(int pos, int desired, int paths[20], char *big_map, char size, int depth, char ignore)
@@ -130,16 +128,16 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char size, int 
 	char found = 0;
 	char id = 0;
   v = 0;
-	width = (size)? 16 : 32;
+	// width = (size)? 16 : 32;
+	width = 16;
   map_counter = 0;
   map_size = 0;
 
-	map[map_size].ownX = pos & width-1;
-	map[map_size].ownY = pos / width;
-	map[map_size].fromX = pos & width-1;
-	map[map_size].fromY = pos / width;
+	map[map_size].ownX = pos & 15;
+	map[map_size].ownY = pos / 16;
+	map[map_size].fromX = pos & 15;
+	map[map_size].fromY = pos / 16;
 	map[map_size].checked = 1;
-	// put_number(width,3,15,15);
 
 	while(exit == 1 && d_level < depth)
 	// while(map[map_counter].checked == 1 && exit == 1 && d_level < depth)
@@ -147,7 +145,8 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char size, int 
 		//THIS HAS TO BE FIXED HERE, IT'S EXITING EARLY BEFORE FINDING WHAT WE NEED BECAUSE AN "UNCHECKED" NODE IS BEING PUT IN SOMEWHERE (LIKELY INDEX 2) LOOK AT PUT NUMBER AT THE END OF THIS FUNCTION
 		count = get_neighbors(map[map_counter].ownX,map[map_counter].ownY,size);
 		i = 0;
-		if(map[map_counter].checked){ //this could probably go above count = get_ne... to make it more effecient
+		if(map[map_counter].checked)
+		{ //this could probably go above count = get_ne... to make it more effecient
 			while(i < count)
 			{
 				p = (neighbors[i].ownY * width) + neighbors[i].ownX;
@@ -184,10 +183,6 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char size, int 
 									d_count++;
 								}
 							}
-							// if(put_visited(x,y,fx,fy))
-							// {
-							// 	d_count++;
-							// }
 	  				}
 				}
 				i++;
@@ -200,6 +195,7 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char size, int 
 		}
 		map_counter++;
 	}
+
 	if(!found)
 	{
 		return -1;
@@ -207,14 +203,14 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char size, int 
   i = 0;
   node = &map[map_size];
 
-	paths[i++] = (node->ownY * width) + node->ownX;
+	paths[i++] = ((node->ownY * width) + node->ownX);
   x = map[0].ownX;
   y = map[0].ownY;
 
   while(!compare(x, y, node->ownX, node->ownY))
   {
     node = &map[get(node->fromX,node->fromY)];
-		paths[i++] = (node->ownY * width) + node->ownX;
+		paths[i++] = ((node->ownY * width) + node->ownX);
     path_counter++;
   }
 
@@ -250,8 +246,8 @@ char compare(char ownX, char ownY, char fromX, char fromY)
 int put_visited(int x, int y, int fx, int fy, char checked)
 {
 	int i = 0;
-	int counter = 0;
-	for(i=0; i<map_size+1; i++){
+	for(i=0; i<map_size+1; i++)
+	{
 		if(map[i].ownX == x && map[i].ownY == y)
 		{
 			return 0;

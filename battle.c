@@ -540,7 +540,7 @@ void load_unit_type_to_vram(int vram_location, enum Unit_Type type, char pal,cha
 		load_vram(vram_location, houndbtl, 0xC00);
 		load_palette(pal, houndbtlpal+offset, 1);
 		break;
-		case BANDITS:
+		case AXES:
 		load_vram(vram_location, bandit, 0xC00);
 		load_palette(pal, banditpal+offset, 1);
 		break;

@@ -14,7 +14,6 @@ char done;
 char target_unit;
 char action;
 char ai_tracker;
-// char weakest_opp;
 
 init_ai()
 {
@@ -23,7 +22,7 @@ init_ai()
     num_of_ai = 0;
     j = 0;
     m = 0;
-    for(i = 0; i<num_of_entities; i++)
+    for(i=0; i<num_of_entities; i++)
     {
       if(entities[i].team == CPU)
       {
@@ -38,8 +37,7 @@ init_ai()
     num_of_players = m;
     // find_weakest_opp();
     // print_unit_type((*entities[weakest_opp].unit).unit_type,20,6);
-
-    // put_number(weakest_opp,3,0,9);
+    // put_number(num_of_players,3,0,9);
 }
 
 int determine_unit_action(char id)
@@ -48,7 +46,7 @@ int determine_unit_action(char id)
   int target, len;
   target = -1;
   units_in_atk_zone(id);
-
+  // put_number(num_of_units_in_range,3,0,0);
   if(num_of_units_in_range != 0)
   {
     weakest = find_weakest_opp();
@@ -57,7 +55,7 @@ int determine_unit_action(char id)
   }
   else
   {
-    target = find_weakest_opp_in_range(id,(*entities[id].unit).mov+(*entities[id].unit).rng);
+    target = find_weakest_opp_in_range(id,entities[id].unit->mov+entities[id].unit->rng);
     if(target == -1)
     {
       action = PASS;
@@ -67,57 +65,6 @@ int determine_unit_action(char id)
       action = MOVE;
     }
   }
-  // switch(entities[id].stamina)
-  // {
-  //   case 0:
-  //   case 1:
-  //   target = -1;
-  //   action = PASS;
-  //   break;
-
-    // case 2:
-    // target = find_weakest_opp_in_range(id,(*entities[id].unit).mov+(*entities[id].unit).rng);
-    // if(target == -1)
-    // {
-    //   action = PASS;
-    // }
-    // else
-    // {
-    //   action = MOVE;
-    // }
-    // break;
-
-    // case 3:
-    // target = find_weakest_opp_in_range(id,(*entities[id].unit).mov+(*entities[id].unit).rng);
-    // if(target == -1)
-    // {
-    //   target = find_critical_unit();
-    //   if(target != -1)
-    //   {
-    //     len = get_path(entities[id].pos,entities[target].pos,path,battle_grid,2,6,entities[id].unit->ign);
-    //     get_unit_radius(entities[id].pos,(*entities[id].unit).mov,CPU,0);
-    //
-    //     for(i=0; i<len; i++)
-    //     {
-    //       for(j=0; j<map_size+1; j++)
-    //       {
-    //         if(path[i] == map[j].ownX + (map[j].ownY*16) && battle_grid[path[i]] == 0)
-    //         {
-    //           action = MOVE;
-    //           return path[i];
-    //         }
-    //       }
-    //     }
-    //     action = PASS;
-    //     return -1;
-    //   }
-    //   action = PASS;
-    //   return -1;
-    // }
-    // action = MOVE;
-    // break;
-  // }
-  // action = PASS;
   return target;
 }
 
@@ -127,11 +74,14 @@ int find_weakest_opp_in_range(char id, char range)
   int target_pos;
   target_pos = -1;
   get_opps_in_range(id,range);
-  // put_number(num_of_units_in_range,3,0,9+(g++));
 
   while(target_pos == -1 && num_of_units_in_range > 0)
   {
     weakest = find_weakest_opp();
+    // if(weakest == 74)
+    // {
+    //   put_number(id,3,0,0);
+    // }
     get_attackable_squares(weakest,id);
     target_pos = get_attack_square(weakest,id);
     if(target_pos == -1)
@@ -140,7 +90,6 @@ int find_weakest_opp_in_range(char id, char range)
     }
   }
   // put_number(target_pos,3,0,9+(g++));
-  put_number(num_of_units_in_range,3,5,5);
   return target_pos;
 }
 
@@ -153,7 +102,7 @@ char find_critical_unit()
   for(i=0; i<num_of_players; i++)
   {
     rating = calc_unit_rating(player_units[i]);
-    // put_number(rating,4,0,9+(g++));
+
     if (lowest > rating)
     {
       lowest = rating;
@@ -176,11 +125,16 @@ void units_in_atk_zone(char id)
   pos = entities[id].pos;
   load_coords(id);
   len = get_pattern_length(id);
+
   for(i=0; i<len; i++)
   {
     square = pos+coords[i*2]+coords[(i*2)+1];
     opp_id = battle_grid[square];
-    if(square < 224 && opp_id != 0 && entities[opp_id-1].team == PLAYER)
+    // if(opp_id)
+    // {
+    //   put_number(entities[opp_id].id,3,0,4+(g++));
+    // }
+    if(square < 464 && opp_id != 0 && entities[opp_id-1].team == PLAYER)//change back to 224
     {
       units_in_range[num_of_units_in_range++] = opp_id-1;
     }
@@ -191,86 +145,14 @@ char units_in_move_zone(char id){}
 
 char units_in_danger_zone(char id){}
 
-// char calc_action_points(char ai_id, char player_id)
-// {
-//   int pts_total, distance;
-//   pts_total = 0;
-//   // distance = (calc_move_cost(entities[ai_id].pos,entities[player_id].pos) / 2)-1;
-//   distance = has_path(ai_id,player_id);
-//   // put_number(distance,3,5,10);
-//   pts_total += get_distance_points(distance);
-//   //unit stamina
-//   // pts_total += (-15 + (entities[ai_id].stamina * 10));
-//   pts_total += (entities[ai_id].stamina * 5);
-//   //enemy health
-//   pts_total += get_health_points(entities[player_id].army_size);
-//   //enemy stamina
-//   // pts_total += (15 - (entities[player_id].stamina * 5));
-//   pts_total += (entities[player_id].stamina * 5) * -1;
-//   //nearby engaged
-//   pts_total += (entities[player_id].nearby_engaged * 15);
-//   return pts_total;
-// }
-//
-// char has_path(char ai_id, char player_id)
-// {
-//   char len;
-//   len = get_path(entities[ai_id].pos,entities[player_id].pos,path,battle_grid,2,4);
-//   if(len == -1)
-//   {
-//     return 99;
-//   }
-//   else
-//   {
-//     return len;
-//   }
-// }
-//
-// char get_distance_points(char distance)
-// {
-//   if(distance == 0)
-//   {
-//     return 30;
-//   }
-//   if(distance < 4) //move distance
-//   {
-//     return 15;
-//   }
-//   if(distance > 6) //outside move distance +2
-//   {
-//     return -30;
-//   }
-//   if(distance > 3) //outside move distance
-//   {
-//     return -15;
-//   }
-// }
-//
-// char get_health_points(char num_of_units)
-// {
-//   if(num_of_units > 11)
-//   {
-//     return 0;
-//   }
-//   if(num_of_units > 7)
-//   {
-//     return 5;
-//   }
-//   if(num_of_units > 4)
-//   {
-//     return 10;
-//   }
-//   return 15;
-// }
-
 ai()
 {
   g = 0;
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
-    set_cursor_pos(entities[ai_units[ai_tracker]].pos);
+    // set_cursor_pos(entities[ai_units[ai_tracker]].pos);
     satb_update();
-    sync(45);
+    // sync(45);
     ai_unit(ai_units[ai_tracker]);
   }
   start_turn(PLAYER);
@@ -279,7 +161,7 @@ ai()
 void ai_unit(char id)
 {
   int traveled, pos;
-  char d, result, continue_move;
+  char result, continue_move;
   continue_move = 1;
   // if(entities[id].actionable)
   while(continue_move)
@@ -288,28 +170,28 @@ void ai_unit(char id)
       // put_number(pos,3,0,9+(g++));
       switch(action)
       {
-
         case PASS:
         continue_move = 0;
-        update_map();
-        draw_actions();
+        // draw_npcs();
+        // update_map();
+        // cycle_animations();
+        // draw_actions();
         break;
 
         case MOVE: //move a unit
-        set_cursor_pos(pos);
+        // set_cursor_pos(pos);
         highlight(entities[id].pos,0xB000,3);
         satb_update();
-        sync(30);
+        // sync(30);
         move_unit(pos,entities[id].pos);
-        update_map();
-        draw_actions();
+        // update_map();
+        // draw_actions();
         satb_update();
-        // ai_timer = 20;
         break;
 
         case ATTACK: //attack a unit
         pattern(entities[id].pos,0xC000,coords,1);
-        set_cursor_pos(entities[pos].pos);
+        // set_cursor_pos(entities[pos].pos);
         satb_update();
         sync(60);
         result = attack_unit(entities[pos].pos,entities[id].pos);
@@ -317,7 +199,7 @@ void ai_unit(char id)
         {
           ai_tracker--;
         }
-        put_string("             ",6,2);
+        // put_string("             ",6,2);
         continue_move = 0;
         init_ai();
         break;
@@ -340,12 +222,13 @@ void start_turn(char team)
     if(team == entities[i].team)
     {
       entities[i].actionable = 1;
-      replenish_stamina(i);
+      // replenish_stamina(i);
     }
   }
   init_ai();
-  draw_actions();
-  update_map();
+  // draw_actions();
+  // update_map();
+  // cycle_animations();
   satb_update();
   vsync();
 }
@@ -363,18 +246,16 @@ int furthest_can_travel(char path_length)
   else
   {
     // return path[max_moves - path_length];
-    // put_number(path_length,3,5,10);
     return path[1];
   }
 }
 
 void get_opps_in_range(char id, char range)
 {
-  char i, pos;
+  int i, pos;
   num_of_units_in_range = 0;
   get_unit_radius(entities[id].pos,range,entities[id].team,1);
-
-  for(i=0; i<map_size+1; i++)
+  for(i=0; i<map_size; i++)
   {
     pos = map[i].ownX + (map[i].ownY*16);
     if(battle_grid[pos] != 0)
@@ -383,12 +264,7 @@ void get_opps_in_range(char id, char range)
       {
         units_in_range[num_of_units_in_range++] = battle_grid[pos]-1;
       }
-      // continue;
     }
-    // if(entities[battle_grid[pos]-1].team != CPU)
-    // {
-    //   units_in_range[num_of_units_in_range++] = battle_grid[pos]-1;
-    // }
   }
 }
 
@@ -400,6 +276,7 @@ char find_weakest_opp()
   weakest_total = 9999;
   for(i=0; i<num_of_units_in_range; i++)
   {
+    // put_number(units_in_range[i],3,0,4+(g++));
     id = units_in_range[i];
     // army_size = entities[id].army_size;
     // army_atk = entities[id].unit.atk * army_size;
@@ -422,10 +299,6 @@ int calc_unit_rating(char id)
   atk = (int)entities[id].unit->atk * army_size;
   def = (int)entities[id].unit->def * army_size;
   return atk + (def*2);
-  // put_number(entities[id].unit->atk,4,0,9+(g++));
-
-  // return ((((int)entities[id].unit->atk) * army_size)*2) + (((int)entities[id].unit->def) * army_size);
-  // return (entities[id].unit.def * army_size)
 }
 
 void pop_unit_from_range(char id)
@@ -479,7 +352,7 @@ int get_attack_square(char id, char atkr)
   return -1;
 }
 
-print_path(char path_length)
+void print_path(char path_length)
 {
   int i;
   for(i=0; i<path_length; i++)

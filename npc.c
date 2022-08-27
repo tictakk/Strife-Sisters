@@ -12,11 +12,12 @@
 struct npc{
   unsigned char pos_x, pos_y, type, active, frame, pal;
 };
+
 const char npc_level_data[18] = {
   0xFF, 0xFF, 0xFF, 10, 7, MAN_NPC, 25, 8, 11, WOMAN_NPC, 25, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x80, 0x80, 0x80 };
+const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,19,21,22,22,25,25,25,25,25,25,25,25};
 
@@ -25,12 +26,14 @@ struct npc npcs[MAX_NPCS];
 char npc_count = 0;
 char npc_type_count = 0;
 char cmdr_pal_count = 0;
+char current_frame = 0;
 
 void init_npcs()
 {
   npc_count = 0;
   npc_type_count = 0;
   cmdr_pal_count = 26;
+  current_frame = 0;
 
   load_palette(17,sldpal,2);
   load_palette(19,dmnpal,2);
@@ -41,8 +44,7 @@ void init_npcs()
 
 void clear_npcs()
 {
-  char i;
-  // init_npcs();
+  int i;
   for(i=0; i<MAX_UNIT_TYPES; i++)
   {
     npc_vram[i] = 0;
@@ -73,7 +75,6 @@ void reset_npcs()
   clear_npcs();
 }
 
-// void load_npcs(int level)
 void load_npcs(char *data)
 {
   int i;
@@ -147,7 +148,7 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],woman_walk,0x100);
           break;
 
-          case BANDIT_UNIT:
+          case AXE_UNIT:
           load_vram(npc_vram[type],bnd,0x100);
           // put_string("error bandit",5,5);
           // put_number(npc_count,2,13,5);
@@ -179,10 +180,17 @@ void add_npc(char x, char y, char type, char pal)
   }
 }
 
+void increment_frame()
+{
+  current_frame = (current_frame + 1) % 6;
+}
+
 void draw_npcs(char sprite_offset)
 {
   char i;
   int x, y;
+  increment_frame();
+
   for(i=0; i<npc_count; i++)
   {
     x = npcs[i].pos_x * 16;
@@ -194,14 +202,33 @@ void draw_npcs(char sprite_offset)
 void draw_npc(char sprite_no, int x, int y, char index)
 {
   int pattern;
-  char frame;
+  // char frame;
 
-  pattern = npc_vram[npcs[index].type];//NPC_VRAM_START + (npcs[index].type * 0x100);
-  npcs[index].frame = (npcs[index].frame + 1) % 6;
-  frame = npcs[index].frame;
-  pattern += NPC_FRAMES[frame];
+  pattern = npc_vram[npcs[index].type];
+  // npcs[index].frame = (npcs[index].frame + 1) % 6;
+  // frame = npcs[index].frame;
+  // pattern += NPC_FRAMES[frame];
 
-  spr_make(sprite_no,x,y+yOffset,pattern,FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
+  spr_make(sprite_no,x,y+yOffset,pattern+NPC_FRAMES[current_frame],FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
+}
+
+void cycle_npcs()
+{
+  // int pattern;
+  // char i, frame, npc_start;
+  //
+  // pattern = npc_vram[npcs[0].type];
+  // npcs[0].frame = (npcs[0].frame + 1) % 6;
+  // frame = npcs[0].frame;
+  // pattern += NPC_FRAMES[frame];
+  //
+  // npc_start = 63 - npc_count;
+  // for(i=0; i<npc_count; i++, npc_start--)
+  // {
+  //   npcs[i].frame = frame;
+  //   spr_set(npc_start);
+  //   spr_pattern(pattern);
+  // }
 }
 
 void destroy_npc(char index)

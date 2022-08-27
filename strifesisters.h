@@ -7,7 +7,7 @@
 #define DEMON_UNIT 4
 #define HOUND_UNIT 5
 #define BLOB_UNIT 6
-#define BANDIT_UNIT 7
+#define AXE_UNIT 7
 #define PALADIN 8
 #define MONK 9
 #define SNPIER 10
@@ -19,9 +19,16 @@
 #define REI 16
 #define VIOLET 17
 #define KING 18
-#define CMDR_FOUR 19
-#define CMDR_FIVE 20
-#define CMDR_SIX 21
+#define ALUCARD 19
+#define KAIN 20
+#define SACHA 21
+#define ALMER 22
+#define VEN 23
+#define PHALC 24
+#define KURT 25
+#define GENERIC_ONE (22 + 16)
+#define GENERIC_TWO (23 + 16)
+#define GENERIC_THREE (24 + 16)
 
 const int EXP_CHART[10] = //ten levels max
 {
@@ -33,13 +40,13 @@ enum battle_map_type{
 };
 
 struct battle_map_data{
-  unsigned char player_start_pos[3], cpu_start_pos[3];
+  unsigned char player_start_pos[6], cpu_start_pos[6];
   int map_no;
   int pos;
   enum battle_map_type map_type;
 };
 
-struct battle_map_data battle_map_metadata[NO_OF_MAPS];
+struct battle_map_data battle_map_metadata[6];
 
 char *location_lookup(int position)
 {
@@ -101,7 +108,7 @@ void init_map_data()
   battle_map_metadata[1].cpu_start_pos[1] = 210;
   battle_map_metadata[1].cpu_start_pos[2] = 219;
   battle_map_metadata[1].map_type = WILD;
-  battle_map_metadata[1].map_no = 1;
+  battle_map_metadata[1].map_no = 0;
 
   battle_map_metadata[2].player_start_pos[0] = 71;
   battle_map_metadata[2].player_start_pos[1] = 51;
@@ -126,9 +133,9 @@ void init_map_data()
   // battle_map_metadata[3].pos = 705;
   // battle_map_metadata[4].pos = 713;
 
-  battle_map_metadata[3].map_no = 3;
-  battle_map_metadata[4].map_no = 4;
-  battle_map_metadata[5].map_no = 5;
-  battle_map_metadata[6].map_no = 6;
-  battle_map_metadata[7].map_no = 7;
+  // battle_map_metadata[3].map_no = 3;
+  // battle_map_metadata[4].map_no = 4;
+  // battle_map_metadata[5].map_no = 5;
+  // battle_map_metadata[6].map_no = 6;
+  // battle_map_metadata[7].map_no = 7;
 }

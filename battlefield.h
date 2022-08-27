@@ -47,10 +47,11 @@ typedef struct{
   char army_size, team, id, actionable, nearby_engaged;
 } Entity;
 
+char updated;
 int the_sy_val;
 int exp_gained;
 int gold_gained;
-unsigned char battle_grid[MAP_SIZE];
+unsigned char battle_grid[464];//MAP_SIZE];
 Entity entities[MAX_ENTITIES];
 char selector_mode, actions;
 int sel_x, sel_y, turn, menu_x, menu_y, cursor_x, cursor_y, unit_selected;
@@ -60,7 +61,6 @@ char two_total;
 char cost;
 char cmdr_fig_pal;
 char current_turn;
-int ai_timer;
 int path[20];
 char g;
 char b_map_id;
@@ -98,23 +98,6 @@ void load_coords(char id)
 {
   switch((*entities[id].unit).unit_type)
   {
-    default:
-    case BLOBS:
-    case FLYERS:
-    case INFANTRY:
-    coords[0] = sword_coord1[0];
-    coords[1] = sword_coord1[1];
-
-    coords[2] = sword_coord2[0];
-    coords[3] = sword_coord2[1];
-
-    coords[4] = sword_coord3[0];
-    coords[5] = sword_coord3[1];
-
-    coords[6] = sword_coord4[0];
-    coords[7] = sword_coord4[1];
-    break;
-
     case SPEARS:
     coords[0] = spear_coord1[0];
     coords[1] = spear_coord1[1];
@@ -159,6 +142,23 @@ void load_coords(char id)
 
     coords[14] = archer_coord8[0];
     coords[15] = archer_coord8[1];
+    break;
+
+    case BLOBS:
+    case FLYERS:
+    case INFANTRY:
+    default:
+    coords[0] = sword_coord1[0];
+    coords[1] = sword_coord1[1];
+
+    coords[2] = sword_coord2[0];
+    coords[3] = sword_coord2[1];
+
+    coords[4] = sword_coord3[0];
+    coords[5] = sword_coord3[1];
+
+    coords[6] = sword_coord4[0];
+    coords[7] = sword_coord4[1];
     break;
   }
 }
@@ -209,13 +209,27 @@ void display_unit_info(char entity_id)
 
 void update_selector_pos(int x, int y)
 {
+  if(sy == 208 && y > 0 && s_y < 464)
+  {
+    yOffset -= 16;
+    s_y += 16;
+    update_map();
+    scroll(0,s_x,s_y+32,32,224,0xC0);
+  }
+  else if(sy == 32 && y < 0 && s_y > 0)
+  {
+    yOffset += 16;
+    s_y -= 16;
+    update_map();
+    scroll(0,s_x,s_y+32,32,224,0xC0);
+  }
   sx += x;
-  sy = max((sy + y),32);
+  sy = min(max((sy + y),32),208);
 }
 
 void draw_selector()
 {
-  spr_set(0);
+  spr_set(SELECTOR);
   spr_x(sx);
   spr_y(sy);
 }
@@ -223,30 +237,32 @@ void draw_selector()
 void hide_menu()
 {
   unhighlight();
-  hide_selector();
+  // hide_selector();
+  hide_cursor();
+  scroll(1,0,0,0,32,0x80);
 }
 
 void unhighlight()
 {
-  load_map(0,2,0,0,16,14);
+  load_map(0,2,0,0,16,29);
 }
 
 void hide_cursor()
 {
-  spr_set(0);
+  spr_set(SELECTOR);
   spr_hide();
 }
 
 void hide_selector()
 {
-  spr_set(1);
+  spr_set(CURSOR);
   spr_hide();
 }
 
 void display_selector()
 {
-  spr_make(0,selector_x,selector_y,0x68C0,FLIP_MAS|SIZE_MAS,SZ_16x16,3,1);
-  spr_show(0);
+  spr_make(SELECTOR,sx,sy,0x68C0,FLIP_MAS|SIZE_MAS,SZ_16x16,3,1);
+  spr_show(SELECTOR);
 }
 
 char check_action_cost(char required_cost){ return 1; }
@@ -261,11 +277,9 @@ char destroy_entity(int id)
   char entity_id, killed;
   killed = 0;
   entity_id = id;
-  // entity_id = battle_grid[grid_pos]-1;
 
   if(entities[entity_id].army_size == 0)
   {
-    // battle_grid[grid_pos] = 0;
     battle_grid[entities[id].pos] = 0;
     killed = 1;
     if(entities[entity_id].team == PLAYER)
@@ -279,7 +293,7 @@ char destroy_entity(int id)
       gold_gained += range(0,20);
       two_total--;
     }
-    for(i=0; i<MAP_SIZE; i++)
+    for(i=0; i<464; i++)
     {
       if(battle_grid[i] > entity_id+1)
       {
@@ -302,7 +316,7 @@ void remove_unit_from_grid(int grid_pos)
   entity_id = battle_grid[grid_pos]-1;
 
   battle_grid[grid_pos] = 0;
-  for(i=0; i<MAP_SIZE; i++)
+  for(i=0; i<464; i++)
   {
     if(battle_grid[i] > entity_id)
     {
@@ -346,10 +360,10 @@ void move_unit(int to, int from)
   battle_grid[to] = battle_grid[from];
   battle_grid[from] = 0;
   entities[id].pos = to;
-  deduct_stamina(id);
+  // deduct_stamina(id);
 
   selector_mode = SELECT_MODE;
-  // put_number(battle_grid[to],3,5,5);
+  updated = 1;
   update_map();
 }
 
@@ -361,6 +375,7 @@ void select_unit(int unit)
   menu_option = MENU_ATTACK;
   // hide_menu();
   // highlight_near_squares(unit,0x1000,2,0,2,0);
+
   highlight(unit,0xB000,(*entities[battle_grid[unit]-1].unit).mov);
   display_selector();
 }
@@ -543,4 +558,3 @@ void print_new_stats(char cmdr_id)
 void update_map();
 void begin_battle(int src, int dst, int src_p, int dst_p);
 void set_cursor_pos(int pos);
-char square_adjacent(int origin, int desired);
