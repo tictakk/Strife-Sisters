@@ -26,27 +26,22 @@
 #define VEN 23
 #define PHALC 24
 #define KURT 25
-#define GENERIC_ONE (22 + 16)
-#define GENERIC_TWO (23 + 16)
-#define GENERIC_THREE (24 + 16)
+#define SWORD_CMDR 35
+#define SPEAR_CMDR 36
+#define ARCH_CMDR 37
+#define GENERIC_CMDR 38
+#define HOUND_CMDR 39
+#define BLOB_CMDR 40
+
+#define ROW_ONE 0
+#define ROW_TWO 1
+#define ROW_THREE 2
+#define MAX_UNITS_PER_ROW 3
 
 const int EXP_CHART[10] = //ten levels max
 {
   50, 150, 350, 700, 1500, 2500, 5000, 10000, 25000, 50000
 };
-
-enum battle_map_type{
-  CASTLE, VILLAGE, WILD, QUEST
-};
-
-struct battle_map_data{
-  unsigned char player_start_pos[6], cpu_start_pos[6];
-  int map_no;
-  int pos;
-  enum battle_map_type map_type;
-};
-
-struct battle_map_data battle_map_metadata[6];
 
 char *location_lookup(int position)
 {
@@ -86,56 +81,4 @@ char *location_lookup(int position)
     default:
     return "No Location";
   }
-}
-
-void init_map_data()
-{
-  battle_map_metadata[0].player_start_pos[0] = 71;
-  battle_map_metadata[0].player_start_pos[1] = 51;
-  battle_map_metadata[0].player_start_pos[2] = 60;
-
-  battle_map_metadata[0].cpu_start_pos[0] = 199;
-  battle_map_metadata[0].cpu_start_pos[1] = 210;
-  battle_map_metadata[0].cpu_start_pos[2] = 218;
-  battle_map_metadata[0].map_type = WILD;
-  battle_map_metadata[0].map_no = 0;
-
-  battle_map_metadata[1].player_start_pos[0] = 71;
-  battle_map_metadata[1].player_start_pos[1] = 51;
-  battle_map_metadata[1].player_start_pos[2] = 60;
-
-  battle_map_metadata[1].cpu_start_pos[0] = 199;
-  battle_map_metadata[1].cpu_start_pos[1] = 210;
-  battle_map_metadata[1].cpu_start_pos[2] = 219;
-  battle_map_metadata[1].map_type = WILD;
-  battle_map_metadata[1].map_no = 0;
-
-  battle_map_metadata[2].player_start_pos[0] = 71;
-  battle_map_metadata[2].player_start_pos[1] = 51;
-  battle_map_metadata[2].player_start_pos[2] = 60;
-
-  battle_map_metadata[2].cpu_start_pos[0] = 199;
-  battle_map_metadata[2].cpu_start_pos[1] = 210;
-  battle_map_metadata[2].cpu_start_pos[2] = 219;
-  battle_map_metadata[2].map_type = VILLAGE;
-  battle_map_metadata[2].map_no = 2;
-
-  battle_map_metadata[0].pos = 994;
-  battle_map_metadata[1].pos = 903;
-  battle_map_metadata[2].pos = 833;
-  battle_map_metadata[3].pos = 807;
-  battle_map_metadata[4].pos = 705;
-  battle_map_metadata[5].pos = 713;
-
-  // battle_map_metadata[0].pos = 903;
-  // battle_map_metadata[1].pos = 833;
-  // battle_map_metadata[2].pos = 807;
-  // battle_map_metadata[3].pos = 705;
-  // battle_map_metadata[4].pos = 713;
-
-  // battle_map_metadata[3].map_no = 3;
-  // battle_map_metadata[4].map_no = 4;
-  // battle_map_metadata[5].map_no = 5;
-  // battle_map_metadata[6].map_no = 6;
-  // battle_map_metadata[7].map_no = 7;
 }

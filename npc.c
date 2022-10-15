@@ -7,7 +7,7 @@
 #define NO_OF_UNIT_TYPES 12
 #define NO_OF_BASIC_TYPE (NO_OF_NPC_TYPES + NO_OF_UNIT_TYPES)
 #define MAX_UNIT_TYPES (NO_OF_NPC_TYPES + NO_OF_UNIT_TYPES + TOTAL_COMMANDERS)
-#define UNIT_VRAM_START 0x3800
+#define UNIT_VRAM_START 0x5200
 
 struct npc{
   unsigned char pos_x, pos_y, type, active, frame, pal;
@@ -19,7 +19,10 @@ const char npc_level_data[18] = {
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
-const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,19,21,22,22,25,25,25,25,25,25,25,25};
+const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,
+                                        19,21,23,22,23,
+                                        24,25,25,25,25,
+                                        25,25};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -37,9 +40,10 @@ void init_npcs()
 
   load_palette(17,sldpal,2);
   load_palette(19,dmnpal,2);
-  load_palette(21,blobpal,1);
-  load_palette(22,banditpal,1);
+  load_palette(21,blobpal,2);
+  load_palette(23,banditpal,2);
   load_palette(25,npc_pal,2);
+  load_palette(31,dark,1);
 }
 
 void clear_npcs()
@@ -106,6 +110,7 @@ void add_npc(char x, char y, char type, char pal)
     npcs[npc_count].pos_y = y;
     npcs[npc_count].type = type;
     npcs[npc_count].pal = pal;
+    npcs[npc_count].active = 1;
     npcs[npc_count++].frame = 0;
     if(npc_vram[type] == 0)
     {
@@ -153,6 +158,7 @@ void add_npc(char x, char y, char type, char pal)
           // put_string("error bandit",5,5);
           // put_number(npc_count,2,13,5);
           break;
+
           case MAGE_UNIT:
           put_string("error mage",5,5);
           put_number(npc_count,2,13,6);
@@ -202,38 +208,16 @@ void draw_npcs(char sprite_offset)
 void draw_npc(char sprite_no, int x, int y, char index)
 {
   int pattern;
-  // char frame;
-
   pattern = npc_vram[npcs[index].type];
-  // npcs[index].frame = (npcs[index].frame + 1) % 6;
-  // frame = npcs[index].frame;
-  // pattern += NPC_FRAMES[frame];
-
   spr_make(sprite_no,x,y+yOffset,pattern+NPC_FRAMES[current_frame],FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
 }
 
-void cycle_npcs()
-{
-  // int pattern;
-  // char i, frame, npc_start;
-  //
-  // pattern = npc_vram[npcs[0].type];
-  // npcs[0].frame = (npcs[0].frame + 1) % 6;
-  // frame = npcs[0].frame;
-  // pattern += NPC_FRAMES[frame];
-  //
-  // npc_start = 63 - npc_count;
-  // for(i=0; i<npc_count; i++, npc_start--)
-  // {
-  //   npcs[i].frame = frame;
-  //   spr_set(npc_start);
-  //   spr_pattern(pattern);
-  // }
-}
+void cycle_npcs(){}
 
 void destroy_npc(char index)
 {
   char i;
+  put_number(npc_count-1,3,1,36);
   for(i=index; i<npc_count; i++)
   {
     memcpy(&npcs[i],&npcs[i+1],sizeof(struct npc));

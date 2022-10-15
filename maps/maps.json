@@ -1,0 +1,11 @@
+[
+  {
+    "map_id": 0,
+    "map_x": 16,
+    "map_y": 29,
+    "player_start_positions": [133,99,103,0,0,0],
+    "cpu_start_positions": [261,310,0,0,0,0],
+    "cpu_commander_ids": [38,38,0,0,0,0],
+    "event_positions": [0,0,0,0,0,0,0,0]
+  }
+]

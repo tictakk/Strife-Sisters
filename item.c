@@ -15,6 +15,7 @@
 #define SPD_ATT 2
 #define AP_ATT 3
 #define HP_ATT 4
+#define NO_ATT 5
 
 typedef struct{
 	char type, attribute, modifier, rarity;
@@ -69,7 +70,7 @@ void initialize_items()
 	items[11].attribute = SPD_ATT;
 	items[12].attribute = HP_ATT;
 	items[13].attribute = HP_ATT;
-	items[14].attribute = HP_ATT;
+	items[14].attribute = NO_ATT;
 
 	items[0].modifier = 1;
 	items[1].modifier = 1;
@@ -85,7 +86,7 @@ void initialize_items()
 	items[11].modifier = 3;
 	items[12].modifier = 3;
 	items[13].modifier = 3;
-	items[14].modifier = 3;
+	items[14].modifier = 0;
 }
 
 char get_drop_by_odds(char unit_level)
@@ -173,31 +174,14 @@ void display_attribute_string(char item_no, char x, char y)
 		put_string("HP+",x,y);
 		put_number(items[item_no].modifier,2,x+3,y);
 		break;
+
+		default:
+		put_string("    ",x,y);
+		put_string("   ",x+3,y);
+		break;
 	}
 }
 
 void display_item_info(char real_index, int x, int y)
 {
-	// put_string("       ",_sx,_sy+1);
-	// put_string("    ",_sx,_sy+2);
-	// put_string("    ",_sx+3,_sy+2);
-	// put_string("    ",_sx,_sy+3);
-	// put_string("    ",_sx+3,_sy+3);
-	// put_string("    ",_sx,_sy+4);
-	// put_string("    ",_sx+3,_sy+4);
-	// put_string("       ",_sx,_sy+7);
-
-	// put_string(commanders[cmdr_id].name,_sx,_sy+1);
-	// put_string("Lv:",_sx,_sy+2);
-	// put_number(commanders[cmdr_id].lvl,2,_sx+3,_sy+2);
-	// put_string("AP:",_sx,_sy+3);
-	// put_number(commanders[cmdr_id].ap,2,_sx+3,_sy+3);
-	// put_string("EX:",_sx,_sy+4);
-	// put_number(commanders[cmdr_id].exp,2,_sx+3,_sy+4);
-	// put_string("Item:",_sx,_sy+6);
-	//
-	// if(commanders[cmdr_id].no_of_items)
-	// {
-	// 	put_string(items[commanders[cmdr_id].equipable].name,_sx,_sy+7);
-	// }
 }

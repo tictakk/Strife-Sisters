@@ -13,8 +13,9 @@
 #define DIALOG_MODE 7
 #define EXPLORE_MODE 8
 #define EXPLORE_MENU_MODE 9
+#define ACTION_MODE 10
 
-#define MAX_ENTITIES 42
+#define MAX_ENTITIES 13
 #define PLAYER 1
 #define CPU 2
 #define INF 0
@@ -29,8 +30,10 @@
 #define ATTACK_COST 2
 #define MERGE_COST 2
 
-#define MENU_ATTACK 0
-#define MENU_MOVE 1
+#define MENU_ATTACK 1
+#define MENU_MOVE 0
+#define MENU_END 3
+#define MENU_TURN 5
 #define MENU_SPLIT 2
 #define MENU_MERGE 99
 #define MENU_BACK 4
@@ -42,19 +45,17 @@
 #define COMMANDER_FIGURE_BEGIN 0x6000
 
 typedef struct{
-  Unit *unit;
-  int pos, hp;
+  // Unit *unit;
+  int pos;
   char army_size, team, id, actionable, nearby_engaged;
 } Entity;
 
-char updated;
-int the_sy_val;
 int exp_gained;
 int gold_gained;
 unsigned char battle_grid[464];//MAP_SIZE];
 Entity entities[MAX_ENTITIES];
 char selector_mode, actions;
-int sel_x, sel_y, turn, menu_x, menu_y, cursor_x, cursor_y, unit_selected;
+int sel_x, sel_y, turn, menu_x, menu_y, cursor_x, cursor_y, unit_selected, last_pos;
 char num_of_entities, menu_option;
 char one_total;
 char two_total;
@@ -68,6 +69,7 @@ char no_of_spawns;
 char map_type;
 char no_of_cpu_cmdrs;
 char no_of_player_cmdrs;
+char last_command;
 // const char spear_attack[4] = { 2, 0, 2, 0};
 
 const int archer_coord1[2] = {1,-16};
@@ -96,58 +98,52 @@ int coords[18];
 
 void load_coords(char id)
 {
-  switch((*entities[id].unit).unit_type)
-  {
-    case SPEARS:
-    coords[0] = spear_coord1[0];
-    coords[1] = spear_coord1[1];
-
-    coords[2] = spear_coord2[0];
-    coords[3] = spear_coord2[1];
-
-    coords[4] = spear_coord3[0];
-    coords[5] = spear_coord3[1];
-
-    coords[6] = spear_coord4[0];
-    coords[7] = spear_coord4[1];
-
-    // coords[4].x = spear_coord5[0];
-    // coords[4].y = spear_coord5[1];
-    //
-    // coords[5].x = spear_coord6[0];
-    // coords[5].y = spear_coord6[1];
-    break;
-
-    case MUSKETS:
-    coords[0] = archer_coord1[0];
-    coords[1] = archer_coord1[1];
-
-    coords[2] = archer_coord2[0];
-    coords[3] = archer_coord2[1];
-
-    coords[4] = archer_coord3[0];
-    coords[5] = archer_coord3[1];
-
-    coords[6] = archer_coord4[0];
-    coords[7] = archer_coord4[1];
-
-    coords[8] = archer_coord5[0];
-    coords[9] = archer_coord5[1];
-
-    coords[10] = archer_coord6[0];
-    coords[11] = archer_coord6[1];
-
-    coords[12] = archer_coord7[0];
-    coords[13] = archer_coord7[1];
-
-    coords[14] = archer_coord8[0];
-    coords[15] = archer_coord8[1];
-    break;
-
-    case BLOBS:
-    case FLYERS:
-    case INFANTRY:
-    default:
+  // switch((*entities[id].unit).unit_type)
+  // {
+  //   case SPEARS:
+  //   coords[0] = spear_coord1[0];
+  //   coords[1] = spear_coord1[1];
+  //
+  //   coords[2] = spear_coord2[0];
+  //   coords[3] = spear_coord2[1];
+  //
+  //   coords[4] = spear_coord3[0];
+  //   coords[5] = spear_coord3[1];
+  //
+  //   coords[6] = spear_coord4[0];
+  //   coords[7] = spear_coord4[1];
+  //   break;
+  //
+  //   case MUSKETS:
+  //   coords[0] = archer_coord1[0];
+  //   coords[1] = archer_coord1[1];
+  //
+  //   coords[2] = archer_coord2[0];
+  //   coords[3] = archer_coord2[1];
+  //
+  //   coords[4] = archer_coord3[0];
+  //   coords[5] = archer_coord3[1];
+  //
+  //   coords[6] = archer_coord4[0];
+  //   coords[7] = archer_coord4[1];
+  //
+  //   coords[8] = archer_coord5[0];
+  //   coords[9] = archer_coord5[1];
+  //
+  //   coords[10] = archer_coord6[0];
+  //   coords[11] = archer_coord6[1];
+  //
+  //   coords[12] = archer_coord7[0];
+  //   coords[13] = archer_coord7[1];
+  //
+  //   coords[14] = archer_coord8[0];
+  //   coords[15] = archer_coord8[1];
+  //   break;
+  //
+  //   case BLOBS:
+  //   case FLYERS:
+  //   case INFANTRY:
+  //   default:
     coords[0] = sword_coord1[0];
     coords[1] = sword_coord1[1];
 
@@ -159,52 +155,35 @@ void load_coords(char id)
 
     coords[6] = sword_coord4[0];
     coords[7] = sword_coord4[1];
-    break;
-  }
+  //   break;
+  // }
 }
 
 char get_pattern_length(char id)
 {
-  switch((*entities[id].unit).unit_type)
-  {
-    case BLOBS:
-    case FLYERS:
-    case INFANTRY: return SWORD_ATTACK;
-    case SPEARS: return SPEAR_ATTACK;
-    case MUSKETS: return ARCHER_ATTACK;
-    default: return SWORD_ATTACK;
-  }
+  // switch((*entities[id].unit).unit_type)
+  // {
+  //   case BLOBS:
+  //   case FLYERS:
+  //   case INFANTRY: return SWORD_ATTACK;
+  //   case SPEARS: return SPEAR_ATTACK;
+  //   case MUSKETS: return ARCHER_ATTACK;
+  //   default: return SWORD_ATTACK;
+  // }
+  return SWORD_ATTACK;
 }
 
 void add_entity(char type, char size, char team, char pal, char unit_id, char cmdr, char id, int pos)
 {
   entities[num_of_entities].army_size = size;
   entities[num_of_entities].team = team;
-  // entities[num_of_entities].pal = pal;
-  entities[num_of_entities].unit = &unit_list[unit_id];
-  // entities[num_of_entities].unit = unit;
-  entities[num_of_entities].id = unit_list[unit_id].id;
+  // entities[num_of_entities].unit = &unit_list[unit_id];
+  entities[num_of_entities].id = cmdr;//unit_list[unit_id].id;
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
-  // entities[num_of_entities].stamina = 3;
-  entities[num_of_entities].hp = unit_list[unit_id].hp * (int)size;
+  // entities[num_of_entities].hp = unit_list[unit_id].hp * (int)size;
   entities[num_of_entities++].nearby_engaged = 1; //should start at 0
-  // num_of_entities += 1;
   add_npc(pos%16,pos/16,unit_list[unit_id].id,pal);
-}
-
-void display_error_message(char *str)
-{
-  put_string(str,10,1);
-  clear_error_message();
-}
-
-void display_unit_info(char entity_id)
-{
-  put_string("unit id:",1,1);
-  put_string("army_size:",1,2);
-  put_number(entity_id,2,10,1);
-  put_number(entities[entity_id-1].army_size,2,13,2);
 }
 
 void update_selector_pos(int x, int y)
@@ -225,6 +204,7 @@ void update_selector_pos(int x, int y)
   }
   sx += x;
   sy = min(max((sy + y),32),208);
+  draw_selector();
 }
 
 void draw_selector()
@@ -249,26 +229,17 @@ void unhighlight()
 
 void hide_cursor()
 {
-  spr_set(SELECTOR);
+  spr_set(CURSOR);
   spr_hide();
 }
 
 void hide_selector()
 {
-  spr_set(CURSOR);
+  spr_set(SELECTOR);
   spr_hide();
 }
 
-void display_selector()
-{
-  spr_make(SELECTOR,sx,sy,0x68C0,FLIP_MAS|SIZE_MAS,SZ_16x16,3,1);
-  spr_show(SELECTOR);
-}
-
 char check_action_cost(char required_cost){ return 1; }
-
-void draw_actions(){}
-void load_actions(){}
 
 char destroy_entity(int id)
 {
@@ -289,7 +260,7 @@ char destroy_entity(int id)
     else
     {
       get_random_item_by_level(0);
-      exp_gained += entities[entity_id].unit->exp;
+      exp_gained += 25;//entities[entity_id].unit->exp;
       gold_gained += range(0,20);
       two_total--;
     }
@@ -335,49 +306,31 @@ void remove_unit_from_grid(int grid_pos)
   num_of_entities--;
 }
 
-void deduct_actions(char num_of_actions)
-{
-  char i, action_offset, actions_left;
-  actions_left = 6 - actions;
-  action_offset = 10 - actions_left;
-  actions -= num_of_actions;
-
-  for(i=num_of_actions; i>0; i--)
-  {
-    spr_set(action_offset-i);
-    spr_hide();
-  }
-}
-
 void move_unit(int to, int from)
 {
   char id;
-  //highlight(from,0,entities[battle_grid[from]-1].unit->mov);//actions/MOVE_COST
-  hide_menu();
+  // hide_menu();
   id = battle_grid[from] - 1;
-  // if(entities[id].stamina < 0){ return;}
 
+  last_pos = from;
   battle_grid[to] = battle_grid[from];
   battle_grid[from] = 0;
   entities[id].pos = to;
-  // deduct_stamina(id);
+  unit_selected = to;
 
-  selector_mode = SELECT_MODE;
-  updated = 1;
+  // selector_mode = SELECT_MODE;
   update_map();
 }
-
-void deduct_stamina(char id){}
 
 void select_unit(int unit)
 {
   selector_mode = PLACE_MODE;
   menu_option = MENU_ATTACK;
-  // hide_menu();
-  // highlight_near_squares(unit,0x1000,2,0,2,0);
+  // hide_selector();
 
-  highlight(unit,0xB000,(*entities[battle_grid[unit]-1].unit).mov);
-  display_selector();
+  draw_selector();
+  // highlight(unit,0xC000,(*entities[battle_grid[unit]-1].unit).mov);
+  highlight(unit,0xC000,3);
 }
 
 int calc_move_cost(int origin, int dest)
@@ -395,20 +348,20 @@ char attack_unit(int src, int dst)
   int attacker, target;//, result;
   attacker = battle_grid[dst]-1;
   target = battle_grid[src]-1;
-  // if(entities[attacker].stamina < 0)
+
+  // put_number(attacker,3,15,15);
+  // put_number(target,3,15,16);
+  // return 2;
+  // if(entities[attacker].actionable == 0)
   // {
-  //   display_error_message("not enough stamina");
   //   return 2;
   // }
-  if(entities[attacker].actionable == 0)
-  {
-    display_error_message("unit has attacked");
-    return 2;
-  }
   if(entities[attacker].team != entities[target].team)
   {
-    if(attackable(attacker,target,coords))
+    // if(attackable(attacker,target,coords))
+    if(1)
     {
+      last_command = selector_mode;
       entities[attacker].actionable = 0;
       // deduct_stamina(attacker);
       // deduct_stamina(target);
@@ -419,28 +372,22 @@ char attack_unit(int src, int dst)
       cursor_y = -32;
       selector_mode = SELECT_MODE;
       return begin_battle(attacker,target,dst,src);
+      // return 2;
       // selector_mode = SELECT_MODE;
       // return result;
       // entities[attacker].actionable = 0;
     }
     else
     {
-      display_error_message("unattackable");
-      // put_number(attacker,4,23,1);
       return -1;
     }
   }
   else
   {
-    display_error_message("invalid target");
     return -1;
   }
-}
 
-void clear_error_message()
-{
-  sync(60);
-  put_string("              ",10,1);
+  return -1;
 }
 
 void clear_text_field()
@@ -553,6 +500,48 @@ void print_new_stats(char cmdr_id)
     }
     wait_for_I_input();
   }
+}
+
+void undo()
+{
+  // battle_grid[unit_selected];
+  set_cursor_pos(last_pos);
+  move_unit(last_pos,unit_selected);
+  print_menu();
+  select_unit(unit_selected);
+  hide_cursor();
+  // hide_selector();
+  // update_map();
+}
+
+void show_selectable_menu_options()
+{
+  if(selector_mode == ACTION_MODE)
+  {
+    set_font_pal(11);
+    print_menu();
+    set_font_pal(10);
+    //check if anyone is attackable..
+    if(1)
+    {
+      put_string("ATK",20,2);
+    }
+    put_string("End",24,2);
+  }
+  else
+  {
+    print_menu();
+  }
+}
+
+void print_menu()
+{
+  put_string("MOV",20,1);
+  put_string("ATK",20,2);
+  put_string("ART",24,1);
+  put_string("End",24,2);
+  put_string("TLK",28,1);
+  put_string("EXT",28,2);
 }
 
 void update_map();

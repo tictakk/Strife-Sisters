@@ -2,8 +2,12 @@
 #include "npc.c"
 #include "battlefield.c"
 
-#define PANEL_VRAM 0x2000
+// extern void wave_1(void);
+// extern void wave_2(void);
+extern const char wave_1[32];
+extern const char wave_2[32];
 
+#define PANEL_VRAM 0x2000
 #define OVERWORLD 0
 #define SHOP_MENU 1
 #define RECRUIT_MENU 2
@@ -20,12 +24,14 @@
 #define BUY_CMDR_UNIT_MENU 13
 #define BUY_ITEM_MENU 14
 #define UNIT_SLIDER_MENU 15
+#define ROW_SELECT_MENU 16
 #define SECONDS 60
 
-char initialized = 0;
 char menu_state = 0;
 char menu_options = 0;
 char submenu_state = 0;
+
+char row_selected = 0;
 
 //party
 enum Direction party_direction;
@@ -41,17 +47,22 @@ char selected_unit = 0;
 char cmdr_selected = 0;
 char cycler = 0;
 char current = 0;
-char current_command_group = 0;
 char current_selected_castle = 0;
 int commander_select_cursor = 0;
 int last_selected_cursor = 0;
+int aahh = 0;
+char bbhh = 0;
+char chan = 0;
+
 char hz = 60;
 int secs = 180;
 
 void overworld_loop()
 {
 	char s;
-	num_of_spawns = 0;
+	row_selected = ROW_ONE;
+	aahh = 0b0000011111111111;
+	// bbhh = 0b0000011111111111;
 	s = script[0];
 	party_direction = NORTH;
 	s_y = 288;
@@ -66,15 +77,27 @@ void overworld_loop()
 	draw_npcs(5);
 	satb_update();
 	arrived(get_absolute_pos());
-	// write_text(5,40,script);
+	// #asm
+	// 	pha
+	// 	lda _aahh
+	// 	jsr _ChibiSound
+	// 	pla
+	// #endasm
+	// put_number(aahh,3,4,50);
+	// load_wavetable(wave_2);
+	// chirp(76);
+	// set_channel(1);
+	// chirp(76);
+	// set_channel(chan);
+	// chirp(76);
+
 	for(;;)
 	{
 		vsync();
+		// put_number(npc_count,3,1,36);
 		if(menu_state == 0)
 		{
 			tick();
-			// timer();
-
 			if(tic == 0)
 			{
 				int pos;
@@ -97,9 +120,6 @@ void overworld_loop()
 					{
 						if(overworld[pos] != ROAD)
 						{
-							// display_info_panel(1,18,13,3);
-							// put_number(pos,4,(s_x/8)+19,(s_y/8)+2);
-							// put_string(location_lookup(pos),(s_x/8)+19,(s_y/8)+2);
 							party_moving = 0;
 							party_walk = 0;
 							arrived(pos);
@@ -155,15 +175,12 @@ void overworld_loop()
 
 void arrived(int pos)
 {
-	// put_number(get_map_id_by_pos(pos),3,5,39);
-	story(get_map_id_by_pos(pos),PREBATTLE,0);
-	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+	// story(get_map_id_by_pos(pos),PREBATTLE,0);
+	// load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+	put_number(pos,4,15,45);
 	display_castle_menu(get_map_id_by_pos(pos));
-	spr_hide(0);
-	// display_info_panel(1,18,13,3);
-	// put_string(location_lookup(pos),(s_x/8)+19,(s_y/8)+2);
+	// spr_hide(0);
 }
-
 
 void set_direction(int sprite_no, enum Direction direction)
 {
@@ -199,43 +216,6 @@ void spawn_starting_enemies()
 {
 	init_npcs();
 	load_npcs(area_one);
-}
-
-void display_spawns()
-{
-}
-
-void load_unit(char id, int address, int index)
-{
-}
-
-void display_unit(int x, int y, int spr_no, int index)
-{
-	spr_make(spr_no+index,x,y,RECRUIT_VRAM+(index*0x100),FLIP_MAS|SIZE_MAS,SZ_16x32,25+index,1);
-}
-
-void spawn_enemy(char spawn_id, char unit_id, char atk, char def, char hp, char spd, char level)
-{
-	// int ran_n=0;
-	// enemy_spawns[spawn_id] = current_global_units;
-	// add_unit_to_pool(1,15,0,unit,atk,def,hp,spd);
-	// enemy_spawns[spawn_id] = unit_id;
-}
-
-void randomize_spawn(int level)
-{
-	// int r_swds, r_sprs, i, j, hp;
-	//
-	// r_swds = rand() & 3;
-	// r_sprs = 3 - r_swds;
-	// for(i=0; i<r_swds; i++)
-	// {
-	// 	enemy[i] = HOUND_UNIT;
-	// }
-	// for(i=0; i<r_sprs; i++)
-	// {
-	// 	enemy[i+r_swds] = SPEAR_UNIT;
-	// }
 }
 
 void move_towards_direction()
@@ -420,15 +400,13 @@ int get_next_pos()
 
 void load_overworld_bg()
 {
-	char i;
-
 	total_sprites = 0;
 	cursor_vram = 0x5080;
 	set_screen_size(SCR_SIZE_64x64);
 	screen_dimensions = 64;
 
 	set_map_data(overworldmap,MAP_WIDTH,32);
-	set_tile_data(overworldtiles,124,overworldtilespal,TILE_WIDTH);
+	set_tile_data(overworldtiles,147,overworldtilespal,TILE_WIDTH);
 
 	load_tile(TILE_VRAM);
 
@@ -442,28 +420,17 @@ void load_overworld_bg()
 	load_vram(0x6400,borders,0x100);
 
 	set_font_pal(10);
-	load_font(font,125,0x2F00);
+	load_font(font,125,0x4900);
 
-	load_vram(0x5300,cursor,0x40);
-	cursor_vram = 0x5300;
+	load_vram(0x4AA0,icons_gfx,0x60);
+	load_vram(0x4CB0,icons_gfx+0x60,0x60);
+
 	load_vram(0x6A00,rei_walk,0x300);
 	load_palette(16,rei_walk_pal,1);
-	// display_sprite(selector_x,selector_y,0x5000,FLIP_MAS|SIZE_MAS,0);
 	spr_make(0,selector_x,selector_y,0x6A00,FLIP_MAS|SIZE_MAS,SZ_16x32,0,1);
 
-	// load_castle_bat();
-	// display_castles();
+	init_overworld_data();
 
-	if(initialized == 0)
-	{
-		init_overworld_data();
-		// number_of_castles = 3;
-		// number_of_commanders = 6;
-	}
-	else
-	{
-		load_vram(0x5000,rei_walk,0x300);
-	}
 	disp_on();
 	scroll(0,s_x,288,0, 223, 0xC0);
 	// vsync();
@@ -489,58 +456,17 @@ void display_inventory(int x, int y, char item_type)
 	menu_state = CONSUME_MENU + (item_type & 1);
 }
 
-void display_units(int x, int y)
-{
-	int j;
-	display_info_panel(0,8,24,12);
-	// put_string("Army",18+(s_x/8),1+(s_y/8));
-
-	// load_unit(&global_units[party[0]],RECRUIT_VRAM,0);
-	// display_unit(16,104,DEFAULT_SPRITE_NUMBER,0);
-	// display_unit_stats(&global_units[party[0]],5,14,0);
-	for(j=0; j<no_of_troops; j++)
-	{
-		print_unit_data(troops[j],j,8,0,0);
-	}
-	menu_options = no_of_troops;
-	commander_select_cursor = 0;
-	menu_state = UNIT_MENU;
-}
-
 void init_overworld_data()
 {
-	// castle = castles;
-	//TAROS
-	load_castle_data(0,100,2,31,1,TAROS);
-	load_castle_data(1,100,3,19,1,TAROS);
-	load_castle_data(2,100,12,24,1,TAROS);
-	//KODEN
-	load_castle_data(3,100,13,10,1,KODEN);
-	load_castle_data(4,100,10,17,1,KODEN);
-	load_castle_data(5,100,18,15,1,KODEN);
-	//BAKURIA
-	load_castle_data(6,100,0,25,1,BAKURIA);
-	load_castle_data(7,100,1,1,1,BAKURIA);
-	// load_castle_data(8,100,2,31,1,BAKURIA);
-	//SANGA
-	load_castle_data(9,100,12,24,1,SANGAI);
-	load_castle_data(10,100,13,28,1,SANGAI);
-	load_castle_data(11,100,21,24,1,SANGAI);
-	//KAYTOKEN
-	load_castle_data(12,100,21,0,1,KAYTOKEN);
-	load_castle_data(13,100,26,2,1,KAYTOKEN);
-	load_castle_data(14,100,24,8,1,KAYTOKEN);
-	// load_castle_data(15,100,7,28,1,KAYTOKEN);
-
-	// castles[8].no_of_items = 3;
-	initialized = 1;
+	load_castle_data(994,0);
+	load_castle_data(903,1);
+	load_castle_data(833,2);
 }
 
-void load_castle_data(int index, char population, char x, char y,
-                      char level, char kingdom)
+void load_castle_data(int pos, int map_id)
 {
-	castles[index].x = x;
-	castles[index].y = y;
+	castles[map_id].pos = pos;
+	castles[map_id].map_id = map_id;
 }
 
 void display_overworld_menu()
@@ -566,12 +492,12 @@ void display_overworld_menu()
 
 void display_commanders_in_castle(char castle_no)
 {
-	char j, id;
+	char j;
 	display_info_panel(0,0,23,12);
 	put_string("Recruit",10+(s_x/8),1+(s_y/8));
 	put_string("Unit",(s_x/8)+2,(s_y/8)+3);
 	put_string("Cost",(s_x/8)+11,(s_y/8)+3);
-	put_string("Lvl",(s_x/8)+17,(s_y/8)+3);
+	put_string("Type",(s_x/8)+17,(s_y/8)+3);
 
 	display_info_panel(0,23,9,12);
 	// display_info_panel(12,4,24,8);
@@ -683,10 +609,8 @@ void print_unit_data(char unit_id, char i, int x_off, int y_off, char disp_cost)
 	if(disp_cost)
 	{
 		put_number(get_unit_cost(buyable_units[unit_id]),3,x+9,y+i);
-	}
-	else
-	{
-		// put_number(gentity->level,2,x+3+((i/7) * 7),y+(i%7));
+		print_unit_attack_icon(unit_id,(s_x/8)+18,(s_y/8)+4+i);
+		print_unit_defense_icon(unit_id,(s_x/8)+19,(s_y/8)+4+i);
 	}
 }
 
@@ -719,19 +643,6 @@ char buy_item(char item_index, char cmdr_index)
 	return 1;
 }
 
-char buy_unit(char unit_index, char castle_id)
-{
-	char unit;
-	int cost;
-	unit = buyable_units[unit_index];
-	cost = get_unit_cost(unit);
-	if(cost > player_gold){ return 0; }
-	if(no_of_troops == 14 ){ return 0; }
-	player_gold -= cost;
-	troops[no_of_troops++] = unit;
-	return 1;
-}
-
 void select_buyable_unit(char unit_index)
 {
 	selected_unit = unit_index;
@@ -739,7 +650,7 @@ void select_buyable_unit(char unit_index)
 	menu_options = party_size;
 	commander_select_cursor = 0;
 	reset_npcs();
-	display_army_info(party[0]-16,20,13);
+	display_army_info(party[0]-16,17,13);
 	item_purchase_select();
 
 	spr_set(1);
@@ -752,13 +663,16 @@ void select_cmdr_for_unit()
 {
 	last_selected_cursor = commander_select_cursor;
 	menu_state = BUY_CMDR_UNIT_MENU;
+	menu_options = 3;
+	commander_select_cursor = 0;
+	row_selected = ROW_ONE;
 
 	set_font_pal(11);
 	put_string(commanders[party[commander_select_cursor]-16].name,25,(s_y/8)+2+commander_select_cursor);
 	set_font_pal(10);
 
-	load_cursor(145+64+16,8*16,SLIDER_ONE);
-	load_cursor(145,8*16,SLIDER_TWO);
+	load_cursor(225+12,112,SLIDER_ONE);
+	load_cursor(145+32,112,SLIDER_TWO);
 }
 
 void select_buyable_item(char item_index)
@@ -778,23 +692,20 @@ void select_buyable_item(char item_index)
 void remove_unit_from_cmdr()
 {
 	int cost;
-	char cmdr_id, unit_count, min;
+	char cmdr_id, min, row_count;
 	cost = get_unit_cost(selected_unit);
 	cmdr_id = cmdr_selected;
 
 	min = 0;
-	unit_count = commanders[cmdr_id].no_of_units;
-	if(unit_count > min)
+	row_count = commanders[cmdr_id].row_counts[row_selected];
+	// unit_count = commanders[cmdr_id].no_of_units;
+	if(row_count > min)
 	{
-		// buy_total -= cost;
 		player_gold += cost;
-
-		commanders[cmdr_id].no_of_units--;
-		display_cmdr_army_info(cmdr_id,20,13);
-		hide_npcs(5);
-		destroy_npc(npc_count-1);
-		show_npcs(5);
-		// put_number(buy_total,6,16+(s_x/8),10+(s_y/8));
+		commanders[cmdr_id].row_counts[row_selected]--;
+		display_cmdr_army_info(cmdr_id,17,13);
+		load_cmdr_army_to_npcs(cmdr_id);
+		draw_npcs(5);
 		put_number(player_gold,5,(s_x/8)+1,10+(s_y/8));
 	}
 }
@@ -802,21 +713,18 @@ void remove_unit_from_cmdr()
 void add_unit_to_cmdr()
 {
 	int cost;
-	char cmdr_id, unit_count, max;
+	char cmdr_id, row_count;
+	char *row;
 	cost = get_unit_cost(selected_unit);
 	cmdr_id = cmdr_selected;
+	row = commanders[cmdr_id].row_one + (row_selected*3);
 
-	max = commanders[cmdr_id].max_units;
-	unit_count = commanders[cmdr_id].no_of_units;
-	// put_number(selected_unit,3,15,40);
-	if(unit_count < max && player_gold > cost)
+	row_count = commanders[cmdr_id].row_counts[row_selected];
+	if(row_count < MAX_UNITS_PER_ROW && player_gold > cost)
 	{
 		player_gold -= cost;
-		commanders[cmdr_id].units[unit_count] = selected_unit;
-		commanders[cmdr_id].no_of_units++;
-		display_cmdr_army_info(cmdr_id,20,13);
-		// put_number(buy_total,6,16+(s_x/8),10+(s_y/8));
-		// put_number(player_gold,5,(s_x/8)+1,10+(s_y/8));
+		row[commanders[cmdr_id].row_counts[row_selected]++] = selected_unit;
+		display_cmdr_army_info(cmdr_id,17,13);
 		put_number(player_gold,5,(s_x/8)+1,10+(s_y/8));
 		load_cmdr_army_to_npcs(cmdr_id);
 		draw_npcs(5);
@@ -826,6 +734,10 @@ void add_unit_to_cmdr()
 void display_army_info(char cmdr_id, int x, int y)
 {
 	cmdr_selected = cmdr_id;
+	// row_selected = ROW_ONE;
+	// menu_options = 3;
+	last_selected_cursor = commander_select_cursor;
+	// commander_select_cursor = 0;
 	display_cmdr_army_info(cmdr_id,x,y);
 	load_cmdr_army_to_npcs(cmdr_id);
 	load_portrait(cmdr_id+16);
@@ -834,62 +746,22 @@ void display_army_info(char cmdr_id, int x, int y)
 
 void load_cmdr_army_to_npcs(char cmdr_id)
 {
-	char i;
+	char i, j;
 	int x,y;
+	char *row;
 	hide_npcs(5);
 	// clear_npcs();
 	reset_npcs();
-	x = 10;
-	y = 7;
-	for(i=0; i<commanders[cmdr_id].no_of_units; i++)
+	row = commanders[cmdr_id].row_one;
+	x = 12;
+	y = 6;
+	for(j=0; j<3; j++, y+=2, row+=3)
 	{
-		add_npc(x+i,y,commanders[cmdr_id].units[i],UNIT_PALS[commanders[cmdr_id].units[i]]);
+		for(i=0; i<commanders[cmdr_id].row_counts[j]; i++)
+		{
+			add_npc(x+i,y,row[i],UNIT_PALS[row[i]]);
+		}
 	}
-}
-
-// void reset_cost()
-// {
-// 	buy_total = 0;
-// }
-
-void remove_unit_stats(int x, int y, int index)
-{
-	int _sx, _sy, y_off;
-	_sx = s_x / 8 + x;
-	_sy = s_y / 8 + y;
-	y_off = index * 4;
-	_sy += y_off;
-
-	put_string("   ",_sx,_sy);
-	put_string("  ",_sx+4,_sy);
-
-	put_string("   ",_sx,_sy+1);
-	put_string("  ",_sx+4,_sy+1);
-
-	put_string("   ",_sx,_sy+2);
-	put_string("  ",_sx+4,_sy+2);
-}
-
-void display_unit_stats(char id, int x, int y, int index)
-{
-	int _sx, _sy, y_off;
-	_sx = s_x / 8 + x;
-	_sy = s_y / 8 + y;
-	y_off = index * 4;
-	_sy += y_off;
-
-	// load_unit(id,RECRUIT_VRAM,index);
-	// display_unit(16,104+(index*32),DEFAULT_SPRITE_NUMBER,index);
-	// display_unit(x*8-16-4,y*8+(index*32)-8,DEFAULT_SPRITE_NUMBER,index);
-
-	put_string("Atk",_sx,_sy);
-	put_number(unit_list[id].atk,2,_sx+4,_sy);
-
-	put_string("Def",_sx,_sy+1);
-	put_number(unit_list[id].def,2,_sx+4,_sy+1);
-
-	put_string("Spd",_sx,_sy+2);
-	put_number(unit_list[id].spd,2,_sx+4,_sy+2);
 }
 
 void item_swap_menu()
@@ -926,91 +798,32 @@ void item_purchase_select()
 {
 	load_portrait(party[commander_select_cursor]);
 	display_cmdr_info(party[commander_select_cursor]-16,2,16);
-	if(commanders[party[commander_select_cursor]-16].no_of_items > 0)
-	{
-		put_string("Item",(s_x/8)+9,(s_y/8)+20);
-		load_item(commanders[party[commander_select_cursor]-16].equipable,2);
-		display_item(0,2,9,22);
-		display_attribute_string(commanders[party[commander_select_cursor]-16].equipable,(s_x/8)+9,(s_y/8)+26);
-	}
-	else
-	{
-		// put_string("    ",(s_x/8)+9,(s_y/8)+20);
-		put_string("    ",(s_x/8)+9,(s_y/8)+21);
-		put_string("    ",(s_x/8)+9,(s_y/8)+22);
-		put_string("    ",(s_x/8)+9,(s_y/8)+23);
-		put_string("    ",(s_x/8)+9,(s_y/8)+24);
-		put_string("    ",(s_x/8)+9,(s_y/8)+25);
-		put_string("      ",(s_x/8)+9,(s_y/8)+26);
-	}
+	put_string("Item",(s_x/8)+9,(s_y/8)+20);
+	load_item(commanders[party[commander_select_cursor]-16].equipable,2);
+	display_item(0,2,9,22);
+	display_attribute_string(commanders[party[commander_select_cursor]-16].equipable,(s_x/8)+9,(s_y/8)+26);
 }
 
 void commander_consume_select()
 {
-	if(commanders[party[commander_select_cursor]-16].no_of_items > 0)
-	{
-		load_item(commanders[party[commander_select_cursor]-16].equipable,2);
-		display_attribute_string(commanders[party[commander_select_cursor]-16].equipable,(s_x/8)+15,(s_y/8)+18);
-		display_item(0,2,11,18);
-	}
-	else
-	{
-		put_string("     ",(s_x/8)+15,(s_y/8)+18);
-		put_string("    ",(s_x/8)+11,(s_y/8)+18);
-		put_string("    ",(s_x/8)+11,(s_y/8)+19);
-		put_string("    ",(s_x/8)+11,(s_y/8)+20);
-		put_string("    ",(s_x/8)+11,(s_y/8)+21);
-	}
+	load_item(commanders[party[commander_select_cursor]-16].equipable,2);
+	display_attribute_string(commanders[party[commander_select_cursor]-16].equipable,(s_x/8)+15,(s_y/8)+18);
+	display_item(0,2,11,18);
 	load_portrait(party[commander_select_cursor]);
 	display_cmdr_info(party[commander_select_cursor]-16,15,10);
 }
 
-void swap_units(int index_one, int index_two)
-{
-	char tmp;
-	tmp = troops[index_one];
-	troops[index_one] = troops[index_two];
-	troops[index_two] = tmp;
-}
-
-void castle_empty(char castle_no){ return 0;}
-
 char get_map_id_by_pos(int pos)
 {
 	char i;
-	for(i=0; i<NO_OF_MAPS; i++)
+	for(i=0; i<NO_OF_CASTLES; i++)
 	{
-		if(battle_map_metadata[i].pos == pos)
+		if(castles[i].pos == pos)
 		{
 			return i;
 		}
 	}
-	return -1;
-}
-
-char select_castle_by_cursor()
-{
-	char x, y;
-
-	x = (selector_x + (s_x >> 1)) / 16;
-	y = ((selector_y + (s_y >> 1)) / 16);
-
-	return get_castle_no_by_pos(x,y);
-}
-
-char get_castle_no_by_pos(char x, char y)
-{
-	int j;
-	for(j = 0; j < NO_OF_CASTLES; j++)
-	{
-		// if(castles[j].x == x && castles[j].y == y)
-		if(castles[j].x == party_pos_x && castles[j].y == party_pos_y)
-		{
-			current_selected_castle = j;
-			return j;
-		}
-	}
-	return -1;
+	return 0;
 }
 
 void reset_menu_state(char ms, char options, char cursor_pos, char last_cursor)
@@ -1188,9 +1001,9 @@ void overworld_controls(){
 	{
 		if(menu_state != 0)
 		{
-				spr_set(1);
 				// put_number(commander_select_cursor,4,10,40);
-				if(commander_select_cursor > 0  && menu_state != BUY_CMDR_UNIT_MENU)
+				spr_set(1);
+				if(commander_select_cursor > 0) //&& menu_state != BUY_CMDR_UNIT_MENU)
 				{
 					commander_select_cursor--;
 					spr_y(spr_get_y()-8);
@@ -1200,11 +1013,15 @@ void overworld_controls(){
 						load_item(buyable_items[commander_select_cursor],1);
 						display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
 					}
-					else if(menu_state == SHOP_MENU)
+					if(menu_state == BUY_CMDR_UNIT_MENU)
 					{
-						// load_unit(castles[current_selected_castle].buyable_units[commander_select_cursor],RECRUIT_VRAM,0);
-						// load_unit(buyable_units[commander_select_cursor],RECRUIT_VRAM,0);
-						// display_unit(216,8,DEFAULT_SPRITE_NUMBER,0);
+						// add_unit_to_cmdr();
+						int ypos;
+						ypos = spr_get_y() - 24;
+						spr_y(ypos);
+						spr_set(2);
+						spr_y(ypos);
+						row_selected--;
 					}
 					else if(menu_state == CONSUME_ITEM_MENU || menu_state == EQUIP_ITEM_MENU)
 					{
@@ -1212,11 +1029,11 @@ void overworld_controls(){
 					}
 					else if(menu_state == UNIT_MENU)
 					{
-						display_unit_stats(troops[commander_select_cursor],5,14,submenu_state);
+						// display_unit_stats(troops[commander_select_cursor],5,14,submenu_state);
 					}
 					else if(menu_state == BUY_SELECT_MENU)
 					{
-						display_army_info(party[commander_select_cursor]-16,20,13);
+						display_army_info(party[commander_select_cursor]-16,17,13);
 						item_purchase_select();
 					}
 					else if(menu_state == BUY_ITEM_MENU)
@@ -1242,10 +1059,11 @@ void overworld_controls(){
 		if(menu_state != 0)
 		{
 				spr_set(1);
-				if(commander_select_cursor < (menu_options-1) && menu_state != BUY_CMDR_UNIT_MENU)
+				if(commander_select_cursor < (menu_options-1)) //&& menu_state != BUY_CMDR_UNIT_MENU)
 				{
 					commander_select_cursor++;
 					spr_y(spr_get_y()+8);
+
 
 					if(menu_state == RECRUIT_MENU)
 					{
@@ -1256,13 +1074,20 @@ void overworld_controls(){
 					{
 						commander_consume_select();
 					}
-					else if(menu_state == UNIT_MENU)
+					if(menu_state == BUY_CMDR_UNIT_MENU)
 					{
-						display_unit_stats(troops[commander_select_cursor],5,14,submenu_state);
+						// add_unit_to_cmdr();
+						// spr_y(spr_get_y()+24);
+						int ypos;
+						ypos = spr_get_y() + 24;
+						spr_y(ypos);
+						spr_set(2);
+						spr_y(ypos);
+						row_selected++;
 					}
 					else if(menu_state == BUY_SELECT_MENU)
 					{
-						display_army_info(party[commander_select_cursor]-16,20,13);
+						display_army_info(party[commander_select_cursor]-16,17,13);
 						item_purchase_select();
 					}
 					else if(menu_state == BUY_ITEM_MENU)
@@ -1342,56 +1167,14 @@ void overworld_controls(){
 
 				case 4:
 				reset_npcs();
-				load_enemies(get_map_id_by_pos(get_absolute_pos()));
-				begin_battlefield(0,enemies,enemies[0]);
+				init_map_data(get_map_id_by_pos(get_absolute_pos()));
+				begin_battlefield(get_map_id_by_pos(get_absolute_pos()));
 				// begin_explore(current_selected_castle);
 				break;
 			}
 		}
 		else if(menu_state == OVERWORLD)
 		{
-
-			// int pos,id;
-			// pos = get_absolute_pos();
-			// if(overworld[pos] < CAST)
-			// {
-			// 	// put_number(pos,4,5,40);
-			// 	id = get_map_id_by_pos(pos);
-			// 	if(id != -1)
-			// 	{
-			// 		reset_satb();
-			// 		reset_npcs();
-			// 		begin_explore(id);
-			//
-			// 		display_spawns();
-			// 		load_overworld_bg();
-			// 	}
-			// 	else
-			// 	{
-			// 		put_number(pos,4,5,40);
-			// 	}
-			// }
-			// else
-			// {
-			// 	char castle_no;
-			// 	castle_no = -1;
-			// 	castle_no = select_castle_by_cursor();
-			// 	current_selected_castle = castle_no;
-			//
-			// 	if(castle_no != 255)
-			// 	{
-					// spr_hide(0);
-					// display_castle_menu(castle_no);
-					// current_selected_castle = castle_no;
-					// return;
-			// 	}
-			// }
-			// int id;
-			// id = get_map_id_by_pos(get_absolute_pos());
-			// spr_hide(0);
-			// display_castle_menu(id);
-			// current_selected_castle = id;
-			// return;
 		}
 		else if(menu_state == CONSUME_MENU)
 		{
@@ -1441,7 +1224,6 @@ void overworld_controls(){
 			spr_show(0);
 			hide_npcs(5);
 			reset_npcs();
-			display_spawns();
 			satb_update();
 			reset_menu_state(OVERWORLD,0,0,0);
 			return;
@@ -1505,6 +1287,7 @@ void overworld_controls(){
 		{
 			commander_select_cursor = last_selected_cursor;
 			menu_state = BUY_SELECT_MENU;
+			menu_options = party_size;
 			put_string(commanders[party[commander_select_cursor]-16].name,25,(s_y/8)+2+commander_select_cursor);
 
 			load_cursor(186,12+(8*commander_select_cursor),CURSOR);

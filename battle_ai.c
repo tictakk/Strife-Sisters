@@ -55,7 +55,8 @@ int determine_unit_action(char id)
   }
   else
   {
-    target = find_weakest_opp_in_range(id,entities[id].unit->mov+entities[id].unit->rng);
+    // target = find_weakest_opp_in_range(id,entities[id].unit->mov+entities[id].unit->rng);
+    target = find_weakest_opp_in_range(id,3);
     if(target == -1)
     {
       action = PASS;
@@ -150,10 +151,13 @@ ai()
   g = 0;
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
-    // set_cursor_pos(entities[ai_units[ai_tracker]].pos);
+    set_cursor_pos(entities[ai_units[ai_tracker]].pos);
+    display_position(14,1);
+
     satb_update();
     // sync(45);
     ai_unit(ai_units[ai_tracker]);
+    update_map();
   }
   start_turn(PLAYER);
 }
@@ -172,6 +176,8 @@ void ai_unit(char id)
       {
         case PASS:
         continue_move = 0;
+        entities[id].actionable = 0;
+        // swap_pal(id,31);
         // draw_npcs();
         // update_map();
         // cycle_animations();
@@ -212,19 +218,20 @@ void ai_unit(char id)
 
 void start_turn(char team)
 {
-  char i;
+  char i, unit_type;
   init_ai();
-  actions = ACTIONS_PER_TURN;
   turn = team;
 
   for(i=0; i<num_of_entities; i++)
   {
-    if(team == entities[i].team)
+    if(entities[i].team)
     {
+      unit_type = entities[i].id;
       entities[i].actionable = 1;
-      // replenish_stamina(i);
+      // swap_pal(i,UNIT_PALS[unit_type]+(entities[i].team-1));
     }
   }
+  update_map();
   init_ai();
   // draw_actions();
   // update_map();
@@ -296,8 +303,8 @@ int calc_unit_rating(char id)
 {
   int army_size, atk, def;
   army_size = entities[id].army_size;
-  atk = (int)entities[id].unit->atk * army_size;
-  def = (int)entities[id].unit->def * army_size;
+  atk = 15;//(int)entities[id].unit->atk * army_size;
+  def = 15;//(int)entities[id].unit->def * army_size;
   return atk + (def*2);
 }
 
@@ -342,7 +349,7 @@ int get_attack_square(char id, char atkr)
     for(j=0; j<len; j++)
     {
       pos = square+coords[j*2]+coords[(j*2)+1];
-      if(pos == (map[i].ownX + (map[i].ownY*16)) && (battle_grid[pos] == 0) && (is_traversable(pos) || entities[atkr].unit->ign))
+      if(pos == (map[i].ownX + (map[i].ownY*16)) && (battle_grid[pos] == 0) && (is_traversable(pos) || 0))//entities[atkr].unit->ign))
       {
         // put_number(pos,3,0,9+(g++));
         return pos;

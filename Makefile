@@ -14,7 +14,7 @@ all: strifesisters.pce
 include ../Make_ex.inc
 
 CFLAGS = -msmall -fno-recursive -v
-LIBS = unpack-zx0.asm
+LIBS =
 
 strifesisters.pce: sisterstrife.c
 	$(CC) -fsigned-char $(CFLAGS) $(LIBS) $<
