@@ -9,7 +9,7 @@
 #define SPLIT_MODE 3
 #define ATTACK_MODE 4
 #define MERGE_MODE 5
-#define OBSERVE_MODE 6 //has to do with seeing AI's move space
+#define OBSERVE_MODE 6
 #define DIALOG_MODE 7
 #define EXPLORE_MODE 8
 #define EXPLORE_MENU_MODE 9
@@ -45,7 +45,6 @@
 #define COMMANDER_FIGURE_BEGIN 0x6000
 
 typedef struct{
-  // Unit *unit;
   int pos;
   char army_size, team, id, actionable, nearby_engaged;
 } Entity;
@@ -475,29 +474,29 @@ void print_new_stats(char cmdr_id)
   for(i=0; i<4; i++) //4 == num of attributes
   {
     clear_text_field();
-    scale_stat(cmdr_id,i);
-    switch(i)
-    {
-      case ATK_ATTRIBUTE:
-      offset = write_text(1,1,"Atk ");
-      put_number(commanders[cmdr_id].unit->atk,3,1+offset,1);
-      break;
-
-      case DEF_ATTRIBUTE:
-      offset = write_text(1,1,"Def ");
-      put_number(commanders[cmdr_id].unit->def,3,1+offset,1);
-      break;
-
-      case SPD_ATTRIBUTE:
-      offset = write_text(1,1,"Speed ");
-      put_number(commanders[cmdr_id].unit->spd,3,1+offset,1);
-      break;
-
-      case HP_ATTRIBUTE:
-      offset = write_text(1,1,"HP ");
-      put_number(commanders[cmdr_id].unit->hp,4,1+offset,1);
-      break;
-    }
+    // scale_stat(cmdr_id,i);
+    // switch(i)
+    // {
+    //   case ATK_ATTRIBUTE:
+    //   offset = write_text(1,1,"Atk ");
+    //   put_number(commanders[cmdr_id].unit->atk,3,1+offset,1);
+    //   break;
+    //
+    //   case DEF_ATTRIBUTE:
+    //   offset = write_text(1,1,"Def ");
+    //   put_number(commanders[cmdr_id].unit->def,3,1+offset,1);
+    //   break;
+    //
+    //   case SPD_ATTRIBUTE:
+    //   offset = write_text(1,1,"Speed ");
+    //   put_number(commanders[cmdr_id].unit->spd,3,1+offset,1);
+    //   break;
+    //
+    //   case HP_ATTRIBUTE:
+    //   offset = write_text(1,1,"HP ");
+    //   put_number(commanders[cmdr_id].unit->hp,4,1+offset,1);
+    //   break;
+    // }
     wait_for_I_input();
   }
 }

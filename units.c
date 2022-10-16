@@ -17,6 +17,8 @@
 #define ADVANTAGE 1
 #define DISADVANTAGE 2
 
+#define MAX_UNIT_ENTITIES 120
+
 enum Unit_Type{
 	INFANTRY, FLYERS, SPEARS, MUSKETS, MAGES, HOUNDS, COMMANDER, BLOBS, AXES
 };
@@ -28,11 +30,13 @@ typedef struct{
 } Unit;
 
 typedef struct{
-	Unit *unit;
+	char unit_type,cmdr_id;
 	int hp;
 } Unit_Entity;
 
+Unit_Entity unit_entities[MAX_UNIT_ENTITIES];
 Unit unit_list[16+TOTAL_COMMANDERS];//12 units, 4 ncpcs, 25 commanders
+unsigned char unit_entity_count = 0;
 
 void initialize_units()
 {
@@ -170,4 +174,16 @@ char check_advantage(char a_type, char d_type)
   {
     return NO_ADV;
   }
+}
+
+unsigned char add_unit_entity(char unit_type)
+{
+	unit_entities[unit_entity_count].unit_type = unit_type;
+	unit_entities[unit_entity_count].hp = unit_list[unit_type].hp;
+	return unit_entity_count++;
+}
+
+void remove_unit_from_game(unsigned char unit_id)
+{
+
 }

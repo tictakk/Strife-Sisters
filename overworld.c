@@ -625,9 +625,9 @@ void print_commander_data(char cmdr_id)
 	put_char('/',x+4,y+2);
 
 	put_string("AP",x+4,y+3);
-	put_number(commanders[cmdr_id].ap,3,x+1,y+4);
+	// put_number(commanders[cmdr_id].ap,3,x+1,y+4);
 	put_char('/',x+4,y+4);
-	put_number(commanders[cmdr_id].ap,3,x+5,y+4);
+	// put_number(commanders[cmdr_id].ap,3,x+5,y+4);
 }
 
 char buy_item(char item_index, char cmdr_index)
@@ -723,7 +723,7 @@ void add_unit_to_cmdr()
 	if(row_count < MAX_UNITS_PER_ROW && player_gold > cost)
 	{
 		player_gold -= cost;
-		row[commanders[cmdr_id].row_counts[row_selected]++] = selected_unit;
+		row[commanders[cmdr_id].row_counts[row_selected]++] = add_unit_entity(selected_unit,cmdr_id);
 		display_cmdr_army_info(cmdr_id,17,13);
 		put_number(player_gold,5,(s_x/8)+1,10+(s_y/8));
 		load_cmdr_army_to_npcs(cmdr_id);
@@ -750,7 +750,6 @@ void load_cmdr_army_to_npcs(char cmdr_id)
 	int x,y;
 	char *row;
 	hide_npcs(5);
-	// clear_npcs();
 	reset_npcs();
 	row = commanders[cmdr_id].row_one;
 	x = 12;

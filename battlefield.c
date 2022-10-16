@@ -480,7 +480,7 @@ void init_units()
 
 void load_group(char cmdr_id, char id, char team, int positions[7])
 {
-  char i, unit_id;
+  char unit_id;
   unit_id = 0;
   add_entity(0,1,team,UNIT_PALS[cmdr_id],cmdr_id,cmdr_id,cmdr_id,positions[0]);
   battle_grid[positions[0]] = num_of_entities;

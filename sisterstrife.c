@@ -92,14 +92,14 @@ struct Commander{
 	char lvl;
 	char id;
 	char no_of_items;
-	char ap;
+	// char ap;
 	char equipable;
 	char *name;
 	char row_one[3];
 	char row_two[3];
 	char row_three[3];
 	char row_counts[3];
-	Unit *unit;
+	// Unit *unit;
 };
 
 struct Castle{
@@ -352,197 +352,70 @@ void main()
 	commanders[23].name = "Alpha.H";
 	commanders[24].name = "King.B";
 
-	commanders[0].unit->hp = 90*10;
-	commanders[0].unit->atk = 7;
-	commanders[0].unit->def = 10;
-	commanders[0].unit->spd = 15;
-	commanders[0].unit->mov = 3;
-	commanders[0].unit->rng = 3;
-	commanders[0].unit->ign = 0;
-	//commanders[0].unit.address = 0x3E00;//0x6A00;
-	commanders[0].unit->unit_type = COMMANDER;
-	// commanders[0].unit->id = REI;
+	commanders[0].row_one[0] = add_unit_entity(SWORD_UNIT);
+	commanders[0].row_one[1] = add_unit_entity(SWORD_UNIT);
+	commanders[0].row_one[2] = add_unit_entity(SWORD_UNIT);
 
-	// commanders[1].unit = (&unit_list[REI]) + sizeof(Unit);
+	commanders[0].row_two[0] = add_unit_entity(ARCHER_UNIT);
+	commanders[0].row_two[1] = add_unit_entity(SPEAR_UNIT);
 
-	commanders[1].unit->hp = 90*10;
-	commanders[1].unit->atk = 11;
-	commanders[1].unit->def = 11;
-	commanders[1].unit->spd = 13;
-	commanders[1].unit->mov = 3;
-	commanders[1].unit->rng = 3;
-	commanders[1].unit->ign = 0;
-	commanders[1].unit->unit_type = COMMANDER;
-	// commanders[1].unit->id = VIOLET;
+	commanders[0].row_three[0] = add_unit_entity(SPEAR_UNIT);
 
-	commanders[0].row_one[0] = SWORD_UNIT;
-	commanders[0].row_one[1] = SWORD_UNIT;
-	commanders[0].row_one[2] = SWORD_UNIT;
-
-	commanders[0].row_two[0] = ARCHER_UNIT;
-	commanders[0].row_two[1] = SPEAR_UNIT;
-
-	commanders[0].row_three[0] = SPEAR_UNIT;
-
-	// commanders[0].units[3] = ARCHER_UNIT;
-	// commanders[0].no_of_units = 3;
 	commanders[0].row_counts[0] = 2;
 	commanders[0].row_counts[1] = 1;
 	commanders[0].row_counts[2] = 1;
 
-	commanders[1].row_one[0] = SWORD_UNIT;
-	commanders[1].row_one[1] = SWORD_UNIT;
+	commanders[1].row_one[0] = add_unit_entity(SWORD_UNIT);
+	commanders[1].row_one[1] = add_unit_entity(SWORD_UNIT);
 	commanders[1].row_counts[0] = 2;
 
-	commanders[2].unit->hp = 50*10;
-	commanders[2].unit->atk = 8;
-	commanders[2].unit->def = 8;
-	commanders[2].unit->spd = 13;
-	commanders[2].unit->mov = 3;
-	commanders[2].unit->rng = 3;
-	commanders[2].unit->ign = 0;
-	commanders[2].unit->exp = 16;
-	commanders[2].unit->unit_type = COMMANDER;
-	// commanders[2].unit->id = KING;
-	// commanders[2].units[0] = ARCHER_UNIT;
-	// commanders[2].units[1] = ARCHER_UNIT;
-	// commanders[2].units[2] = ARCHER_UNIT;
 	commanders[2].row_counts[0] = 0;
 
-	commanders[3].unit->hp = 60*10;
-	commanders[3].unit->atk = 9;
-	commanders[3].unit->def = 7;
-	commanders[3].unit->spd = 12;
-	commanders[3].unit->mov = 3;
-	commanders[3].unit->rng = 1;
-	commanders[3].unit->ign = 0;
-	commanders[3].unit->exp = 0;
-	commanders[3].unit->unit_type = COMMANDER;
-	// commanders[3].unit->id = CMDR_FOUR;
-
-	commanders[3].row_one[0] = SPEAR_UNIT;
-	commanders[3].row_one[1] = SPEAR_UNIT;
+	commanders[3].row_one[0] = add_unit_entity(SPEAR_UNIT);
+	commanders[3].row_one[1] = add_unit_entity(SPEAR_UNIT);
 	commanders[3].row_counts[0] = 2;
 
-	commanders[4].unit->hp = 60*10;
-	commanders[4].unit->atk = 19;
-	commanders[4].unit->def = 20;
-	commanders[4].unit->spd = 15;
-	commanders[4].unit->mov = 3;
-	commanders[4].unit->rng = 2;
-	commanders[4].unit->ign = 0;
-	commanders[4].unit->exp = 0;
-	commanders[4].unit->unit_type = COMMANDER;
-	commanders[4].row_one[0] = SPEAR_UNIT;
-	commanders[4].row_one[1] = SPEAR_UNIT;
-	commanders[4].row_one[2] = ARCHER_UNIT;
-	// commanders[4].units[3] = ARCHER_UNIT;
+	commanders[4].row_one[0] = add_unit_entity(SPEAR_UNIT);
+	commanders[4].row_one[1] = add_unit_entity(SPEAR_UNIT);
+	commanders[4].row_one[2] = add_unit_entity(ARCHER_UNIT);
+
 	commanders[4].row_counts[0] = 3;
 
-	commanders[5].unit->hp = 850;
-	commanders[5].unit->atk = 16;
-	commanders[5].unit->def = 21;
-	commanders[5].unit->spd = 25;
-	commanders[5].unit->mov = 3;
-	commanders[5].unit->rng = 3;
-	commanders[5].unit->ign = 0;
-	commanders[5].unit->exp = 0;
-	commanders[5].unit->unit_type = COMMANDER;
-	// commanders[5].unit->id = CMDR_SIX;
-
-	commanders[5].row_one[0] = SWORD_UNIT;
-	commanders[5].row_one[1] = SWORD_UNIT;
-	commanders[5].row_one[2] = ARCHER_UNIT;
-	// commanders[5].row_one[3] = ARCHER_UNIT;
+	commanders[5].row_one[0] = add_unit_entity(SWORD_UNIT);
+	commanders[5].row_one[1] = add_unit_entity(SWORD_UNIT);
+	commanders[5].row_one[2] = add_unit_entity(ARCHER_UNIT);
 	commanders[5].row_counts[0] = 0;
 
-	commanders[6].unit->hp = 950;
-	commanders[6].unit->atk = 12;
-	commanders[6].unit->def = 12;
-	commanders[6].unit->spd = 15;
-	commanders[6].unit->mov = 3;
-	commanders[6].unit->rng = 3;
-	commanders[6].unit->ign = 0;
-	commanders[6].unit->exp = 0;
-	commanders[6].unit->unit_type = COMMANDER;
-	// commanders[6].unit->id = CMDR_SIX;
-
-	commanders[6].row_one[0] = SPEAR_UNIT;
-	commanders[6].row_one[1] = SPEAR_UNIT;
-	commanders[6].row_one[2] = SPEAR_UNIT;
-	// commanders[6].row_one[3] = SPEAR_UNIT;
+	commanders[6].row_one[0] = add_unit_entity(SPEAR_UNIT);
+	commanders[6].row_one[1] = add_unit_entity(SPEAR_UNIT);
+	commanders[6].row_one[2] = add_unit_entity(SPEAR_UNIT);
 	commanders[6].row_counts[0] = 3;
 
-	commanders[7].unit->hp = 750;
-	commanders[7].unit->atk = 15;
-	commanders[7].unit->def = 11;
-	commanders[7].unit->spd = 15;
-	commanders[7].unit->mov = 3;
-	commanders[7].unit->rng = 3;
-	commanders[7].unit->ign = 0;
-	commanders[7].unit->exp = 0;
-	commanders[7].unit->unit_type = COMMANDER;
-	// commanders[7].unit->id = 7;
-
-	commanders[7].row_one[0] = ARCHER_UNIT;
-	commanders[7].row_one[1] = ARCHER_UNIT;
-	commanders[7].row_one[2] = ARCHER_UNIT;
-	// commanders[7].row_one[3] = ARCHER_UNIT;
+	commanders[7].row_one[0] = add_unit_entity(ARCHER_UNIT);
+	commanders[7].row_one[1] = add_unit_entity(ARCHER_UNIT);
+	commanders[7].row_one[2] = add_unit_entity(ARCHER_UNIT);
 	commanders[7].row_counts[0] = 0;
 
-	commanders[8].unit->hp = 750;
-	commanders[8].unit->atk = 4;
-	commanders[8].unit->def = 11;
-	commanders[8].unit->spd = 15;
-	commanders[8].unit->mov = 3;
-	commanders[8].unit->rng = 1;
-	commanders[8].unit->ign = 0;
-	commanders[8].unit->exp = 0;
-	commanders[8].unit->unit_type = COMMANDER;
-	// commanders[8].unit->id = 8+16;
-	commanders[8].row_one[0] = SPEAR_UNIT;
-	commanders[8].row_one[1] = SPEAR_UNIT;
-	commanders[8].row_one[2] = SPEAR_UNIT;
-	// commanders[8].row_one[3] = SPEAR_UNIT;
+	commanders[8].row_one[0] = add_unit_entity(SPEAR_UNIT);
+	commanders[8].row_one[1] = add_unit_entity(SPEAR_UNIT);
+	commanders[8].row_one[2] = add_unit_entity(SPEAR_UNIT);
+
 	commanders[8].row_counts[0] = 3;
 
-	commanders[24].ap = 5;
-	// commanders[24].unit->id = 24;
-	commanders[24].unit->hp = 90*10;
-	commanders[24].unit->atk = 8;
-	commanders[24].unit->def = 11;
-	commanders[24].unit->spd = 13;
-	commanders[24].unit->mov = 3;
-	commanders[24].unit->rng = 1;
-	commanders[24].unit->ign = 0;
-	commanders[24].unit->exp = 0;
-	commanders[24].unit->unit_type = COMMANDER;
-	commanders[24].row_one[0] = BLOB_UNIT;
-	commanders[24].row_one[1] = BLOB_UNIT;
-	commanders[24].row_one[2] = BLOB_UNIT;
+	commanders[24].row_one[0] = add_unit_entity(BLOB_UNIT);
+	commanders[24].row_one[1] = add_unit_entity(BLOB_UNIT);
+	commanders[24].row_one[2] = add_unit_entity(BLOB_UNIT);
 	// commanders[24].row_one[3] = BLOB_UNIT;
 	commanders[24].row_counts[0] = 3;
 	commanders[24].row_counts[1] = 0;
 	commanders[24].row_counts[2] = 0;
-	// commanders[24].unit->id = CMDR_FOUR;
 
-	commanders[23].ap = 5;
-	commanders[23].unit->hp = 80*10;
-	commanders[23].unit->atk = 9;
-	commanders[23].unit->def = 12;
-	commanders[23].unit->spd = 13;
-	commanders[23].unit->mov = 3;
-	commanders[23].unit->rng = 1;
-	commanders[23].unit->ign = 0;
-	commanders[23].unit->exp = 0;
-	commanders[23].unit->unit_type = COMMANDER;
-	commanders[23].row_one[0] = HOUND_UNIT;
-	commanders[23].row_one[1] = HOUND_UNIT;
-	commanders[23].row_one[2] = HOUND_UNIT;
+	commanders[23].row_one[0] = add_unit_entity(HOUND_UNIT);
+	commanders[23].row_one[1] = add_unit_entity(HOUND_UNIT);
+	commanders[23].row_one[2] = add_unit_entity(HOUND_UNIT);
 
-	commanders[23].row_two[0] = HOUND_UNIT;
+	commanders[23].row_two[0] = add_unit_entity(HOUND_UNIT);
 
-	// commanders[23].row_one[3] = HOUND_UNIT;
 	commanders[23].row_counts[0] = 3;
 	commanders[23].row_counts[1] = 1;
 	commanders[23].row_counts[2] = 0;
@@ -603,13 +476,11 @@ void main()
 	// load_palette(17,banditpal,1);
 	load_vram(0x68C0,cursor,0x40);
 	load_vram(0x68C0+0x40,vert_pointer,0x100);
-	// satb_update();
 
-	// display_intro();
 	for(;;)
 	{
-		// overworld_loop();
-		battle_loop(0,23,1);
+		overworld_loop();
+		// battle_loop(0,23,1);
 		// battle_loop(24,0,1);
 	}
 }
@@ -685,7 +556,9 @@ void print_unit_type(char id, int x, int y)
 		break;
 
 		default:
-		put_string(commanders[id-16].name,x,y);
+		put_string("err ",x,y);
+		put_number(id,3,x+4,y);
+		// put_string(commanders[id-16].name,x,y);
 		break;
 	}
 }
@@ -825,27 +698,14 @@ initialize_commanders()
 	struct Commander *cmdr;
 	for(i=0, cmdr = commanders, unit_ptr = &unit_list[REI]; i<TOTAL_COMMANDERS; i++, cmdr++, unit_ptr++)
 	{
-		cmdr->ap = 5;
 		cmdr->lvl = 0;
 		cmdr->id = i;
 		cmdr->no_of_items = 0;
-		// cmdr->unit.exp = 50;
 		cmdr->exp = 0;
-		cmdr->unit = unit_ptr;
-		cmdr->unit->id = i + 16;
-		cmdr->unit->atk = 13;
-		cmdr->unit->def = 13;
-		cmdr->unit->spd = 13;
-		cmdr->unit->hp = 1000;
-		cmdr->unit->mov = 3;
-		cmdr->unit->ign = 0;
-		cmdr->unit->rng = 1;
 		cmdr->equipable = 14;
-
 		cmdr->row_counts[0] = 0;
 		cmdr->row_counts[1] = 0;
 		cmdr->row_counts[2] = 0;
-		// unit_ptr =  unit_ptr + (11);
 	}
 }
 
@@ -1045,18 +905,18 @@ void display_cmdr_info(char cmdr_id, int x, int y)
 	put_string("   ",_sx+3,_sy+3);
 
 	put_string("AT",_sx,_sy+1);
-	put_number(commanders[cmdr_id].unit->atk+1,2,_sx+2,_sy+1);
+	// put_number(commanders[cmdr_id].unit->atk+1,2,_sx+2,_sy+1);
 	put_string("DF",_sx,_sy+2);
-	put_number(commanders[cmdr_id].unit->def,2,_sx+2,_sy+2);
+	// put_number(commanders[cmdr_id].unit->def,2,_sx+2,_sy+2);
 	put_string("SP",_sx,_sy+3);
-	put_number(commanders[cmdr_id].unit->spd,2,_sx+2,_sy+3);
+	// put_number(commanders[cmdr_id].unit->spd,2,_sx+2,_sy+3);
 
 	put_string("Lv",_sx+5,_sy-4);
 	put_number(commanders[cmdr_id].lvl+1,2,_sx+8,_sy-4);
 	put_string("HP",_sx+5,_sy-3);
-	put_number(commanders[cmdr_id].unit->hp,4,_sx+8,_sy-3);
+	// put_number(commanders[cmdr_id].unit->hp,4,_sx+8,_sy-3);
 	put_string("AP",_sx+5,_sy-2);
-	put_number(commanders[cmdr_id].ap,2,_sx+8,_sy-2);
+	// put_number(commanders[cmdr_id].ap,2,_sx+8,_sy-2);
 }
 
 void display_cmdr_army_info(char cmdr_id, int x, int y)
@@ -1401,39 +1261,39 @@ char next_level(char level, int exp)
 	return level;
 }
 
-void scale_stat(char cmdr_id, char attribute)
-{
-	int offset, scale;
-	int stat = 0;
-
-	offset = (cmdr_id*4)+attribute;
-	scale = STAT_SCALER_TABLE[offset];
-
-	if(scale == 0 || scale > 5)//should never be anything but 1-4
-	{
-		return;
-	}
-
-	switch(attribute)
-	{
-		case ATK_ATTRIBUTE:
-		stat = commanders[cmdr_id].unit->atk;
-		stat += (stat / scale);
-		commanders[cmdr_id].unit->atk = stat;
-		case DEF_ATTRIBUTE:
-		stat = commanders[cmdr_id].unit->def;
-		stat += (stat / scale);
-		commanders[cmdr_id].unit->def = stat;
-		case SPD_ATTRIBUTE:
-		stat = commanders[cmdr_id].unit->spd;
-		stat += (stat / scale);
-		commanders[cmdr_id].unit->spd = stat;
-		case HP_ATTRIBUTE:
-		stat = commanders[cmdr_id].unit->hp;
-		stat += (stat / scale);
-		commanders[cmdr_id].unit->hp = stat;
-	}
-}
+// void scale_stat(char cmdr_id, char attribute)
+// {
+// 	int offset, scale;
+// 	int stat = 0;
+//
+// 	offset = (cmdr_id*4)+attribute;
+// 	scale = STAT_SCALER_TABLE[offset];
+//
+// 	if(scale == 0 || scale > 5)//should never be anything but 1-4
+// 	{
+// 		return;
+// 	}
+//
+// 	switch(attribute)
+// 	{
+// 		case ATK_ATTRIBUTE:
+// 		stat = commanders[cmdr_id].unit->atk;
+// 		stat += (stat / scale);
+// 		commanders[cmdr_id].unit->atk = stat;
+// 		case DEF_ATTRIBUTE:
+// 		stat = commanders[cmdr_id].unit->def;
+// 		stat += (stat / scale);
+// 		commanders[cmdr_id].unit->def = stat;
+// 		case SPD_ATTRIBUTE:
+// 		stat = commanders[cmdr_id].unit->spd;
+// 		stat += (stat / scale);
+// 		commanders[cmdr_id].unit->spd = stat;
+// 		case HP_ATTRIBUTE:
+// 		stat = commanders[cmdr_id].unit->hp;
+// 		stat += (stat / scale);
+// 		commanders[cmdr_id].unit->hp = stat;
+// 	}
+// }
 
 #include "overworld.c"
 #include "battle.c"

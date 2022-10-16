@@ -47,16 +47,17 @@ int stun_vrams[MAX_GROUP_SIZE] = {
                                   0x5D00,0x5E00,0x5F00
                                   };
 
-void add_battle_npc(char x, char y, char type, char pal, char index)
+void add_battle_npc(char x, char y, char entity_id, char pal, char index)
 {
     int p_x = 0, p_y = 0;
     npcs[index].pos_x = x;
     npcs[index].pos_y = y;
-    npcs[index].type = type;
+    npcs[index].type = entity_id;
     npcs[index].active = 1;
     npcs[index].frame = 0;
 
-    switch(type)
+    // put_number(unit_entities[entity_id].unit_type,3,0,index);
+    switch(unit_entities[entity_id].unit_type)
     {
       case BLOB_UNIT:
       case SWORD_UNIT:
@@ -102,7 +103,8 @@ void add_battle_npc(char x, char y, char type, char pal, char index)
 
 void transfer_units_to_attack_vram(char npc_id)
 {
-  switch(npcs[npc_id].type)
+  // switch(npcs[npc_id].type)
+  switch(unit_entities[npcs[npc_id].type].unit_type)
   {
     case BLOB_UNIT:
     case SWORD_UNIT:
@@ -143,7 +145,8 @@ void transfer_units_to_attack_vram(char npc_id)
 
 void transfer_units_to_stun_vram(char npc_id)
 {
-  switch(npcs[npc_id].type)
+  // switch(npcs[npc_id].type)
+  switch(unit_entities[npcs[npc_id].type].unit_type)
   {
     case BLOB_UNIT:
     case SWORD_UNIT:
@@ -172,12 +175,10 @@ void transfer_units_to_stun_vram(char npc_id)
 
     case MAGE_UNIT:
     put_string("error mage",5,5);
-    // put_number(npc_count,2,13,6);
     break;
 
     default:
     put_string("error default",5,5);
-    // put_number(npc_count,2,13,9);
     break;
   }
 }
