@@ -758,7 +758,7 @@ void load_cmdr_army_to_npcs(char cmdr_id)
 	{
 		for(i=0; i<commanders[cmdr_id].row_counts[j]; i++)
 		{
-			add_npc(x+i,y,row[i],UNIT_PALS[row[i]]);
+			add_npc(x+i,y,unit_entities[row[i]].unit_type,UNIT_PALS[unit_entities[row[i]].unit_type]);
 		}
 	}
 }

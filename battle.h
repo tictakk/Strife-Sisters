@@ -63,37 +63,31 @@ void add_battle_npc(char x, char y, char entity_id, char pal, char index)
       case SWORD_UNIT:
       load_vram(idle_vrams[index],attack,0x100);
       npcs[index].pal = 17;
-      // load_palette(pal,soldierpal,1);
       break;
 
       case SPEAR_UNIT:
       load_vram(idle_vrams[index],attack2,0x100);
       npcs[index].pal = 18;
-      // load_palette(pal,spearpal,1);
       break;
 
       case ARCHER_UNIT:
       load_vram(idle_vrams[index],musketbtl,0x100);
       npcs[index].pal = 19;
-      // load_palette(pal,musketbtlpal,1);
       break;
 
       case DEMON_UNIT:
       load_vram(idle_vrams[index],demonbtl,0x100);
       npcs[index].pal = 20;
-      // load_palette(pal,demonbtlpal,1);
       break;
 
       case HOUND_UNIT:
       load_vram(idle_vrams[index],houndbtl,0x100);
       npcs[index].pal = 21;
-      // load_palette(21,houndbtlpal,1);
       break;
 
       case AXE_UNIT:
       load_vram(idle_vrams[index],bandit,0x100);
       npcs[index].pal = 22;
-      // load_palette(pal,banditpal,1);
       break;
     }
     p_x = (int)(x << 5);
@@ -103,7 +97,6 @@ void add_battle_npc(char x, char y, char entity_id, char pal, char index)
 
 void transfer_units_to_attack_vram(char npc_id)
 {
-  // switch(npcs[npc_id].type)
   switch(unit_entities[npcs[npc_id].type].unit_type)
   {
     case BLOB_UNIT:
@@ -145,7 +138,6 @@ void transfer_units_to_attack_vram(char npc_id)
 
 void transfer_units_to_stun_vram(char npc_id)
 {
-  // switch(npcs[npc_id].type)
   switch(unit_entities[npcs[npc_id].type].unit_type)
   {
     case BLOB_UNIT:
@@ -180,5 +172,17 @@ void transfer_units_to_stun_vram(char npc_id)
     default:
     put_string("error default",5,5);
     break;
+  }
+}
+
+void reduce_npc_ids(unsigned char entity_id)
+{
+  unsigned char i;
+  for(i=0; i<18; i++)
+  {
+    if(npcs[i].type > entity_id)
+    {
+      npcs[i].type--;
+    }
   }
 }

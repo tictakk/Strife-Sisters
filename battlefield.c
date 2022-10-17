@@ -111,11 +111,25 @@ void battlefield_loop(char map_id)
       id = battle_grid[graph_from_x_y(sx,sy)];
       if(id)
       {
-        display_id(0,0);
+        display_id(id-1,0,0);
         id--;
         // display_army_size(id,1,2);
         // display_stats(id,6,2);
         // display_type(id,4,1);
+      }
+      else
+      {
+        put_string("   ",3,0);
+        put_string("   ",3,1);
+        put_string("   ",3,2);
+
+        put_string("   ",7,0);
+        put_string("   ",7,1);
+        put_string("   ",7,2);
+
+        put_string("   ",11,0);
+        put_string("   ",11,1);
+        put_string("   ",11,2);
       }
       // else
       // {
@@ -1081,20 +1095,41 @@ void display_abs(int x, int y)
   put_number(graph_from_x_y(sx,sy),3,x,y);
 }
 
-void display_id(int x, int y)
+void display_id(char id, int x, int y)
 {
-  char id;
-  id = battle_grid[graph_from_x_y(sx,sy)];
-  put_string("id",x,y);
-  if(id)
+  char i;
+  // char id;
+  // id = battle_grid[graph_from_x_y(sx,sy)];
+  // put_number(commanders[entities[id].id-16],2,x,y);
+  // put_number(entities[id].id-16,2,x,y);
+  put_number(id,2,x,y);
+  // put_string("id",x,y);
+  // if(id)
+  // {
+  for(i=0; i<commanders[entities[id].id-16].row_counts[0]; i++)
   {
-    put_number(entities[id-1].id,3,x+3,y);
-    // put_number(id,3,x+3,y);
+    put_number(commanders[entities[id].id-16].row_one[i],3,x+3,y+i);
   }
-  else
+
+  for(i=0; i<commanders[entities[id].id-16].row_counts[1]; i++)
   {
-    put_number(0,3,x+3,y);
+    put_number(commanders[entities[id].id-16].row_two[i],3,x+7,y+i);
   }
+
+  for(i=0; i<commanders[entities[id].id-16].row_counts[2]; i++)
+  {
+    put_number(commanders[entities[id].id-16].row_three[i],3,x+11,y+i);
+  }
+
+  // put_number(commanders[entities[id].id-16].row_counts[0],3,x+3,y);
+  // put_number(commanders[entities[id].id-16].row_counts[1],3,x+3,y+1);
+  // put_number(commanders[entities[id].id-16].row_counts[2],3,x+3,y+2);
+  // }
+  // else
+  // {
+  //   put_number(0,3,x+3,y);
+  // }
+
 }
 
 void display_army_size(char id, int x, int y)
@@ -1139,26 +1174,21 @@ void display_type(char id, int x, int y)
 char begin_battle(int attacker, int target, int attacker_pos, int target_pos)
 {
   int i, battle_result, attacker_before, attacker_after, target_before, target_after, resolution;
-
-  // put_number(attacker,3,15,15);
-  // put_number(entities[target].id,3,15,16);
-  // return 0;
-
-  satb_update();
+  // satb_update();
   disp_off();
-  vsync();
-  for(i=0; i<64; i++)
-  {
-    spr_hide(i);
-  }
-  cls();
-  satb_update();
+  // vsync();
+  // for(i=0; i<64; i++)
+  // {
+  //   spr_hide(i);
+  // }
+  // cls();
+  // satb_update();
   reset_satb();
   vsync();
 
   attacker_before = entities[attacker].army_size;
   target_before = entities[target].army_size;
-  hide_npcs(5);
+  // hide_npcs(5);
   // resolution = battle_loop(attacker,target,attackable(target,attacker,coords));
   resolution = battle_loop(entities[attacker].id-16,entities[target].id-16,1);
   // resolution = battle_loop(0,24,0);

@@ -30,7 +30,7 @@ typedef struct{
 } Unit;
 
 typedef struct{
-	char unit_type,cmdr_id;
+	char unit_type, cmdr_id;
 	int hp;
 } Unit_Entity;
 
@@ -83,7 +83,7 @@ void initialize_units()
 
   unit_list[SWORD_UNIT].hp  = 90;
   unit_list[SWORD_UNIT].atk = 14;
-  unit_list[SWORD_UNIT].def = 14;
+  unit_list[SWORD_UNIT].def = 12;
   unit_list[SWORD_UNIT].mov = 3;
   unit_list[SWORD_UNIT].rng = 1;
   unit_list[SWORD_UNIT].ign = 0;
@@ -107,7 +107,7 @@ void initialize_units()
   unit_list[ARCHER_UNIT].a_type = MISSILE;
   unit_list[ARCHER_UNIT].d_type = LIGHT;
 
-  unit_list[MAGE_UNIT].atk = 20;
+  unit_list[MAGE_UNIT].atk = 17;
   unit_list[MAGE_UNIT].def = 10;
   unit_list[MAGE_UNIT].hp  = 60;
   unit_list[MAGE_UNIT].ign = 0;
@@ -132,7 +132,7 @@ void initialize_units()
   unit_list[HOUND_UNIT].d_type = MEDIUM;
 
   unit_list[BLOB_UNIT].atk = 16;
-  unit_list[BLOB_UNIT].def = 14;
+  unit_list[BLOB_UNIT].def = 13;
   unit_list[BLOB_UNIT].hp  = 65;
   unit_list[BLOB_UNIT].ign = 0;
   unit_list[BLOB_UNIT].mov = 3;
@@ -176,14 +176,20 @@ char check_advantage(char a_type, char d_type)
   }
 }
 
-unsigned char add_unit_entity(char unit_type)
+unsigned char add_unit_entity(char unit_type, char id)
 {
 	unit_entities[unit_entity_count].unit_type = unit_type;
 	unit_entities[unit_entity_count].hp = unit_list[unit_type].hp;
+	unit_entities[unit_entity_count].cmdr_id = id;
 	return unit_entity_count++;
 }
 
-void remove_unit_from_game(unsigned char unit_id)
+void delete_unit_entity(unsigned char unit_id)
 {
-
+	unsigned char i;
+	for(i=unit_id; i<unit_entity_count-1; i++)
+	{
+	  memcpy(&unit_entities[i],&unit_entities[i+1],sizeof(Unit_Entity));
+	}
+	unit_entity_count--;
 }

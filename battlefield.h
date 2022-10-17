@@ -509,8 +509,6 @@ void undo()
   print_menu();
   select_unit(unit_selected);
   hide_cursor();
-  // hide_selector();
-  // update_map();
 }
 
 void show_selectable_menu_options()

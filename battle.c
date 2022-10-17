@@ -18,7 +18,6 @@ int attacks;
 int team_one_total;
 int team_two_total;
 char can_attack;
-int one_dmg, two_dmg, one_health, two_health;
 char ticker = 0;
 
 char atker, trgt;
@@ -43,10 +42,6 @@ int roundUp(int num, int div)
 			return whole+1;
 }
 
-void controls()
-{
-}
-
 int is_opp_adjacent(int gridpos)
 {
 	return 0;
@@ -67,11 +62,14 @@ void intro()
 	// target = range(target_team,target_team+(target_size-1));
 	find_new_target();
 	disp_on();
+
 	load_pals(0,team_one_count);
 	load_pals(9,team_two_count);
+	load_palette(0,healthbarpal,1);
 
 	satb_update();
 	load_animations_to_vram(TEAM_ONE,TEAM_TWO);
+
 	hit_frames = 0;
 	t = 0;
 
@@ -109,16 +107,24 @@ void intro()
 		}
 		if(hit_frames == 12)
 		{
-			hide_healthbar(target);
+			if(!npcs[target].active)
+			{
+				hide_healthbar(target);
+			}
 			spr_set(attacker);
 			spr_pattern(idle_vrams[attacker]);
 			spr_set(target);
 			spr_pattern(idle_vrams[target]);
 			hit_frames = 0;
 			attacker++;
+			// wait_for_I_input();
+			if(team_one_total == 0 || team_two_total == 0)
+			{
+				// return;
+				break;
+			}
 			find_new_target();
 			attacks++;
-			// wait_for_I_input();
 		}
 		satb_update();
 		vsync(1);
@@ -128,6 +134,7 @@ void intro()
 void display_unit_info(char id, char x, char y)
 {
 	print_unit_type(unit_entities[npcs[id].type].unit_type,x,y);
+	put_number(npcs[id].type,3,x,y+3);
 	put_string("HP",x+4,y);
 	put_number(unit_entities[npcs[id].type].hp,4,x+2,y+1);
 	put_string("AT",x+7,y);
@@ -156,13 +163,23 @@ void animate_stun(char unit_id, char hit_frames)
 	{
 		spr_set(unit_id);
 		spr_pattern(stun_vrams[unit_id%9]);
-		display_healthbar(x/8,(y/8)+4);
 	}
 	if(hit_frames == 8)
 	{
 		dmg = calc_hit_damage();
 		reduce_healthbar(x/8,(y/8)+4,hlth-dmg,dmg);
 	}
+}
+
+void show_healthbar(char npc_id, int x, int y)
+{
+	char hlth, h_diff, dmg, p;
+	hlth = unit_list[unit_entities[npcs[npc_id].type].unit_type].hp;
+	p = hlth / 5;
+	h_diff = roundUp(unit_entities[npcs[npc_id].type].hp,p);
+
+	display_healthbar(x/8,(y/8)+4);
+	reduce_healthbar(x/8,(y/8)+4,h_diff,5-h_diff);
 }
 
 void hide_healthbar(char unit_id)
@@ -176,8 +193,20 @@ void hide_healthbar(char unit_id)
 
 void kill_unit()
 {
+	if(attacking_team == TEAM_ONE)
+	{
+		team_two_total--;
+	}
+	else
+	{
+		team_one_total--;
+	}
 	npcs[target].active = 0;
 	spr_hide(target);
+	// hide_healthbar(target);
+	delete_unit_entity(npcs[target].type);
+	reduce_unit_ids(npcs[target].type);
+	reduce_npc_ids(npcs[target].type);
 }
 
 void calc_hit_damage()
@@ -196,7 +225,7 @@ void calc_hit_damage()
 	dmg = max((a_atk - t_def)*10,0);
 	if(dmg)
 	{
-		if(dmg > t_hp)
+		if(dmg >= t_hp)
 		{
 			unit_entities[npcs[target].type].hp = 0;
 			kill_unit();
@@ -222,7 +251,12 @@ void swap_turns(char atkr, char trgt)
 void find_new_target()
 {
 	char t;
-	while(npcs[(t = get_random_target())].active != 1){}
+	t = 0;
+	// if(target_size)
+	// {
+	// 	while((npcs[(t = get_random_target())].active != 1)){}
+	// }
+	while((npcs[(t = get_random_target())].active != 1)){}
 	target = t;
 }
 
@@ -230,9 +264,6 @@ void get_next_attacker()
 {
 	char j;
 	j=0;
-	// put_number(attacking_team,3,0,20);
-	// put_number(attacker_size,3,0,21);
-	// put_number((attacking_team+attacker_size)+1,3,0,22);
 
 	for(j=attacker; j<(attacking_team+attacker_size)+1; j++)
 	{
@@ -255,6 +286,8 @@ char get_random_target()
 void load_animations_to_vram(char attackers, char targets)
 {
 	char i;
+	// wait_for_I_input();
+
 	for(i=0; i<attacker_size; i++)
 	{
 		transfer_units_to_attack_vram(i+attackers);
@@ -289,44 +322,36 @@ char battle_loop(int i1, int i2, char target_attack)
 	can_attack = target_attack;
 	xOffset = -36;
 	atker = i1, trgt = i2;
+	set_screen_size(SCR_SIZE_32x32);
+	// load_palette(0,grasspal,1);
+	load_font(font,125,0xf00);
+	set_font_addr(0xf00);
+	cls();
+
+	load_battle_bg();
 
 	init_armies(i1,i2);
-
+	// cls(1);
 	scroll(0, 0, 0, 0, 223, 0xC0);
-	set_screen_size(SCR_SIZE_32x32);
-	load_battle_bg();
+	// load_font(font,125,0xf00);
+	// set_screen_size(SCR_SIZE_32x32);
 	// load_battle_scene(i1,i2);
 
-	one_dmg = 0;
-	two_dmg = 0;
-	one_health = 60;
-	two_health = 120;
 	load_healthbars();
-	// display_healthbar(16,12);
-	// display_healthbar(16,17);
-	// display_healthbar(16,22);
-	// display_healthbar(21,12);
-	// reduce_healthbar(13,2,7,0);
-	// reduce_healthbar(13,4,0,7);
-
 	intro();
 
 	reset_satb();
 	cleanup_battle(i1,i2);
 
-	// if(p_c_army.current_army_size == 0)//attacker
-	// {
-	// 	return 0;
-	// }
-	// else if(c_c_army.current_army_size == 0)//target
-	// {
-	// 	return 1;
-	// }
-	// else
-	// {
-	// 	return 2;
-	// }
+	if(team_one_total == 0)
+	{
+		return 1;
+	}
 
+	if(team_two_total == 0)
+	{
+		return 0;
+	}
 	return 2;
 }
 
@@ -365,6 +390,7 @@ void init_armies(int player, int cpu)
 		for(i=0; i<commanders[player].row_counts[j]; i++, total_count++)
 		{
 			add_battle_npc(3-(i/3)-j,2+(i%3),row[i],17,total_count);
+			show_healthbar(total_count,spr_get_x(),spr_get_y());
 		}
 	}
 
@@ -375,6 +401,7 @@ void init_armies(int player, int cpu)
 		for(i=0; i<commanders[cpu].row_counts[j]; i++, total_count++)
 		{
 			add_battle_npc(j+4+(i/3),2+(i%3),row[i],17,total_count);
+			show_healthbar(total_count,spr_get_x(),spr_get_y());
 		}
 	}
 
@@ -383,12 +410,14 @@ void init_armies(int player, int cpu)
 		spr_set(j+9);
 		spr_ctrl(FLIP_MAS,FLIP_X);
 	}
+	satb_update();
 }
 
 void load_battle_bg()
 {
 	set_map_data(batty,16,16);
 	set_tile_data(grass,0,grasspal,16);
+	// cls();
 }
 
 int get_y_from_pos(int pos){
@@ -436,50 +465,34 @@ void load_pals(int off, char count)
 
 void cleanup_battle(int player_selected_index, int cpu_selected_index)
 {
-	int i, j;
+	unsigned char last_id;
+	char i;
 
-	for(i=0;i<2;i++)
-	{
-		for(j=0;j<9;j++)
-		{
-
-		}
-	}
-	// entities[player_selected_index].army_size = p_c_army.current_army_size;
-	// entities[cpu_selected_index].army_size = c_c_army.current_army_size;
-	// entities[player_selected_index].hp = p_c_army.hp_current;
-	// entities[cpu_selected_index].hp = c_c_army.hp_current;
-	// for(i=5; i<35; i++)
+	// for(i=0; i<team_one_count; i++)
 	// {
-	// 	spr_hide(i);
-	// }
-
-	// for(i=0, sp=armyOne; i<15; i++)
-	// {
-	// 	sp->active = 0;
-	// 	sp->id = 0;
-	// 	sp->state = 0;
-	// 	sp->tic = 0;
-	// 	sp->x = 0;
-	// 	sp->y = 0;
-	// 	sp->state = 0;
-	// 	sp->direction = 0;
+	// 	if(npcs[i].active == 0)
+	// 	{
+	// 		delete_unit_entity(npcs[i].type);
+	// 		reduce_unit_ids(npcs[i].type);
+	// 		reduce_npc_ids(npcs[i].type);
+	// 		wait_for_I_input();
+	// 	}
 	// }
 	//
-	// for(i=0, sp=armyTwo; i<15; i++)
+	// for(i=9; i<team_two_count+9; i++)
 	// {
-	// 	sp->active = 0;
-	// 	sp->id = 0;
-	// 	sp->state = 0;
-	// 	sp->tic = 0;
-	// 	sp->x = 0;
-	// 	sp->y = 0;
-	// 	sp->state = 0;
-	// 	sp->direction = 0;
+	// 	if(npcs[i].active == 0)
+	// 	{
+	// 		delete_unit_entity(npcs[i].type);
+	// 		reduce_unit_ids(npcs[i].type);
+	// 		reduce_npc_ids(npcs[i].type);
+	// 		wait_for_I_input();
+	// 	}
 	// }
 
-	// sp = 0;
 	total_units = 0;
+	team_one_total = 0;
+	team_two_total = 0;
 
 	spr_set(62);
 	spr_hide();

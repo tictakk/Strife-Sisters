@@ -68,10 +68,6 @@
 #incchr(king_gfx, "characters/king.pcx")
 #incpal(king_pal, "characters/king.pcx")
 
-// #incpal(npc_pal, "characters/mannpc.pcx")
-// #incspr(man_walk, "characters/mannpc.pcx")
-// #incspr(woman_walk, "characters/womannpc.pcx")
-
 #define MAP_WIDTH 32
 #define TILE_WIDTH 16
 #define TILE_VRAM 0x1000
@@ -92,14 +88,12 @@ struct Commander{
 	char lvl;
 	char id;
 	char no_of_items;
-	// char ap;
 	char equipable;
 	char *name;
 	char row_one[3];
 	char row_two[3];
 	char row_three[3];
 	char row_counts[3];
-	// Unit *unit;
 };
 
 struct Castle{
@@ -277,14 +271,8 @@ const char row_names[17] = {
 
 int menu_size = 0;
 unsigned int player_gold = 0;
-// Unit unit_list[UNIT_LIST_SIZE+MAX_COMMANDERS_PER_BATTLE];
-// Unit unit_list[16+TOTAL_COMMANDERS];//12 units, 4 ncpcs, 25 commanders
 char buyable_units[3];
 char buyable_items[4];
-
-// struct soldier armyOne[15];
-// struct soldier armyTwo[15];
-// struct soldier *sp;
 
 int map_counter = 0;
 int map_size = 0;
@@ -352,69 +340,75 @@ void main()
 	commanders[23].name = "Alpha.H";
 	commanders[24].name = "King.B";
 
-	commanders[0].row_one[0] = add_unit_entity(SWORD_UNIT);
-	commanders[0].row_one[1] = add_unit_entity(SWORD_UNIT);
-	commanders[0].row_one[2] = add_unit_entity(SWORD_UNIT);
+	commanders[0].row_one[0] = add_unit_entity(SWORD_UNIT,0);
+	commanders[0].row_one[1] = add_unit_entity(SWORD_UNIT,0);
+	commanders[0].row_one[2] = add_unit_entity(SWORD_UNIT,0);
 
-	commanders[0].row_two[0] = add_unit_entity(ARCHER_UNIT);
-	commanders[0].row_two[1] = add_unit_entity(SPEAR_UNIT);
+	commanders[0].row_two[0] = add_unit_entity(ARCHER_UNIT,0);
+	commanders[0].row_two[1] = add_unit_entity(SPEAR_UNIT,0);
+	commanders[0].row_two[2] = add_unit_entity(SPEAR_UNIT,0);
 
-	commanders[0].row_three[0] = add_unit_entity(SPEAR_UNIT);
+	commanders[0].row_three[0] = add_unit_entity(SPEAR_UNIT,0);
+	commanders[0].row_three[1] = add_unit_entity(SPEAR_UNIT,0);
+	commanders[0].row_three[2] = add_unit_entity(SPEAR_UNIT,0);
 
-	commanders[0].row_counts[0] = 2;
-	commanders[0].row_counts[1] = 1;
-	commanders[0].row_counts[2] = 1;
+	// commanders[0].row_counts[0] = 2;
+	// commanders[0].row_counts[1] = 1;
+	// commanders[0].row_counts[2] = 1;
+	commanders[0].row_counts[0] = 3;
+	commanders[0].row_counts[1] = 3;
+	commanders[0].row_counts[2] = 3;
 
-	commanders[1].row_one[0] = add_unit_entity(SWORD_UNIT);
-	commanders[1].row_one[1] = add_unit_entity(SWORD_UNIT);
+	commanders[1].row_one[0] = add_unit_entity(SWORD_UNIT,1);
+	commanders[1].row_one[1] = add_unit_entity(SWORD_UNIT,1);
 	commanders[1].row_counts[0] = 2;
 
 	commanders[2].row_counts[0] = 0;
 
-	commanders[3].row_one[0] = add_unit_entity(SPEAR_UNIT);
-	commanders[3].row_one[1] = add_unit_entity(SPEAR_UNIT);
+	commanders[3].row_one[0] = add_unit_entity(SPEAR_UNIT,3);
+	commanders[3].row_one[1] = add_unit_entity(SPEAR_UNIT,3);
 	commanders[3].row_counts[0] = 2;
 
-	commanders[4].row_one[0] = add_unit_entity(SPEAR_UNIT);
-	commanders[4].row_one[1] = add_unit_entity(SPEAR_UNIT);
-	commanders[4].row_one[2] = add_unit_entity(ARCHER_UNIT);
+	commanders[4].row_one[0] = add_unit_entity(SPEAR_UNIT,4);
+	commanders[4].row_one[1] = add_unit_entity(SPEAR_UNIT,4);
+	commanders[4].row_one[2] = add_unit_entity(ARCHER_UNIT,4);
 
 	commanders[4].row_counts[0] = 3;
 
-	commanders[5].row_one[0] = add_unit_entity(SWORD_UNIT);
-	commanders[5].row_one[1] = add_unit_entity(SWORD_UNIT);
-	commanders[5].row_one[2] = add_unit_entity(ARCHER_UNIT);
+	commanders[5].row_one[0] = add_unit_entity(SWORD_UNIT,5);
+	commanders[5].row_one[1] = add_unit_entity(SWORD_UNIT,5);
+	commanders[5].row_one[2] = add_unit_entity(ARCHER_UNIT,5);
 	commanders[5].row_counts[0] = 0;
 
-	commanders[6].row_one[0] = add_unit_entity(SPEAR_UNIT);
-	commanders[6].row_one[1] = add_unit_entity(SPEAR_UNIT);
-	commanders[6].row_one[2] = add_unit_entity(SPEAR_UNIT);
+	commanders[6].row_one[0] = add_unit_entity(SPEAR_UNIT,6);
+	commanders[6].row_one[1] = add_unit_entity(SPEAR_UNIT,6);
+	commanders[6].row_one[2] = add_unit_entity(SPEAR_UNIT,6);
 	commanders[6].row_counts[0] = 3;
 
-	commanders[7].row_one[0] = add_unit_entity(ARCHER_UNIT);
-	commanders[7].row_one[1] = add_unit_entity(ARCHER_UNIT);
-	commanders[7].row_one[2] = add_unit_entity(ARCHER_UNIT);
+	commanders[7].row_one[0] = add_unit_entity(ARCHER_UNIT,7);
+	commanders[7].row_one[1] = add_unit_entity(ARCHER_UNIT,7);
+	commanders[7].row_one[2] = add_unit_entity(ARCHER_UNIT,7);
 	commanders[7].row_counts[0] = 0;
 
-	commanders[8].row_one[0] = add_unit_entity(SPEAR_UNIT);
-	commanders[8].row_one[1] = add_unit_entity(SPEAR_UNIT);
-	commanders[8].row_one[2] = add_unit_entity(SPEAR_UNIT);
+	commanders[8].row_one[0] = add_unit_entity(SPEAR_UNIT,8);
+	commanders[8].row_one[1] = add_unit_entity(SPEAR_UNIT,8);
+	commanders[8].row_one[2] = add_unit_entity(SPEAR_UNIT,8);
 
 	commanders[8].row_counts[0] = 3;
 
-	commanders[24].row_one[0] = add_unit_entity(BLOB_UNIT);
-	commanders[24].row_one[1] = add_unit_entity(BLOB_UNIT);
-	commanders[24].row_one[2] = add_unit_entity(BLOB_UNIT);
+	commanders[24].row_one[0] = add_unit_entity(BLOB_UNIT,24);
+	commanders[24].row_one[1] = add_unit_entity(BLOB_UNIT,24);
+	commanders[24].row_one[2] = add_unit_entity(BLOB_UNIT,24);
 	// commanders[24].row_one[3] = BLOB_UNIT;
 	commanders[24].row_counts[0] = 3;
 	commanders[24].row_counts[1] = 0;
 	commanders[24].row_counts[2] = 0;
 
-	commanders[23].row_one[0] = add_unit_entity(HOUND_UNIT);
-	commanders[23].row_one[1] = add_unit_entity(HOUND_UNIT);
-	commanders[23].row_one[2] = add_unit_entity(HOUND_UNIT);
+	commanders[23].row_one[0] = add_unit_entity(HOUND_UNIT,23);
+	commanders[23].row_one[1] = add_unit_entity(HOUND_UNIT,23);
+	commanders[23].row_one[2] = add_unit_entity(HOUND_UNIT,23);
 
-	commanders[23].row_two[0] = add_unit_entity(HOUND_UNIT);
+	commanders[23].row_two[0] = add_unit_entity(HOUND_UNIT,24);
 
 	commanders[23].row_counts[0] = 3;
 	commanders[23].row_counts[1] = 1;
@@ -471,9 +465,8 @@ void main()
 	no_of_party_items = 11;
 
 	disp_off();
-	// cls();
 	init_satb();
-	// load_palette(17,banditpal,1);
+
 	load_vram(0x68C0,cursor,0x40);
 	load_vram(0x68C0+0x40,vert_pointer,0x100);
 
@@ -1242,6 +1235,44 @@ void load_commanders_gfx(int cmdr_id, int address, int pal)
 		load_vram(address,dmn,0x100);
 		load_palette(pal,dmnpal,1);
 		break;
+	}
+}
+
+void reduce_unit_ids(unsigned char unit_id)
+{
+	char i, j;
+
+	for(j=0;j<TOTAL_COMMANDERS;j++)
+	{
+		for(i=0;i<9;i++)
+		{
+			if(commanders[j].row_one[i] == unit_id)
+			{
+				put_number(unit_id,3,24,10);
+				remove_unit_from_row(commanders[j].row_one,i%3);
+				commanders[j].row_counts[i/3]--;
+			}
+			else if(commanders[j].row_one[i] > unit_id)
+			{
+				commanders[j].row_one[i]--;
+				// 28, 31
+				// 29
+				// 30
+			}
+		}
+	}
+}
+
+void remove_unit_from_row(char *row, char position)
+{
+	char i;
+	if(position == 2)
+	{
+		return;
+	}
+	for(i=position;i<3;i++)
+	{
+		row[i] = row[i+1];
 	}
 }
 
