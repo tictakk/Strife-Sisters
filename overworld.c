@@ -68,7 +68,6 @@ void overworld_loop()
 	s_y = 288;
 	selector_y = 208-16;
 	selector_x = 32;
-	cursor_vram = 0x5080;
 
 	disp_off();
   load_overworld_bg();
@@ -177,6 +176,7 @@ void arrived(int pos)
 {
 	// story(get_map_id_by_pos(pos),PREBATTLE,0);
 	// load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+	commander_select_cursor = 0;
 	put_number(pos,4,15,45);
 	display_castle_menu(get_map_id_by_pos(pos));
 	// spr_hide(0);
@@ -401,7 +401,6 @@ int get_next_pos()
 void load_overworld_bg()
 {
 	total_sprites = 0;
-	cursor_vram = 0x5080;
 	set_screen_size(SCR_SIZE_64x64);
 	screen_dimensions = 64;
 
@@ -411,8 +410,6 @@ void load_overworld_bg()
 	load_tile(TILE_VRAM);
 
 	load_palette(0,overworldpal,7);
-	// load_palette(8,panel_pal,1);
-	// load_palette(9,castlepal,1);
 	load_palette(10,fontpal,2);
 	load_palette(8,borderspal,1);
 
@@ -1168,6 +1165,13 @@ void overworld_controls(){
 				reset_npcs();
 				init_map_data(get_map_id_by_pos(get_absolute_pos()));
 				begin_battlefield(get_map_id_by_pos(get_absolute_pos()));
+				disp_off();
+				load_overworld_bg();
+
+				spawn_starting_enemies();
+				draw_npcs(5);
+				satb_update();
+				menu_state = OVERWORLD;
 				// begin_explore(current_selected_castle);
 				break;
 			}

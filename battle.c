@@ -42,11 +42,6 @@ int roundUp(int num, int div)
 			return whole+1;
 }
 
-int is_opp_adjacent(int gridpos)
-{
-	return 0;
-}
-
 void intro()
 {
 	int hit_frames;
@@ -120,7 +115,6 @@ void intro()
 			// wait_for_I_input();
 			if(team_one_total == 0 || team_two_total == 0)
 			{
-				// return;
 				break;
 			}
 			find_new_target();
@@ -201,12 +195,14 @@ void kill_unit()
 	{
 		team_one_total--;
 	}
-	npcs[target].active = 0;
-	spr_hide(target);
-	// hide_healthbar(target);
-	delete_unit_entity(npcs[target].type);
+
+	// delete_unit_entity(npcs[target].type);
 	reduce_unit_ids(npcs[target].type);
 	reduce_npc_ids(npcs[target].type);
+	delete_unit_entity(npcs[target].type);
+
+	npcs[target].active = 0;
+	spr_hide(target);
 }
 
 void calc_hit_damage()
@@ -231,7 +227,7 @@ void calc_hit_damage()
 			kill_unit();
 			return 5;
 		}
-		if(dmg < fifth){ unit_entities[npcs[target].type].hp -= dmg;return 0;}
+		if(dmg < fifth){ unit_entities[npcs[target].type].hp -= dmg; return 0;}
 		if((t_hp - dmg)<fifth){ unit_entities[npcs[target].type].hp -= dmg;return 4;}
 		unit_entities[npcs[target].type].hp -= dmg;
 		return 5 - ((t_hp - ((a_atk - t_def)*10))/fifth);
@@ -298,17 +294,6 @@ void load_animations_to_vram(char attackers, char targets)
 	{
 		transfer_units_to_stun_vram(i+targets);
 	}
-}
-
-void reset_camera()
-{
-	char z;
-	sx = 0;
-	sy = 0;
-	// yOffset = 0;
-	xOffset = 0;
-
-	scroll(0, 0, 0, 0, 223, 0xC0);
 }
 /*
 	BATTLE ROUTINE
@@ -465,34 +450,7 @@ void load_pals(int off, char count)
 
 void cleanup_battle(int player_selected_index, int cpu_selected_index)
 {
-	unsigned char last_id;
-	char i;
-
-	// for(i=0; i<team_one_count; i++)
-	// {
-	// 	if(npcs[i].active == 0)
-	// 	{
-	// 		delete_unit_entity(npcs[i].type);
-	// 		reduce_unit_ids(npcs[i].type);
-	// 		reduce_npc_ids(npcs[i].type);
-	// 		wait_for_I_input();
-	// 	}
-	// }
-	//
-	// for(i=9; i<team_two_count+9; i++)
-	// {
-	// 	if(npcs[i].active == 0)
-	// 	{
-	// 		delete_unit_entity(npcs[i].type);
-	// 		reduce_unit_ids(npcs[i].type);
-	// 		reduce_npc_ids(npcs[i].type);
-	// 		wait_for_I_input();
-	// 	}
-	// }
-
 	total_units = 0;
-	team_one_total = 0;
-	team_two_total = 0;
 
 	spr_set(62);
 	spr_hide();

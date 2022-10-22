@@ -182,7 +182,7 @@ void add_entity(char type, char size, char team, char pal, char unit_id, char cm
   entities[num_of_entities].actionable = 1;
   // entities[num_of_entities].hp = unit_list[unit_id].hp * (int)size;
   entities[num_of_entities++].nearby_engaged = 1; //should start at 0
-  add_npc(pos%16,pos/16,unit_list[unit_id].id,pal);
+  add_npc(pos%16,pos/16,cmdr,pal);
 }
 
 void update_selector_pos(int x, int y)
@@ -248,8 +248,8 @@ char destroy_entity(int id)
   killed = 0;
   entity_id = id;
 
-  if(entities[entity_id].army_size == 0)
-  {
+  // if(entities[entity_id].army_size == 0)
+  // {
     battle_grid[entities[id].pos] = 0;
     killed = 1;
     if(entities[entity_id].team == PLAYER)
@@ -276,7 +276,7 @@ char destroy_entity(int id)
       memcpy(&entities[i],&entities[i+1],sizeof(Entity)); //cpy dst from src
     }
     num_of_entities--;
-  }
+  // }
   return killed;
 }
 
@@ -398,10 +398,10 @@ void clear_text_field()
 void post_battle_dialog()
 {
   clear_text_field();
-  print_items_gained();
+  // print_items_gained();
   print_post_battle_info("Gold received",gold_gained);
   print_post_battle_info("EXP received",exp_gained);
-  distribute_exp();
+  // distribute_exp();
 
   // print_post_battle_info("Rei exp",commanders[party[0]].exp);
   // print_post_battle_info();

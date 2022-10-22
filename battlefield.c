@@ -433,30 +433,29 @@ void check_battle_complete()
   {
     return;
   }
-  return ;
   satb_update();
   vsync();
   //if the battle is over and we're not at a castle, we go back to exploring
   // if(battle_map_metadata[b_map_id].map_type != CASTLE)
   // {
-    post_battle_dialog();
-    cleanup_battlefield();
-    reset_npcs();
-    load_visible_units();
-    randomize_enemy_npcs();
-    load_map(0,2,0,0,16,29);
-    spr_set(2);
-    spr_x(cmdr_x);
-    spr_y(cmdr_y+yOffset);
-    //remove npc enemy group killed
-    selector_mode = EXPLORE_MODE;
+    // post_battle_dialog();
+    // cleanup_battlefield();
+    // reset_npcs();
+    // load_visible_units();
+    // randomize_enemy_npcs();
+    // load_map(0,2,0,0,16,29);
+    // spr_set(2);
+    // spr_x(cmdr_x);
+    // spr_y(cmdr_y+yOffset);
+    // //remove npc enemy group killed
+    // selector_mode = EXPLORE_MODE;
   // }
   //becaue if the battle is over and we're at a castle, we just leave the battlefield
   // else if(battle_map_metadata[b_map_id].map_type == CASTLE)
   // {
-  //   post_battle_dialog();
-  //   cleanup_battlefield();
-  //   exit_battlefield = 0;
+    post_battle_dialog();
+    // cleanup_battlefield();
+    exit_battlefield = 0;
   // }
 }
 //this is awful. Since our sprites in the SATB don't have a reference to our
@@ -479,6 +478,22 @@ void cycle_animations()
 void init_units()
 {
   char i;
+  commanders[23].row_counts[0] = 0;
+  commanders[23].row_counts[1] = 0;
+  commanders[23].row_counts[2] = 0;
+
+  commanders[24].row_counts[0] = 0;
+  commanders[24].row_counts[1] = 0;
+  commanders[24].row_counts[2] = 0;
+
+  commanders[25].row_counts[0] = 0;
+  commanders[25].row_counts[1] = 0;
+  commanders[25].row_counts[2] = 0;
+
+  load_units_by_cmdr_id(24);
+  load_units_by_cmdr_id(23);
+  load_units_by_cmdr_id(25);
+
   for(i=0; i<no_of_player_cmdrs; i++)
   {
     load_group(party[i],party[i]-16,PLAYER,battle_map_metadata.player_start_pos+(i*7));//commander + max_army_size
@@ -1106,6 +1121,7 @@ void display_id(char id, int x, int y)
   // put_string("id",x,y);
   // if(id)
   // {
+
   for(i=0; i<commanders[entities[id].id-16].row_counts[0]; i++)
   {
     put_number(commanders[entities[id].id-16].row_one[i],3,x+3,y+i);
@@ -1124,6 +1140,7 @@ void display_id(char id, int x, int y)
   // put_number(commanders[entities[id].id-16].row_counts[0],3,x+3,y);
   // put_number(commanders[entities[id].id-16].row_counts[1],3,x+3,y+1);
   // put_number(commanders[entities[id].id-16].row_counts[2],3,x+3,y+2);
+
   // }
   // else
   // {
@@ -1193,6 +1210,15 @@ char begin_battle(int attacker, int target, int attacker_pos, int target_pos)
   resolution = battle_loop(entities[attacker].id-16,entities[target].id-16,1);
   // resolution = battle_loop(0,24,0);
 
+  if(resolution == 0)
+  {
+    destroy_entity(target);
+  }
+  if(resolution == 1)
+  {
+    destroy_entity(attacker);
+  }
+
   attacker_after = entities[attacker].army_size;
   target_after = entities[target].army_size;
   battle_result = -1;
@@ -1204,6 +1230,8 @@ char begin_battle(int attacker, int target, int attacker_pos, int target_pos)
   disp_on();
   selector_mode = 0;
   vsync();
+  put_number(target,3,0,0);
+
   return battle_result;
 }
 

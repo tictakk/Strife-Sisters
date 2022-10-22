@@ -185,4 +185,11 @@ void reduce_npc_ids(unsigned char entity_id)
       npcs[i].type--;
     }
   }
+  // if(entity_id == 28)
+  // {
+  //   put_number(commanders[0x18].row_one[0],3,29,3);
+  //   put_number(commanders[0x18].row_one[1],3,29,4);
+  //   put_number(commanders[0x18].row_one[2],3,29,5);
+  //   wait_for_I_input();
+  // }
 }

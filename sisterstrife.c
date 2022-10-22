@@ -2,8 +2,9 @@
 #include "paths.h"
 #include "strifesisters.h"
 #include "item.c"
-#include "commander.c"
 #include "units.c"
+#include "commander.c"
+// #include "units.c"
 #include "map.c"
 #incasm("wavetable.asm")
 #include "sound.c"
@@ -90,9 +91,9 @@ struct Commander{
 	char no_of_items;
 	char equipable;
 	char *name;
-	char row_one[3];
-	char row_two[3];
-	char row_three[3];
+	unsigned char row_one[3];
+	unsigned char row_two[3];
+	unsigned char row_three[3];
 	char row_counts[3];
 };
 
@@ -159,7 +160,6 @@ int ptr[288];
 #define EQUIPABLE 1
 #define ANY_ITEM 2
 
-int cursor_vram = 0;
 int current_global_units = 0;
 unsigned char game_state = PREBATTLE;
 
@@ -296,7 +296,6 @@ void main()
 {
 	selector_x = 0;
 	selector_y = 32;
-	cursor_vram = 0x68C0;
 	// init_map_data(1);
 
 	buyable_units[0] = SWORD_UNIT;
@@ -338,7 +337,10 @@ void main()
 	commanders[8].name = "Phalc";
 	commanders[9].name = "Kurt";
 	commanders[23].name = "Alpha.H";
-	commanders[24].name = "King.B";
+	commanders[24].name = "Cmdr 24";
+	commanders[25].name = "Cmdr 25";
+	commanders[26].name = "Cmdr 26";
+	commanders[27].name = "Cmdr 27";
 
 	commanders[0].row_one[0] = add_unit_entity(SWORD_UNIT,0);
 	commanders[0].row_one[1] = add_unit_entity(SWORD_UNIT,0);
@@ -396,23 +398,23 @@ void main()
 
 	commanders[8].row_counts[0] = 3;
 
-	commanders[24].row_one[0] = add_unit_entity(BLOB_UNIT,24);
-	commanders[24].row_one[1] = add_unit_entity(BLOB_UNIT,24);
-	commanders[24].row_one[2] = add_unit_entity(BLOB_UNIT,24);
-	// commanders[24].row_one[3] = BLOB_UNIT;
-	commanders[24].row_counts[0] = 3;
-	commanders[24].row_counts[1] = 0;
-	commanders[24].row_counts[2] = 0;
+	// commanders[24].row_one[0] = add_unit_entity(BLOB_UNIT,24);
+	// commanders[24].row_one[1] = add_unit_entity(BLOB_UNIT,24);
+	// commanders[24].row_one[2] = add_unit_entity(BLOB_UNIT,24);
+	//
+	// commanders[24].row_counts[0] = 3;
+	// commanders[24].row_counts[1] = 0;
+	// commanders[24].row_counts[2] = 0;
+	//
+	// commanders[23].row_one[0] = add_unit_entity(HOUND_UNIT,23);
+	// commanders[23].row_one[1] = add_unit_entity(HOUND_UNIT,23);
+	// commanders[23].row_one[2] = add_unit_entity(HOUND_UNIT,23);
+	//
+	// commanders[23].row_two[0] = add_unit_entity(HOUND_UNIT,24);
 
-	commanders[23].row_one[0] = add_unit_entity(HOUND_UNIT,23);
-	commanders[23].row_one[1] = add_unit_entity(HOUND_UNIT,23);
-	commanders[23].row_one[2] = add_unit_entity(HOUND_UNIT,23);
-
-	commanders[23].row_two[0] = add_unit_entity(HOUND_UNIT,24);
-
-	commanders[23].row_counts[0] = 3;
-	commanders[23].row_counts[1] = 1;
-	commanders[23].row_counts[2] = 0;
+	// commanders[23].row_counts[0] = 3;
+	// commanders[23].row_counts[1] = 1;
+	// commanders[23].row_counts[2] = 0;
 
 
 	items[0].name = "Dagger";
@@ -464,11 +466,15 @@ void main()
 	party_items[10] = 3; //potion -> consume
 	no_of_party_items = 11;
 
+	// load_units_by_cmdr_id(24);
+	// load_units_by_cmdr_id(23);
+	// load_units_by_cmdr_id(25);
+
 	disp_off();
 	init_satb();
 
-	load_vram(0x68C0,cursor,0x40);
-	load_vram(0x68C0+0x40,vert_pointer,0x100);
+	load_vram(0x6900,cursor,0x40);
+	// load_vram(0x68C0+0x40,vert_pointer,0x100);
 
 	for(;;)
 	{
@@ -625,11 +631,11 @@ void load_cursor(int x, int y, int cursor_no)
 {
 	if(cursor_no == SLIDER_TWO)
 	{
-		spr_make(cursor_no,x,y,0x68C0,FLIP_MAS|SIZE_MAS,FLIP_X|SZ_16x16,19,1);
+		spr_make(cursor_no,x,y,0x6900,FLIP_MAS|SIZE_MAS,FLIP_X|SZ_16x16,19,1);
 	}
 	else
 	{
-		spr_make(cursor_no,x,y,0x68C0,FLIP_MAS|SIZE_MAS,NO_FLIP|SZ_16x16,19,1);
+		spr_make(cursor_no,x,y,0x6900,FLIP_MAS|SIZE_MAS,NO_FLIP|SZ_16x16,19,1);
 	}
 }
 
@@ -686,10 +692,11 @@ void wait_for_I_input()
 
 initialize_commanders()
 {
-	Unit *unit_ptr;
+	// Unit *unit_ptr;
 	char i;
 	struct Commander *cmdr;
-	for(i=0, cmdr = commanders, unit_ptr = &unit_list[REI]; i<TOTAL_COMMANDERS; i++, cmdr++, unit_ptr++)
+	// for(i=0, cmdr = commanders, unit_ptr = &unit_list[REI]; i<TOTAL_COMMANDERS; i++, cmdr++, unit_ptr++)
+	for(i=0, cmdr = commanders; i<TOTAL_COMMANDERS; i++, cmdr++)
 	{
 		cmdr->lvl = 0;
 		cmdr->id = i;
@@ -699,6 +706,10 @@ initialize_commanders()
 		cmdr->row_counts[0] = 0;
 		cmdr->row_counts[1] = 0;
 		cmdr->row_counts[2] = 0;
+		if(i>24)
+		{
+			cmdr->name = "generic";
+		}
 	}
 }
 
@@ -1241,29 +1252,34 @@ void load_commanders_gfx(int cmdr_id, int address, int pal)
 void reduce_unit_ids(unsigned char unit_id)
 {
 	char i, j;
-
 	for(j=0;j<TOTAL_COMMANDERS;j++)
 	{
 		for(i=0;i<9;i++)
 		{
+			// if(j == 0x18)
+			// {
+			// 	put_number(commanders[0x18].row_counts[0],3,29,3);
+			// 	put_number(commanders[0x18].row_counts[1],3,29,4);
+			// 	put_number(commanders[0x18].row_counts[2],3,29,5);
+			// 	put_number(i%3,3,29,6);
+			// 	put_number(commanders[j].row_one[i],3,29,6);
+			// 	wait_for_I_input();
+			// }
 			if(commanders[j].row_one[i] == unit_id)
 			{
-				put_number(unit_id,3,24,10);
-				remove_unit_from_row(commanders[j].row_one,i%3);
+				remove_unit_from_row(commanders[j].row_one,i%3,unit_id);
+				commanders[j].row_one[i]--;
 				commanders[j].row_counts[i/3]--;
 			}
 			else if(commanders[j].row_one[i] > unit_id)
 			{
 				commanders[j].row_one[i]--;
-				// 28, 31
-				// 29
-				// 30
 			}
 		}
 	}
 }
 
-void remove_unit_from_row(char *row, char position)
+void remove_unit_from_row(char *row, char position,unsigned char id)
 {
 	char i;
 	if(position == 2)
@@ -1292,39 +1308,37 @@ char next_level(char level, int exp)
 	return level;
 }
 
-// void scale_stat(char cmdr_id, char attribute)
-// {
-// 	int offset, scale;
-// 	int stat = 0;
-//
-// 	offset = (cmdr_id*4)+attribute;
-// 	scale = STAT_SCALER_TABLE[offset];
-//
-// 	if(scale == 0 || scale > 5)//should never be anything but 1-4
-// 	{
-// 		return;
-// 	}
-//
-// 	switch(attribute)
-// 	{
-// 		case ATK_ATTRIBUTE:
-// 		stat = commanders[cmdr_id].unit->atk;
-// 		stat += (stat / scale);
-// 		commanders[cmdr_id].unit->atk = stat;
-// 		case DEF_ATTRIBUTE:
-// 		stat = commanders[cmdr_id].unit->def;
-// 		stat += (stat / scale);
-// 		commanders[cmdr_id].unit->def = stat;
-// 		case SPD_ATTRIBUTE:
-// 		stat = commanders[cmdr_id].unit->spd;
-// 		stat += (stat / scale);
-// 		commanders[cmdr_id].unit->spd = stat;
-// 		case HP_ATTRIBUTE:
-// 		stat = commanders[cmdr_id].unit->hp;
-// 		stat += (stat / scale);
-// 		commanders[cmdr_id].unit->hp = stat;
-// 	}
-// }
+void load_unit_entities_to_cmdr(char cmdr_id, char row_number, char number_in_row, char unit_id)
+{
+	commanders[cmdr_id].row_one[(row_number*3)+number_in_row] = add_unit_entity(unit_id,cmdr_id);
+	commanders[cmdr_id].row_counts[row_number]++;
+}
+
+void load_units_by_cmdr_id(char cmdr_id)
+{
+	switch(cmdr_id)
+	{
+		case 23:
+		load_unit_entities_to_cmdr(cmdr_id,0,0,HOUND_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,1,HOUND_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,2,HOUND_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,1,0,HOUND_UNIT);
+		break;
+
+		case 24:
+		load_unit_entities_to_cmdr(cmdr_id,0,0,BLOB_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,1,BLOB_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,2,BLOB_UNIT);
+		break;
+
+		case 25:
+		load_unit_entities_to_cmdr(cmdr_id,0,0,AXE_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,1,AXE_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,2,AXE_UNIT);
+		break;
+	}
+}
+
 
 #include "overworld.c"
 #include "battle.c"

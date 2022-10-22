@@ -17,7 +17,7 @@
 #define ADVANTAGE 1
 #define DISADVANTAGE 2
 
-#define MAX_UNIT_ENTITIES 120
+#define MAX_UNIT_ENTITIES 180
 
 enum Unit_Type{
 	INFANTRY, FLYERS, SPEARS, MUSKETS, MAGES, HOUNDS, COMMANDER, BLOBS, AXES
@@ -35,13 +35,14 @@ typedef struct{
 } Unit_Entity;
 
 Unit_Entity unit_entities[MAX_UNIT_ENTITIES];
-Unit unit_list[16+TOTAL_COMMANDERS];//12 units, 4 ncpcs, 25 commanders
+Unit unit_list[16];//12 units, 4 ncpcs, 25 commanders
 unsigned char unit_entity_count = 0;
 
 void initialize_units()
 {
   char i;
-  for(i=0; i<16+TOTAL_COMMANDERS; i++)
+  // for(i=0; i<16+TOTAL_COMMANDERS; i++)
+	for(i=0; i<16; i++)
   {
     unit_list[i].hp = 50;
     unit_list[i].atk = 10;
@@ -187,7 +188,7 @@ unsigned char add_unit_entity(char unit_type, char id)
 void delete_unit_entity(unsigned char unit_id)
 {
 	unsigned char i;
-	for(i=unit_id; i<unit_entity_count-1; i++)
+	for(i=unit_id; i<unit_entity_count; i++)
 	{
 	  memcpy(&unit_entities[i],&unit_entities[i+1],sizeof(Unit_Entity));
 	}
