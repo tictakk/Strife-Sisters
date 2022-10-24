@@ -145,7 +145,7 @@ void initialize_units()
   unit_list[BLOB_UNIT].d_type = LIGHT;
 
   unit_list[AXE_UNIT].atk = 17;
-  unit_list[AXE_UNIT].def = 17;
+  unit_list[AXE_UNIT].def = 12;
   unit_list[AXE_UNIT].hp  = 80;
   unit_list[AXE_UNIT].ign = 0;
   unit_list[AXE_UNIT].mov = 3;

@@ -95,6 +95,7 @@ struct Commander{
 	unsigned char row_two[3];
 	unsigned char row_three[3];
 	char row_counts[3];
+	char sprite_type;
 };
 
 struct Castle{
@@ -290,6 +291,7 @@ int total_units = 0;
 int n = 0;
 char num_of_buyable_units = 0;
 char num_of_buyable_items = 0;
+char g = 0;
 
 
 void main()
@@ -396,26 +398,14 @@ void main()
 	commanders[8].row_one[1] = add_unit_entity(SPEAR_UNIT,8);
 	commanders[8].row_one[2] = add_unit_entity(SPEAR_UNIT,8);
 
+	//I like butts
 	commanders[8].row_counts[0] = 3;
 
-	// commanders[24].row_one[0] = add_unit_entity(BLOB_UNIT,24);
-	// commanders[24].row_one[1] = add_unit_entity(BLOB_UNIT,24);
-	// commanders[24].row_one[2] = add_unit_entity(BLOB_UNIT,24);
-	//
-	// commanders[24].row_counts[0] = 3;
-	// commanders[24].row_counts[1] = 0;
-	// commanders[24].row_counts[2] = 0;
-	//
-	// commanders[23].row_one[0] = add_unit_entity(HOUND_UNIT,23);
-	// commanders[23].row_one[1] = add_unit_entity(HOUND_UNIT,23);
-	// commanders[23].row_one[2] = add_unit_entity(HOUND_UNIT,23);
-	//
-	// commanders[23].row_two[0] = add_unit_entity(HOUND_UNIT,24);
-
-	// commanders[23].row_counts[0] = 3;
-	// commanders[23].row_counts[1] = 1;
-	// commanders[23].row_counts[2] = 0;
-
+	commanders[23].sprite_type = 5;
+	commanders[24].sprite_type = 6;
+	commanders[25].sprite_type = 7;
+	commanders[26].sprite_type = 7;
+	commanders[27].sprite_type = 7;
 
 	items[0].name = "Dagger";
 	items[0].type = EQUIPABLE;
@@ -450,8 +440,8 @@ void main()
 
 	party[0] = REI;
 	party[1] = VIOLET;
-	// party[2] = KING;
-	party_size = 2;
+	party[2] = KING;
+	party_size = 3;
 
 	party_items[0] = 2; //bow -> equip
 	party_items[1] = 4; //elixir -> consume
@@ -465,10 +455,6 @@ void main()
 	party_items[9] = 3; //potion -> consume
 	party_items[10] = 3; //potion -> consume
 	no_of_party_items = 11;
-
-	// load_units_by_cmdr_id(24);
-	// load_units_by_cmdr_id(23);
-	// load_units_by_cmdr_id(25);
 
 	disp_off();
 	init_satb();
@@ -706,6 +692,7 @@ initialize_commanders()
 		cmdr->row_counts[0] = 0;
 		cmdr->row_counts[1] = 0;
 		cmdr->row_counts[2] = 0;
+		cmdr->sprite_type = i+16;
 		if(i>24)
 		{
 			cmdr->name = "generic";
@@ -1214,7 +1201,7 @@ char get_item_real_index(char item_index, char item_type)
 
 void load_commanders_gfx(int cmdr_id, int address, int pal)
 {
-	// put_number(cmdr_id,3,10,5);
+	// put_number(cmdr_id,3,10,5+(g++));
 	switch(cmdr_id)
 	{
 		case REI:
@@ -1232,15 +1219,15 @@ void load_commanders_gfx(int cmdr_id, int address, int pal)
 		load_palette(pal,cat_walk_pal,1);
 		break;
 
-		case BLOB_CMDR:
-		load_vram(address,blob,0x100);
-		load_palette(pal,blobpal,1);
-		break;
-
-		case HOUND_CMDR:
-		load_vram(address,hnd,0x100);
-		load_palette(pal,dmnpal,1);
-		break;
+		// case BLOB_CMDR:
+		// load_vram(address,blob,0x100);
+		// load_palette(pal,blobpal,1);
+		// break;
+		//
+		// case HOUND_CMDR:
+		// load_vram(address,hnd,0x100);
+		// load_palette(pal,dmnpal,1);
+		// break;
 
 		default:
 		load_vram(address,dmn,0x100);
@@ -1314,24 +1301,47 @@ void load_unit_entities_to_cmdr(char cmdr_id, char row_number, char number_in_ro
 	commanders[cmdr_id].row_counts[row_number]++;
 }
 
-void load_units_by_cmdr_id(char cmdr_id)
+void load_units_by_cmdr_id(char cmdr_type, char cmdr_id)
 {
-	switch(cmdr_id)
+	switch(cmdr_type)
 	{
+		case 20:
+		commanders[cmdr_id].sprite_type = SWORD_UNIT;
+		load_unit_entities_to_cmdr(cmdr_id,0,0,SWORD_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,1,SWORD_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,2,SWORD_UNIT);
+		break;
+
+		case 21:
+		commanders[cmdr_id].sprite_type = SPEAR_UNIT;
+		load_unit_entities_to_cmdr(cmdr_id,0,0,SPEAR_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,1,SPEAR_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,2,SPEAR_UNIT);
+		break;
+
+		case 22:
+		commanders[cmdr_id].sprite_type = ARCHER_UNIT;
+		load_unit_entities_to_cmdr(cmdr_id,0,0,ARCHER_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,1,ARCHER_UNIT);
+		load_unit_entities_to_cmdr(cmdr_id,0,2,ARCHER_UNIT);
+		break;
+
 		case 23:
+		commanders[cmdr_id].sprite_type = HOUND_UNIT;
 		load_unit_entities_to_cmdr(cmdr_id,0,0,HOUND_UNIT);
 		load_unit_entities_to_cmdr(cmdr_id,0,1,HOUND_UNIT);
 		load_unit_entities_to_cmdr(cmdr_id,0,2,HOUND_UNIT);
-		load_unit_entities_to_cmdr(cmdr_id,1,0,HOUND_UNIT);
 		break;
 
 		case 24:
+		commanders[cmdr_id].sprite_type = BLOB_UNIT;
 		load_unit_entities_to_cmdr(cmdr_id,0,0,BLOB_UNIT);
 		load_unit_entities_to_cmdr(cmdr_id,0,1,BLOB_UNIT);
 		load_unit_entities_to_cmdr(cmdr_id,0,2,BLOB_UNIT);
 		break;
 
 		case 25:
+		commanders[cmdr_id].sprite_type = AXE_UNIT;
 		load_unit_entities_to_cmdr(cmdr_id,0,0,AXE_UNIT);
 		load_unit_entities_to_cmdr(cmdr_id,0,1,AXE_UNIT);
 		load_unit_entities_to_cmdr(cmdr_id,0,2,AXE_UNIT);

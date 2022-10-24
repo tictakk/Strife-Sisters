@@ -15,7 +15,7 @@
 #define EXPLORE_MENU_MODE 9
 #define ACTION_MODE 10
 
-#define MAX_ENTITIES 13
+#define MAX_ENTITIES 25
 #define PLAYER 1
 #define CPU 2
 #define INF 0
@@ -46,7 +46,7 @@
 
 typedef struct{
   int pos;
-  char army_size, team, id, actionable, nearby_engaged;
+  char army_size, team, id, actionable, objective;
 } Entity;
 
 int exp_gained;
@@ -62,7 +62,6 @@ char cost;
 char cmdr_fig_pal;
 char current_turn;
 int path[20];
-char g;
 char b_map_id;
 char no_of_spawns;
 char map_type;
@@ -172,17 +171,16 @@ char get_pattern_length(char id)
   return SWORD_ATTACK;
 }
 
-void add_entity(char type, char size, char team, char pal, char unit_id, char cmdr, char id, int pos)
+void add_entity(char team, char pal, char cmdr, char id, int pos)
 {
-  entities[num_of_entities].army_size = size;
+  // put_number(pal,3,10,5+(g++));
+  entities[num_of_entities].id = id;
   entities[num_of_entities].team = team;
-  // entities[num_of_entities].unit = &unit_list[unit_id];
-  entities[num_of_entities].id = cmdr;//unit_list[unit_id].id;
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
-  // entities[num_of_entities].hp = unit_list[unit_id].hp * (int)size;
-  entities[num_of_entities++].nearby_engaged = 1; //should start at 0
-  add_npc(pos%16,pos/16,cmdr,pal);
+  entities[num_of_entities++].objective = 0; //should start at 0
+  // add_npc(pos%16,pos/16,commanders[cmdr-16].sprite_type,pal);
+  add_npc(pos%16,pos/16,commanders[id].sprite_type,pal);
 }
 
 void update_selector_pos(int x, int y)
@@ -523,7 +521,7 @@ void show_selectable_menu_options()
     {
       put_string("ATK",20,2);
     }
-    put_string("End",24,2);
+    put_string("END",24,2);
   }
   else
   {
@@ -536,7 +534,7 @@ void print_menu()
   put_string("MOV",20,1);
   put_string("ATK",20,2);
   put_string("ART",24,1);
-  put_string("End",24,2);
+  put_string("END",24,2);
   put_string("TLK",28,1);
   put_string("EXT",28,2);
 }

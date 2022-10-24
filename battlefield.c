@@ -490,28 +490,27 @@ void init_units()
   commanders[25].row_counts[1] = 0;
   commanders[25].row_counts[2] = 0;
 
-  load_units_by_cmdr_id(24);
-  load_units_by_cmdr_id(23);
-  load_units_by_cmdr_id(25);
+  // load_units_by_cmdr_id(24);
+  // load_units_by_cmdr_id(23);
+  // load_units_by_cmdr_id(25);
 
   for(i=0; i<no_of_player_cmdrs; i++)
   {
-    load_group(party[i],party[i]-16,PLAYER,battle_map_metadata.player_start_pos+(i*7));//commander + max_army_size
+    load_group(party[i],party[i]-16,PLAYER,battle_map_metadata.player_start_pos+i);//commander + max_army_size
   }
 
   for(i=0; i<cpu_cmdr_count; i++)
   {
-    load_group((char)battle_map_metadata.cpu_commander_ids[i],
-                (char)battle_map_metadata.cpu_commander_ids[i]-16,
-                CPU,battle_map_metadata.cpu_start_pos+(i*7));
+    load_units_by_cmdr_id((char)battle_map_metadata.cpu_commander_ids[i],20+i);
+    load_group((char)battle_map_metadata.cpu_commander_ids[i]+16+i,
+                20+i,
+                CPU,battle_map_metadata.cpu_start_pos+i);
   }
 }
 
 void load_group(char cmdr_id, char id, char team, int positions[7])
 {
-  char unit_id;
-  unit_id = 0;
-  add_entity(0,1,team,UNIT_PALS[cmdr_id],cmdr_id,cmdr_id,cmdr_id,positions[0]);
+  add_entity(team,UNIT_PALS[commanders[id].sprite_type],cmdr_id,id,positions[0]);
   battle_grid[positions[0]] = num_of_entities;
 }
 
@@ -522,8 +521,8 @@ void load_ents()
   for(i=0; i<num_of_entities; i++)
   {
     add_npc(entities[i].pos%16,entities[i].pos/16,
-            entities[i].id,
-            UNIT_PALS[entities[i].id]+(entities[i].team-1));
+            commanders[entities[i].id].sprite_type,
+            UNIT_PALS[commanders[entities[i].id].sprite_type]);
   }
 }
 
@@ -1117,36 +1116,25 @@ void display_id(char id, int x, int y)
   // id = battle_grid[graph_from_x_y(sx,sy)];
   // put_number(commanders[entities[id].id-16],2,x,y);
   // put_number(entities[id].id-16,2,x,y);
-  put_number(id,2,x,y);
+  put_number(entities[id].id,2,x,y);
   // put_string("id",x,y);
   // if(id)
   // {
 
-  for(i=0; i<commanders[entities[id].id-16].row_counts[0]; i++)
+  for(i=0; i<commanders[entities[id].id].row_counts[0]; i++)
   {
-    put_number(commanders[entities[id].id-16].row_one[i],3,x+3,y+i);
+    put_number(commanders[entities[id].id].row_one[i],3,x+3,y+i);
   }
 
-  for(i=0; i<commanders[entities[id].id-16].row_counts[1]; i++)
+  for(i=0; i<commanders[entities[id].id].row_counts[1]; i++)
   {
-    put_number(commanders[entities[id].id-16].row_two[i],3,x+7,y+i);
+    put_number(commanders[entities[id].id].row_two[i],3,x+7,y+i);
   }
 
-  for(i=0; i<commanders[entities[id].id-16].row_counts[2]; i++)
+  for(i=0; i<commanders[entities[id].id].row_counts[2]; i++)
   {
-    put_number(commanders[entities[id].id-16].row_three[i],3,x+11,y+i);
+    put_number(commanders[entities[id].id].row_three[i],3,x+11,y+i);
   }
-
-  // put_number(commanders[entities[id].id-16].row_counts[0],3,x+3,y);
-  // put_number(commanders[entities[id].id-16].row_counts[1],3,x+3,y+1);
-  // put_number(commanders[entities[id].id-16].row_counts[2],3,x+3,y+2);
-
-  // }
-  // else
-  // {
-  //   put_number(0,3,x+3,y);
-  // }
-
 }
 
 void display_army_size(char id, int x, int y)
@@ -1207,7 +1195,7 @@ char begin_battle(int attacker, int target, int attacker_pos, int target_pos)
   target_before = entities[target].army_size;
   // hide_npcs(5);
   // resolution = battle_loop(attacker,target,attackable(target,attacker,coords));
-  resolution = battle_loop(entities[attacker].id-16,entities[target].id-16,1);
+  resolution = battle_loop(entities[attacker].id,entities[target].id,1);
   // resolution = battle_loop(0,24,0);
 
   if(resolution == 0)

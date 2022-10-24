@@ -2,7 +2,8 @@
 #incspr(man_walk, "characters/mannpc.pcx")
 #incspr(woman_walk, "characters/womannpc.pcx")
 
-#define MAX_NPCS 42
+// #define MAX_NPCS 42
+#define MAX_NPCS 30
 #define NO_OF_NPC_TYPES 4
 #define NO_OF_UNIT_TYPES 12
 #define NO_OF_BASIC_TYPE (NO_OF_NPC_TYPES + NO_OF_UNIT_TYPES)
@@ -104,6 +105,7 @@ void load_npcs(char *data)
 
 void add_npc(char x, char y, char type, char pal)
 {
+  // put_number(type,3,10,5+(g++));
   if(npc_count < MAX_NPCS)
   {
     npcs[npc_count].pos_x = x;
@@ -212,12 +214,10 @@ void draw_npc(char sprite_no, int x, int y, char index)
   spr_make(sprite_no,x,y+yOffset,pattern+NPC_FRAMES[current_frame],FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
 }
 
-void cycle_npcs(){}
-
 void destroy_npc(char index)
 {
   char i;
-  put_number(npc_count-1,3,1,36);
+  // put_number(npc_count-1,3,1,36);
   for(i=index; i<npc_count; i++)
   {
     memcpy(&npcs[i],&npcs[i+1],sizeof(struct npc));
