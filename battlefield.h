@@ -62,9 +62,7 @@ char cost;
 char cmdr_fig_pal;
 char current_turn;
 int path[20];
-char b_map_id;
 char no_of_spawns;
-char map_type;
 char no_of_cpu_cmdrs;
 char no_of_player_cmdrs;
 char last_command;
@@ -314,7 +312,6 @@ void move_unit(int to, int from)
   battle_grid[from] = 0;
   entities[id].pos = to;
   unit_selected = to;
-
   // selector_mode = SELECT_MODE;
   update_map();
 }
@@ -342,49 +339,29 @@ int calc_move_cost(int origin, int dest)
 
 char attack_unit(int src, int dst)
 {
+  char result;
   int attacker, target;//, result;
   attacker = battle_grid[dst]-1;
   target = battle_grid[src]-1;
-
-  // put_number(attacker,3,15,15);
-  // put_number(target,3,15,16);
-  // return 2;
-  // if(entities[attacker].actionable == 0)
-  // {
-  //   return 2;
-  // }
+  result = 2;
+  // wait_for_I_input();
   if(entities[attacker].team != entities[target].team)
   {
     // if(attackable(attacker,target,coords))
-    if(1)
-    {
-      last_command = selector_mode;
-      entities[attacker].actionable = 0;
-      // deduct_stamina(attacker);
-      // deduct_stamina(target);
-      hide_menu();
-      // menu_x = -64;
-      // menu_y = -64;
-      cursor_x = -32;
-      cursor_y = -32;
-      selector_mode = SELECT_MODE;
-      return begin_battle(attacker,target,dst,src);
-      // return 2;
-      // selector_mode = SELECT_MODE;
-      // return result;
-      // entities[attacker].actionable = 0;
-    }
-    else
-    {
-      return -1;
-    }
+    last_command = selector_mode;
+    entities[attacker].actionable = 0;
+    hide_menu();
+    cursor_x = -32;
+    cursor_y = -32;
+    selector_mode = SELECT_MODE;
+    result = begin_battle(attacker,target,dst,src);
   }
   else
   {
     return -1;
   }
-
-  return -1;
+  return result;
+  // return -1;
 }
 
 void clear_text_field()

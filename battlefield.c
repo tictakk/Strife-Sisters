@@ -29,8 +29,7 @@ void begin_explore(char map_id)
 {
   no_of_player_cmdrs = 1;
   yOffset = 0;
-  b_map_id = map_id;
-  map_no = battle_map_metadata.map_no;
+  // map_no = battle_map_metadata.map_no;
   // init_npcs();
   clear_npcs();
   load_npcs(get_map_data_offset(map_no)+npc_level_data);
@@ -72,9 +71,20 @@ int get_map_data_offset(int level)
 
 void begin_battlefield(char map_id)
 {
-  b_map_id = map_id;
+  char i;
   map_no = map_id;
-  no_of_player_cmdrs = min(6,party_size);
+  if(map_id == 1)
+  {
+    add_commander_to_party(KING);
+  }
+  for(i=0; i<6; i++)
+  {
+    if(battle_map_metadata.player_start_pos[i])
+    {
+      no_of_player_cmdrs++;
+    }
+  }
+  // no_of_player_cmdrs = min(6,party_size);
   yOffset = 0;
   // clear_npcs();
   init_battlefield();
@@ -91,6 +101,11 @@ void battlefield_loop(char map_id)
   exp_gained = 75;
   gold_gained = 75;
   last_command = SELECT_MODE;
+  objective_pos = 200;
+  // ai_objective = battle_map_metadata.map_obj;
+  // ai_objective = CAPTURE;
+  // ai_objective = DEFEND;
+  load_coords(0);
   display_sprites_();
   disp_on();
   satb_update();
@@ -100,8 +115,6 @@ void battlefield_loop(char map_id)
   while(exit_battlefield)
   {
     // put_hex(npc_vram[AXE_UNIT],5,0,0);
-    // put_number(battle_map_metadata.event_positions[0],4,0,0);
-
     if(turn == CPU)
     {
       ai();
@@ -113,12 +126,13 @@ void battlefield_loop(char map_id)
       {
         display_id(id-1,0,0);
         id--;
-        // display_army_size(id,1,2);
-        // display_stats(id,6,2);
-        // display_type(id,4,1);
+        display_army_size(id,1,2);
+        display_stats(id,6,2);
+        display_type(id,4,1);
       }
       else
       {
+        put_string("  ",0,0);
         put_string("   ",3,0);
         put_string("   ",3,1);
         put_string("   ",3,2);
@@ -131,12 +145,6 @@ void battlefield_loop(char map_id)
         put_string("   ",11,1);
         put_string("   ",11,2);
       }
-      // else
-      // {
-      //   put_string("     ",1,2);
-      //   put_string("        ",6,2);
-      //   put_string("      ",4,1);
-      // }
       display_position(14,1);
 
       ctrls();
@@ -454,7 +462,6 @@ void check_battle_complete()
   // else if(battle_map_metadata[b_map_id].map_type == CASTLE)
   // {
     post_battle_dialog();
-    // cleanup_battlefield();
     exit_battlefield = 0;
   // }
 }
@@ -749,6 +756,17 @@ void ctrls()
 
   if(j & JOY_I)
   {
+    // char i, size;
+    // g=0;
+    // size = get_path(abs,216,path,battle_grid,CPU,60,0);
+    // for(i=0;i<size+1;i++)
+    // {
+    //   put_number(path[i],4,10,5+(g++));
+    // }
+    // return;
+    // get_unit_radius(abs,3,CPU,0);
+    // put_number(find_nearest_unoccupied_position(abs,objective_pos,map_size,map),4,10,5);
+    // find_nearest_unoccupied_position(abs,objective_pos,map_size,map);
     if(selector_mode == SELECT_MODE)
     {
       if(battle_grid[abs] != 0)
@@ -833,6 +851,8 @@ void ctrls()
 
   if(j & JOY_II)
   {
+    // turn = CPU;
+    // return;
     if(selector_mode == PLACE_MODE)
     {
       set_cursor_pos(unit_selected);
@@ -989,7 +1009,8 @@ char valid_map_square(int desired)
   char i;
   for(i=0; i<map_size+1; i++)
   {
-    if((map[i].ownY*16)+map[i].ownX == desired) return 1;
+    // if((map[i].ownY*16)+map[i].ownX == desired) return 1;
+    if(map[i].ownPos == desired) return 1;
   }
   return 0;
 }
@@ -1031,18 +1052,16 @@ void display_menu(int x, int y)
 void highlight(int square, int pal, int depth)
 {
   int i, p;
-  // p = get_path(square,999,path,battle_grid,entities[battle_grid[square]-1].team,depth,entities[battle_grid[square]-1].unit->ign);
   p = get_path(square,999,path,battle_grid,entities[battle_grid[square]-1].team,depth,0);
   for(i=0; i<map_size+1; i++)
   {
-    change_background_palette(((map[i].ownY*16)+map[i].ownX),pal,(464*map_no));//change back to 224
+    change_background_palette((map[i].ownPos),pal,(464*map_no));
   }
 }
 
 void get_unit_radius(int square, int distance, char team, char ignore)
 {
   get_path(square,999,path,battle_grid,team,distance,ignore);
-  // get_path(square,999,path,battle_grid,team,distance,ignore);
 }
 
 void pattern(int square, int pal, int coords[18], char ignore_terrain)
@@ -1076,7 +1095,6 @@ char attackable(int attacker, int target, int coords[18])
       {
         return 1;
       }
-      // change_background_palette(pos,pal);
     }
   }
   return 0;
@@ -1114,9 +1132,7 @@ void display_id(char id, int x, int y)
   char i;
   // char id;
   // id = battle_grid[graph_from_x_y(sx,sy)];
-  // put_number(commanders[entities[id].id-16],2,x,y);
-  // put_number(entities[id].id-16,2,x,y);
-  put_number(entities[id].id,2,x,y);
+  put_number(id-1,2,x,y);
   // put_string("id",x,y);
   // if(id)
   // {
@@ -1198,14 +1214,15 @@ char begin_battle(int attacker, int target, int attacker_pos, int target_pos)
   resolution = battle_loop(entities[attacker].id,entities[target].id,1);
   // resolution = battle_loop(0,24,0);
 
-  if(resolution == 0)
+  if(resolution == 0)//attacking team kills army
   {
     destroy_entity(target);
   }
-  if(resolution == 1)
+  if(resolution == 1)//targeted team kills army
   {
     destroy_entity(attacker);
   }
+  //2 == neither army destroyed
 
   attacker_after = entities[attacker].army_size;
   target_after = entities[target].army_size;
@@ -1218,8 +1235,7 @@ char begin_battle(int attacker, int target, int attacker_pos, int target_pos)
   disp_on();
   selector_mode = 0;
   vsync();
-  put_number(target,3,0,0);
-
+  // put_number(target,3,0,0);
   return battle_result;
 }
 

@@ -171,7 +171,8 @@ unsigned char game_state = PREBATTLE;
 #define BATTLE_MAP_HEIGHT 16
 
 struct Node{
-	int ownX, ownY, fromX, fromY;
+	// int ownX, ownY, fromX, fromY;
+	int ownPos, fromPos;
 	char checked;
 };
 
@@ -194,6 +195,9 @@ enum Direction{
 /* sprites */
 #incspr(attack, "map/sprites/swordy.pcx")
 #incpal(soldierpal, "map/sprites/swordy.pcx",0,2)
+
+#incspr(blobbattle, "map/sprites/blobbattle.pcx")
+#incpal(blobbattlepal, "map/sprites/blobbattle.pcx",0,2)
 
 #incspr(attack2, "map/sprites/spear_anim.pcx")
 #incpal(spearpal, "map/sprites/spear_anim.pcx",0,2)
@@ -348,26 +352,33 @@ void main()
 	commanders[0].row_one[1] = add_unit_entity(SWORD_UNIT,0);
 	commanders[0].row_one[2] = add_unit_entity(SWORD_UNIT,0);
 
-	commanders[0].row_two[0] = add_unit_entity(ARCHER_UNIT,0);
-	commanders[0].row_two[1] = add_unit_entity(SPEAR_UNIT,0);
-	commanders[0].row_two[2] = add_unit_entity(SPEAR_UNIT,0);
+	// commanders[0].row_two[0] = add_unit_entity(ARCHER_UNIT,0);
+	// commanders[0].row_two[1] = add_unit_entity(SPEAR_UNIT,0);
+	// commanders[0].row_two[2] = add_unit_entity(SPEAR_UNIT,0);
 
-	commanders[0].row_three[0] = add_unit_entity(SPEAR_UNIT,0);
-	commanders[0].row_three[1] = add_unit_entity(SPEAR_UNIT,0);
-	commanders[0].row_three[2] = add_unit_entity(SPEAR_UNIT,0);
+	// commanders[0].row_three[0] = add_unit_entity(SPEAR_UNIT,0);
+	// commanders[0].row_three[1] = add_unit_entity(SPEAR_UNIT,0);
+	// commanders[0].row_three[2] = add_unit_entity(SPEAR_UNIT,0);
 
-	// commanders[0].row_counts[0] = 2;
-	// commanders[0].row_counts[1] = 1;
-	// commanders[0].row_counts[2] = 1;
 	commanders[0].row_counts[0] = 3;
-	commanders[0].row_counts[1] = 3;
-	commanders[0].row_counts[2] = 3;
+	commanders[0].row_counts[1] = 0;
+	commanders[0].row_counts[2] = 0;
 
-	commanders[1].row_one[0] = add_unit_entity(SWORD_UNIT,1);
-	commanders[1].row_one[1] = add_unit_entity(SWORD_UNIT,1);
-	commanders[1].row_counts[0] = 2;
+	commanders[1].row_one[0] = add_unit_entity(ARCHER_UNIT,1);
+	commanders[1].row_one[1] = add_unit_entity(ARCHER_UNIT,1);
+	commanders[1].row_one[2] = add_unit_entity(ARCHER_UNIT,1);
 
-	commanders[2].row_counts[0] = 0;
+	commanders[1].row_counts[0] = 3;
+	commanders[1].row_counts[1] = 0;
+	commanders[1].row_counts[2] = 0;
+
+	commanders[2].row_one[0] = add_unit_entity(SPEAR_UNIT,2);
+	commanders[2].row_one[1] = add_unit_entity(SPEAR_UNIT,2);
+	commanders[2].row_one[2] = add_unit_entity(SPEAR_UNIT,2);
+
+	commanders[2].row_counts[0] = 3;
+	commanders[2].row_counts[1] = 0;
+	commanders[2].row_counts[2] = 0;
 
 	commanders[3].row_one[0] = add_unit_entity(SPEAR_UNIT,3);
 	commanders[3].row_one[1] = add_unit_entity(SPEAR_UNIT,3);
@@ -436,12 +447,12 @@ void main()
 	items[11].type = CONSUMABLE;
 	items[14].name = "Empty";
 
-	player_gold = 10000;
+	player_gold = 1000;
 
 	party[0] = REI;
 	party[1] = VIOLET;
-	party[2] = KING;
-	party_size = 3;
+	// party[2] = KING;
+	party_size = 2;
 
 	party_items[0] = 2; //bow -> equip
 	party_items[1] = 4; //elixir -> consume
@@ -1243,18 +1254,17 @@ void reduce_unit_ids(unsigned char unit_id)
 	{
 		for(i=0;i<9;i++)
 		{
-			// if(j == 0x18)
+			// if(j == 2)
 			// {
-			// 	put_number(commanders[0x18].row_counts[0],3,29,3);
-			// 	put_number(commanders[0x18].row_counts[1],3,29,4);
-			// 	put_number(commanders[0x18].row_counts[2],3,29,5);
-			// 	put_number(i%3,3,29,6);
-			// 	put_number(commanders[j].row_one[i],3,29,6);
+			// 	put_number(commanders[2].row_counts[0],3,29,3);
+			// 	put_number(commanders[2].row_counts[1],3,29,4);
+			// 	put_number(commanders[2].row_counts[2],3,29,5);
+			// 	put_number(commanders[j].row_one[0],3,29,6);
 			// 	wait_for_I_input();
 			// }
 			if(commanders[j].row_one[i] == unit_id)
 			{
-				remove_unit_from_row(commanders[j].row_one,i%3,unit_id);
+				remove_unit_from_row(commanders[j].row_one+((i/3)*3),i%3,unit_id);
 				commanders[j].row_one[i]--;
 				commanders[j].row_counts[i/3]--;
 			}
@@ -1266,7 +1276,7 @@ void reduce_unit_ids(unsigned char unit_id)
 	}
 }
 
-void remove_unit_from_row(char *row, char position,unsigned char id)
+void remove_unit_from_row(char *row, char position, unsigned char id)
 {
 	char i;
 	if(position == 2)
@@ -1346,6 +1356,14 @@ void load_units_by_cmdr_id(char cmdr_type, char cmdr_id)
 		load_unit_entities_to_cmdr(cmdr_id,0,1,AXE_UNIT);
 		load_unit_entities_to_cmdr(cmdr_id,0,2,AXE_UNIT);
 		break;
+	}
+}
+
+void add_commander_to_party(char cmdr_id)
+{
+	if(party_size < 6)
+	{
+		party[party_size++] = cmdr_id;
 	}
 }
 

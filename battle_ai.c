@@ -3,17 +3,35 @@
 #define MOVE 2
 #define PASS_PTS 50
 
-// int attackable_squares[4];
+//Objective
+#define DEFEND 0
+#define CAPTURE 1
+#define TARGET 2
+
+//AI states
+#define READY 0
+#define MOVING 1
+#define ATTACKING 2
+#define CAPTURING 3
+#define PASSING 4
+
+struct Ai_Entity{
+  char state, entity_id, id, action, target;
+  int dest;
+};
+
 char ai_units[21];
 char player_units[21];
 char units_in_range[16];
 char num_of_units_in_range;
 char num_of_ai;
 char num_of_players;
-char done;
 char target_unit;
 char action;
 char ai_tracker;
+int objective_pos;
+
+struct Ai_Entity ai_entities[20]; //should be 15 but gave an extra 5 for possible, non-enemy ais
 
 init_ai()
 {
@@ -26,7 +44,11 @@ init_ai()
     {
       if(entities[i].team == CPU)
       {
-        ai_units[j++] = i;
+        ai_entities[j].entity_id = i;
+        ai_entities[j].id = j;
+        ai_entities[j].target = 0;
+        ai_entities[j].dest = 0;
+        ai_entities[j++].state = READY;
       }
       else if(entities[i].team == PLAYER)
       {
@@ -35,185 +57,45 @@ init_ai()
     }
     num_of_ai = j;
     num_of_players = m;
-    // find_weakest_opp();
-    // print_unit_type((*entities[weakest_opp].unit).unit_type,20,6);
-    // put_number(num_of_players,3,0,9);
-}
-
-int determine_unit_action(char id)
-{
-  char weakest, i, j;
-  int target, len;
-  target = -1;
-  units_in_atk_zone(id);
-  // put_number(num_of_units_in_range,3,0,0);
-  if(num_of_units_in_range != 0)
-  {
-    weakest = find_weakest_opp();
-    action = ATTACK;
-    return weakest;
-  }
-  else
-  {
-    // target = find_weakest_opp_in_range(id,entities[id].unit->mov+entities[id].unit->rng);
-    target = find_weakest_opp_in_range(id,3);
-    if(target == -1)
-    {
-      action = PASS;
-    }
-    else
-    {
-      action = MOVE;
-    }
-  }
-  return target;
 }
 
 int find_weakest_opp_in_range(char id, char range)
 {
   char weakest;
   int target_pos;
+  weakest = -1;
   target_pos = -1;
   get_opps_in_range(id,range);
 
   while(target_pos == -1 && num_of_units_in_range > 0)
   {
     weakest = find_weakest_opp();
-    // if(weakest == 74)
-    // {
-    //   put_number(id,3,0,0);
-    // }
-    get_attackable_squares(weakest,id);
+
     target_pos = get_attack_square(weakest,id);
     if(target_pos == -1)
     {
       pop_unit_from_range(weakest);
     }
   }
-  // put_number(target_pos,3,0,9+(g++));
-  return target_pos;
+  return weakest;
 }
-
-char find_critical_unit()
-{
-  int lowest, rating;
-  char i, id;
-  lowest = 9999;
-  id = -1;
-  for(i=0; i<num_of_players; i++)
-  {
-    rating = calc_unit_rating(player_units[i]);
-
-    if (lowest > rating)
-    {
-      lowest = rating;
-      id = player_units[i];
-    }
-  }
-
-  if(lowest < 600)
-  {
-    return id;
-  }
-  return -1;
-}
-
-void units_in_atk_zone(char id)
-{
-  int square, pos;
-  char weakest, len, i, opp_id;
-  num_of_units_in_range = 0;
-  pos = entities[id].pos;
-  load_coords(id);
-  len = get_pattern_length(id);
-
-  for(i=0; i<len; i++)
-  {
-    square = pos+coords[i*2]+coords[(i*2)+1];
-    opp_id = battle_grid[square];
-    // if(opp_id)
-    // {
-    //   put_number(entities[opp_id].id,3,0,4+(g++));
-    // }
-    if(square < 464 && opp_id != 0 && entities[opp_id-1].team == PLAYER)//change back to 224
-    {
-      units_in_range[num_of_units_in_range++] = opp_id-1;
-    }
-  }
-}
-
-char units_in_move_zone(char id){}
-
-char units_in_danger_zone(char id){}
 
 ai()
 {
-  g = 0;
+  char f=0;
+  g=0;
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
-    set_cursor_pos(entities[ai_units[ai_tracker]].pos);
-    display_position(14,1);
-
-    satb_update();
-    // sync(45);
-    ai_unit(ai_units[ai_tracker]);
+    // set_cursor_pos(entities[ai_units[ai_tracker]].pos);
+    // set_cursor_pos(entities[ai_entities[ai_tracker].entity_id].pos);
+    // display_position(14,1);
+    // satb_update();
+    // sync(30);
+    ai_do_state(ai_entities[ai_tracker].id);
     update_map();
+    satb_update();
   }
   start_turn(PLAYER);
-}
-
-void ai_unit(char id)
-{
-  int traveled, pos;
-  char result, continue_move;
-  continue_move = 1;
-  // if(entities[id].actionable)
-  while(continue_move)
-  {
-      pos = determine_unit_action(id);
-      // put_number(pos,3,0,9+(g++));
-      switch(action)
-      {
-        case PASS:
-        continue_move = 0;
-        entities[id].actionable = 0;
-        // swap_pal(id,31);
-        // draw_npcs();
-        // update_map();
-        // cycle_animations();
-        // draw_actions();
-        break;
-
-        case MOVE: //move a unit
-        // set_cursor_pos(pos);
-        highlight(entities[id].pos,0xB000,3);
-        satb_update();
-        // sync(30);
-        move_unit(pos,entities[id].pos);
-        // update_map();
-        // draw_actions();
-        satb_update();
-        break;
-
-        case ATTACK: //attack a unit
-        pattern(entities[id].pos,0xC000,coords,1);
-        // set_cursor_pos(entities[pos].pos);
-        satb_update();
-        sync(60);
-        result = attack_unit(entities[pos].pos,entities[id].pos);
-        if(result == id)
-        {
-          ai_tracker--;
-        }
-        // put_string("             ",6,2);
-        continue_move = 0;
-        init_ai();
-        break;
-      }
-      // vysnc();
-      satb_update();
-      sync(30);
-    }
 }
 
 void start_turn(char team)
@@ -228,11 +110,10 @@ void start_turn(char team)
     {
       unit_type = entities[i].id;
       entities[i].actionable = 1;
-      // swap_pal(i,UNIT_PALS[unit_type]+(entities[i].team-1));
     }
   }
   update_map();
-  init_ai();
+  // init_ai();
   // draw_actions();
   // update_map();
   // cycle_animations();
@@ -240,31 +121,16 @@ void start_turn(char team)
   vsync();
 }
 
-void replenish_stamina(char id){}
-
-int furthest_can_travel(char path_length)
-{
-  char max_moves;
-  max_moves = 6 / 2;
-  if((path_length - max_moves)+1 > 0)
-  {
-    return path[(path_length - max_moves)+1];
-  }
-  else
-  {
-    // return path[max_moves - path_length];
-    return path[1];
-  }
-}
-
 void get_opps_in_range(char id, char range)
 {
   int i, pos;
   num_of_units_in_range = 0;
-  get_unit_radius(entities[id].pos,range,entities[id].team,1);
-  for(i=0; i<map_size; i++)
+  get_unit_radius(entities[id].pos,range,CPU,1);
+
+  for(i=0; i<map_size+1; i++)
   {
-    pos = map[i].ownX + (map[i].ownY*16);
+    // pos = map[i].ownX + (map[i].ownY*16);
+    pos = map[i].ownPos;
     if(battle_grid[pos] != 0)
     {
       if(entities[battle_grid[pos]-1].team != CPU)
@@ -273,22 +139,18 @@ void get_opps_in_range(char id, char range)
       }
     }
   }
+  g = 0;
 }
 
 char find_weakest_opp()
 {
   char i, weakest_id, id;
   int army_size, army_atk, army_def, army_total, weakest_total;
-  weakest_id = -1;
-  weakest_total = 9999;
+  weakest_id = units_in_range[0];
+  weakest_total = calc_unit_rating(units_in_range[0]);
   for(i=0; i<num_of_units_in_range; i++)
   {
-    // put_number(units_in_range[i],3,0,4+(g++));
     id = units_in_range[i];
-    // army_size = entities[id].army_size;
-    // army_atk = entities[id].unit.atk * army_size;
-    // army_def = entities[id].unit.def * army_size;
-    // army_total = army_atk + army_def;
     army_total = calc_unit_rating(id);
     if(army_total < weakest_total)
     {
@@ -303,8 +165,8 @@ int calc_unit_rating(char id)
 {
   int army_size, atk, def;
   army_size = entities[id].army_size;
-  atk = 15;//(int)entities[id].unit->atk * army_size;
-  def = 15;//(int)entities[id].unit->def * army_size;
+  atk = 15;
+  def = 15;
   return atk + (def*2);
 }
 
@@ -327,31 +189,19 @@ void pop_unit_from_range(char id)
   num_of_units_in_range--;
 }
 
-void get_attackable_squares(char trgt, char atkr)
-{
-  // int pos;
-  // pos = entities[trgt].pos;
-  load_coords(atkr);
-  // attackable_squares[0] = pos-1; //left
-  // attackable_squares[1] = pos-16; //up
-  // attackable_squares[2] = pos+1; //right
-  // attackable_squares[3] = pos+16; //down
-}
-
 int get_attack_square(char id, char atkr)
 {
   int pos, square;
   char i, j, len;
   square = entities[id].pos;
-  len = get_pattern_length(atkr);
+  // len = get_pattern_length(atkr);
   for(i=0; i<map_size+1; i++)
   {
     for(j=0; j<len; j++)
     {
       pos = square+coords[j*2]+coords[(j*2)+1];
-      if(pos == (map[i].ownX + (map[i].ownY*16)) && (battle_grid[pos] == 0) && (is_traversable(pos) || 0))//entities[atkr].unit->ign))
+      if(pos == (map[i].ownPos) && (battle_grid[pos] == 0) && (is_traversable(pos) || 0))//entities[atkr].unit->ign))
       {
-        // put_number(pos,3,0,9+(g++));
         return pos;
       }
     }
@@ -359,12 +209,227 @@ int get_attack_square(char id, char atkr)
   return -1;
 }
 
-void print_path(char path_length)
+void do_defend_objective(char ai_id)
 {
-  int i;
-  for(i=0; i<path_length; i++)
+  char i = 0, obj_in_range = 0;
+  int p = 0;
+
+  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,4);
+  if(num_of_units_in_range > 0)
   {
-    // put_number(path[i],3,3,3+i);
-    put_number(map[i].ownX+(map[i].ownY*16),3,3,5+i);
+    ai_entities[ai_id].target = find_weakest_opp();
+    // put_number(ai_entities[ai_id].target,3,1,1);
+    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[ai_entities[ai_id].target].pos,path,battle_grid,CPU,60,0);
+    // put_number(battle_grid[path[0]],3,1,1);
+    for(i=p; i>=0; i--)
+    {
+      // put_number(path[p-i],3,1,1+(g++));
+      if(battle_grid[path[p-i]] == 0)
+      {
+        ai_entities[ai_id].state = MOVING;
+        ai_entities[ai_id].dest = path[p-i];
+        // break;
+        return;
+      }
+      // ai_entities[ai_id].state = PASSING;
+      ai_entities[ai_id].state = ATTACKING;
+    }
   }
+  else
+  {
+    ai_entities[ai_id].state = PASSING;
+  }
+}
+
+void do_capture_objective(char ai_id)
+{
+  char i = 0, obj_in_range = 0;
+  int p = 0;
+
+  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,3);
+
+  if(obj_in_range && battle_grid[objective_pos] == 0)
+  {
+    ai_entities[ai_id].state = MOVING;
+    ai_entities[ai_id].dest = objective_pos;
+    return;
+  }
+  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,4);
+  if(num_of_units_in_range == 1)
+  {
+    // wait_for_I_input();
+    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,path,battle_grid,CPU,60,0);
+    if(p == 0)
+    {
+      ai_entities[ai_id].state = ATTACKING;
+      ai_entities[ai_id].target = units_in_range[0];
+    }
+    else
+    {
+      for(i=p; i>=0; i--)
+      {
+        if(battle_grid[path[p-i]] == 0)
+        {
+          ai_entities[ai_id].state = MOVING;
+          ai_entities[ai_id].dest = path[p-i];
+          ai_entities[ai_id].target = units_in_range[0];
+          return;
+        }
+      }
+    }
+  }
+  else
+  {
+    p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size,map);
+    ai_entities[ai_id].state = MOVING;
+    ai_entities[ai_id].dest = p;
+  }
+}
+
+void do_target_objective(char ai_id)
+{
+  int location = 0;
+}
+
+char search_in_radius(int position, char radius_size)
+{
+  char i=0, found=0;
+  int pos=0, id=0;
+  get_unit_radius(position,radius_size,CPU,1);
+  num_of_units_in_range = 0;
+
+  for(i=0; i<map_size+1; i++)
+  {
+    pos = map[i].ownPos;
+    id = battle_grid[pos];
+    if(pos == objective_pos)
+    {
+      found = 1;
+    }
+    if(id)
+    {
+      if(entities[id-1].team != CPU)
+      {
+        units_in_range[num_of_units_in_range] = id-1;
+        num_of_units_in_range++;
+      }
+    }
+  }
+  return found;
+}
+
+void move_ai_unit(char ai_id, int dest)
+{
+  if(battle_grid[dest] != 0)
+  {
+    return;
+  }
+  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000,3);
+  satb_update();
+  sync(60);
+  move_unit(dest,entities[ai_entities[ai_id].entity_id].pos);
+  set_cursor_pos(entities[ai_entities[ai_id].entity_id].pos);
+  unhighlight();
+  satb_update();
+  sync(30);
+}
+
+void ai_do_state(char ai_id)
+{
+  set_cursor_pos(entities[ai_entities[ai_id].entity_id].pos);
+  display_position(14,1);
+  satb_update();
+  sync(30);
+  if(ai_entities[ai_id].state == READY){ do_ready(ai_id); }
+  if(ai_entities[ai_id].state == MOVING){ do_move(ai_id); }
+  if(ai_entities[ai_id].state == ATTACKING){ do_attack(ai_id); }
+  if(ai_entities[ai_id].state == PASSING){ do_pass(ai_id); }
+}
+
+void do_ready(char ai_id)
+{
+  switch(ai_objective)
+  {
+    case DEFEND: do_defend_objective(ai_id); break;
+    case CAPTURE: do_capture_objective(ai_id); break;
+    case TARGET: do_target_objective(ai_id); break;
+  }
+}
+
+void do_move(char ai_id)
+{
+  if(ai_entities[ai_id].dest && ai_entities[ai_id].dest != entities[ai_entities[ai_id].entity_id].pos)
+  {
+    move_ai_unit(ai_id,ai_entities[ai_id].dest);
+  }
+  ai_entities[ai_id].target = find_weakest_opp_in_range(ai_entities[ai_id].entity_id,1);
+
+  if(ai_entities[ai_id].target != -1)
+  {
+    ai_entities[ai_id].state = ATTACKING;
+    ai_entities[ai_id].target;
+  }
+  else
+  {
+    ai_entities[ai_id].state = PASSING;
+  }
+}
+
+void do_attack(char ai_id)
+{
+  char result, track_tracker;
+  // track_tracker = ai_tracker;
+  pattern(entities[ai_entities[ai_id].entity_id].pos,0xD000,coords,1);
+  satb_update();
+  sync(30);
+  set_cursor_pos(entities[ai_entities[ai_id].target].pos);
+  satb_update();
+  sync(30);
+  result = attack_unit(entities[ai_entities[ai_id].target].pos,entities[ai_entities[ai_id].entity_id].pos);
+  if(result == 1)
+  {
+    // ai_id--;
+    // init_ai();
+    // ai_tracker = track_tracker;
+    return;
+  }
+  // ai_entities[ai_id].state = PASSING;
+}
+
+void do_pass(char ai_id)
+{
+  entities[ai_entities[ai_id].entity_id].actionable = 0;
+}
+
+int find_nearest_unoccupied_position(int position, int destination, char range, struct Node *grid)
+{
+  char i;
+  int closest, distance, distance_x, distance_y, distance_diff,
+      closest_x, closest_y, closest_diff;
+
+  closest = position;
+  closest_diff = abs(position - destination);
+  closest_x = closest_diff % 16;
+  closest_y = closest_diff / 16;
+
+  for(i=0; i<range; i++)
+  {
+    distance = grid[i].ownPos;
+
+    if(battle_grid[grid[i].ownPos] == 0)
+    {
+      distance_diff = abs(distance - destination);
+      distance_x = distance_diff % 16;
+      distance_y = distance_diff / 16;
+
+      if((distance_x + distance_y) < (closest_x + closest_y))
+      {
+        closest = distance;
+        closest_diff = distance_diff;
+        closest_x = distance_x;
+        closest_y = distance_y;
+      }
+    }
+  }
+  return closest;
 }

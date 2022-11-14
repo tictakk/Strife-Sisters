@@ -60,6 +60,10 @@ void add_battle_npc(char x, char y, char entity_id, char pal, char index)
     switch(unit_entities[entity_id].unit_type)
     {
       case BLOB_UNIT:
+      load_vram(idle_vrams[index],blobbattle,0x100);
+      npcs[index].pal = 16;
+      break;
+
       case SWORD_UNIT:
       load_vram(idle_vrams[index],attack,0x100);
       npcs[index].pal = 17;
@@ -100,6 +104,9 @@ void transfer_units_to_attack_vram(char npc_id)
   switch(unit_entities[npcs[npc_id].type].unit_type)
   {
     case BLOB_UNIT:
+    load_vram(attack_vrams[npc_id%9],blobbattle+0x300,0x500);
+    break;
+
     case SWORD_UNIT:
     load_vram(attack_vrams[npc_id%9],attack+0x300,0x500);
     break;
@@ -141,6 +148,9 @@ void transfer_units_to_stun_vram(char npc_id)
   switch(unit_entities[npcs[npc_id].type].unit_type)
   {
     case BLOB_UNIT:
+    load_vram(stun_vrams[npc_id%9],blobbattle+0x900,0x100);
+    break;
+
     case SWORD_UNIT:
     load_vram(stun_vrams[npc_id%9],attack+0x900,0x100);
     break;
@@ -178,6 +188,13 @@ void transfer_units_to_stun_vram(char npc_id)
 void reduce_npc_ids(unsigned char entity_id)
 {
   unsigned char i;
+  // if(entity_id == 17)
+  // {
+  //   put_number(commanders[2].row_one[0],3,29,3);
+  //   put_number(commanders[2].row_one[1],3,29,4);
+  //   put_number(commanders[2].row_one[2],3,29,5);
+  //   wait_for_I_input();
+  // }
   for(i=0; i<18; i++)
   {
     if(npcs[i].type > entity_id)
@@ -185,11 +202,11 @@ void reduce_npc_ids(unsigned char entity_id)
       npcs[i].type--;
     }
   }
-  // if(entity_id == 28)
+  // if(entity_id == 17)
   // {
-  //   put_number(commanders[0x18].row_one[0],3,29,3);
-  //   put_number(commanders[0x18].row_one[1],3,29,4);
-  //   put_number(commanders[0x18].row_one[2],3,29,5);
+  //   put_number(commanders[2].row_one[0],3,29,3);
+  //   put_number(commanders[2].row_one[1],3,29,4);
+  //   put_number(commanders[2].row_one[2],3,29,5);
   //   wait_for_I_input();
   // }
 }

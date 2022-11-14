@@ -6,4 +6,5 @@ concepts.rtf
 *.s
 *.sym
 *.vgm
+.*
 .DS_store

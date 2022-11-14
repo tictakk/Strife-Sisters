@@ -47,8 +47,7 @@ char *location_lookup(int position)
 {
   switch(position)
   {
-
-    case 994:
+    case 997:
     return "Fort Begin";
 
     case 971:

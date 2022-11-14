@@ -36,7 +36,7 @@ char row_selected = 0;
 //party
 enum Direction party_direction;
 char party_moving = 0;
-int party_pos_x = 2;
+int party_pos_x = 5;
 int party_pos_y = 31;
 int party_pos_last = 0;
 char party_walk = 0;
@@ -67,7 +67,7 @@ void overworld_loop()
 	party_direction = NORTH;
 	s_y = 288;
 	selector_y = 208-16;
-	selector_x = 32;
+	selector_x = 80;
 
 	disp_off();
   load_overworld_bg();
@@ -456,8 +456,8 @@ void display_inventory(int x, int y, char item_type)
 void init_overworld_data()
 {
 	load_castle_data(994,0);
-	load_castle_data(903,1);
-	load_castle_data(833,2);
+	load_castle_data(867,1);
+	load_castle_data(737,2);
 }
 
 void load_castle_data(int pos, int map_id)

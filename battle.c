@@ -67,7 +67,7 @@ void intro()
 
 	hit_frames = 0;
 	t = 0;
-
+	wait_for_I_input();
 	while((attack_turns>attacks) && team_one_count && team_two_count)
 	{
 		if(t++ == 4)
@@ -197,8 +197,8 @@ void kill_unit()
 	}
 
 	// delete_unit_entity(npcs[target].type);
-	reduce_unit_ids(npcs[target].type);
 	reduce_npc_ids(npcs[target].type);
+	reduce_unit_ids(npcs[target].type);
 	delete_unit_entity(npcs[target].type);
 
 	npcs[target].active = 0;
@@ -218,7 +218,10 @@ void calc_hit_damage()
 	a_atk = unit_list[unit_entities[npcs[attacker].type].unit_type].atk;
 
 	fifth = t_hp / 5;
-	dmg = max((a_atk - t_def)*10,0);
+	dmg = max((a_atk - t_def),0);
+	// put_number(dmg,3,15,5);
+	put_number(fifth,3,15,5);
+
 	if(dmg)
 	{
 		if(dmg >= t_hp)
@@ -230,7 +233,7 @@ void calc_hit_damage()
 		if(dmg < fifth){ unit_entities[npcs[target].type].hp -= dmg; return 0;}
 		if((t_hp - dmg)<fifth){ unit_entities[npcs[target].type].hp -= dmg;return 4;}
 		unit_entities[npcs[target].type].hp -= dmg;
-		return 5 - ((t_hp - ((a_atk - t_def)*10))/fifth);
+		return 5 - ((t_hp - ((a_atk - t_def)))/fifth);
 	}
 	return 0;
 }
@@ -421,6 +424,9 @@ void load_pals(int off, char count)
 		switch(unit_entities[npcs[i+off].type].unit_type)
 		{
 			case BLOB_UNIT:
+			load_palette(npcs[i+off].pal,blobbattlepal,1);
+			break;
+
 			case SWORD_UNIT:
 			load_palette(npcs[i+off].pal,soldierpal,1);
 			break;
