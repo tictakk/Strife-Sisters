@@ -26,6 +26,7 @@
 #define VEN 23
 #define PHALC 24
 #define KURT 25
+#define GEN_ONE 26
 #define SWORD_CMDR 35
 #define SPEAR_CMDR 36
 #define ARCH_CMDR 37

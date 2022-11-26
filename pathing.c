@@ -1,13 +1,19 @@
 #include "battlefield.h"
 struct Node neighbors[4];
-struct Node map[100];
-// struct Node path[20];
+struct Node map[80];
+
+//range, 1) 4-0 = 4
+//range, 2) 12-4 = 8
+//range, 3) 24-12 = 12
+//range, 4) 40-24 = 16
+//range, 5) 60-40 = 20
+//range, 6) 84-60 = 24
+//range, 7) 112-84 = 28
 
 // int get_neighbors(unsigned char x, unsigned char y, char size)
 int get_neighbors(int position)
 {
 	int i, counter;
-	// width = 32;
 	counter = 0;
 	//left
 	if(((position&0xF) - 1) > -1)
@@ -51,7 +57,7 @@ int get_neighbors(int position)
 	return counter;
 }
 
-int get_path(int pos, int desired, int paths[20], char *big_map, char team, int depth, char ignore)
+int get_path(int pos, int desired, int paths[20], char *big_map, char team, int depth, char ignore_depth)
 {
   struct Node *node;
 
@@ -73,11 +79,6 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 	map[map_size].ownPos = pos;
 	map[map_size].fromPos = pos;
 	map[map_size].checked = 1;
-	//17.97
-	//17.88
-	//17.60
-	//17.62
-	//17.40
 
 	while(exit == 1 && d_level < depth)
 	{
@@ -90,7 +91,7 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 				p = neighbors[i].ownPos;
 				fp = neighbors[i].fromPos;
 
-				if(is_traversable(p) || ignore)
+				if(is_traversable(p) || ignore_depth <= d_level)
 				{
 					id = *(big_map+p);
 		      if(p == desired)
@@ -101,7 +102,7 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		        i=count;
 						found = 1;
 		  		}
-					else if(entities[id-1].team != team && id != 0)
+					else if(entities[id-1].team != team && id != 0 && !(ignore_depth<=d_level))
 					// else if(entities[id-1].team == team && id != 0)
 					{
 						if(put_visited(p,fp,0))
@@ -109,18 +110,21 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 							d_count++;
 						}
 					}
-					// else if(id == 0)
-					// {
-					// 	if(put_visited(p,fp,1))
-					// 	{
-					// 		d_count++;
-					// 	}
-					// }
 					else
 					{
-						if(put_visited(p,fp,1))
+						if(entities[id-1].team == team && (d_level+1) == ignore_depth)
 						{
-							d_count++;
+							if(put_visited(p,fp,0))
+							{
+								d_count++;
+							}
+						}
+						else
+						{
+							if(put_visited(p,fp,1))
+							{
+								d_count++;
+							}
 						}
 					}
 				}

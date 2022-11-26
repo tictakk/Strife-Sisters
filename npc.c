@@ -3,27 +3,21 @@
 #incspr(woman_walk, "characters/womannpc.pcx")
 
 // #define MAX_NPCS 42
-#define MAX_NPCS 30
-#define NO_OF_NPC_TYPES 4
-#define NO_OF_UNIT_TYPES 12
-#define NO_OF_BASIC_TYPE (NO_OF_NPC_TYPES + NO_OF_UNIT_TYPES)
-#define MAX_UNIT_TYPES (NO_OF_NPC_TYPES + NO_OF_UNIT_TYPES + TOTAL_COMMANDERS)
+#define MAX_NPCS 20
+#define NO_OF_BASIC_TYPE 16
+#define MAX_UNIT_TYPES (NO_OF_BASIC_TYPE + TOTAL_COMMANDERS)
 #define UNIT_VRAM_START 0x5200
 
 struct npc{
   unsigned char pos_x, pos_y, type, active, frame, pal;
 };
 
-const char npc_level_data[18] = {
-  0xFF, 0xFF, 0xFF, 10, 7, MAN_NPC, 25, 8, 11, WOMAN_NPC, 25, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-};
-
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,
-                                        19,21,23,22,23,
-                                        24,25,25,25,25,
-                                        25,25};
+                                        19,21,23,24,23,
+                                        24,25,26,25,26,
+                                        25,26};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -105,7 +99,6 @@ void load_npcs(char *data)
 
 void add_npc(char x, char y, char type, char pal)
 {
-  // put_number(type,3,10,5+(g++));
   if(npc_count < MAX_NPCS)
   {
     npcs[npc_count].pos_x = x;
@@ -114,6 +107,7 @@ void add_npc(char x, char y, char type, char pal)
     npcs[npc_count].pal = pal;
     npcs[npc_count].active = 1;
     npcs[npc_count++].frame = 0;
+
     if(npc_vram[type] == 0)
     {
       npc_vram[type] = UNIT_VRAM_START + (npc_type_count * 0x100);
@@ -165,17 +159,20 @@ void add_npc(char x, char y, char type, char pal)
           put_string("error mage",5,5);
           put_number(npc_count,2,13,6);
           break;
+
           case BOY_NPC:
           put_string("error boy",5,5);
           put_number(npc_count,2,13,7);
           break;
+
           case GIRL_NPC:
           put_string("error girl",5,5);
           put_number(npc_count,2,13,8);
           break;
+
           default:
           put_string("error default",5,5);
-          put_number(npc_count,2,13,9);
+          put_number(type,3,13,9);
           break;
         }
       }
