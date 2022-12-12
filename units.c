@@ -27,6 +27,12 @@ typedef struct{
 	enum Unit_Type unit_type;
 } Unit;
 
+typedef struct{
+  Unit *unit;
+  char exp;
+  int hp;
+} Unit_Entity;
+
 Unit unit_list[16];
 unsigned char unit_entity_count = 0;
 

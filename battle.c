@@ -103,8 +103,8 @@ void intro()
 			}
 			t = 0;
 			if(
-				(attacking_team == TEAM_ONE && entities[atker].row_one[attacker].unit->rng < attack_range) ||
-				(attacking_team == TEAM_TWO && entities[trgt].row_one[attacker-9].unit->rng < attack_range) ||
+				(attacking_team == TEAM_ONE && entities[atker].bg->units[attacker].unit->rng < attack_range) ||
+				(attacking_team == TEAM_TWO && entities[trgt].bg->units[attacker-9].unit->rng < attack_range) ||
 				(!npcs[attacker].active)
 				)
 			{
@@ -204,9 +204,9 @@ void show_healthbar(char entity_id, char unit_id, int x, int y)
 {
 	char max_hlth, h_diff, h_p, dmg;
 
-	max_hlth = entities[entity_id].row_one[unit_id].unit->hp;
+	max_hlth = entities[entity_id].bg->units[unit_id].unit->hp;
 	h_p = max_hlth / 5;
-	h_diff = roundUp(entities[entity_id].row_one[unit_id].hp,h_p);
+	h_diff = roundUp(entities[entity_id].bg->units[unit_id].hp,h_p);
 
 	display_healthbar(x/8,(y/8)+4);
 	reduce_healthbar(x/8,(y/8)+4,h_diff,5-h_diff);
@@ -232,7 +232,7 @@ void kill_unit(char target_id)
 	// 	team_one_total--;
 	// }
 
-	entities[target_id].row_one[(target-target_team)].hp = 0;
+	entities[target_id].bg->units[(target-target_team)].hp = 0;
 
 	npcs[target].active = 0;
 	spr_hide(target);
@@ -244,11 +244,11 @@ void calc_hit_damage(char attacker_id, char target_id, char a_a_bonus, char t_a_
 	int t_hp, t_atk, t_def,
 			a_atk, fifth, dmg;
 
-	t_hp  = entities[target_id].row_one[target-target_team].hp;
-	t_atk = entities[target_id].row_one[target-target_team].unit->atk + t_a_bonus;
-	t_def = entities[target_id].row_one[target-target_team].unit->def + t_d_bonus;
+	t_hp  = entities[target_id].bg->units[target-target_team].hp;
+	t_atk = entities[target_id].bg->units[target-target_team].unit->atk + t_a_bonus;
+	t_def = entities[target_id].bg->units[target-target_team].unit->def + t_d_bonus;
 
-	a_atk = entities[attacker_id].row_one[attacker-attacking_team].unit->atk + a_a_bonus; 
+	a_atk = entities[attacker_id].bg->units[attacker-attacking_team].unit->atk + a_a_bonus; 
 
 	fifth = t_hp / 5;
 	dmg = max((a_atk - t_def),0);
@@ -263,24 +263,24 @@ void calc_hit_damage(char attacker_id, char target_id, char a_a_bonus, char t_a_
 	}
 	if(dmg)
 	{
-		if(dmg >= entities[target_id].row_one[target-target_team].hp)
+		if(dmg >= entities[target_id].bg->units[target-target_team].hp)
 		{	
 			kill_unit(target_id);
 			return 5;
 		}
 		if(dmg < fifth)
 		{
-			entities[target_id].row_one[target-target_team].hp -= dmg;
+			entities[target_id].bg->units[target-target_team].hp -= dmg;
 			return 0;
 		}
 
 		if((t_hp - dmg) < fifth)
 		{
-			entities[target_id].row_one[target-target_team].hp -= dmg;
+			entities[target_id].bg->units[target-target_team].hp -= dmg;
 			return 4;
 		}
 
-		entities[target_id].row_one[target-target_team].hp -= dmg;
+		entities[target_id].bg->units[target-target_team].hp -= dmg;
 		return min(dmg/fifth,5);
 	}
 	return 0;
@@ -416,25 +416,27 @@ void init_armies(int player, int cpu)
 	team_one_total = team_one_count;
 	team_two_total = team_two_count;
 
-	row = entities[player].row_one;
+	row = entities[player].bg->units;
 	for(j=0; j<3; j++, row+=3)
 	{
 		for(i=0; i<3; i++, total_count++)
 		{
-			add_battle_npc(3-(i/3)-j,2+(i%3),row[i].unit->id,17,total_count,row[i].hp>0);
+			// add_battle_npc(3-(i/3)-j,2+(i%3),row[i].unit->id,17,total_count,row[i].hp>0);
+			add_battle_npc(3-(i/3)-j,2+(i%3),entities[player].bg->units->unit->id,17,total_count,row[i].hp>0);
+
 			team_one_hp += row[i].hp;
 			team_one_max_hp += row[i].unit->hp;
 			// show_healthbar(player,total_count,spr_get_x(),spr_get_y());
 		}
 	}
 
-	row = entities[cpu].row_one;
+	row = entities[cpu].bg->units;
 	total_count = 9;
 	for(j=0; j<3; j++, row+=3)
 	{
 		for(i=0; i<3; i++, total_count++)
 		{
-			add_battle_npc(j+4+(i/3),2+(i%3),row[i].unit->id,17,total_count,row[i].hp>0);
+			add_battle_npc(j+4+(i/3),2+(i%3),entities[cpu].bg->units->unit->id,17,total_count,row[i].hp>0);
 			team_two_hp += row[i].hp;
 			team_two_max_hp += row[i].unit->hp;
 			// show_healthbar(cpu,total_count-9,spr_get_x(),spr_get_y());
@@ -461,9 +463,9 @@ void load_pals(char entity_id, int off, char count)
 	char i;
 	for(i=0; i<count; i++)
 	{
-		if(entities[entity_id].row_one[i].hp)
+		if(entities[entity_id].bg->units[i].hp)
 		{
-			switch(entities[entity_id].row_one[i].unit->id)
+			switch(entities[entity_id].bg->units[i].unit->id)
 			{
 				case BLOB_UNIT:
 				load_palette(npcs[i+off].pal,blobbattlepal,1);

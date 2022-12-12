@@ -87,6 +87,11 @@ void add_battle_npc(char x, char y, char entity_id, char pal, char index, char a
     load_vram(idle_vrams[index],bandit,0x100);
     npcs[index].pal = 22;
     break;
+
+    default:
+    put_string("error",5,5);
+    put_number(entity_id,3,5,6);
+    break;
   }
   p_x = (int)(x << 5);
   p_y = (int)(y << 5);
@@ -136,8 +141,8 @@ void transfer_units_to_attack_vram(char npc_id)
     break;
 
     default:
-    put_string("error default atk",5,5);
-    put_number(npcs[npc_id].type,2,13,9);
+    // put_string("error default atk",5,5);
+    // put_number(npcs[npc_id].type,2,5,6);
     break;
   }
 }
@@ -182,7 +187,8 @@ void transfer_units_to_stun_vram(char npc_id)
     break;
 
     default:
-    put_string("error default stn",5,5);
+    // put_string("error default stn",5,5);
+    // put_number(npc_id,4,5,6);
     break;
   }
 }

@@ -412,10 +412,10 @@ void load_overworld_bg()
 	load_vram(0x6400,borders,0x100);
 
 	set_font_pal(10);
-	load_font(font,125,0x4900);
+	load_font(font,125,0x4800);
 
-	load_vram(0x4AA0,icons_gfx,0x60);
-	load_vram(0x4CB0,icons_gfx+0x60,0x60);
+	load_vram(0x49A0,icons_gfx,0x60);
+	load_vram(0x4BB0,icons_gfx+0x60,0x60);
 
 	load_vram(0x6A00,rei_walk,0x300);
 	load_palette(16,rei_walk_pal,1);

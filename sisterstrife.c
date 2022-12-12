@@ -82,13 +82,17 @@
 #incspr(horz_pointer, "map/sprites/pointer_lr.pcx");
 #incpal(pointerpal, "map/sprites/pointer_ud.pcx");
 
+typedef struct {
+	Unit_Entity units[9];
+} Battlegroup;
+
 struct Commander{
 	char id;
 	char no_of_items;
 	char equipable;
 	char *name;
-	char unit;
 	char sprite_type;
+	Battlegroup bg;
 };
 
 struct Castle{
@@ -110,6 +114,7 @@ char j_1, j_2;
 int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 struct Castle castles[NO_OF_CASTLES];
 struct Commander commanders[TOTAL_COMMANDERS];
+
 int total_sprites = 0;
 
 char no_of_party_items;
@@ -222,6 +227,7 @@ enum Direction{
 #incspr(blob,"map/sprites/blob.pcx")
 #incspr(bnd,"characters/bandit.pcx")
 #incspr(dark,"map/sprites/dark.pcx")
+// #incspr(blob,"map/sprites/froggy.pcx")
 
 #incpal(sldpal, "map/sprites/sldpiece.pcx",0,3)
 #incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
@@ -229,6 +235,7 @@ enum Direction{
 #incpal(mskpal,"map/sprites/msktpiece.pcx",0,2)
 #incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
 #incpal(blobpal,"map/sprites/blob.pcx",0,2)
+// #incpal(blobpal,"map/sprites/froggy.pcx",0,2)
 
 const char area_one_buyable_items[] = {
 	0, 1, 2, 3
@@ -304,9 +311,26 @@ void main()
 	commanders[26].name = "Cmdr 26";
 	commanders[27].name = "Cmdr 27";
 
-	commanders[0].unit = SWORD_UNIT;
-	commanders[1].unit = ARCHER_UNIT;
-	commanders[2].unit = SPEAR_UNIT;
+	commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
+	commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
+	commanders[0].bg.units[1].unit = &unit_list[ARCHER_UNIT];
+	commanders[0].bg.units[1].hp = unit_list[ARCHER_UNIT].hp;
+	commanders[0].bg.units[2].unit = &unit_list[SWORD_UNIT];
+	commanders[0].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
+
+	commanders[1].bg.units[0].unit = &unit_list[ARCHER_UNIT];
+	commanders[1].bg.units[0].hp = unit_list[ARCHER_UNIT].hp;
+	commanders[1].bg.units[4].unit = &unit_list[ARCHER_UNIT];
+	commanders[1].bg.units[4].hp = unit_list[ARCHER_UNIT].hp;
+	commanders[1].bg.units[2].unit = &unit_list[ARCHER_UNIT];
+	commanders[1].bg.units[2].hp = unit_list[ARCHER_UNIT].hp;
+
+	commanders[2].bg.units[1] = &unit_list[SPEAR_UNIT];
+	commanders[2].bg.units[1].hp = unit_list[SPEAR_UNIT].hp;
+	commanders[2].bg.units[5] = &unit_list[SPEAR_UNIT];
+	commanders[2].bg.units[5].hp = unit_list[SPEAR_UNIT].hp;
+	commanders[2].bg.units[8] = &unit_list[SPEAR_UNIT];
+	commanders[2].bg.units[8].hp = unit_list[SPEAR_UNIT].hp;
 
 	commanders[23].sprite_type = 5;
 	commanders[24].sprite_type = 6;
@@ -609,7 +633,7 @@ void wait_for_I_input()
 
 initialize_commanders()
 {
-	char i;
+	char i, j;
 	struct Commander *cmdr;
 	// for(i=0, cmdr = commanders, unit_ptr = &unit_list[REI]; i<TOTAL_COMMANDERS; i++, cmdr++, unit_ptr++)
 	for(i=0, cmdr = commanders; i<TOTAL_COMMANDERS; i++, cmdr++)
@@ -617,8 +641,12 @@ initialize_commanders()
 		cmdr->id = i;
 		cmdr->no_of_items = 0;
 		cmdr->equipable = 14;
-		cmdr->unit = 0;
+		// cmdr->unit = 0;
 		cmdr->sprite_type = i+16;
+		for(j=0; j<9; j++)
+		{
+			cmdr->bg.units[j] = 0;
+		}
 		if(i>24)
 		{
 			cmdr->name = "generic";
@@ -1177,43 +1205,50 @@ char next_level(char level, int exp)
 	return level;
 }
 
-void load_units_by_cmdr_id(char cmdr_type, char cmdr_id)
+void load_units_by_cmdr_id(char cmdr_type, char cmdr_id, char unit_pos)
 {
 	switch(cmdr_type)
 	{
 		case 10:
 		commanders[cmdr_id].sprite_type = SWORD_UNIT;
-		commanders[cmdr_id].unit = SWORD_UNIT;
+		commanders[cmdr_id].bg.units[unit_pos] = &unit_list[SWORD_UNIT];
+		commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[SWORD_UNIT].hp;
 		break;
 		
 		case 20:
 		commanders[cmdr_id].sprite_type = SWORD_UNIT;
-		commanders[cmdr_id].unit = SWORD_UNIT;
+		commanders[cmdr_id].bg.units[unit_pos] = &unit_list[SWORD_UNIT];
+		commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[SWORD_UNIT].hp;
 		break;
 
 		case 21:
 		commanders[cmdr_id].sprite_type = SPEAR_UNIT;
-		commanders[cmdr_id].unit = SWORD_UNIT;
+		commanders[cmdr_id].bg.units[unit_pos] = &unit_list[SWORD_UNIT];
+		commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[SWORD_UNIT].hp;
 		break;
 
 		case 22:
 		commanders[cmdr_id].sprite_type = ARCHER_UNIT;
-		commanders[cmdr_id].unit = ARCHER_UNIT;
+		commanders[cmdr_id].bg.units[unit_pos] = &unit_list[ARCHER_UNIT];
+		commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[ARCHER_UNIT].hp;
 		break;
 
 		case 23:
 		commanders[cmdr_id].sprite_type = HOUND_UNIT;
-		commanders[cmdr_id].unit = HOUND_UNIT;
+		commanders[cmdr_id].bg.units[unit_pos] = &unit_list[HOUND_UNIT];
+		commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[HOUND_UNIT].hp;
 		break;
 
 		case 24:
 		commanders[cmdr_id].sprite_type = BLOB_UNIT;
-		commanders[cmdr_id].unit = BLOB_UNIT;
+		commanders[cmdr_id].bg.units[unit_pos] = &unit_list[BLOB_UNIT];
+		commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[BLOB_UNIT].hp;
 		break;
 
 		case 25:
 		commanders[cmdr_id].sprite_type = AXE_UNIT;
-		commanders[cmdr_id].unit = AXE_UNIT;
+		commanders[cmdr_id].bg.units[unit_pos] = &unit_list[AXE_UNIT];
+		commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[AXE_UNIT].hp;
 		break;
 	}
 }

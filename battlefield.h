@@ -42,16 +42,9 @@
 #define COMMANDER_FIGURE_BEGIN 0x6000
 
 typedef struct{
-  Unit *unit;
-  int hp;
-} Unit_Entity;
-
-typedef struct{
   int pos;
   char team, id, actionable, movable;
-  Unit_Entity row_one[3];
-  Unit_Entity row_two[3];
-  Unit_Entity row_three[3];
+  Battlegroup *bg;
 } Entity;
 
 int gold_gained;
@@ -147,9 +140,9 @@ char get_army_max_range(char entity_id)
   max = 1;
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
-    if(entities[entity_id].row_one[i].hp && entities[entity_id].row_one[i].unit->rng > max)
+    if(entities[entity_id].bg->units[i].hp && entities[entity_id].bg->units[i].unit->rng > max)
     {
-      max = entities[entity_id].row_one[i].unit->rng;
+      max = entities[entity_id].bg->units[i].unit->rng;
     }
   }
   return max;
@@ -161,9 +154,9 @@ char get_army_min_move(char entity_id)
   min = MAX_MOVE_RANGE;
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
-    if(entities[entity_id].row_one[i].hp && entities[entity_id].row_one[i].unit->mov < min)
+    if(entities[entity_id].bg->units[i].hp && entities[entity_id].bg->units[i].unit->mov < min)
     {
-      min = entities[entity_id].row_one[i].unit->mov;
+      min = entities[entity_id].bg->units[i].unit->mov;
     }
   }
   return min;
@@ -182,8 +175,10 @@ void add_entity(char team, char pal, char cmdr, char id, int pos)
 
   for(i=0; i<9; i++)
   {
-    entities[num_of_entities].row_one[i].unit = &unit_list[commanders[id].unit];
-    entities[num_of_entities].row_one[i].hp = unit_list[commanders[id].unit].hp;
+    entities[num_of_entities].bg = commanders[id].bg;
+    // entities[num_of_entities].row_one[i].unit = &unit_list[commanders[id].unit];
+    // entities[num_of_entities].row_one[i].hp = unit_list[commanders[id].unit].hp;
+
   }
   num_of_entities++;
 }

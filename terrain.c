@@ -2,6 +2,9 @@
 #incchr(water_anim_two,"assets/water_anim_2.pcx")
 #incchr(terrain_icons,"map/sprites/terrain_icons.pcx",14,2)
 #incpal(t_icon_pal,"map/sprites/terrain_icons.pcx")
+#incchr(buffs,"map/sprites/buff1.pcx")
+// #incchr(level_card,"map/sprites/card.pcx")
+#incpal(buff_pals,"map/sprites/buff1.pcx")
 
 //Map images
 #incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
@@ -43,7 +46,8 @@
 #define TERRAIN_EVENT 6
 #define MAX_EVENT_TERRAIN 10
 
-#define TERRAIN_ICON_VRAM 0x4F00
+#define TERRAIN_ICON_VRAM 0x4E00
+#define TERRAIN_ITEM_VRAM (TERRAIN_ICON_VRAM + 0x1C0)
 #define TERRAIN_ICON_PAL 14
 
 #define WATER_VRAM 0x2640
@@ -63,16 +67,28 @@ int map_offset = 0;
 char water_frame = 0;
 char water_trigger = 0;
 
+void load_terrains()
+{
+  load_terrain_icons();
+  load_terrain_items();
+}
+
 void load_terrain_icons()
 {
   load_vram(TERRAIN_ICON_VRAM,terrain_icons,0x1C0);
   load_palette(TERRAIN_ICON_PAL,t_icon_pal,1);
 }
 
-void put_terrain_icon(char terrain_no, int x, int y)
+void load_terrain_items()
+{
+  load_vram(TERRAIN_ITEM_VRAM,buffs,0x200);
+  load_palette(7,buff_pals,1);
+}
+
+void put_terrain_effect(char num, int x, int y, int pal)
 {
   int ptr[4], address, tile_address;
-  tile_address = (TERRAIN_ICON_VRAM>>4) + (terrain_no<<2) + 0xE000;
+  tile_address = (TERRAIN_ICON_VRAM>>4) + (num<<2) + pal;
   ptr[0] = tile_address;
   ptr[1] = tile_address+1;
   ptr[2] = tile_address+2;
@@ -80,6 +96,16 @@ void put_terrain_icon(char terrain_no, int x, int y)
   address = vram_addr(x,y);
   load_vram(address,ptr,2);
   load_vram(address+0x20,ptr+2,2);
+}
+
+void put_terrain_icon(char terrain_no, int x, int y)
+{
+  put_terrain_effect(terrain_no,x,y,0xE000);
+}
+
+void put_terrain_item(char item_no, int x, int y)
+{
+  put_terrain_effect(item_no,x<<1,y<<1,0x7000);
 }
 
 void put_terrain_def_stat(char terrain_no, int x, int y)

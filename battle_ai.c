@@ -165,9 +165,9 @@ int calc_unit_rating(char id)
   total = 0;
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
-    if(entities[id].row_one[i].hp>0)
+    if(entities[id].bg->units[i].hp>0)
     {
-      total += (int)entities[id].row_one[i].unit->def;
+      total += (int)entities[id].bg->units[i].unit->def;
     }
   }
   return total;
