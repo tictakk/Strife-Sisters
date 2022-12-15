@@ -11,10 +11,13 @@
 
 all: strifesisters.pce
 
+run: strifesisters.pce
+	mednafen strifesisters.pce
+
 include ../Make_ex.inc
 
 CFLAGS = -msmall -fno-recursive -v
 LIBS =
 
-strifesisters.pce: sisterstrife.c
+strifesisters.pce: strifesisters.c
 	$(CC) -fsigned-char $(CFLAGS) $(LIBS) $<

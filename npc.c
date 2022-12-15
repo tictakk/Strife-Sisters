@@ -14,8 +14,8 @@ struct npc{
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
-const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,
-                                        19,21,23,24,23,
+const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,20,
+                                        20,19,21,22,23,
                                         24,25,26,25,26,
                                         25,26};
 
@@ -141,14 +141,6 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],blob,0x100);
           break;
 
-          case MAN_NPC:
-          load_vram(npc_vram[type],man_walk,0x100);
-          break;
-
-          case WOMAN_NPC:
-          load_vram(npc_vram[type],woman_walk,0x100);
-          break;
-
           case AXE_UNIT:
           load_vram(npc_vram[type],bnd,0x100);
           // put_string("error bandit",5,5);
@@ -158,16 +150,6 @@ void add_npc(char x, char y, char type, char pal)
           case MAGE_UNIT:
           put_string("error mage",5,5);
           put_number(npc_count,2,13,6);
-          break;
-
-          case BOY_NPC:
-          put_string("error boy",5,5);
-          put_number(npc_count,2,13,7);
-          break;
-
-          case GIRL_NPC:
-          put_string("error girl",5,5);
-          put_number(npc_count,2,13,8);
           break;
 
           default:

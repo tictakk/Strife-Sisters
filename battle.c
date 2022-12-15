@@ -21,6 +21,8 @@ int team_two_max_hp;
 int team_one_max_hp;
 char attack_range;
 char ticker = 0;
+char team_one_kills = 0;
+char team_two_kills = 0;
 
 char atker, trgt;
 
@@ -47,7 +49,7 @@ int roundUp(int num, int div)
 
 void intro()
 {
-	int hit_frames;
+	int hit_frames, i;
 
 	attacking_team = TEAM_ONE;
 	target_team = TEAM_TWO;
@@ -57,7 +59,7 @@ void intro()
 
 	attacker_size = team_one_count;
 	target_size = team_two_count;
-	// target = range(target_team,target_team+(target_size-1));
+
 	load_pals(atker,0,team_one_count);
 	load_pals(trgt,9,team_two_count);
 
@@ -65,9 +67,7 @@ void intro()
 	disp_on();
 
 	load_palette(0,healthbarpal,1);
-
 	satb_update();
-
 	load_animations_to_vram(TEAM_ONE,TEAM_TWO);
 
 	hit_frames = 0;
@@ -76,40 +76,27 @@ void intro()
 	{
 		if(t++ == 4)
 		{
-			if(attacking_team == TEAM_ONE)
+			if(attacking_team == TEAM_ONE && attacker == 9)
 			{
-				display_unit_info(atker,attacker,0,0);
-				display_unit_info(trgt,target-9,18,0);
-			}
-			else
-			{
-				display_unit_info(trgt,attacker-9,0,0);
-				display_unit_info(atker,target,18,0);
-			}
-			if(attacking_team == TEAM_ONE && attacker == team_one_count)
-			{
-				target_size = team_one_count;
+        target_size = team_one_count;
 				attacker_size = team_two_count;
 				swap_turns(TEAM_TWO,TEAM_ONE);
-				find_new_target();
-
 			}
 			else if(attacking_team == TEAM_TWO && attacker == ((team_two_count)+9))
 			{
 				target_size = team_two_count;
 				attacker_size = team_one_count;
 				swap_turns(TEAM_ONE,TEAM_TWO);
-				find_new_target();
 			}
 			t = 0;
-			if(
-				(attacking_team == TEAM_ONE && entities[atker].bg->units[attacker].unit->rng < attack_range) ||
+			if((attacking_team == TEAM_ONE && entities[atker].bg->units[attacker].unit->rng < attack_range) ||
 				(attacking_team == TEAM_TWO && entities[trgt].bg->units[attacker-9].unit->rng < attack_range) ||
-				(!npcs[attacker].active)
-				)
+				(!npcs[attacker].active))
 			{
-				attacker++;
+        attacker++;
 				attacks++;
+
+        find_new_target();
 			}
 			else
 			{
@@ -130,7 +117,6 @@ void intro()
 			{
 				break;
 			}
-			find_new_target();
 			attacks++;
 		}
 		satb_update();
@@ -138,10 +124,50 @@ void intro()
 	}
 }
 
+void battle_seq()
+{
+  int b_ticker = 0;
+  clock_divider = 10;
+  attacking = 0;
+
+  //two options:
+  //attacking -> continue animation, battle stuff
+  //not attacking -> two options
+  //unit can attack: find next unit to attack
+  //no one can attack: decrement battle clock
+
+  put_number(battle_clock,3,15,0);
+  while(battle_clock)
+  {
+    if(b_ticker++ == 4)
+    {
+
+      if(attacking)
+      {
+
+      }
+      else
+      {
+        if((attacker = find_next_attacker()))
+        {
+
+        }
+      }
+
+      put_number(--battle_clock,3,15,0);
+    }
+  }
+}
+
+char check_next_attacker()
+{
+
+}
+
 void display_unit_info(char entity_id, char id, char x, char y)
 {
-	put_number(team_one_hp,3,10,2);
-	put_number(team_two_hp,3,16,2);
+//	put_number(team_one_hp,3,10,2);
+//	put_number(team_two_hp,3,16,2);
 	// print_unit_type(entities[entity_id].row_one[id].unit->id,x,y);
 	// put_number(npcs[id].type,3,x,y+3);
 	// put_string("HP",x+4,y);
@@ -196,18 +222,20 @@ void animate_stun(char unit_id, char hit_frames)
 	if(hit_frames == 8)
 	{
 		dmg = calc_hit_damage(attacker_id,target_id,a_a_bonus,t_a_bonus,t_d_bonus);
-		// reduce_healthbar(x/8,(y/8)+4,hlth-dmg,dmg);
+		 reduce_healthbar(x/8,(y/8)+4,hlth-dmg,dmg);
 	}
 }
 
 void show_healthbar(char entity_id, char unit_id, int x, int y)
 {
-	char max_hlth, h_diff, h_p, dmg;
+	unsigned char max_hlth, h_diff, h_p, dmg;
 
 	max_hlth = entities[entity_id].bg->units[unit_id].unit->hp;
 	h_p = max_hlth / 5;
 	h_diff = roundUp(entities[entity_id].bg->units[unit_id].hp,h_p);
-
+//  put_string("unit id",0,5); put_number(unit_id,3,10,5);
+//  put_string("hp:",0,6); put_number(h_p,3,4,6);
+//  wait_for_I_input();
 	display_healthbar(x/8,(y/8)+4);
 	reduce_healthbar(x/8,(y/8)+4,h_diff,5-h_diff);
 }
@@ -223,17 +251,18 @@ void hide_healthbar(char unit_id)
 
 void kill_unit(char target_id)
 {
-	// if(attacking_team == TEAM_ONE)
-	// {
+	 if(attacking_team == TEAM_ONE)
+	 {
+     team_one_kills++;
 	// 	team_two_total--;
-	// }
-	// else
-	// {
+	 }
+	 else
+	 {
+     team_two_kills++;
 	// 	team_one_total--;
-	// }
+	 }
 
 	entities[target_id].bg->units[(target-target_team)].hp = 0;
-
 	npcs[target].active = 0;
 	spr_hide(target);
 }
@@ -292,22 +321,26 @@ void swap_turns(char atkr, char trgt)
 	attacking_team = atkr;
 	target_team = trgt;
 	attacker = atkr;
-	// target = range(target_team,target_team+(target_size-1));
+//  find_new_target();
 }
 
 void find_new_target()
 {
-	target = get_random_target();
-	// put_number(target,3,2,16);
-	// wait_for_I_input();
-	// char t;
-	// t = 0;
-	// while((npcs[(t = get_random_target())].active != 1)){}
-	// {
-		// put_number(t,4,2,17+((g++)%3));
-	// }
-	// target = t;
-	// target = get_random_target();
+  target = find_target_unit(attacker-attacking_team) + target_team;
+}
+
+char find_next_attacker()
+{
+  char i;
+  for(i=0; i<18; i++)
+  {
+//    if(npcs[])
+//    {
+//
+//    }
+  }
+
+  return 0;
 }
 
 char get_random_target()
@@ -366,8 +399,8 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
 	scroll(0, 0, 0, 0, 223, 0xC0);
 
 	load_healthbars();
-	intro();
-
+//	intro();
+  battle_seq();
 	reset_satb();
 	cleanup_battle(i1,i2);
 
@@ -386,8 +419,7 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
 void init_armies(int player, int cpu)
 {
 	int j,i;
-	char total_count, row_count;
-	Unit_Entity *row;
+	char total_count;
 
 	reset_npcs();
 	team_one_total = 0;
@@ -400,46 +432,50 @@ void init_armies(int player, int cpu)
 	team_one_max_hp = 0;
 	team_two_hp = 0;
 	team_two_max_hp = 0;
+  battle_clock = 0;
 
 	team_one_count = 9;
 	team_two_count = 9;
-
-	// team_one_count += entities[player].row_counts[0];
-	// team_one_count += entities[player].row_counts[1];
-	// team_one_count += entities[player].row_counts[2];
-
-	// team_two_count += entities[cpu].row_counts[0];
-	// team_two_count += entities[cpu].row_counts[1];
-	// team_two_count += entities[cpu].row_counts[2];
 
 	total_units	   = team_two_count + team_one_count;
 	team_one_total = team_one_count;
 	team_two_total = team_two_count;
 
-	row = entities[player].bg->units;
-	for(j=0; j<3; j++, row+=3)
+	for(j=0; j<3; j++)
 	{
 		for(i=0; i<3; i++, total_count++)
 		{
-			// add_battle_npc(3-(i/3)-j,2+(i%3),row[i].unit->id,17,total_count,row[i].hp>0);
-			add_battle_npc(3-(i/3)-j,2+(i%3),entities[player].bg->units->unit->id,17,total_count,row[i].hp>0);
+			add_battle_npc(3-(i/3)-j,2+(i%3),entities[player].bg->units[(j*3)+i]->unit.id,17,total_count,entities[player].bg->units[(j*3)+i].hp>0);
+			team_one_hp += entities[player].bg->units[(j*3)+i].hp;
+			team_one_max_hp += entities[player].bg->units[(j*3)+i]->unit.hp;
 
-			team_one_hp += row[i].hp;
-			team_one_max_hp += row[i].unit->hp;
-			// show_healthbar(player,total_count,spr_get_x(),spr_get_y());
-		}
+      if(entities[player].bg->units[(j*3)+i]->unit.id)
+      {
+        if(entities[player].bg->units[(j*3)+i]->unit.spd > battle_clock)
+        {
+          battle_clock = entities[player].bg->units[(j*3)+i]->unit.spd;
+        }
+        show_healthbar(player,total_count,spr_get_x(),spr_get_y());
+      }
+    }
 	}
 
-	row = entities[cpu].bg->units;
 	total_count = 9;
-	for(j=0; j<3; j++, row+=3)
+	for(j=0; j<3; j++)
 	{
 		for(i=0; i<3; i++, total_count++)
 		{
-			add_battle_npc(j+4+(i/3),2+(i%3),entities[cpu].bg->units->unit->id,17,total_count,row[i].hp>0);
-			team_two_hp += row[i].hp;
-			team_two_max_hp += row[i].unit->hp;
-			// show_healthbar(cpu,total_count-9,spr_get_x(),spr_get_y());
+			add_battle_npc(j+4+(i/3),2+(i%3),entities[cpu].bg->units[(j*3)+i]->unit.id,17,total_count,entities[cpu].bg->units[(j*3)+i].hp>0);
+			team_two_hp += entities[cpu].bg->units[(j*3)+i].hp;
+			team_two_max_hp += entities[cpu].bg->units[(j*3)+i]->unit.hp;
+      if(entities[cpu].bg->units[(j*3)+i]->unit.id)
+      {
+        if(entities[cpu].bg->units[(j*3)+i]->unit.spd > battle_clock)
+        {
+          battle_clock = entities[cpu].bg->units[(j*3)+i]->unit.spd;
+        }
+        show_healthbar(cpu,total_count-9,spr_get_x(),spr_get_y());
+      }
 		}
 	}
 
@@ -468,32 +504,42 @@ void load_pals(char entity_id, int off, char count)
 			switch(entities[entity_id].bg->units[i].unit->id)
 			{
 				case BLOB_UNIT:
-				load_palette(npcs[i+off].pal,blobbattlepal,1);
-				break;
+          load_palette(npcs[i+off].pal,blobbattlepal,1);
+          break;
 
 				case SWORD_UNIT:
-				load_palette(npcs[i+off].pal,soldierpal,1);
-				break;
+          load_palette(npcs[i+off].pal,soldierpal,1);
+          break;
 
+        case LANCER_UNIT:
+        case KNIGHT_UNIT:
 				case SPEAR_UNIT:
-				load_palette(npcs[i+off].pal,spearpal,1);
-				break;
+          load_palette(npcs[i+off].pal,spearpal,1);
+          break;
 
 				case ARCHER_UNIT:
-				load_palette(npcs[i+off].pal,musketbtlpal,1);
-				break;
+          load_palette(npcs[i+off].pal,musketbtlpal,1);
+          break;
 
 				case DEMON_UNIT:
-				load_palette(npcs[i+off].pal,demonbtlpal,1);
-				break;
+          load_palette(npcs[i+off].pal,demonbtlpal,1);
+          break;
 
 				case HOUND_UNIT:
-				load_palette(npcs[i+off].pal,houndbtlpal,1);
-				break;
+          load_palette(npcs[i+off].pal,houndbtlpal,1);
+          break;
 
 				case AXE_UNIT:
-				load_palette(npcs[i+off].pal,banditpal,1);
-				break;
+          load_palette(npcs[i+off].pal,banditpal,1);
+          break;
+
+        case MAGE_UNIT:
+          load_palette(npcs[i+off].pal,magebtlpal,1);
+          break;
+
+        case MONK_UNIT:
+          load_palette(npcs[i+off].pal,monkbtlpal,1);
+          break;
 			}
 		}
 	}
@@ -501,7 +547,22 @@ void load_pals(char entity_id, int off, char count)
 
 void cleanup_battle(int player_selected_index, int cpu_selected_index)
 {
+  char i;
+
+  for(i=0; i<9; i++)
+  {
+    if(entities[player_selected_index].bg->units[i].hp)
+    {
+      entities[player_selected_index].bg->units[i].exp += team_one_kills;
+    }
+    if(entities[cpu_selected_index].bg->units[i].hp)
+    {
+      entities[cpu_selected_index].bg->units[i].exp += team_two_kills;
+    }
+  }
 	total_units = 0;
+  team_one_kills = 0;
+  team_two_kills = 0;
 
 	spr_set(62);
 	spr_hide();

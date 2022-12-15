@@ -76,7 +76,7 @@ void overworld_loop()
 	draw_npcs(5);
 	satb_update();
 	arrived(get_absolute_pos());
-	// put_number(aahh,3,4,50);
+
 	// load_wavetable(wave_2);
 	// chirp(76);
 	// set_channel(1);
@@ -413,7 +413,7 @@ void load_overworld_bg()
 
 	set_font_pal(10);
 	load_font(font,125,0x4800);
-
+  load_terrains();
 	load_vram(0x49A0,icons_gfx,0x60);
 	load_vram(0x4BB0,icons_gfx+0x60,0x60);
 
@@ -513,7 +513,7 @@ void display_commanders_in_castle(char castle_no)
 
 	for(j=0; j<party_size; j++)
 	{
-		put_string(commanders[party[j]-16].name,25,2+(s_y/8)+j);
+		put_string(party_commanders[j].name,25,2+(s_y/8)+j);
 	}
 
 	menu_state = SHOP_MENU;
@@ -549,7 +549,7 @@ void display_shop_menu(char castle_no)
 
 	for(i=0; i<party_size; i++)
 	{
-		put_string(commanders[party[i]-16].name,25,(s_y/8)+2+i);
+		put_string(party_commanders[i].name,25,(s_y/8)+2+i);
 	}
 
 	menu_options = num_of_buyable_items;
@@ -570,8 +570,9 @@ void display_castle_menu(char castle_no)
 	put_string("Cmdrs",2+s_x/8,4+s_y/8);
 	set_font_pal(10);
 	put_string("Begin",2+s_x/8,5+s_y/8);
-
-	load_cursor(2,4,SLIDER_ONE);
+  cursor_x = 1;
+  cursor_y = 1;
+	load_cursor(cursor_x,1,SLIDER_ONE);
 	menu_state = CASTLE_MENU;
 	menu_options = 5;
 	current_selected_castle = castle_no;
@@ -618,7 +619,7 @@ void print_commander_data(char cmdr_id)
 	x = 23+((s_x>>1)/8);
 	y = 5+((s_y>>1)/8);
 	put_string("       ",x+2,y);
-	put_string(commanders[cmdr_id].name,x+2,y);
+	put_string(party_commanders[cmdr_id].name,x+2,y);
 	put_string("HP",x+4,y+1);
 	put_char('/',x+4,y+2);
 
@@ -635,8 +636,7 @@ char buy_item(char item_index, char cmdr_index)
 	// item_id = buyable_items[item_index];
 	// cost = items[item_id].cost;
 	player_gold -= 100;
-	commanders[cmdr_index].equipable = item_index;
-	commanders[cmdr_index].no_of_items = 1;
+	party_commanders[cmdr_index].item = item_index;
 	// party_items[no_of_party_items++] = item_id;
 	return 1;
 }
@@ -648,7 +648,7 @@ void select_buyable_unit(char unit_index)
 	menu_options = party_size;
 	commander_select_cursor = 0;
 	reset_npcs();
-	display_army_info(party[0]-16,17,13);
+	display_army_info(party_commanders[0].sprite_type-16,17,13);
 	item_purchase_select();
 
 	spr_set(1);
@@ -666,7 +666,7 @@ void select_cmdr_for_unit()
 	row_selected = ROW_ONE;
 
 	set_font_pal(11);
-	put_string(commanders[party[commander_select_cursor]-16].name,25,(s_y/8)+2+commander_select_cursor);
+	put_string(party_commanders[commander_select_cursor].name,25,(s_y/8)+2+commander_select_cursor);
 	set_font_pal(10);
 
 	load_cursor(225+12,112,SLIDER_ONE);
@@ -760,21 +760,22 @@ void load_cmdr_army_to_npcs(char cmdr_id)
 void item_swap_menu()
 {
 	int z;
-	load_portrait(party[0]);
+	load_portrait(0);
 
 	for(z=0; z<party_size; z++)
 	{
-		put_string(commanders[party[z]-16].name,3,49+z);
+		put_string(party_commanders[z].name,3,49+z);
 	}
 	display_item(0,0,11,13);
 	display_item(0,1,21,13);
-	if(commanders[party[0]-16].no_of_items > 0)
+	if(party_commanders[0].item)
 	{
-		load_item(commanders[party[0]-16].equipable,2);
+		load_item(party_commanders[0].item,2);
 		display_item(0,2,11,18);
-		display_attribute_string(commanders[party[0]-16].equipable,(s_x/8)+15,(s_y/8)+18);
+		display_attribute_string(party_commanders[0].item,(s_x/8)+15,(s_y/8)+18);
 	}
-	display_cmdr_info(party[0]-16,15,10);
+	// display_cmdr_info(party[0]-16,15,10);
+	display_cmdr_info(0,15,10);
 	display_attribute_string(party_items[selected_item],(s_x/8)+25,(s_y/8)+13);
 
 	load_cursor(12,100,SLIDER_ONE);
@@ -789,21 +790,23 @@ void item_consume_select()
 
 void item_purchase_select()
 {
-	load_portrait(party[commander_select_cursor]);
-	display_cmdr_info(party[commander_select_cursor]-16,2,16);
+	load_portrait(party_commanders[commander_select_cursor]);
+	display_cmdr_info(party_commanders[commander_select_cursor]-16,2,16);
 	put_string("Item",(s_x/8)+9,(s_y/8)+20);
-	load_item(commanders[party[commander_select_cursor]-16].equipable,2);
+	load_item(party_commanders[commander_select_cursor].item,2);
 	display_item(0,2,9,22);
-	display_attribute_string(commanders[party[commander_select_cursor]-16].equipable,(s_x/8)+9,(s_y/8)+26);
+	display_attribute_string(party_commanders[commander_select_cursor].item,(s_x/8)+9,(s_y/8)+26);
 }
 
 void commander_consume_select()
 {
-	load_item(commanders[party[commander_select_cursor]-16].equipable,2);
-	display_attribute_string(commanders[party[commander_select_cursor]-16].equipable,(s_x/8)+15,(s_y/8)+18);
+	load_item(party_commanders[commander_select_cursor].item,2);
+	display_attribute_string(party_commanders[commander_select_cursor].item,(s_x/8)+15,(s_y/8)+18);
 	display_item(0,2,11,18);
-	load_portrait(party[commander_select_cursor]);
-	display_cmdr_info(party[commander_select_cursor]-16,15,10);
+	load_portrait(0);
+	display_cmdr_info(0,15,10);
+	// load_portrait(party[commander_select_cursor]);
+	// display_cmdr_info(party[commander_select_cursor]-16,15,10);
 }
 
 char get_map_id_by_pos(int pos)
@@ -999,7 +1002,8 @@ void overworld_controls(){
 				if(commander_select_cursor > 0) //&& menu_state != BUY_CMDR_UNIT_MENU)
 				{
 					commander_select_cursor--;
-					spr_y(spr_get_y()-8);
+          curs_up();
+//					spr_y(spr_get_y()-8);
 
 					if(menu_state == RECRUIT_MENU)
 					{
@@ -1026,7 +1030,8 @@ void overworld_controls(){
 					}
 					else if(menu_state == BUY_SELECT_MENU)
 					{
-						display_army_info(party[commander_select_cursor]-16,17,13);
+						// display_army_info(party[commander_select_cursor]-16,17,13);
+						display_army_info(0,17,13);
 						item_purchase_select();
 					}
 					else if(menu_state == BUY_ITEM_MENU)
@@ -1055,7 +1060,8 @@ void overworld_controls(){
 				if(commander_select_cursor < (menu_options-1)) //&& menu_state != BUY_CMDR_UNIT_MENU)
 				{
 					commander_select_cursor++;
-					spr_y(spr_get_y()+8);
+          curs_down();
+//					spr_y(spr_get_y()+8);
 
 					if(menu_state == RECRUIT_MENU)
 					{
@@ -1077,7 +1083,8 @@ void overworld_controls(){
 					}
 					else if(menu_state == BUY_SELECT_MENU)
 					{
-						display_army_info(party[commander_select_cursor]-16,17,13);
+						// display_army_info(party[commander_select_cursor]-16,17,13);
+						display_army_info(0,17,13);
 						item_purchase_select();
 					}
 					else if(menu_state == BUY_ITEM_MENU)
@@ -1113,15 +1120,18 @@ void overworld_controls(){
 			print_item_name(buyable_items[commander_select_cursor],2,3,commander_select_cursor);
 			set_font_pal(10);
 			select_buyable_item(buyable_items[commander_select_cursor]);
-			load_portrait(party[0]);
+			// load_portrait(party[0]);
+			load_portrait(0);
+
 			display_item(0,0,2,14);
-			display_cmdr_info(party[0]-16,2,16);
-			if(commanders[party[0]-16].no_of_items > 0)
+			// display_cmdr_info(party[0]-16,2,16);
+			display_cmdr_info(0,2,16);
+			if(party_commanders[0].item)
 			{
 				put_string("Item",(s_x/8)+9,(s_y/8)+20);
-				load_item(commanders[party[0]-16].equipable,2);
+				load_item(party_commanders[0].item,2);
 				display_item(0,2,9,22);
-				display_attribute_string(commanders[party[0]-16].equipable,(s_x/8)+9,(s_y/8)+26);
+				display_attribute_string(party_commanders[0].item,(s_x/8)+9,(s_y/8)+26);
 			}
 		}
 		else if(menu_state == SHOP_MENU)//actually the buy units menu...
@@ -1132,7 +1142,7 @@ void overworld_controls(){
 			print_unit_data(buyable_units[commander_select_cursor],commander_select_cursor,0,1,1);
 			set_font_pal(10);
 			select_buyable_unit(buyable_units[commander_select_cursor]);
-			load_portrait(party[0]);
+			load_portrait(0);
 			display_item(0,0,2,14);
 		}
 		else if(menu_state == BUY_SELECT_MENU)
@@ -1195,17 +1205,18 @@ void overworld_controls(){
 		}
 		else if(menu_state == EQUIP_ITEM_MENU)
 		{
-			equip_item(party[commander_select_cursor]-16,last_selected_cursor,EQUIPABLE);
+			equip_item(party_commanders[commander_select_cursor].sprite_type-16,last_selected_cursor,EQUIPABLE);
 			display_inventory(0,8,EQUIPABLE);
 			load_cursor(66,20,SLIDER_ONE);
 			last_selected_cursor = 0;
 		}
 		else if(menu_state == BUY_ITEM_MENU)
 		{
-			buy_item(selected_item,party[commander_select_cursor]-16);
-			load_item(commanders[party[commander_select_cursor]-16].equipable,2);
+			// buy_item(selected_item,party[commander_select_cursor]-16);
+			buy_item(selected_item,0);
+			load_item(party_commanders[commander_select_cursor].item,2);
 			display_item(0,2,9,22);
-			display_attribute_string(commanders[party[commander_select_cursor]-16].equipable,(s_x/8)+9,(s_y/8)+26);
+			display_attribute_string(party_commanders[commander_select_cursor].item,(s_x/8)+9,(s_y/8)+26);
 			put_number(player_gold,6,16+(s_x/8),10+(s_y/8));
 		}
 	}
@@ -1291,7 +1302,7 @@ void overworld_controls(){
 			commander_select_cursor = last_selected_cursor;
 			menu_state = BUY_SELECT_MENU;
 			menu_options = party_size;
-			put_string(commanders[party[commander_select_cursor]-16].name,25,(s_y/8)+2+commander_select_cursor);
+			put_string(party_commanders[commander_select_cursor].name,25,(s_y/8)+2+commander_select_cursor);
 
 			load_cursor(186,12+(8*commander_select_cursor),CURSOR);
 			spr_hide(SLIDER_TWO);

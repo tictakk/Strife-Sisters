@@ -5,7 +5,7 @@
 #define MENU_MODE 2
 #define SPLIT_MODE 3
 #define ATTACK_MODE 4
-#define MERGE_MODE 5
+#define ARMY_MODE 5
 #define OBSERVE_MODE 6
 #define DIALOG_MODE 7
 #define EXPLORE_MODE 8
@@ -15,21 +15,11 @@
 #define MAX_ENTITIES 21
 #define PLAYER 1
 #define CPU 2
-#define INF 0
-#define SPEAR 1
-#define MUSKET 2
-#define FLYER 3
-#define HOUND 4
-
-#define ACTIONS_PER_TURN 6
-#define MOVE_COST 2
-#define SPLIT_COST 2
-#define ATTACK_COST 2
-#define MERGE_COST 2
 
 #define MENU_ATTACK 1
 #define MENU_MOVE 0
 #define MENU_END 3
+#define MENU_GRP 4
 #define MENU_TURN 5
 #define MENU_SPLIT 2
 #define MENU_MERGE 99
@@ -44,6 +34,7 @@
 typedef struct{
   int pos;
   char team, id, actionable, movable;
+  unsigned char hp;
   Battlegroup *bg;
 } Entity;
 
@@ -51,8 +42,9 @@ int gold_gained;
 unsigned char battle_grid[464];//MAP_SIZE];
 Entity entities[MAX_ENTITIES];
 char selector_mode;
-int cursor_x, cursor_y, unit_selected, last_pos;
-char num_of_entities, menu_option;
+int unit_selected, last_pos;
+char num_of_entities, menu_option, menu_rows,
+     menu_columns, menu_vert_size, selected_option, selected_entity;
 char one_total;
 char two_total;
 char cost;
@@ -162,7 +154,7 @@ char get_army_min_move(char entity_id)
   return min;
 }
 
-void add_entity(char team, char pal, char cmdr, char id, int pos)
+void add_entity(char team, char pal, char id, int pos, struct Commander *commanders)
 {
   char i, j;
 
@@ -171,14 +163,12 @@ void add_entity(char team, char pal, char cmdr, char id, int pos)
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
   entities[num_of_entities].movable = 1;
+  entities[num_of_entities].hp = 255;
   add_npc(pos%16,pos/16,commanders[id].sprite_type,pal);
 
   for(i=0; i<9; i++)
   {
     entities[num_of_entities].bg = commanders[id].bg;
-    // entities[num_of_entities].row_one[i].unit = &unit_list[commanders[id].unit];
-    // entities[num_of_entities].row_one[i].hp = unit_list[commanders[id].unit].hp;
-
   }
   num_of_entities++;
 }
@@ -226,8 +216,7 @@ void unhighlight()
 
 void hide_cursor()
 {
-  spr_set(CURSOR);
-  spr_hide();
+  remove_cursor();
 }
 
 void hide_selector()
@@ -474,7 +463,7 @@ void undo()
 
 void set_menu_mask(char entity_id)
 {
-  menu_mask = 0x08;
+  menu_mask = 0x28;
   if(entities[entity_id].actionable)
   {
     menu_mask |= 0x0E;
@@ -489,10 +478,10 @@ void mask_menu()
 {
   if(menu_mask & 0x01) { put_string("MOV",20,1); }
   if(menu_mask & 0x02) { put_string("ATK",20,2); }
-  if(menu_mask & 0x04) { put_string("PAS",24,2); }
-  if(menu_mask & 0x08) { put_string("END",28,2); }
+  if(menu_mask & 0x04) { put_string("END",24,2); }
+  if(menu_mask & 0x08) { put_string("TRN",28,2); }
   if(menu_mask & 0x10) { put_string("ART",24,1); }
-  if(menu_mask & 0x20) { put_string("INF",28,1); }
+  if(menu_mask & 0x20) { put_string("GRP",28,1); }
 }
 
 void print_menu()
@@ -500,10 +489,10 @@ void print_menu()
   set_font_pal(11);
   put_string("MOV",20,1);
   put_string("ATK",20,2);
-  put_string("PAS",24,2);
-  put_string("END",28,2);
+  put_string("END",24,2);
+  put_string("TRN",28,2);
   put_string("ART",24,1);
-  put_string("INF",28,1);
+  put_string("GRP",28,1);
   set_font_pal(10);
   mask_menu();
 }

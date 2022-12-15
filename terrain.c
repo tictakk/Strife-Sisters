@@ -6,6 +6,9 @@
 // #incchr(level_card,"map/sprites/card.pcx")
 #incpal(buff_pals,"map/sprites/buff1.pcx")
 
+#incchr(cursor, "map/cursor.pcx");
+#incpal(cursorpal, "map/cursor.pcx");
+
 //Map images
 #incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
 #inctilepal(overworldtilespal,"map/backgrounds/strifesisters.tiles.pcx")
@@ -71,6 +74,7 @@ void load_terrains()
 {
   load_terrain_icons();
   load_terrain_items();
+  load_vram(0x4DB0,cursor,0x10);
 }
 
 void load_terrain_icons()

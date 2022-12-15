@@ -1,1 +1,3 @@
-mednafen sisterstrife.pce
+make clean
+make
+mednafen ./strifesisters.pce
