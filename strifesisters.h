@@ -21,10 +21,10 @@
 #define BMAGE 17
 #define WMAGE 18
 #define CLERIC 19
-#define NECROMANCER 20
+#define WITCH 20
 #define RAIDER 21
-#define PRIATE 22
-#define ADMIRAL 23
+#define PIRATE 22
+#define CAPTAIN 23
 #define FIGHTER 24
 #define BRAWLER 25
 #define CREATURE_1 26
@@ -58,6 +58,9 @@ const int EXP_CHART[10] = //ten levels max
 {
   50, 150, 350, 700, 1500, 2500, 5000, 10000, 25000, 50000
 };
+
+char s_y_relative = 0;
+char s_x_relative = 0;
 
 char *location_lookup(int position)
 {

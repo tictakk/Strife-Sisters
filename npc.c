@@ -14,7 +14,7 @@ struct npc{
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
-const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,20,
+const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
                                         20,19,21,22,23,
                                         24,25,26,25,26,
                                         25,26};
@@ -33,10 +33,11 @@ void init_npcs()
   cmdr_pal_count = 26;
   current_frame = 0;
 
-  load_palette(17,sldpal,2);
+  load_palette(17,sldpal,1);
+  load_palette(18,magepal,1);
   load_palette(19,dmnpal,2);
   load_palette(21,blobpal,2);
-  load_palette(23,banditpal,2);
+  load_palette(23,axebtlpal,2);
   load_palette(25,npc_pal,2);
   load_palette(31,dark,1);
 }
@@ -143,18 +144,16 @@ void add_npc(char x, char y, char type, char pal)
 
           case AXE_UNIT:
           load_vram(npc_vram[type],bnd,0x100);
-          // put_string("error bandit",5,5);
-          // put_number(npc_count,2,13,5);
           break;
 
           case MAGE_UNIT:
-          put_string("error mage",5,5);
-          put_number(npc_count,2,13,6);
+          load_vram(npc_vram[type],mag,0x100);
           break;
 
           default:
           put_string("error default",5,5);
-          put_number(type,3,13,9);
+//          put_number(type,3,13,9);
+//          wait_for_I_input();
           break;
         }
       }

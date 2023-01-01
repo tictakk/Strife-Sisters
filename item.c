@@ -89,63 +89,6 @@ void initialize_items()
 	items[14].modifier = 0;
 }
 
-char get_drop_by_odds(char unit_level)
-{
-  char offset, item_level = 0;
-  unsigned char roll = 0;
-  roll = range(0,255);
-  offset = 7;
-  offset *= unit_level;
-  while(DROP_TABLE[offset++] > roll)
-  {
-    item_level++;
-  }
-  return item_level;
-}
-
-void get_items_by_rarity(char level)
-{
-  char i = 0;
-  for(i=0; i<NUM_OF_ITEMS; i++)
-  {
-    if(items[i].rarity == level)
-    {
-      items_by_level[num_of_items_by_level++] = i;
-    }
-  }
-}
-
-void get_random_item_by_level(char level)
-{
-  unsigned char r=0, i=0;
-  int odds=0;
-  get_items_by_rarity(get_drop_by_odds(level));
-
-  if(drop_count > 2){ return 0; }
-  if(num_of_items_by_level == 0){ return 0; }
-
-  odds = 255 / num_of_items_by_level;
-  r = rand() & 255;
-  while(r > odds)
-  {
-    odds+=odds;
-    i++;
-  }
-  battle_items[drop_count++] = items_by_level[i];
-  num_of_items_by_level = 0;
-}
-
-void clear_battle_items()
-{
-	char i=0;
-	for(i=0; i<MAX_DROPPABLE_ITEMS; i++)
-	{
-		battle_items[i] = 0;
-	}
-	drop_count = 0;
-	num_of_items_by_level = 0;
-}
-
 void display_attribute_string(char item_no, char x, char y)
 {
 	switch(items[item_no].attribute)

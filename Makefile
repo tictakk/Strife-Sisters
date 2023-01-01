@@ -6,8 +6,8 @@
 # sisterstrife.pce: $(SRC)
 # 	$(CC) $(CFLAGS) $(SRC) $(LIBS)
 #
-# clean:
-# 	rm -f *.pce *.lst *.sym *.s
+clean:
+	rm -f *.pce *.lst *.sym *.s
 
 all: strifesisters.pce
 

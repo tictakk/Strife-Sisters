@@ -1,3 +1,3 @@
 make clean
-make
+make all
 mednafen ./strifesisters.pce

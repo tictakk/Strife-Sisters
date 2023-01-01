@@ -1,8 +1,4 @@
 #define PASS 0
-#define ATTACK 1
-#define MOVE 2
-#define PASS_PTS 50
-
 //Objective
 #define DEFEND 0
 #define CAPTURE 1

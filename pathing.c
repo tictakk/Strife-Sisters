@@ -2,14 +2,6 @@
 struct Node neighbors[4];
 struct Node map[80];
 
-//range, 1) 4-0 = 4
-//range, 2) 12-4 = 8
-//range, 3) 24-12 = 12
-//range, 4) 40-24 = 16
-//range, 5) 60-40 = 20
-//range, 6) 84-60 = 24
-//range, 7) 112-84 = 28
-
 // int get_neighbors(unsigned char x, unsigned char y, char size)
 int get_neighbors(int position)
 {
@@ -146,18 +138,11 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 	}
   i = 0;
   node = &map[map_size];
-
-	// paths[i++] = ((node->ownY * width) + node->ownX);
-  // x = map[0].ownX;
-  // y = map[0].ownY;
 	paths[i++] = node->ownPos;
 
-  // while(!compare(x, y, node->ownX, node->ownY))
 	while(!(node->ownPos == map[0].ownPos && node->fromPos == map[0].fromPos))
   {
-    // node = &map[get(node->fromX,node->fromY)];
 		node = &map[get(node->fromPos)];
-		// paths[i++] = ((node->ownY * width) + node->ownX);
 		paths[i++] = node->ownPos;
     path_counter++;
   }
@@ -180,7 +165,7 @@ char is_zero(char num, char size)
 // int put_visited(int x, int y, int fx, int fy, char checked)
 int put_visited(int pos, int fpos, char checked)
 {
-	int i = 0;
+	int i;
 	for(i=0; i<map_size+1; i++)
 	{
 		if(map[i].ownPos == pos)
@@ -188,6 +173,7 @@ int put_visited(int pos, int fpos, char checked)
 			return 0;
 		}
 	}
+
 	++map_size;
 	map[map_size].ownPos = pos;
 	map[map_size].fromPos = fpos;
@@ -200,7 +186,6 @@ unsigned char get(int pos)
   unsigned char i = 0;
   for(i=0; i<map_size; i++)
 	{
-    // if(map[i].ownX == x && map[i].ownY == y)
 		if(map[i].ownPos == pos)
     {
       return i;

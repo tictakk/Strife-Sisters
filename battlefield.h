@@ -18,6 +18,7 @@
 
 #define MENU_ATTACK 1
 #define MENU_MOVE 0
+#define MENU_TAKE 2
 #define MENU_END 3
 #define MENU_GRP 4
 #define MENU_TURN 5
@@ -156,20 +157,16 @@ char get_army_min_move(char entity_id)
 
 void add_entity(char team, char pal, char id, int pos, struct Commander *commanders)
 {
-  char i, j;
-
   entities[num_of_entities].id = id;
   entities[num_of_entities].team = team;
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
   entities[num_of_entities].movable = 1;
   entities[num_of_entities].hp = 255;
-  add_npc(pos%16,pos/16,commanders[id].sprite_type,pal);
+  // party_commanders[entities[num_of_entities]].meter = 0;
 
-  for(i=0; i<9; i++)
-  {
-    entities[num_of_entities].bg = commanders[id].bg;
-  }
+  add_npc(pos%16,pos/16,commanders[id].sprite_type,pal);
+  entities[num_of_entities].bg = commanders[id].bg;
   num_of_entities++;
 }
 
@@ -234,9 +231,6 @@ char destroy_entity(int id)
   char entity_id, killed;
   killed = 0;
   entity_id = id;
-
-  // if(entities[entity_id].army_size == 0)
-  // {
     battle_grid[entities[id].pos] = 0;
     killed = 1;
     if(entities[entity_id].team == PLAYER)
@@ -245,9 +239,8 @@ char destroy_entity(int id)
     }
     else
     {
-      get_random_item_by_level(0);
-      // exp_gained += 25;//entities[entity_id].unit->exp;
-      gold_gained += range(0,20);
+//      get_random_item_by_level(0);
+//      gold_gained += range(0,20);
       two_total--;
     }
     for(i=0; i<464; i++)
@@ -264,7 +257,6 @@ char destroy_entity(int id)
       // entities[i].id--;
     }
     num_of_entities--;
-  // }
   return killed;
 }
 
@@ -463,7 +455,15 @@ void undo()
 
 void set_menu_mask(char entity_id)
 {
+  char item_index;
+
   menu_mask = 0x28;
+  if((item_index = item_at_position(entities[entity_id].pos)) != -1)
+  {
+    put_hex(menu_mask,3,6,1);
+    menu_mask |= 0x10;
+    put_hex(menu_mask,3,6,2);
+  }
   if(entities[entity_id].actionable)
   {
     menu_mask |= 0x0E;
@@ -480,7 +480,7 @@ void mask_menu()
   if(menu_mask & 0x02) { put_string("ATK",20,2); }
   if(menu_mask & 0x04) { put_string("END",24,2); }
   if(menu_mask & 0x08) { put_string("TRN",28,2); }
-  if(menu_mask & 0x10) { put_string("ART",24,1); }
+  if(menu_mask & 0x10) { put_string("TKE",24,1); }
   if(menu_mask & 0x20) { put_string("GRP",28,1); }
 }
 
@@ -491,7 +491,7 @@ void print_menu()
   put_string("ATK",20,2);
   put_string("END",24,2);
   put_string("TRN",28,2);
-  put_string("ART",24,1);
+  put_string("TKE",24,1);
   put_string("GRP",28,1);
   set_font_pal(10);
   mask_menu();
@@ -507,6 +507,49 @@ void center_camera(int selector_abs)
   scroll(0,s_x,s_y+32,32,224,0xC0);
 }
 
+void item_gained_text(char item_no)
+{
+  clear_text_field();
+  put_string("Gained 10",1,1);
+  switch(item_no)
+  {
+    case 0x7:
+      put_string("red gems",1,2);
+      red_crystal_count += 10;
+      break;
+
+    case 0xA:
+      put_string("blue gems",1,2);
+      blue_crystal_count += 10;
+      break;
+
+    case 0xD:
+      put_string("green gems",1,2);
+      green_crystal_count += 10;
+      break;
+
+    case 0x10:
+      put_char('0',10,1);
+      put_string("gold coins",1,2);
+      player_gold += 100;
+      break;
+  }
+
+  wait_for_I_input();
+  clear_text_field();
+}
+
+void end_unit_turn(char entity_id)
+{
+  selector_mode = SELECT_MODE;
+  menu_option = MENU_ATTACK;
+  entities[entity_id].actionable = 0;
+  menu_mask = 0x00;
+  print_menu();
+  hide_cursor();
+}
+
 void update_map();
 void begin_battle(int src, int dst, int dst_p, char a_terrain, char t_terrain);
 void set_cursor_pos(int pos);
+

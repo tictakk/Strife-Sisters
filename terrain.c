@@ -2,14 +2,15 @@
 #incchr(water_anim_two,"assets/water_anim_2.pcx")
 #incchr(terrain_icons,"map/sprites/terrain_icons.pcx",14,2)
 #incpal(t_icon_pal,"map/sprites/terrain_icons.pcx")
-#incchr(buffs,"map/sprites/buff1.pcx")
-// #incchr(level_card,"map/sprites/card.pcx")
+//#incchr(buffs,"map/sprites/buff1.pcx")
+#incchr(buffs,"map/sprites/buff1.pcx",12,3)
+ #incchr(chest,"map/sprites/chest.pcx")
 #incpal(buff_pals,"map/sprites/buff1.pcx")
 
 #incchr(cursor, "map/cursor.pcx");
 #incpal(cursorpal, "map/cursor.pcx");
 
-//Map images
+//Map imagesR
 #incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
 #inctilepal(overworldtilespal,"map/backgrounds/strifesisters.tiles.pcx")
 
@@ -48,14 +49,24 @@
 #define TERRAIN_TRAP 5
 #define TERRAIN_EVENT 6
 #define MAX_EVENT_TERRAIN 10
+#define MAX_TERRAIN_ITEMS 5
 
-#define TERRAIN_ICON_VRAM 0x4E00
+//#define TERRAIN_ICON_VRAM 0x4E00
+#define TERRAIN_ICON_VRAM 0x5600
 #define TERRAIN_ITEM_VRAM (TERRAIN_ICON_VRAM + 0x1C0)
 #define TERRAIN_ICON_PAL 14
 
 #define WATER_VRAM 0x2640
 #define WATER_ANIM_ZERO (overworldtiles + 0x1640)
 
+#define RED_CRYSTAL 0x7
+#define BLUE_CRYSTAL 0xA
+#define GREEN_CRYSTAL 0xD
+
+typedef struct{
+  int x, y;
+  char item_no, frame;
+}Terrain_Item;
 
 const char def_bonus[TERRAIN_EFFECT_COUNT] = { 0, 3, -3, 5, 5 };
 const char atk_bonus[TERRAIN_EFFECT_COUNT] = { 0, -3, -3, 0, 0 };
@@ -63,12 +74,15 @@ const char type_effect_map[TERRAIN_TYPE_COUNT] = {
   NORMAL_TERRAIN, NEGATIVE_TERRAIN, DENSE_TERRAIN,
   NORMAL_TERRAIN, DENSE_TERRAIN, NORMAL_TERRAIN, BUILDING_TERRAIN;
 };
+const char terrain_animation[] = { 0, 1, 0, 2 };
 
+Terrain_Item terrain_items[MAX_TERRAIN_ITEMS];
 int event_terrains[MAX_EVENT_TERRAIN];
-
 int map_offset = 0;
 char water_frame = 0;
 char water_trigger = 0;
+char item_trigger = 0;
+char terrain_item_count = 0;
 
 void load_terrains()
 {
@@ -85,7 +99,8 @@ void load_terrain_icons()
 
 void load_terrain_items()
 {
-  load_vram(TERRAIN_ITEM_VRAM,buffs,0x200);
+  load_vram(TERRAIN_ITEM_VRAM,buffs,0x240);
+//  load_vram(TERRAIN_ITEM_VRAM+0x240,chest,0x40);
   load_palette(7,buff_pals,1);
 }
 
@@ -110,6 +125,14 @@ void put_terrain_icon(char terrain_no, int x, int y)
 void put_terrain_item(char item_no, int x, int y)
 {
   put_terrain_effect(item_no,x<<1,y<<1,0x7000);
+}
+
+void create_terrain_item(char item_no, int x, int y)
+{
+  terrain_items[terrain_item_count].frame = terrain_item_count%4;//range(1,3);
+  terrain_items[terrain_item_count].item_no = item_no;
+  terrain_items[terrain_item_count].x = x;
+  terrain_items[terrain_item_count++].y = y;
 }
 
 void put_terrain_def_stat(char terrain_no, int x, int y)
@@ -184,5 +207,48 @@ void swap_water_tiles()
     }
     water_frame %= 4;
     water_trigger = 0;
+//    cycle_terrain_items();
   }
+}
+
+void cycle_terrain_items()
+{
+  char i;
+  if(item_trigger++ == 16)
+  {
+    for(i=0; i<terrain_item_count; i++)
+    {
+      put_terrain_item(terrain_items[i].item_no+(terrain_animation[terrain_items[i].frame]),terrain_items[i].x,terrain_items[i].y);
+      terrain_items[i].frame++;
+      terrain_items[i].frame %= 4;
+    }
+    item_trigger = 0;
+  }
+}
+
+void remove_terrain_item(char item_index)
+{
+  char i;
+
+  put_tile(map_get_tile(terrain_items[item_index].x,terrain_items[item_index].y-2),
+           terrain_items[item_index].x,terrain_items[item_index].y);
+
+  for(i=item_index; i<terrain_item_count; i++)
+  {
+    memcpy(&terrain_items[i],&terrain_items[i+1],sizeof(Terrain_Item));
+  }
+  terrain_item_count--;
+}
+
+char item_at_position(int position)
+{
+  char i;
+  for(i=0; i<terrain_item_count; i++)
+  {
+    if((terrain_items[i].y<<4)+terrain_items[i].x == position)
+    {
+      return i;
+    }
+  }
+  return -1;
 }
