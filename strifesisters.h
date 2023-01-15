@@ -18,7 +18,7 @@
 #define BERSERKER 14
 #define STALKER 15
 #define ARTILLERY 16
-#define BMAGE 17
+#define CLERIC_UNIT 17
 #define WMAGE 18
 #define CLERIC 19
 #define WITCH 20
