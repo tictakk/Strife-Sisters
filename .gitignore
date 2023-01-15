@@ -1,7 +1,8 @@
 map/*
 tiles/*
 script/*
-concepts.rtf
+assets/*
+*.rtf
 *.pce
 *.s
 *.sym
