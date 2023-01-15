@@ -68,7 +68,7 @@ typedef struct{
   char item_no, frame;
 }Terrain_Item;
 
-const char def_bonus[TERRAIN_EFFECT_COUNT] = { 0, 3, -3, 5, 5 };
+const char def_bonus[TERRAIN_EFFECT_COUNT] = { 0, 10, -10, 20, 20 };
 const char atk_bonus[TERRAIN_EFFECT_COUNT] = { 0, -3, -3, 0, 0 };
 const char type_effect_map[TERRAIN_TYPE_COUNT] = {
   NORMAL_TERRAIN, NEGATIVE_TERRAIN, DENSE_TERRAIN,
@@ -135,20 +135,12 @@ void create_terrain_item(char item_no, int x, int y)
   terrain_items[terrain_item_count++].y = y;
 }
 
-void put_terrain_def_stat(char terrain_no, int x, int y)
+void put_terrain_bonus(char terrain_no, int x, int y)
 {
   char bonus;
   bonus = terrain_def_bonus(terrain_effect_by_type(terrain_no));
   put_number(bonus,2,x,y);
-  put_char('D',x+2,y);
-}
-
-void put_terrain_atk_stat(char terrain_no, int x, int y)
-{
-  char bonus;
-  bonus = terrain_atk_bonus(terrain_effect_by_type(terrain_no));
-  put_number(bonus,2,x,y);
-  put_char('A',x+2,y);
+  put_char('%',x+2,y);
 }
 
 char terrain_def_bonus(char te_type)

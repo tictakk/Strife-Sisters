@@ -58,7 +58,7 @@
 
 typedef struct{
 	unsigned char atk, def, mov, id, a_type,
-                rng, ign, spd, points, bonus_col;
+                rng, ign, spd, points, bonus_col, pow;
 
   char attacks[3];
 	int hp;
@@ -70,7 +70,7 @@ typedef struct{
 } Unit_Entity;
 
 const char buyable_units[] = { SWORD_UNIT, SPEAR_UNIT, AXE_UNIT, MAGE_UNIT, LANCER_UNIT, ARCHER_UNIT, HOUND_UNIT,
-                              MONK_UNIT, BERSERKER};
+                              MONK_UNIT, BERSERKER, CLERIC_UNIT};
 
 Unit unit_list[MAX_UNIT_COUNT];
 unsigned char unit_entity_count = 0;
@@ -80,11 +80,11 @@ char buyable_unit_count = 0;
 void initialize_units()
 {
   char i;
-  buyable_unit_count = 9;
+  buyable_unit_count = 10;
 
 	for(i=0; i<MAX_UNIT_COUNT; i++)
   {
-    unit_list[i].hp = 25;
+    unit_list[i].hp = 50;
     unit_list[i].atk = 20;
     unit_list[i].def = 10;
     unit_list[i].spd = 15;
@@ -100,11 +100,11 @@ void initialize_units()
     unit_list[i].attacks[2] = SINGLE_HIT;
     unlocked_units[i] = 0;
   }
-  unit_list[SPEAR_UNIT].hp  = 27;
+  unit_list[SPEAR_UNIT].hp  = 45;
   unit_list[SPEAR_UNIT].atk = 23;
   unit_list[SPEAR_UNIT].def = 12;
   unit_list[SPEAR_UNIT].rng = 2;
-  unit_list[SPEAR_UNIT].mov = 2;
+  unit_list[SPEAR_UNIT].mov = 3;
   unit_list[SPEAR_UNIT].bonus_col = 1;
   unit_list[SPEAR_UNIT].spd = 15;
   unit_list[SPEAR_UNIT].ign = 0;
@@ -112,7 +112,7 @@ void initialize_units()
   unit_list[SPEAR_UNIT].a_type = PIERCE;
   unlocked_units[SPEAR_UNIT] = 1;
 
-  unit_list[LANCER_UNIT].hp  = 29;
+  unit_list[LANCER_UNIT].hp  = 55;
   unit_list[LANCER_UNIT].atk = 25;
   unit_list[LANCER_UNIT].def = 14;
   unit_list[LANCER_UNIT].rng = 2;
@@ -124,7 +124,7 @@ void initialize_units()
   unit_list[LANCER_UNIT].a_type = PIERCE;
   unlocked_units[LANCER_UNIT] = 1;
 
-  unit_list[SWORD_UNIT].hp  = 34; //0x2BCE
+  unit_list[SWORD_UNIT].hp  = 60; //0x2BCE
   unit_list[SWORD_UNIT].atk = 21;
   unit_list[SWORD_UNIT].def = 15;
   unit_list[SWORD_UNIT].mov = 3;
@@ -137,8 +137,8 @@ void initialize_units()
   unit_list[SWORD_UNIT].attacks[2] = NO_ATTACK;
   unlocked_units[SWORD_UNIT] = 1;
 
-  unit_list[ARCHER_UNIT].atk = 25;
-  unit_list[ARCHER_UNIT].hp  = 24;
+  unit_list[ARCHER_UNIT].atk = 26;
+  unit_list[ARCHER_UNIT].hp  = 35;
   unit_list[ARCHER_UNIT].def = 12;
   unit_list[ARCHER_UNIT].rng = 2;
   unit_list[ARCHER_UNIT].mov = 3;
@@ -151,7 +151,7 @@ void initialize_units()
 
 	unit_list[HOUND_UNIT].atk = 23;
 	unit_list[HOUND_UNIT].def = 13;
-	unit_list[HOUND_UNIT].hp  = 23;
+	unit_list[HOUND_UNIT].hp  = 45;
 	unit_list[HOUND_UNIT].ign = 0;
   unit_list[HOUND_UNIT].bonus_col = 1;
   unit_list[HOUND_UNIT].mov = 4;
@@ -161,7 +161,7 @@ void initialize_units()
 
 	unit_list[BLOB_UNIT].atk = 20; //0x2C1B
 	unit_list[BLOB_UNIT].def = 13;
-	unit_list[BLOB_UNIT].hp  = 25;
+	unit_list[BLOB_UNIT].hp  = 35;
 	unit_list[BLOB_UNIT].ign = 0;
   unit_list[BLOB_UNIT].spd = 17;
   unit_list[BLOB_UNIT].mov = 3;
@@ -171,7 +171,7 @@ void initialize_units()
 
 	unit_list[AXE_UNIT].atk = 22;
 	unit_list[AXE_UNIT].def = 13;
-	unit_list[AXE_UNIT].hp  = 27;
+	unit_list[AXE_UNIT].hp  = 50;
 	unit_list[AXE_UNIT].ign = 0;
   unit_list[AXE_UNIT].bonus_col = 0;
   unit_list[AXE_UNIT].mov = 3;
@@ -180,7 +180,7 @@ void initialize_units()
 
   unit_list[BERSERKER].atk = 32;
   unit_list[BERSERKER].def = 14;
-  unit_list[BERSERKER].hp  = 30;
+  unit_list[BERSERKER].hp  = 60;
   unit_list[BERSERKER].ign = 0;
   unit_list[BERSERKER].bonus_col = 0;
   unit_list[BERSERKER].mov = 3;
@@ -190,18 +190,31 @@ void initialize_units()
   unit_list[MAGE_UNIT].atk = 18;
   unit_list[MAGE_UNIT].hp = 16;
   unit_list[MAGE_UNIT].def = 11;
-  unit_list[MAGE_UNIT].hp = 24;
+  unit_list[MAGE_UNIT].hp = 35;
   unit_list[MAGE_UNIT].spd = 12;
   unit_list[MAGE_UNIT].bonus_col = 1;
   unit_list[MAGE_UNIT].ign = 0;
+  unit_list[MAGE_UNIT].rng = 2;
   unit_list[MAGE_UNIT].mov = 3;
   unit_list[MAGE_UNIT].id = MAGE_UNIT;
   unit_list[MAGE_UNIT].a_type = MAGIC;
-  unit_list[MAGE_UNIT].attacks[1] = HEAL;
-  unit_list[MAGE_UNIT].attacks[2] = HEAL;
+  unit_list[MAGE_UNIT].attacks[1] = SINGLE_HIT;
+  unit_list[MAGE_UNIT].attacks[2] = SINGLE_HIT;
   unit_list[MAGE_UNIT].attacks[0] = NO_ATTACK;
 
-  unit_list[DEMON_UNIT].hp  = 22;
+  unit_list[CLERIC_UNIT].atk = 16;
+  unit_list[CLERIC_UNIT].def = 12;
+  unit_list[CLERIC_UNIT].hp = 29;
+  unit_list[CLERIC_UNIT].spd = 16;
+  unit_list[CLERIC_UNIT].bonus_col = 1;
+  unit_list[CLERIC_UNIT].ign = 0;
+  unit_list[CLERIC_UNIT].mov = 3;
+  unit_list[CLERIC_UNIT].id = CLERIC_UNIT;
+  unit_list[CLERIC_UNIT].a_type = MAGIC;
+  unit_list[CLERIC_UNIT].attacks[0] = NO_ATTACK;
+  unit_list[CLERIC_UNIT].attacks[1] = HEAL;
+  unit_list[CLERIC_UNIT].attacks[2] = HEAL;
+
 	unit_list[DEMON_UNIT].atk = 22;
 	unit_list[DEMON_UNIT].def = 13;
 	unit_list[DEMON_UNIT].rng = 1;
@@ -211,7 +224,7 @@ void initialize_units()
 	unit_list[DEMON_UNIT].id = DEMON_UNIT;
 	unit_list[DEMON_UNIT].a_type = NORMAL;
 
-  unit_list[MONK_UNIT].hp  = 23;
+  unit_list[MONK_UNIT].hp  = 60;
   unit_list[MONK_UNIT].atk = 23;
   unit_list[MONK_UNIT].def = 15;
   unit_list[MONK_UNIT].rng = 1;
@@ -221,8 +234,17 @@ void initialize_units()
   unit_list[MONK_UNIT].id = MONK_UNIT;
   unit_list[MONK_UNIT].a_type = UNARMED;
 
-//  unlocked_units[DEMON_UNIT] = 1;
+  for(i=0; i<MAX_UNIT_COUNT; i++)
+  {
+    unit_list[i].pow = 0;
+    unit_list[i].pow += unit_list[i].hp;
+    unit_list[i].pow += unit_list[i].atk;
+    unit_list[i].pow += unit_list[i].def;
+    unit_list[i].pow /= 7;
+    unit_list[i].pow += unit_list[i].rng * 2;
+  }
 
+//  unlocked_units[DEMON_UNIT] = 1;
 }
 
 //0 = no advantage, 1 = advantage, 2 = disavantage

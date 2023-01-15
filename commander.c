@@ -81,6 +81,7 @@ char level_up_commander(char cmdr_id)
     party_commanders[cmdr_id].level++;
     party_commanders[cmdr_id].max_army_pts++;
     party_commanders[cmdr_id].max_meter += 5;
+    party_commanders[cmdr_id].meter += 5;
   }
   return party_commanders[cmdr_id].level;
 }

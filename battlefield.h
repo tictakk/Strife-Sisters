@@ -157,7 +157,14 @@ char get_army_min_move(char entity_id)
 
 void add_entity(char team, char pal, char id, int pos, struct Commander *commanders)
 {
-  entities[num_of_entities].id = id;
+  if(team == CPU)
+  {
+    entities[num_of_entities].id = id + MAX_PARTY_COMMANDERS;
+  }
+  else
+  {
+    entities[num_of_entities].id = id;
+  }
   entities[num_of_entities].team = team;
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
@@ -480,7 +487,7 @@ void mask_menu()
   if(menu_mask & 0x02) { put_string("ATK",20,2); }
   if(menu_mask & 0x04) { put_string("END",24,2); }
   if(menu_mask & 0x08) { put_string("TRN",28,2); }
-  if(menu_mask & 0x10) { put_string("TKE",24,1); }
+  if(menu_mask & 0x10) { put_string("ART",24,1); }
   if(menu_mask & 0x20) { put_string("GRP",28,1); }
 }
 
@@ -491,7 +498,7 @@ void print_menu()
   put_string("ATK",20,2);
   put_string("END",24,2);
   put_string("TRN",28,2);
-  put_string("TKE",24,1);
+  put_string("ART",24,1);
   put_string("GRP",28,1);
   set_font_pal(10);
   mask_menu();

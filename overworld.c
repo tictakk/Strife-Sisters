@@ -440,10 +440,14 @@ void display_castle_menu(char castle_no)
 
   display_window(0,0,10,12);
 
+  set_font_pal(11);
 	put_string("Shop",2+s_x/8,3+s_y/8);
+  set_font_pal(10);
 	put_string("Units",2+s_x/8,4+s_y/8);
 	put_string("Army",2+s_x/8,5+s_y/8);
-	put_string("upgrade",2+s_x/8,6+s_y/8);
+  set_font_pal(11);
+	put_string("Upgrade",2+s_x/8,6+s_y/8);
+  set_font_pal(10);
 	put_string("Begin",2+s_x/8,7+s_y/8);
 
   load_cursor(1,3,SLIDER_ONE);
@@ -917,7 +921,7 @@ void overworld_controls(){
 		if(menu_state == RECRUIT_MENU) //actually the shop items menu
 		{
 			last_selected_cursor = commander_select_cursor;
-      set_font_pal(11);
+      		set_font_pal(11);
 			print_item_name(buyable_items[commander_select_cursor],2,3,commander_select_cursor);
 			set_font_pal(10);
 			select_buyable_item(buyable_items[commander_select_cursor]);
@@ -936,70 +940,70 @@ void overworld_controls(){
 		}
 		else if(menu_state == SHOP_MENU)//actually the buy units menu...
 		{
-      clear_joy_events(0x1F);
+      		clear_joy_events(0x1F);
 
-      if(unlocked_units[selected_unit])
-      {
-        if(affirmative_question("Buy unit",22,18))
-        {
-          buy_unit();
-        }
-      }
-      else
-      {
-        if(affirmative_question("Upgrade",22,18))
-        {
-          unlock_unit(selected_unit);
-        }
-      }
-      display_recruit_window(selected_unit);
+			if(unlocked_units[selected_unit])
+			{
+				if(affirmative_question("Buy unit",22,18))
+				{
+				buy_unit();
+				}
+			}
+      		else
+			{
+				if(affirmative_question("Upgrade",22,18))
+				{
+				unlock_unit(selected_unit);
+				}
+			}
+      		display_recruit_window(selected_unit);
 		}
 		else if(menu_state == ASSIGN_MENU)
 		{
-      selected_unit = (cursor_column % 3)+(commander_select_cursor * 3);
-      display_convoy_select_window(22,0);
+			selected_unit = (cursor_column % 3)+(commander_select_cursor * 3);
+			display_convoy_select_window(22,0);
 		}
-    else if(menu_state == ARRANGE_MENU)
+    	else if(menu_state == ARRANGE_MENU)
 		{
-      menu_state = SWAP_MENU;
-      swap_unit = (cursor_column % 3)+(commander_select_cursor * 3);
-      put_white_square(2+(cursor_column*3),17+(commander_select_cursor*3));
+			menu_state = SWAP_MENU;
+			swap_unit = (cursor_column % 3)+(commander_select_cursor * 3);
+			put_white_square(2+(cursor_column*3),17+(commander_select_cursor*3));
 		}
-    else if(menu_state == SWAP_MENU)
-    {
-      swap_commander_units(selected_cmdr,selected_unit,swap_unit);
-      swap_unit = 0;
-      menu_state = ARRANGE_MENU;
+		else if(menu_state == SWAP_MENU)
+		{
+			swap_commander_units(selected_cmdr,selected_unit,swap_unit);
+			swap_unit = 0;
+			menu_state = ARRANGE_MENU;
 
-      display_battle_group_window(selected_cmdr,0,14);
-      display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
-    }
-    else if(menu_state == UNIT_MENU)
-    {
-      swap_convoy_units(selected_cmdr,selected_unit,(cursor_column*8)+commander_select_cursor);
-      commander_select_cursor = (selected_unit) / 3;
-      cursor_column = selected_unit % 3;
+			display_battle_group_window(selected_cmdr,0,14);
+			display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
+		}
+		else if(menu_state == UNIT_MENU)
+		{
+			swap_convoy_units(selected_cmdr,selected_unit,(cursor_column*8)+commander_select_cursor);
+			commander_select_cursor = (selected_unit) / 3;
+			cursor_column = selected_unit % 3;
 
-      display_battle_group_window(selected_cmdr,0,14);
-      update_convoy_select(22,0);
-      display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
-      menu_state = ASSIGN_MENU;
-    }
-    else if(menu_state == PARTY_MENU)
-    {
-      selected_cmdr = commander_select_cursor;
-      commander_select_cursor = 0;
-      cursor_column = 0;
-      // display_battle_group_window(selected_cmdr,0,14);
-      display_party_options_window(10,0);
-      // display_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].unit->id,22,14);
-    }
+			display_battle_group_window(selected_cmdr,0,14);
+			update_convoy_select(22,0);
+			display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
+			menu_state = ASSIGN_MENU;
+		}
+    	else if(menu_state == PARTY_MENU)
+		{
+			selected_cmdr = commander_select_cursor;
+			commander_select_cursor = 0;
+			cursor_column = 0;
+			// display_battle_group_window(selected_cmdr,0,14);
+			display_party_options_window(10,0);
+			// display_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].unit->id,22,14);
+		}
 		else if(menu_state == CASTLE_MENU)
 		{
 			switch(commander_select_cursor)
 			{
-				case 0:
-          display_shop_menu(current_selected_castle);
+        case 0:
+          // display_shop_menu(current_selected_castle);
           break;
 
 				case 1:

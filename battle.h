@@ -72,24 +72,13 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].frame = 0;
   battleunits[index].state = IDLE;
   battleunits[index].pos = position;
-  battleunits[index].attacks = ue->unit->spd / speed_divider;
+  battleunits[index].attacks = 1;
   battleunits[index].target = 0;
   battleunits[index].unit = ue;
 
-//  put_hex(battleunits[index].unit,6,0,0);
-//  wait_for_I_input();
-
-  if(entities[entity_id].bg->units[position]->unit.bonus_col == position/3)
-  {
-    battleunits[index].attacks++; //+= speed_reducer;
-  }
-
   if(entities[entity_id].bg->units[position]->unit.rng < attack_range)
   {
-//    battleunits[index].spd = 0;
     battleunits[index].attacks = 0;
-//    put_string("test",0,0);
-//    wait_for_I_input();
   }
 
   switch(ue->unit->id)
@@ -129,6 +118,11 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
       battleunits[index].pal = 22;
       break;
 
+    case CLERIC_UNIT:
+      load_vram(idle_vrams[index],magebtl,0x100);
+      battleunits[index].pal = 24;
+      break;
+
     case MAGE_UNIT:
       load_vram(idle_vrams[index],magebtl,0x100);
       battleunits[index].pal = 23;
@@ -159,7 +153,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
 
   if(active)
   {
-	  spr_make(index,((p_x/4)*5)+xOffset,((p_y/4)*5)-16,idle_vrams[index],FLIP_MAS|SIZE_MAS,SZ_32x32,battleunits[index].pal,1);
+	  spr_make(index+5,((p_x/4)*5)+xOffset,((p_y/4)*5)-16,idle_vrams[index],FLIP_MAS|SIZE_MAS,SZ_32x32,battleunits[index].pal,1);
   }
 }
 
@@ -196,6 +190,7 @@ void transfer_units_to_attack_vram(char type)
       load_vram(attack_vrams[0],axebtl+0x300,0x500);
       break;
 
+    case CLERIC_UNIT:
     case MAGE_UNIT:
       load_vram(attack_vrams[0],magebtl+0x300,0x500);
       break;
@@ -252,6 +247,7 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],axebtl+0x900,0x100);
       break;
 
+    case CLERIC_UNIT:
     case MAGE_UNIT:
       load_vram(stun_vrams[index],magebtl+0x900,0x100);
       //	put_string("error mage",5,5);
@@ -285,6 +281,7 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],axebtl+0x900,0x100);
       break;
 
+    case CLERIC_UNIT:
     case MAGE_UNIT:
       load_vram(stun_vrams[index],magebtl+0x900,0x100);
       //	put_string("error mage",5,5);
@@ -420,42 +417,42 @@ void determine_action(char b_id)
     switch(battleunits[b_id].unit->unit->attacks[battleunits[b_id].pos/3])
     {
       case SINGLE_HIT:
-        put_string("single   ",0,23);
+        // put_string("single   ",0,23);
         target_single_unit(b_id);
         break;
 
       case MULTI_ROW:
-        put_string("multi row",0,23);
+        // put_string("multi row",0,23);
         target_multi_row(b_id);
         break;
 
       case MULTI_COL_2:
-        put_string("col 2   ",0,23);
+        // put_string("col 2   ",0,23);
         target_multi_col(b_id,2);
         break;
 
       case MULTI_COL_3:
-        put_string("col 3   ",0,23);
+        // put_string("col 3   ",0,23);
         target_multi_col(b_id,3);
         break;
 
       case MULTI_ATTACK_AOE:
-        put_string("atk aoe  ",0,23);
+        // put_string("atk aoe  ",0,23);
         attack_multi_aoe(b_id);
         break;
 
       case HEAL:
-        put_string("heal unit",0,23);
+        // put_string("heal unit",0,23);
         heal_single_unit(b_id);
         break;
 
       case MULTI_HEAL_AOE:
-        put_string("heal aoe ",0,23);
+        // put_string("heal aoe ",0,23);
         heal_multi_aoe(b_id);
         break;
 
       default:
-        put_string("other   ",0,23);
+        // put_string("other   ",0,23);
         target_single_unit(b_id);
         break;
     }

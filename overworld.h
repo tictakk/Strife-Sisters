@@ -218,6 +218,17 @@ void update_battle_group_window(char cmdr_id, char x, char y)
   put_number(pts,2,l_x+13,l_y+2);
   put_char('/',l_x+15,l_y+2);
   put_number(party_commanders[cmdr_id].max_army_pts,2,l_x+16,l_y+2);
+  
+  put_string("Power",l_x+12,l_y+3);
+  put_number(100,3,l_x+14,l_y+4);
+
+  put_string("Ensign",l_x+12,l_y+5);
+  put_string("---",l_x+14,l_y+6);
+
+  put_string("Arts",l_x+12,l_y+7);
+  put_string("---",l_x+14,l_y+8);
+  put_string("---",l_x+14,l_y+9);
+  put_string("---",l_x+14,l_y+10);
 
   put_green_square(2,17);
   put_green_square(8,17);
@@ -243,8 +254,10 @@ void display_party_options_window(char x, char y)
   remove_cursor();
   load_cursor(x+1,y+2,SLIDER_ONE);
   put_string("Assign",s_x_relative+x+2,s_y_relative+y+2);
-  put_string("Arrange",s_x_relative+x+2,s_y_relative+y+3);
+  put_string("Organize",s_x_relative+x+2,s_y_relative+y+3);
   put_string("Arts",s_x_relative+x+2,s_y_relative+y+4);
+  put_string("Ensign",s_x_relative+x+2,s_y_relative+y+5);
+  put_string("Cancel",s_x_relative+x+2,s_y_relative+y+6);
 
   menu_options = 3;
   menu_state = PARTY_OPTION_MENU;

@@ -164,10 +164,10 @@ void window_8(int vaddr, char row_x, char row_y)
   load_vram(vaddr+offset,top_8,row_x);
   for(i=0; i<row_y-2; i++)
   {
-    offset+=64;
+    offset+=screen_dimensions;
     load_vram(vaddr+offset,mid_8,row_x);
   }
-  offset+=64;
+  offset+=screen_dimensions;
   load_vram(vaddr+offset,bot_8,row_x);
 }
 
@@ -180,10 +180,10 @@ void window_10(int vaddr, char row_x, char row_y )
   load_vram(vaddr+offset,top_10,row_x);
   for(i=0; i<row_y-2; i++)
   {
-    offset+=64;
+    offset+=screen_dimensions;
     load_vram(vaddr+offset,mid_10,row_x);
   }
-  offset+=64;
+  offset+=screen_dimensions;
   load_vram(vaddr+offset,bot_10,row_x);
 }
 
@@ -196,10 +196,10 @@ void window_16(int vaddr, char row_x, char row_y )
   load_vram(vaddr+offset,top_16,row_x);
   for(i=0; i<row_y-2; i++)
   {
-    offset+=64;
+    offset+=screen_dimensions;
     load_vram(vaddr+offset,mid_16,row_x);
   }
-  offset+=64;
+  offset+=screen_dimensions;
   load_vram(vaddr+offset,bot_16,row_x);
 }
 
@@ -212,10 +212,10 @@ void window_22(int vaddr, char row_x, char row_y )
   load_vram(vaddr+offset,top_22,row_x);
   for(i=0; i<row_y-2; i++)
   {
-    offset+=64;
+    offset+=screen_dimensions;
     load_vram(vaddr+offset,mid_22,row_x);
   }
-  offset+=64;
+  offset+=screen_dimensions;
   load_vram(vaddr+offset,bot_22,row_x);
 }
 
@@ -228,10 +228,10 @@ void window_24(int vaddr, char row_x, char row_y )
   load_vram(vaddr+offset,top_24,row_x);
   for(i=0; i<row_y-2; i++)
   {
-    offset+=64;
+    offset+=screen_dimensions;
     load_vram(vaddr+offset,mid_24,row_x);
   }
-  offset+=64;
+  offset+=screen_dimensions;
   load_vram(vaddr+offset,bot_24,row_x);
 }
 
@@ -244,10 +244,10 @@ void window_32(int vaddr, char row_x, char row_y )
   load_vram(vaddr+offset,top_32,row_x);
   for(i=0; i<row_y-2; i++)
   {
-    offset+=64;
+    offset+=screen_dimensions;
     load_vram(vaddr+offset,mid_32,row_x);
   }
-  offset+=64;
+  offset+=screen_dimensions;
   load_vram(vaddr+offset,bot_32,row_x);
 }
 
@@ -260,9 +260,9 @@ void window_12(int vaddr, char row_x, char row_y)
   load_vram(vaddr+offset,top_12,row_x);
   for(i=0; i<row_y-2; i++)
   {
-    offset+=64;
+    offset+=screen_dimensions;
     load_vram(vaddr+offset,mid_12,row_x);
   }
-  offset+=64;
+  offset+=screen_dimensions;
   load_vram(vaddr+offset,bot_12,row_x);
 }

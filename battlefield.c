@@ -55,6 +55,7 @@ void battlefield_loop(char map_id)
   char id;
   char collide;
   int item_index;
+  int position;
   gold_gained = 75;
   last_command = SELECT_MODE;
   selected_option = -1;
@@ -67,11 +68,14 @@ void battlefield_loop(char map_id)
 //  create_terrain_item(GREEN_CRYSTAL,13,10);
 //  create_terrain_item(BLUE_CRYSTAL,6,5);
 
+  s_x_relative = (s_x/8);
+  s_y_relative = (s_y/8);
+
   disp_on();
   satb_update();
   vsync();
   turn = PLAYER;
-
+  put_number(unit_list[LANCER_UNIT].pow,3,0,0);
   while(exit_battlefield)
   {
     if(turn == CPU)
@@ -80,10 +84,11 @@ void battlefield_loop(char map_id)
     }
     else
     {
-      display_terrain_bonus(graph_from_x_y(sx,sy));
-      id = battle_grid[graph_from_x_y(sx,sy)];
-      display_position(14,1);
-      display_id(id-1,0,0);
+      position = graph_from_x_y(sx,sy);
+      display_terrain_bonus(position);
+      id = battle_grid[position];
+      // display_position(14,1);
+      display_id(id-1,13,1);
       swap_water_tiles();
       if(selector_mode != ARMY_MODE){ cycle_terrain_items(); }
       ctrls();
@@ -293,8 +298,8 @@ void load_ents()
     else
     {
           add_npc(entities[i].pos%16,entities[i].pos/16,
-            enemy_commanders[entities[i].id].sprite_type,
-            UNIT_PALS[enemy_commanders[entities[i].id].sprite_type]+(entities[i].team-1));
+            party_commanders[entities[i].id].sprite_type,
+            UNIT_PALS[party_commanders[entities[i].id].sprite_type]+(entities[i].team-1));
     }
   }
 }
@@ -380,8 +385,8 @@ void display_terrain_bonus(int id)
   char t_type;
   t_type = terrain_type(battlefieldbat[map_offset+id]);
   put_terrain_icon(t_type,1,1);
-  put_terrain_def_stat(t_type,3,1);
-  put_terrain_atk_stat(t_type,3,2);
+  put_terrain_bonus(t_type,3,1);
+  // put_terrain_atk_stat(t_type,3,2);
 }
 
 void load_sprites_() //load default sprites
@@ -880,7 +885,16 @@ void display_id(char id, int x, int y)
 {
   if(id >= 0)
   {
-    put_number(entities[id].id,3,6,1);
+    // put_number(entities[id].id,3,6,1);
+    put_char('P',x,y);
+    put_number(calculate_power(entities[id].id),3,x+1,y);
+    put_char('M',x,y+1);
+    put_number(0,3,x+1,y+1);
+  }
+  else
+  {
+    put_string("    ",x,y);
+    put_string("    ",x,y+1);
   }
 }
 
