@@ -6,7 +6,7 @@
 #define MAX_NPCS 20
 #define NO_OF_BASIC_TYPE 29
 #define MAX_UNIT_TYPES (NO_OF_BASIC_TYPE + TOTAL_COMMANDERS)
-#define UNIT_VRAM_START 0x5200
+#define UNIT_VRAM_START 0x3600//0x5200
 
 struct npc{
   unsigned char pos_x, pos_y, type, active, frame, pal;
@@ -17,7 +17,7 @@ const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
                                         19,19,21,22,23,
                                         24,25,26,25,26,
-                                        25,19,19};
+                                        25,19,19,17,17,24,24};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -37,8 +37,8 @@ void init_npcs()
   load_palette(18,magepal,2);
   load_palette(20,dmnpal,2);
   load_palette(21,blobpal,2);
-  load_palette(23,axebtlpal,2);
-  load_palette(25,npc_pal,2);
+  load_palette(23,axebtlpal,1);
+  load_palette(24,bndpal,2);
   load_palette(31,dark,1);
 }
 
@@ -139,22 +139,27 @@ void add_npc(char x, char y, char type, char pal)
           break;
 
           case BLOB_UNIT:
-            load_vram(npc_vram[type],blob,0x100);
-            break;
+          load_vram(npc_vram[type],blob,0x100);
+          break;
 
           case AXE_UNIT:
-            load_vram(npc_vram[type],bnd,0x100);
-            break;
+          load_vram(npc_vram[type],bnd,0x100);
+          break;
 
           case CLERIC_UNIT:
-            load_vram(npc_vram[type],mag,0x100);
-            break;
+          load_vram(npc_vram[type],mag,0x100);
+          break;
 
           case MAGE_UNIT:
-            load_vram(npc_vram[type],mag,0x100);
-            break;
+          load_vram(npc_vram[type],mag,0x100);
+          break;
+
+          case RAIDER_UNIT:
+          load_vram(npc_vram[type],bnd,0x100);
+          break;
 
           default:
+          load_vram(npc_vram[type],sld,0x100);
           put_string("error default",5,5);
 //          put_number(type,3,13,9);
 //          wait_for_I_input();

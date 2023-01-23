@@ -22,7 +22,7 @@
 #define WMAGE 18
 #define CLERIC 19
 #define WITCH 20
-#define RAIDER 21
+#define RAIDER_UNIT 21
 #define PIRATE 22
 #define CAPTAIN 23
 #define FIGHTER 24

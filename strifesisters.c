@@ -8,6 +8,8 @@ char screen_dimensions = 0;
 #include "terrain.c"
 #include "commander.c"
 #include "map.c"
+#include "effects.c"
+#include "arts.c"
 
 #define SELECTOR 0
 #define CURSOR 1
@@ -74,13 +76,8 @@ char screen_dimensions = 0;
 #define OVERWORLD_MAP_HEIGHT 32
 #define NO_OF_CASTLES 16
 
-#define MAX_ARMY_SIZE 9
 #define MAX_COMMANDERS 3
 #define MAX_MOVE_RANGE 5
-
-#incspr(vert_pointer, "map/sprites/pointer_ud.pcx");
-#incspr(horz_pointer, "map/sprites/pointer_lr.pcx");
-#incpal(pointerpal, "map/sprites/pointer_ud.pcx");
 
 #incspr(selector,"map/sprites/selector.pcx");
 #incpal(selectorpal,"map/sprites/selector.pcx");
@@ -215,6 +212,7 @@ enum Direction{
 #incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
 #incpal(blobpal,"map/sprites/blob.pcx",0,2)
 #incpal(magepal,"map/sprites/mage.pcx",0,2)
+#incpal(bndpal,"characters/bandit.pcx",0,2)
 // #incpal(blobpal,"map/sprites/froggy.pcx",0,2)
 
 const char area_one_buyable_items[] = {
@@ -275,6 +273,7 @@ void main()
 
 	initialize_units();
 	initialize_commanders();
+  init_arts();
 //	initialize_items();
 
   add_commander_to_party(name0,REI);
@@ -290,6 +289,9 @@ void main()
   party_commanders[0].bg.units[4].hp = unit_list[CLERIC_UNIT].hp;
   party_commanders[0].bg.units[2].unit = &unit_list[SWORD_UNIT];
 	party_commanders[0].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
+  // party_commanders[0].bg.art = LIGHTENING_ART;
+  party_commanders[0].bg.art = POWER_WAVE_ART;
+  party_commanders[0].meter = 100;
 
   party_commanders[0].bg.units[3].unit = &unit_list[LANCER_UNIT];
 	party_commanders[0].bg.units[3].hp = unit_list[LANCER_UNIT].hp;
@@ -311,7 +313,7 @@ void main()
 	disp_off();
 	init_satb();
 
-  	load_vram(0x4DB0,cursor,0x10);
+  load_vram(0x4DB0,cursor,0x10);
 	// load_vram(0x68C0+0x40,vert_pointer,0x100);
 
 	while(game_loop)
@@ -332,7 +334,7 @@ void display_intro()
 	// load_background(build_screen,build_pal,build_bat,32,28);
 	cls();
 	disp_on();
-	put_string("Strife Sisters v0.6.5",6,13);
+	put_string("Strife Sisters v0.7.1",6,13);
 	// wait_for_I_input();
 	// sync(60*10);
 
@@ -411,6 +413,10 @@ void print_unit_type(char id, int x, int y)
 
 		case AXE_UNIT:
       put_string("AXE",x,y);
+      break;
+
+    case RAIDER_UNIT:
+      put_string("RAD",x,y);
       break;
 
     case KNIGHT_UNIT:
@@ -494,6 +500,9 @@ void print_unit_fullname(char unit_id, int x, int y)
       put_string("Berserkr",x,y);
       break;
 
+    case RAIDER_UNIT:
+      put_string("Raider  ",x,y);
+
     default:
       put_string("errorbig",x,y);
       break;
@@ -555,6 +564,12 @@ void draw_32x32_sprite(char type, int x, int y)
     case LANCER_UNIT:
       load_palette(30,spearpal,1);
       load_vram(0x6E00,lancerbtl,0x100);
+      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      break;
+
+    case RAIDER_UNIT:
+      load_palette(30,raiderbtlpal,1);
+      load_vram(0x6E00,raiderbtl,0x100);
       spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
@@ -758,21 +773,32 @@ initialize_commanders()
 		{
 			cmdr->bg.units[j].unit = &unit_list[NO_UNIT];
       		cmdr->bg.units[j].hp = 0;
-    	}
-		cmdr->bg.arts[0] = 0;
-		cmdr->bg.arts[1] = 0;
-		cmdr->bg.arts[2] = 0;
+    }
+		cmdr->bg.art = NO_ART;
 	}
 }
 
 void darken_palette(int pal_num)
 {
-	modify_palette(pal_num,-1);
+	modify_palette(pal_num,-2);
 }
 
 void lighten_palette(int pal_num)
 {
 	modify_palette(pal_num,2);
+}
+
+void fade_screen()
+{
+  char i, j;
+
+  for(j=0; j<3; j++)
+  {
+    for(i=0; i<32; i++)
+    {
+      darken_palette(i);
+    }
+  }
 }
 
 void modify_palette(int pal_num, char modifier)
@@ -1259,7 +1285,6 @@ char get_item_real_index(char item_index, char item_type)
 
 void load_commanders_gfx(int cmdr_id, int address, int pal)
 {
-	// put_number(cmdr_id,3,10,5+(g++));
 	switch(cmdr_id)
 	{
 		case REI:
@@ -1350,9 +1375,9 @@ void load_predefined_group_layout(char layout_type, char cmdr_id)
       break;
 
     case 25:
-      enemy_commanders[cmdr_id].sprite_type = AXE_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,AXE_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,AXE_UNIT);
+      enemy_commanders[cmdr_id].sprite_type = RAIDER_UNIT;
+      load_unit_to_cmdr(cmdr_id,0,RAIDER_UNIT);
+      load_unit_to_cmdr(cmdr_id,2,RAIDER_UNIT);
       break;
   }
 }

@@ -19,6 +19,8 @@
 #incspr(monkbtl, "map/sprites/monkbtl.pcx")
 #incpal(monkbtlpal, "map/sprites/monkbtl.pcx",0,2)
 #incspr(lancerbtl, "map/sprites/lancerbattle.pcx")
+#incspr(raiderbtl,"characters/banditbattle.pcx")
+#incspr(raiderbtlpal,"characters/banditbattle.pcx",0,2)
 
 #incchr(portraitgfx, "map/sprites/portrait.pcx", 0, 0, 4, 4)
 #incchr(portraitm, "map/sprites/portraitm.pcx", 0, 0, 4, 4)
@@ -28,13 +30,13 @@
 #define MAX_UNIT_COUNT 29
 
 //attack types
-#define NORMAL 0
-#define PIERCE 1
-#define AXE 2
-#define MISSILE 3
-#define MAGIC 4
-#define UNARMED 5
-#define NONE 6
+#define NORMAL  0b00000001 //sword
+#define PIERCE  0b00000010 //spear
+#define AXE     0b00000100 //axe
+#define MISSILE 0b00001000 //bow
+#define MAGIC   0b00010000 //magic
+#define UNARMED 0b00100000 //bare
+#define NONE    0b01000000
 
 //advantage types
 #define NO_ADV 0
@@ -76,6 +78,136 @@ Unit unit_list[MAX_UNIT_COUNT];
 unsigned char unit_entity_count = 0;
 char unlocked_units[MAX_UNIT_COUNT];
 char buyable_unit_count = 0;
+
+//0 = no advantage, 1 = advantage
+unsigned char check_advantage(unsigned char unit_1, unsigned char unit_2)
+{
+  return get_weapon_adv(unit_1) & unit_2;
+}
+
+char get_weapon_adv(unsigned char weapon_type)
+{
+    // return 0;
+  switch(weapon_type)
+  {
+    case NORMAL:
+    return MISSILE;
+
+    case MISSILE:
+    return PIERCE;
+
+    case AXE:
+    return MAGIC;
+
+    case PIERCE:
+    return UNARMED;
+
+    case MAGIC:
+    return NORMAL;
+
+    case UNARMED:
+    return AXE;
+  }
+  return NONE;
+}
+
+void print_unit_info(Unit_Entity *ue, char x, char y)
+{
+  int hp;
+  if(!ue->hp)
+  {
+    put_string("   ",x,y);
+    put_string("   ",x,y+1);
+    put_string("   ",x,y+2);
+    return;
+  }
+  hp = ue->hp * 100;
+//  print_unit_attack_icon(ue->unit->id,x+1,y);
+  print_unit_type(ue->unit->id,x,y);
+//  put_char('M',x,y+1);
+//  put_number(ue->unit->meter,2,x+1,y+1);
+  put_char('%',x,y+2);
+  put_number(hp/ue->unit->hp,2,x+1,y+2);
+}
+
+void print_unit_stats(char unit_id, char x, char y)
+{
+  put_string("HP ",x,y);
+  put_number(unit_list[unit_id].hp,2,x+3,y);
+
+  put_string("ATK ",x,y+1);
+  put_number(unit_list[unit_id].atk,2,x+4,y+1);
+
+  put_string("DEF ",x,y+2);
+  put_number(unit_list[unit_id].def,2,x+4,y+2);
+
+  put_string("SPD ",x,y+3);
+  put_number(unit_list[unit_id].spd,2,x+4,y+3);
+
+  put_string("PTS ",x, y+4);
+  put_number(unit_list[unit_id].points,2,x+4,y+4);
+
+  put_string("Type ",x, y+5);
+  print_unit_attack_icon(unit_list[unit_id].id,x+5,y+5);
+}
+
+void print_attack_type(char unit_id, char row, char x, char y)
+{
+  set_font_pal(8);
+  switch(unit_list[unit_id].attacks[row])
+  {
+    case SINGLE_HIT:
+      put_char('[',x,y);
+      put_string("Melee  ",x+1,y);
+      break;
+
+    case HEAL:
+      put_char('[',x,y);
+      put_string("Heal  ",x+1,y);
+      break;
+
+    case MULTI_ROW:
+      put_char('\\',x,y);
+      put_string("Melee  ",x+1,y);
+      break;
+
+    case NO_ATTACK:
+      put_char('_',x,y);
+      put_string("None  ",x+1,y);
+      break;
+
+    default:
+      put_char('`',x,y);
+      put_string("All   ",x+1,y);
+      break;
+  }
+  set_font_pal(10);
+}
+
+void print_unit_advantage_position(char unit_id, char x, char y)
+{
+  set_font_pal(8);
+  switch(unit_list[unit_id].bonus_col)
+  {
+    case 0:
+      put_string("Front ",x,y);
+      break;
+
+    case 1:
+      put_string("Middle",x,y);
+      break;
+
+    case 2:
+      put_string("Rear  ",x,y);
+      break;
+  }
+  set_font_pal(10);
+}
+
+void unlock_unit(char unit_id)
+{
+  unlocked_units[unit_id] = 1;
+}
 
 void initialize_units()
 {
@@ -234,6 +366,16 @@ void initialize_units()
   unit_list[MONK_UNIT].id = MONK_UNIT;
   unit_list[MONK_UNIT].a_type = UNARMED;
 
+  unit_list[MONK_UNIT].hp  = 60;
+  unit_list[MONK_UNIT].atk = 23;
+  unit_list[MONK_UNIT].def = 15;
+  unit_list[MONK_UNIT].rng = 1;
+  unit_list[MONK_UNIT].mov = 3;
+  unit_list[MONK_UNIT].bonus_col = 0;
+  unit_list[MONK_UNIT].ign = 1;
+  unit_list[MONK_UNIT].id = MONK_UNIT;
+  unit_list[MONK_UNIT].a_type = UNARMED;
+
   for(i=0; i<MAX_UNIT_COUNT; i++)
   {
     unit_list[i].pow = 0;
@@ -243,110 +385,4 @@ void initialize_units()
     unit_list[i].pow /= 7;
     unit_list[i].pow += unit_list[i].rng * 2;
   }
-
-//  unlocked_units[DEMON_UNIT] = 1;
-}
-
-//0 = no advantage, 1 = advantage, 2 = disavantage
-char check_advantage(char a_type, char d_type)
-{
-  return 0;
-}
-
-void print_unit_info(Unit_Entity *ue, char x, char y)
-{
-  int hp;
-  if(!ue->hp)
-  {
-    put_string("   ",x,y);
-    put_string("   ",x,y+1);
-    put_string("   ",x,y+2);
-    return;
-  }
-  hp = ue->hp * 100;
-//  print_unit_attack_icon(ue->unit->id,x+1,y);
-  print_unit_type(ue->unit->id,x,y);
-//  put_char('M',x,y+1);
-//  put_number(ue->unit->meter,2,x+1,y+1);
-  put_char('%',x,y+2);
-  put_number(hp/ue->unit->hp,2,x+1,y+2);
-}
-
-void print_unit_stats(char unit_id, char x, char y)
-{
-  put_string("HP ",x,y);
-  put_number(unit_list[unit_id].hp,2,x+3,y);
-
-  put_string("ATK ",x,y+1);
-  put_number(unit_list[unit_id].atk,2,x+4,y+1);
-
-  put_string("DEF ",x,y+2);
-  put_number(unit_list[unit_id].def,2,x+4,y+2);
-
-  put_string("SPD ",x,y+3);
-  put_number(unit_list[unit_id].spd,2,x+4,y+3);
-
-  put_string("PTS ",x, y+4);
-  put_number(unit_list[unit_id].points,2,x+4,y+4);
-
-  put_string("Type ",x, y+5);
-  print_unit_attack_icon(unit_list[unit_id].id,x+5,y+5);
-}
-
-void print_attack_type(char unit_id, char row, char x, char y)
-{
-  set_font_pal(8);
-  switch(unit_list[unit_id].attacks[row])
-  {
-    case SINGLE_HIT:
-      put_char('[',x,y);
-      put_string("Melee  ",x+1,y);
-      break;
-
-    case HEAL:
-      put_char('[',x,y);
-      put_string("Heal  ",x+1,y);
-      break;
-
-    case MULTI_ROW:
-      put_char('\\',x,y);
-      put_string("Melee  ",x+1,y);
-      break;
-
-    case NO_ATTACK:
-      put_char('_',x,y);
-      put_string("None  ",x+1,y);
-      break;
-
-    default:
-      put_char('`',x,y);
-      put_string("All   ",x+1,y);
-      break;
-  }
-  set_font_pal(10);
-}
-
-void print_unit_advantage_position(char unit_id, char x, char y)
-{
-  set_font_pal(8);
-  switch(unit_list[unit_id].bonus_col)
-  {
-    case 0:
-      put_string("Front ",x,y);
-      break;
-
-    case 1:
-      put_string("Middle",x,y);
-      break;
-
-    case 2:
-      put_string("Rear  ",x,y);
-      break;
-  }
-  set_font_pal(10);
-}
-
-void unlock_unit(char unit_id)
-{
-  unlocked_units[unit_id] = 1;
 }

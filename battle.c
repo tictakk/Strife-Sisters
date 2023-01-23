@@ -1,22 +1,16 @@
-#incchr(grass, "map/backgrounds/grass.pcx")
-#incpal(grasspal, "map/backgrounds/grass.pcx")
-
+#include "battle.h"
 #incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
 #inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
 #inctile(battletiles,"tiles/battletiles.tiles.pcx")
 #incpal(battlepal,"tiles/battletiles.tiles.pcx")
 
-#include "effects.c"
-#include "arts.c"
-#include "battle.h"
-
-int attack_turns;
-int attacks;
 char ticker = 0;
 char team_one_kills = 0;
 char team_two_kills = 0;
 char rel_y_tmp = 0;
 char rel_x_tmp = 0;
+char battle_art = 0;
+char art_target = 0;
 
 char atker, trgt;
 
@@ -24,8 +18,6 @@ char atker, trgt;
 #define COMMANDER_TWO_VRAM 0x3200
 #define PLAYER_SPRITE_VRAM 0x6000
 #define CPU_SPRITE_VRAM 0x5000
-
-const char batty[1024];
 
 int roundUp(int num, int div)
 {
@@ -46,12 +38,22 @@ void battle_seq()
   load_pals(atker,0);
   load_pals(trgt,9);
 
-  d_art(trgt);
+  if(battle_art)
+  {
+    d_art(art_target);
+  }
 
   battle_clock = get_highest_speed(atker);
   d_battle(atker);
   battle_clock = get_highest_speed(trgt);
   d_battle(trgt);
+  end_sequence();
+}
+
+void end_sequence()
+{
+  update_info_bar();
+  fade_screen();
 }
 
 void d_battle(char team)
@@ -86,24 +88,26 @@ void d_art(char team)
   char i = 0, j = 0;
   char count = 0;
   animating = 0;
+  battle_clock = -1;
 
   for(i=0; i<18; i++)
   {
     if(battleunits[i].active && battleunits[i].ent_id == team)
     {
       spr_set(i+5);
-      // create_lightening(spr_get_x(),spr_get_y());
-      load_art(LIGHTENING_ART,spr_get_x(),spr_get_y());
-      // set_unit_stunned(i);
-      // transfer_units_to_stun_vram(battleunits[i].unit->unit->id,count++);
+      load_art(battle_art,spr_get_x(),spr_get_y());
       for(j=0; j<11; j++)
       {
-        battle_unit_state(i);
-        animate_effect(0);
+        // battle_unit_state(i);
+        animate_effect(battle_art);
         vsync(4);
         satb_update();
       }
-      remove_art(LIGHTENING_ART);
+      remove_art(battle_art);
+      if(arts[battle_art].modify == MOD_HP)
+      {
+        complete_art_damage(battle_art,i);
+      }
       spr_set(i+5);
       spr_pattern(idle_vrams[i]);
       battleunits[i].state = WAITING;
@@ -112,7 +116,34 @@ void d_art(char team)
       satb_update();
     }
   }
+  if(arts[battle_art].modify != MOD_HP)
+  {
+    if(art_target == atker){complete_art_modifier(TEAM_ONE);} else {complete_art_modifier(TEAM_TWO);}
+  }
   load_battle_bg();
+}
+
+void complete_art_damage(char target)
+{
+  battleunits[target].unit->hp += arts[battle_art].modifier_amt;
+  if(battleunits[target].unit->hp <= 0)
+  {
+    kill_unit(target);
+  }
+}
+
+void complete_art_modifier(char target)
+{
+  switch(arts[battle_art].modify)
+  {
+    case MOD_ATK:
+    if(target == TEAM_ONE) {a_atk_bonus += arts[battle_art].modifier_amt;} else { t_atk_bonus += arts[battle_art].modifier_amt;}
+    break;
+
+    case MOD_DEF:
+    if(target == TEAM_ONE) {a_def_bonus += arts[battle_art].modifier_amt;} else { t_def_bonus += arts[battle_art].modifier_amt;}
+    break;
+  }
 }
 
 char get_highest_speed(char team)
@@ -167,24 +198,49 @@ void b_u_idle(char b_id)
 
 void b_u_attack(char b_id)
 {
-  // if(battleunits[b_id].frame == 0)
-  // {
-    // spr_set(b_id+5);
-    // create_effect(EFFECT_ADV,spr_x(spr_get_x(b_id+5))-32,spr_y(spr_get_y(b_id+5))-64); 
-    // create_lightening(spr_x(spr_get_x(b_id+5))-24,spr_y(spr_get_y(b_id+5))-64);
-  // }
-  if(battleunits[b_id].frame < 11)
+  if(battleunits[b_id].frame == 0) //check if unit has advantage
+  {
+    char i;
+    unsigned char adv;
+    adv = 0;
+    for(i=0; i<18; i++)
+    {
+      if(battleunits[i].active && battleunits[i].target)
+      {
+        adv = check_advantage(unit_list[battleunits[b_id].unit->unit->id].a_type,battleunits[i].unit->unit->a_type);
+        if(adv)
+        {
+          break;
+        }
+      }
+    }
+
+    if(adv)
+    {
+      spr_set(b_id+5);
+      battleunits[b_id].effect_id = create_effect(EFFECT_ADV,spr_get_x(),spr_get_y());
+    }
+  }
+  if(battleunits[b_id].frame < 11)//animating attack
   {
     animate_attack(b_id,battleunits[b_id].frame++);
+    animate_word_effect(battleunits[b_id].effect_id);
   }
-  else
+  else //finish animation, calculate damage
   {
     char i;
     for(i=0; i<18; i++)
     {
       if(battleunits[i].target)
       {
-        calc_hit_damage(b_id,i,0,0,0);
+        if(battleunits[b_id].ent_id == atker)
+        {
+          calc_hit_damage(b_id,i,a_atk_bonus,0,t_def_bonus);
+        }
+        else
+        {
+          calc_hit_damage(b_id,i,t_atk_bonus,0,a_def_bonus);
+        }
       }
     }
     spr_set(b_id+5);
@@ -193,8 +249,8 @@ void b_u_attack(char b_id)
     battleunits[b_id].frame = 0;
     battleunits[b_id].attacks--;
     animating--;
-    // remove_effect(0);
-    // remove_lightening(0);
+    remove_effect(battleunits[b_id].effect_id);
+    battleunits[b_id].effect_id = -1;
   }
 }
 
@@ -209,9 +265,12 @@ void b_u_stun(char b_id){
     spr_set(b_id+5);
     spr_pattern(stun_vrams[stun_count++]);
     battleunits[b_id].frame++;
+    battleunits[b_id].effect_id = create_hit_spark(spr_get_x(),spr_get_y());
   }
-  else if(battleunits[b_id].frame < 12 && battleunits[b_id].frame > 8)
-  {
+  else if(battleunits[b_id].frame < 12 && battleunits[b_id].frame > 6)
+  {    
+    
+    animate_hit_spark(battleunits[b_id].effect_id);
     spr_set(b_id+5);
     
     if(battleunits[b_id].frame % 2)
@@ -239,6 +298,8 @@ void b_u_stun(char b_id){
       // hide_healthbar(b_id);
     }
     animating--;
+    remove_effect(battleunits[b_id].effect_id);
+    battleunits[b_id].effect_id = -1;
   }
   else
   {
@@ -258,13 +319,33 @@ void b_u_wait(char b_id)
 
 void b_u_heal(char b_id)
 {
+  if(battleunits[b_id].frame == 0)
+  {
+    char j;
+    for(j=0; j<18; j++)
+    {
+      if(battleunits[j].target)
+      {
+        spr_set(j+5);
+        battleunits[j].effect_id = create_healing(spr_get_x()+8,spr_get_y()+16);
+      }
+    }
+  }
   if(battleunits[b_id].frame < 11)
   {
+    char j;
     animate_attack(b_id,battleunits[b_id].frame++);
+    for(j=0; j<18; j++)
+    {
+      if(battleunits[j].active)
+      {
+        animate_healing(battleunits[j].effect_id);
+      }
+    }
   }
   else
   {
-    char i;
+    char i, j;
     for(i=0; i<18; i++)
     {
       if(battleunits[i].target)
@@ -278,6 +359,15 @@ void b_u_heal(char b_id)
     battleunits[b_id].frame = 0;
     battleunits[b_id].attacks--;
     animating--;
+    //This may cause an issue when there may be a time when heal is done at the same time as another
+    //effect. This erases all effects.
+    for(j=0; j<18; j++)
+    {
+      if(battleunits[j].active)
+      {
+        remove_effect(battleunits[j].effect_id);
+      }
+    }
   }
 }
 
@@ -325,17 +415,28 @@ void calc_heal(char attacker_id, char target_id, char a_a_bonus, char t_a_bonus,
 
 void calc_hit_damage(char attacker_id, char target_id, char a_a_bonus, char t_a_bonus, char t_d_bonus)
 {
-	//TODO: cleanup pls
-	int t_hp, t_atk, t_def,
+	int t_hp, t_def,
 			a_atk, fifth, dmg;
 
+  unsigned char adv;
+
+  adv = check_advantage(battleunits[attacker_id].unit->unit->a_type,battleunits[target_id].unit->unit->a_type);
+
 	t_hp  = entities[battleunits[target_id].ent_id].bg->units[battleunits[target_id].pos].hp;
-	t_atk = entities[battleunits[target_id].ent_id].bg->units[battleunits[target_id].pos].unit->atk + t_a_bonus;
 	t_def = entities[battleunits[target_id].ent_id].bg->units[battleunits[target_id].pos].unit->def + t_d_bonus;
 
 	a_atk = entities[battleunits[attacker_id].ent_id].bg->units[battleunits[attacker_id].pos].unit->atk + a_a_bonus;
 
 	dmg = max((a_atk - t_def),0);
+  // put_number(dmg,3,0,0);
+  if(adv)
+  {
+    dmg *= 2;
+    party_commanders[entities[battleunits[attacker_id].ent_id].id].meter += 5;
+    party_commanders[entities[battleunits[attacker_id].ent_id].id].meter = 
+    min(party_commanders[entities[battleunits[attacker_id].ent_id].id].max_meter,
+        party_commanders[entities[battleunits[attacker_id].ent_id].id].max_meter);
+  }
 
 	if(dmg)
 	{
@@ -361,19 +462,21 @@ void load_animations_to_vram(char attacker)
 /*
 	BATTLE ROUTINE
 */
-char battle_loop(int i1, int i2, char range, char a_t, char t_t)
+char battle_loop(int i1, int i2, char range, char a_t, char t_t, char art, char a_target)
 {
 	attack_range = range;
 	xOffset = -36;
 	atker = i1, trgt = i2;
   speed_divider = 10;
+  battle_art = art;
+  art_target = a_target;
 
-  a_terrain = terrain_effect_by_type(terrain_type(a_t));
-	t_terrain = terrain_effect_by_type(terrain_type(t_t));
-	a_atk_bonus = terrain_atk_bonus(a_terrain);
-	a_def_bonus = terrain_def_bonus(a_terrain);
-	t_atk_bonus = terrain_atk_bonus(t_terrain);
-	t_def_bonus = terrain_def_bonus(t_terrain);
+  // a_terrain = terrain_effect_by_type(terrain_type(a_t));
+	t_terrain = terrain_def_bonus(t_t);//terrain_effect_by_type(terrain_type(t_t));
+	a_atk_bonus = 0;//terrain_atk_bonus(a_terrain);
+	a_def_bonus = 0;//terrain_def_bonus(a_terrain);
+	t_atk_bonus = 0;//terrain_atk_bonus(t_terrain);
+	t_def_bonus = 0;//terrain_def_bonus(t_terrain);
   screen_dimensions = 32;
   rel_y_tmp = s_x_relative;
   rel_x_tmp = s_y_relative;
@@ -429,8 +532,6 @@ void set_portrait(char index, char entity_id)
 
 void set_infobar()
 {
-  // display_window(0,0,32,6);
-  // display_window(12,0,8,6);
   display_window(0,0,16,6);
   display_window(16,0,16,6);
   set_portrait(0,atker);
@@ -442,15 +543,24 @@ void set_infobar()
   put_number(1,2,7,1);
   put_string("Pow",5,3);
   put_number(136,3,5,4);
+  put_number(calculate_power(entities[atker].id),3,5,4);
   put_string("Meter",9,3);
-  put_number(100,3,10,4);
+  put_number(party_commanders[entities[atker].id].meter,3,10,4);
 
   put_string("Lv",23,1);
   put_number(3,2,25,1);
   put_string("Pow",24,3);
-  put_number(74,3,24,4);
+  put_number(calculate_power(entities[trgt].id),3,24,4);
   put_string("Meter",18,3);
-  put_number(100,3,19,4);
+  put_number(party_commanders[entities[trgt].id].meter,3,19,4);
+}
+
+void update_info_bar()
+{
+  put_number(calculate_power(entities[atker].id),3,5,4);
+  put_number(party_commanders[entities[atker].id].meter,3,10,4);
+  put_number(calculate_power(entities[trgt].id),3,24,4);
+  put_number(party_commanders[entities[trgt].id].meter,3,19,4);
 }
 
 void init_armies(int player, int cpu)
@@ -545,6 +655,10 @@ void load_pals(char entity_id, int off)
           load_palette(battleunits[i+off].pal,axebtlpal,1);
           break;
 
+        case RAIDER_UNIT:
+          load_palette(battleunits[i+off].pal,raiderbtlpal,1);
+          break;
+
         case MAGE_UNIT:
           load_palette(battleunits[i+off].pal,magebtlpal,1);
           break;
@@ -598,10 +712,9 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
     battleunits[i].state = 0;
     battleunits[i].target_team = 0;
     battleunits[i].pos = 0;
-    battleunits[i].type = 0;
+    battleunits[i].effect_id = -1;
     battleunits[i].attacks = 0;
     battleunits[i].target = 0;
-
   }
 
   s_y_relative = rel_y_tmp;

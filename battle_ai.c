@@ -419,7 +419,7 @@ void do_attack(char ai_id)
   set_cursor_pos(entities[ai_entities[ai_id].target].pos);
   satb_update();
   sync(30);
-  result = attack_unit(entities[ai_entities[ai_id].target].pos,entities[ai_entities[ai_id].entity_id].pos);
+  result = attack_unit(entities[ai_entities[ai_id].target].pos,entities[ai_entities[ai_id].entity_id].pos,0);
   if(result == 1)
   {
     init_ai();

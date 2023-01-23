@@ -7,7 +7,7 @@
 #define ATTACK_MODE 4
 #define ARMY_MODE 5
 #define OBSERVE_MODE 6
-#define DIALOG_MODE 7
+#define ATTACK_WITH_ART 7
 #define EXPLORE_MODE 8
 #define EXPLORE_MENU_MODE 9
 #define ACTION_MODE 10
@@ -223,11 +223,11 @@ void hide_cursor()
   remove_cursor();
 }
 
-void hide_selector()
-{
-  spr_set(SELECTOR);
-  spr_hide();
-}
+// void hide_selector()
+// {
+//   spr_set(SELECTOR);
+//   spr_hide();
+// }
 
 char check_action_cost(char required_cost){ return 1; }
 
@@ -329,7 +329,7 @@ int calc_move_cost(int origin, int dest)
   return (char)(abs(o_x - d_x) + abs(o_y - d_y)) * 2;
 }
 
-char attack_unit(int src, int dst)
+char attack_unit(int src, int dst, char art)
 {
   char result;
   int attacker, target, range;//, result;
@@ -346,7 +346,7 @@ char attack_unit(int src, int dst)
     cursor_x = -32;
     cursor_y = -32;
     selector_mode = SELECT_MODE;
-    result = begin_battle(attacker,target,range,battlefieldbat[map_offset+dst],battlefieldbat[map_offset+src]);
+    result = begin_battle(attacker,target,range,battlefieldbat[map_offset+dst],battlefieldbat[map_offset+src],art);
   }
   else
   {
@@ -465,11 +465,9 @@ void set_menu_mask(char entity_id)
   char item_index;
 
   menu_mask = 0x28;
-  if((item_index = item_at_position(entities[entity_id].pos)) != -1)
+  if(arts[entities[entity_id].bg->art].cost <= party_commanders[entities[entity_id].id].meter && entities[entity_id].bg->art)
   {
-    put_hex(menu_mask,3,6,1);
     menu_mask |= 0x10;
-    put_hex(menu_mask,3,6,2);
   }
   if(entities[entity_id].actionable)
   {

@@ -75,7 +75,6 @@ void battlefield_loop(char map_id)
   satb_update();
   vsync();
   turn = PLAYER;
-  put_number(unit_list[LANCER_UNIT].pow,3,0,0);
   while(exit_battlefield)
   {
     if(turn == CPU)
@@ -395,6 +394,7 @@ void load_sprites_() //load default sprites
   load_palette(13,redpal,1);
 
   load_vram(0x68C0,selector,0x40);
+  load_palette(17,selectorpal,1);
 //  load_vram(0x6900,cursor,0x40);
 
   display_sprites_();
@@ -402,7 +402,7 @@ void load_sprites_() //load default sprites
 
 void display_sprites_() //info sprites
 {
-  spr_make(0,sx,sy,0x68C0,0,NO_FLIP|SZ_16x16,29,1);
+  spr_make(0,sx,sy,0x68C0,0,NO_FLIP|SZ_16x16,17,1);
 //  spr_make(1,cursor_x,cursor_y,0x6900,FLIP_MAS|SIZE_MAS,NO_FLIP|SZ_16x16,29,1);
 }
 
@@ -490,7 +490,7 @@ void ctrls()
 
   if(j & JOY_UP)
   {
-    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE)
+    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE || selector_mode == ATTACK_WITH_ART)
     {
       selector_up();
     }
@@ -502,7 +502,7 @@ void ctrls()
 
   if(j & JOY_DOWN)
   {
-    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE)
+    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE || selector_mode == ATTACK_WITH_ART)
     {
       selector_down();
     }
@@ -514,7 +514,7 @@ void ctrls()
 
   if(j & JOY_RIGHT)
   {
-    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE)
+    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE || selector_mode == ATTACK_WITH_ART)
     {
       selector_right();
     }
@@ -526,7 +526,7 @@ void ctrls()
 
   if(j & JOY_LEFT)
   {
-    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE)
+    if(selector_mode == SELECT_MODE || selector_mode == PLACE_MODE || selector_mode == ATTACK_MODE || selector_mode == ATTACK_WITH_ART)
     {
       selector_left();
     }
@@ -576,7 +576,14 @@ void ctrls()
     {
       if(battle_grid[abs] != 0 && valid_map_square(abs))
       {
-        attack_unit(abs,unit_selected);
+        attack_unit(abs,unit_selected,0);
+      }
+    }
+    else if(selector_mode == ATTACK_WITH_ART)
+    {
+      if(battle_grid[abs] != 0 && valid_map_square(abs))
+      {
+        attack_unit(abs,unit_selected,entities[battle_grid[unit_selected]-1].bg->art);
       }
     }
     else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
@@ -603,51 +610,50 @@ void ctrls()
         break;
 
         case MENU_END:
-          if(menu_mask & 0x4)
-          {
-            end_unit_turn(battle_grid[unit_selected]-1);
-//            selector_mode = SELECT_MODE;
-//            menu_option = MENU_ATTACK;
-//            entities[battle_grid[unit_selected]-1].actionable = 0;
-//            menu_mask = 0x00;
-//            print_menu();
-//            hide_cursor();
-          }
-          break;
+        if(menu_mask & 0x4)
+        {
+          end_unit_turn(battle_grid[unit_selected]-1);
+        }
+        break;
 
         case MENU_TURN:
-          selector_mode = SELECT_MODE;
-          menu_option = MENU_ATTACK;
-          last_pos = 0;
-          hide_cursor();
-          start_turn(CPU);
-          menu_mask = 0x00;
-          print_menu();
-          hide_cursor();
-          break;
+        selector_mode = SELECT_MODE;
+        menu_option = MENU_ATTACK;
+        last_pos = 0;
+        hide_cursor();
+        start_turn(CPU);
+        menu_mask = 0x00;
+        print_menu();
+        hide_cursor();
+        break;
 
         case MENU_GRP:
-          remove_cursor();
-          scroll(0,0,s_y+32,32,224,0x80);
-          display_abs_info_panel(8+(s_x),32+(s_y/2),14,14);
-          cursor_x = 9;
-          cursor_y = 10 + (s_y/8);
-          display_cursor();
-          selector_mode = ARMY_MODE;
-          menu_option = 0;
-          menu_rows = 3;
-          menu_columns = 3;
-          menu_vert_size = 4;
-          list_commander_army(entities[id-1].bg,10,9);
-          break;
+        remove_cursor();
+        scroll(0,0,s_y+32,32,224,0x80);
+        display_abs_info_panel(8+(s_x),32+(s_y/2),14,14);
+        cursor_x = 9;
+        cursor_y = 10 + (s_y/8);
+        display_cursor();
+        selector_mode = ARMY_MODE;
+        menu_option = 0;
+        menu_rows = 3;
+        menu_columns = 3;
+        menu_vert_size = 4;
+        list_commander_army(entities[id-1].bg,10,9);
+        break;
 
         case MENU_TAKE:
-          if(menu_mask & 0x10)
-          {
-            pickup_item(battle_grid[unit_selected]-1);
-            end_unit_turn(battle_grid[unit_selected]-1);
-          }
-          break;
+        // menu_option = ATTACK_WITH_ART;
+        if(menu_mask & 0x10)
+        {
+          selector_mode = ATTACK_WITH_ART;
+          hide_menu();
+          draw_selector();
+          highlight(unit_selected,0xD000,get_army_max_range(battle_grid[unit_selected]-1),0);
+          // pickup_item(battle_grid[unit_selected]-1);
+          // end_unit_turn(battle_grid[unit_selected]-1);
+        }
+        break;
       }
     }
     else if(selector_mode == ARMY_MODE)
@@ -799,8 +805,6 @@ void display_menu(int x, int y)
 
   print_menu();
   display_cursor();
-//  spr_make(CURSOR,cursor_x,cursor_y,0x6900,FLIP_MAS|SIZE_MAS,NO_FLIP|SZ_16x16,20,1);
-//  spr_show(CURSOR);
   scroll(1,0,0,0,32,0x80);
 }
 
@@ -946,14 +950,22 @@ void display_type(char id, int x, int y)
   // print_unit_type(entities[id].unit->id,x,y);
 }
 
-char begin_battle(int attacker, int target, char range, char a_terrain, char t_terrain)
+char begin_battle(int attacker, int target, char range, char a_terrain, char t_terrain, char art)
 {
   int i, battle_result, resolution;
 
   reset_satb();
   vsync();
 
-  resolution = battle_loop(attacker,target,range,a_terrain,t_terrain);
+  if(arts[art].target)//if targeting enemy
+  {
+    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,arts[art].effect,target);
+  }
+  else
+  {
+    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,arts[art].effect,attacker);
+  }
+    // resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,LIGHTENING_ART,target);
 
   if(resolution == 0)//attacking team kills army
   {

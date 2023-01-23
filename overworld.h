@@ -184,7 +184,9 @@ void display_battle_group_window(char cmdr_id, char x, char y)
   menu_cols = 2;
 
   remove_cursor();
+
   load_vram(0x68C0,selector,0x40);
+  load_palette(28,selectorpal,1);
 
   display_window(x,y,22,14);
   update_battle_group_window(cmdr_id,x,y);
@@ -212,7 +214,7 @@ void update_battle_group_window(char cmdr_id, char x, char y)
     }
   }
 
-  spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,6,1);
+  spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
 
   put_string("Points",l_x+12,l_y+1);
   put_number(pts,2,l_x+13,l_y+2);
@@ -225,11 +227,8 @@ void update_battle_group_window(char cmdr_id, char x, char y)
   put_string("Ensign",l_x+12,l_y+5);
   put_string("---",l_x+14,l_y+6);
 
-  put_string("Arts",l_x+12,l_y+7);
+  put_string("Art",l_x+12,l_y+7);
   put_string("---",l_x+14,l_y+8);
-  put_string("---",l_x+14,l_y+9);
-  put_string("---",l_x+14,l_y+10);
-
   put_green_square(2,17);
   put_green_square(8,17);
   put_green_square(5,20);
@@ -255,7 +254,7 @@ void display_party_options_window(char x, char y)
   load_cursor(x+1,y+2,SLIDER_ONE);
   put_string("Assign",s_x_relative+x+2,s_y_relative+y+2);
   put_string("Organize",s_x_relative+x+2,s_y_relative+y+3);
-  put_string("Arts",s_x_relative+x+2,s_y_relative+y+4);
+  put_string("Art",s_x_relative+x+2,s_y_relative+y+4);
   put_string("Ensign",s_x_relative+x+2,s_y_relative+y+5);
   put_string("Cancel",s_x_relative+x+2,s_y_relative+y+6);
 

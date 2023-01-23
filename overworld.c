@@ -351,7 +351,7 @@ void load_overworld_bg()
 
 	set_font_pal(10);
 	load_font(font,125,0x4800);
-  	load_terrains();
+  load_terrains();
 	load_vram(0x49A0,icons_gfx,0x60);
 	load_vram(0x4BB0,icons_gfx+0x60,0x60);
 
@@ -709,7 +709,7 @@ void overworld_controls(){
         cursor_column--;
         selected_unit = (cursor_column % 3) + (commander_select_cursor * 3);
         // update_battle_group_window(selected_cmdr,0,14);
-        spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,6,1);
+        spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
         display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
       }
       return;
@@ -766,7 +766,7 @@ void overworld_controls(){
         cursor_column++;
         selected_unit = (cursor_column % 3) + (commander_select_cursor * 3);
         // update_battle_group_window(selected_cmdr,0,14);
-        spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,6,1);
+        spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
         display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
       }
       return;
@@ -825,7 +825,7 @@ void overworld_controls(){
           {
             selected_unit = (cursor_column % 3) + (commander_select_cursor * 3);
             // update_battle_group_window(selected_cmdr,0,14);
-            spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,6,1);
+            spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
             display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
             return;
           }
@@ -857,63 +857,62 @@ void overworld_controls(){
 	}
 	if (j_2 & JOY_DOWN)
 	{
-		if(menu_state != 0)
-		{
-      if(menu_state == SHOP_MENU)
+	if(menu_state != 0)
+	{
+    if(menu_state == SHOP_MENU)
+    {
+      char u_id;
+      if((u_id = check_unit_in_row(0,1)) >= 0)
       {
-        char u_id;
-        if((u_id = check_unit_in_row(0,1)) >= 0)
-        {
-          selected_unit = u_id;
-          commander_select_cursor++;
-          remove_cursor();
-          cursor_y += 1;
-          display_cursor();
+        selected_unit = u_id;
+        commander_select_cursor++;
+        remove_cursor();
+        cursor_y += 1;
+        display_cursor();
 
-          update_recruit_menu(selected_unit);
-        }
+        update_recruit_menu(selected_unit);
+      }
+      return;
+    }
+		if(commander_select_cursor < (menu_options-1))
+		{
+			commander_select_cursor++;
+      if(menu_state == ARRANGE_MENU || menu_state == ASSIGN_MENU || menu_state == SWAP_MENU)
+      {
+        selected_unit = (cursor_column % 3) + (commander_select_cursor * 3);
+        // update_battle_group_window(selected_cmdr,0,14);
+        spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
+        display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
         return;
       }
-			if(commander_select_cursor < (menu_options-1))
-			{
-					commander_select_cursor++;
-          if(menu_state == ARRANGE_MENU || menu_state == ASSIGN_MENU || menu_state == SWAP_MENU)
-          {
-            selected_unit = (cursor_column % 3) + (commander_select_cursor * 3);
-            // update_battle_group_window(selected_cmdr,0,14);
-            spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,6,1);
-            display_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,22,14);
-            return;
-          }
-          curs_down();
+      curs_down();
 
-					if(menu_state == RECRUIT_MENU)
-					{
-						load_item(buyable_items[commander_select_cursor],1);
-						display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
-					}
-					if(menu_state == BUY_SELECT_MENU)
-					{
-//						display_army_info(commander_select_cursor,17,13);
-//						item_purchase_select();
-					}
-					else if(menu_state == BUY_ITEM_MENU)
-					{
-//						item_purchase_select();
-					}
-				}
-			return;
-		}
-		return;
-		if(party_moving != 0){ return; }
-		if(menu_state == 0)
-		{
-			if(check_south())
+			if(menu_state == RECRUIT_MENU)
 			{
-				set_south();
+				load_item(buyable_items[commander_select_cursor],1);
+				display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
+			}
+			if(menu_state == BUY_SELECT_MENU)
+			{
+//				display_army_info(commander_select_cursor,17,13);
+//				item_purchase_select();
+			}
+			else if(menu_state == BUY_ITEM_MENU)
+			{
+//				item_purchase_select();
 			}
 		}
-		load_map(9,18,9,18,10,4);
+	  return;
+	}
+	if(party_moving != 0){ return; }
+	if(menu_state == 0)
+	{
+		if(check_south())
+		{
+			set_south();
+		}
+	}
+	load_map(9,18,9,18,10,4);
 	}
 
 	if(j_2 & JOY_I)
@@ -1172,12 +1171,27 @@ void overworld_controls(){
 
 char check_unit_in_row(char curs_col, char curs_row)
 {
-  char unit_id, i, desired_col, desired_row, row_count;
-  unit_id = -1;  row_count = 0;
-  desired_col = curs_col + cursor_column;
-  desired_row = commander_select_cursor + curs_row;
+  unsigned char i, desired_col, desired_row, row_count, unit_type, current_row;
+  row_count = 0;
 
-  if(desired_col < 0 || desired_col > 6){ return unit_id; }
+  desired_col = curs_col + cursor_column;
+  current_row = 1 << (commander_select_cursor * 1);
+  desired_row = current_row;
+  // desired_row = commander_select_cursor + curs_row;
+
+  if(curs_row > 0)
+  {
+    desired_row = current_row << 1;
+  }
+  if(curs_row < 0)
+  {
+    desired_row = current_row >> 1;
+  }
+  // desired_row = 1 <<  (curs_row * (commander_select_cursor+1));
+
+  put_number(desired_row,3,0,36);
+
+  if(desired_col < 0 || desired_col > 6){ return -1; }
 
   for(i=0; i<buyable_unit_count; i++)
   {
@@ -1189,7 +1203,7 @@ char check_unit_in_row(char curs_col, char curs_row)
       }
     }
   }
-  return unit_id;
+  return -1;
 }
 
 void clear_commander_select()

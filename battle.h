@@ -12,7 +12,7 @@
 #define METER_ATTACK 8
 
 typedef struct {
-    char ent_id, active, frame, pal, state, target_team, pos, type, attacks, target;
+    char ent_id, active, frame, pal, state, target_team, pos, attacks, target, effect_id;
     Unit_Entity *unit;
 } BattleUnit;
 
@@ -75,6 +75,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].attacks = 1;
   battleunits[index].target = 0;
   battleunits[index].unit = ue;
+  battleunits[index].effect_id = -1;
 
   if(entities[entity_id].bg->units[position]->unit.rng < attack_range)
   {
@@ -116,6 +117,11 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
     case AXE_UNIT:
       load_vram(idle_vrams[index],axebtl,0x100);
       battleunits[index].pal = 22;
+      break;
+
+    case RAIDER_UNIT:
+      load_vram(idle_vrams[index],raiderbtl,0x100);
+      battleunits[index].pal = 25;
       break;
 
     case CLERIC_UNIT:
@@ -188,6 +194,10 @@ void transfer_units_to_attack_vram(char type)
 
     case AXE_UNIT:
       load_vram(attack_vrams[0],axebtl+0x300,0x500);
+      break;
+
+    case RAIDER_UNIT:
+      load_vram(attack_vrams[0],raiderbtl+0x300,0x500);
       break;
 
     case CLERIC_UNIT:

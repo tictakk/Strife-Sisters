@@ -1,5 +1,7 @@
 #define MAX_PARTY_COMMANDERS 6
 #define MAX_ENEMY_COMMANDERS 15
+#define MAX_ARMY_SIZE 9
+
 #define TOTAL_COMMANDERS (MAX_PARTY_COMMANDERS + MAX_ENEMY_COMMANDERS)
 
 //names
@@ -9,7 +11,7 @@ const char *name20 = "Generic";
 
 typedef struct {
 	Unit_Entity units[9];
-  char arts[3];
+  char art;
 } Battlegroup;
 
 struct Commander{
