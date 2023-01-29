@@ -213,11 +213,9 @@ void b_u_meter(char b_id)
   {
     spr_set(b_id+5);
     animate_attack(b_id,battleunits[b_id].frame++);
-    // animate_effects();
   }
   else if(battleunits[b_id].frame < (12+arts[battleunits[b_id].unit->unit->art].frame_count))
   {
-    // animate_effects();
     battleunits[b_id].frame++;
   }
   else
@@ -247,6 +245,7 @@ void b_u_idle(char b_id)
       set_unit_meter(b_id);
       spr_set(get_first_target()+5);
       load_arts_by_targets(battleunits[b_id].unit->unit->art,(b_id>8)? 1 : 0);
+      battleunits[b_id].unit->meter = 0;
     }
     else
     {
