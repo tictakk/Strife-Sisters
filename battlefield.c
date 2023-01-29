@@ -30,7 +30,8 @@ void begin_battlefield(char map_id)
   objective_pos = battle_map_metadata.event_positions[0];
   if(map_id == 1 || map_id == 2)
   {
-    add_commander_to_party(name20,KING);
+    add_commander_to_party(name2,KING);
+    // add_commander_to_party(name3,TINKER);
   }
 
   yOffset = 0;
@@ -305,7 +306,6 @@ void load_ents()
 
 void init_battlefield()
 {
-  g=0;
   unit_selected = 0;
   selector_mode = 0;
   num_of_entities = 0;
@@ -518,9 +518,18 @@ void ctrls()
     {
       selector_right();
     }
-    else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE || selector_mode == ARMY_MODE)
+    else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
     {
       cursor_right();
+    }
+    else if(selector_mode == ARMY_MODE)
+    {
+      if(menu_option >= ((menu_rows*menu_columns)-menu_rows))
+      {
+        return;
+      }
+      menu_option += menu_rows;
+      curs_right(5);
     }
   }
 
@@ -530,9 +539,18 @@ void ctrls()
     {
       selector_left();
     }
-    else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE || selector_mode == ARMY_MODE)
+    else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
     {
       cursor_left();
+    }
+    else if(selector_mode == ARMY_MODE)
+    {
+      if(menu_option < menu_rows)
+      {
+        return;
+      }
+      menu_option -= menu_rows;
+      curs_left(5);
     }
   }
 
@@ -581,10 +599,10 @@ void ctrls()
     }
     else if(selector_mode == ATTACK_WITH_ART)
     {
-      if(battle_grid[abs] != 0 && valid_map_square(abs))
-      {
-        attack_unit(abs,unit_selected,entities[battle_grid[unit_selected]-1].bg->art);
-      }
+      // if(battle_grid[abs] != 0 && valid_map_square(abs))
+      // {
+      //   attack_unit(abs,unit_selected,entities[battle_grid[unit_selected]-1].bg->art);
+      // }
     }
     else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
     {
@@ -630,16 +648,16 @@ void ctrls()
         case MENU_GRP:
         remove_cursor();
         scroll(0,0,s_y+32,32,224,0x80);
-        display_abs_info_panel(8+(s_x),32+(s_y/2),14,14);
-        cursor_x = 9;
-        cursor_y = 10 + (s_y/8);
+        display_abs_info_panel(7+(s_x),32+(s_y/2),18,14);
+        cursor_x = 8;
+        cursor_y = 11 + (s_y/8);
         display_cursor();
         selector_mode = ARMY_MODE;
         menu_option = 0;
         menu_rows = 3;
         menu_columns = 3;
         menu_vert_size = 4;
-        list_commander_army(entities[id-1].bg,10,9);
+        list_commander_army(entities[id-1].bg,9,10);
         break;
 
         case MENU_TAKE:
@@ -662,13 +680,13 @@ void ctrls()
       {
         set_font_pal(11);
         selected_option = menu_option;
-        print_unit_info(&entities[id-1].bg->units[menu_option].unit,10+((menu_option/3)*4)+(s_x/8),9+((menu_option%3)*4)+(s_y/8));
+        print_unit_info(&entities[id-1].bg->units[menu_option].unit,9+((menu_option/3)*5)+(s_x/8),10+((menu_option%3)*4)+(s_y/8));
         set_font_pal(10);
       }
       else
       {
         swap_commander_units(entities[id-1].id,selected_option,menu_option);
-        list_commander_army(entities[id-1].bg,10,9);
+        list_commander_army(entities[id-1].bg,9,10);
         selected_option = -1;
       }
     }
@@ -959,11 +977,11 @@ char begin_battle(int attacker, int target, char range, char a_terrain, char t_t
 
   if(arts[art].target)//if targeting enemy
   {
-    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,arts[art].effect,target);
+    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,0,target);
   }
   else
   {
-    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,arts[art].effect,attacker);
+    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,0,attacker);
   }
     // resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,LIGHTENING_ART,target);
 

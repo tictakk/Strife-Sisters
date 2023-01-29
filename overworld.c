@@ -11,8 +11,8 @@ void overworld_loop()
 	party_direction = NORTH;
 	s_y = 288;
 	s_x = 0;
-	s_y_relative = s_y / 8;
-	s_x_relative = s_x / 8;
+	// s_y_relative = s_y / 8;
+	// s_x_relative = s_x / 8;
 	selector_y = 208-16;
 	selector_x = 80;
 	game_over = 1;
@@ -336,6 +336,8 @@ void load_overworld_bg()
 	total_sprites = 0;
 	set_screen_size(SCR_SIZE_64x64);
 	screen_dimensions = 64;
+  s_x_relative = s_x / 8;
+  s_y_relative = s_y / 8;
 
 	set_map_data(overworldmap,MAP_WIDTH,32);
 	set_tile_data(overworldtiles,147,overworldtilespal,TILE_WIDTH);
@@ -537,7 +539,6 @@ void select_buyable_item(char item_index)
 void load_cmdr_army_to_npcs(char cmdr_id, char x, char y)
 {
   char i, j;
-//  int x,y;
 
   hide_npcs(5);
   reset_npcs();
@@ -939,7 +940,7 @@ void overworld_controls(){
 		}
 		else if(menu_state == SHOP_MENU)//actually the buy units menu...
 		{
-      		clear_joy_events(0x1F);
+      clear_joy_events(0x1F);
 
 			if(unlocked_units[selected_unit])
 			{

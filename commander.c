@@ -1,22 +1,24 @@
 #define MAX_PARTY_COMMANDERS 6
 #define MAX_ENEMY_COMMANDERS 15
 #define MAX_ARMY_SIZE 9
-
+#define MAX_METER 100
+#define MAX_UNIT_METER 25
 #define TOTAL_COMMANDERS (MAX_PARTY_COMMANDERS + MAX_ENEMY_COMMANDERS)
 
 //names
 const char *name0 = "Rei";
 const char *name1 = "Violet";
+const char *name2 = "King";
+const char *name3 = "Yuri";
 const char *name20 = "Generic";
 
 typedef struct {
 	Unit_Entity units[9];
-  char art;
+  char calling;
 } Battlegroup;
 
 struct Commander{
 	char item;
-  char max_meter;
   char meter;
   char max_army_pts;
 	char *name;
@@ -82,8 +84,6 @@ char level_up_commander(char cmdr_id)
   {
     party_commanders[cmdr_id].level++;
     party_commanders[cmdr_id].max_army_pts++;
-    party_commanders[cmdr_id].max_meter += 5;
-    party_commanders[cmdr_id].meter += 5;
   }
   return party_commanders[cmdr_id].level;
 }

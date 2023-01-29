@@ -146,7 +146,7 @@ void update_unit_battle_info(char unit_id, char x, char y)
   put_string("Front",l_x+1,l_y+5);
   print_attack_type(unit_id,0,l_x+3,l_y+6);
 
-  put_string("Middle",l_x+1,l_y+7);
+  put_string("Middle",l_x+1,l_y+7); 
   print_attack_type(unit_id,1,l_x+3,l_y+8);
 
   put_string("Rear",l_x+1,l_y+9);

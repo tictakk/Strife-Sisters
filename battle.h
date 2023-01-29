@@ -12,7 +12,7 @@
 #define METER_ATTACK 8
 
 typedef struct {
-    char ent_id, active, frame, pal, state, target_team, pos, attacks, target, effect_id;
+    char ent_id, active, frame, pal, state, target_team, pos, attacks, target;
     Unit_Entity *unit;
 } BattleUnit;
 
@@ -75,7 +75,6 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].attacks = 1;
   battleunits[index].target = 0;
   battleunits[index].unit = ue;
-  battleunits[index].effect_id = -1;
 
   if(entities[entity_id].bg->units[position]->unit.rng < attack_range)
   {
@@ -151,7 +150,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
 
     default:
       put_string("errorz",5,5);
-      put_number(entity_id,3,5,6);
+      // put_number(entity_id,3,5,6);
       break;
   }
   p_x = (int)(x << 5);
@@ -417,56 +416,59 @@ void modify_attack_chart(char *attack_chart, char target_team)
   }
 }
 
-void determine_action(char b_id)
+char get_first_target()
 {
-//  if(battleunits[b_id].unit->meter == 10)
-//  {
-//  }
-//  else
-//  {
-    switch(battleunits[b_id].unit->unit->attacks[battleunits[b_id].pos/3])
+  char i;
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[i].target)
     {
-      case SINGLE_HIT:
-        // put_string("single   ",0,23);
-        target_single_unit(b_id);
-        break;
-
-      case MULTI_ROW:
-        // put_string("multi row",0,23);
-        target_multi_row(b_id);
-        break;
-
-      case MULTI_COL_2:
-        // put_string("col 2   ",0,23);
-        target_multi_col(b_id,2);
-        break;
-
-      case MULTI_COL_3:
-        // put_string("col 3   ",0,23);
-        target_multi_col(b_id,3);
-        break;
-
-      case MULTI_ATTACK_AOE:
-        // put_string("atk aoe  ",0,23);
-        attack_multi_aoe(b_id);
-        break;
-
-      case HEAL:
-        // put_string("heal unit",0,23);
-        heal_single_unit(b_id);
-        break;
-
-      case MULTI_HEAL_AOE:
-        // put_string("heal aoe ",0,23);
-        heal_multi_aoe(b_id);
-        break;
-
-      default:
-        // put_string("other   ",0,23);
-        target_single_unit(b_id);
-        break;
+      return i;
     }
-//  }
+  }
+  return -1;
+}
+
+void determine_action(char b_id, char target_type)
+{
+  // set_unit_meter(b_id);
+  // transfer_units_to_attack_vram(battleunits[b_id].unit->unit->id);
+  // spr_hide();
+  switch(target_type)
+  {
+    case SINGLE_HIT:
+      set_unit_attack(b_id);
+      target_single_unit(b_id);
+      break;
+    case MULTI_ROW:
+      set_unit_attack(b_id);
+      target_multi_row(b_id);
+      break;
+    case MULTI_COL_2:
+      set_unit_attack(b_id);
+      target_multi_col(b_id,2);
+      break;
+    case MULTI_COL_3:
+      set_unit_attack(b_id);
+      target_multi_col(b_id,3);
+      break;
+    case MULTI_ATTACK_AOE:
+      set_unit_attack(b_id);
+      attack_multi_aoe(b_id);
+      break;
+    case HEAL:
+      set_unit_heal(b_id);
+      heal_single_unit(b_id);
+      break;
+    case MULTI_HEAL_AOE:
+      set_unit_heal(b_id);
+      heal_multi_aoe(b_id);
+      break;
+    default:
+      set_unit_attack(b_id);
+      target_single_unit(b_id);
+      break;
+  }
 }
 
 void heal_multi_aoe(char b_id)
@@ -475,8 +477,7 @@ void heal_multi_aoe(char b_id)
   target = find_lowest_hp(b_id,battleunits[b_id].ent_id);
 
   target_aoe(target,battleunits[b_id].ent_id,IDLE,1,0);
-  set_unit_heal(b_id);
-
+  // set_unit_heal(b_id);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
 
@@ -485,28 +486,28 @@ void heal_single_unit(char b_id)
   char target;
   target = find_lowest_hp(b_id,battleunits[b_id].ent_id);
 
-  set_unit_heal(b_id);
+  // set_unit_heal(b_id);
   battleunits[target].target = 1;
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
 
 void attack_multi_aoe(char b_id)
 {
-  set_unit_attack(b_id);
+  // set_unit_attack(b_id);
   target_aoe(find_target_unit(b_id),get_opposing_team_id(battleunits[b_id].ent_id),STUNNED,1,1);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
 
 void target_multi_row(char b_id)
 {
-  set_unit_attack(b_id);
+  // set_unit_attack(b_id);
   target_row(find_target_unit(b_id)/3);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
 
 void target_multi_col(char b_id, char cnt)
 {
-  set_unit_attack(b_id);
+  // set_unit_attack(b_id);
   target_col(find_target_unit(b_id),cnt);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
@@ -515,7 +516,7 @@ void target_single_unit(char b_id)
 {
   char target;
   target = find_target_unit(b_id);
-  set_unit_attack(b_id);
+  // set_unit_attack(b_id);
   set_unit_stunned(target);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
@@ -603,6 +604,13 @@ void set_unit_attack(char b_id)
   battleunits[b_id].state = ATTACK;
   battleunits[b_id].frame = 0;
   animating++;
+}
+
+void set_unit_meter(char b_id)
+{
+  battleunits[b_id].state = METER_ATTACK;
+  battleunits[b_id].frame = 0;
+  // animating++;
 }
 
 void set_unit_heal(char b_id)

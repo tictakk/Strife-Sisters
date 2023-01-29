@@ -229,7 +229,7 @@ void hide_cursor()
 //   spr_hide();
 // }
 
-char check_action_cost(char required_cost){ return 1; }
+// char check_action_cost(char required_cost){ return 1; }
 
 char destroy_entity(int id)
 {
@@ -465,10 +465,10 @@ void set_menu_mask(char entity_id)
   char item_index;
 
   menu_mask = 0x28;
-  if(arts[entities[entity_id].bg->art].cost <= party_commanders[entities[entity_id].id].meter && entities[entity_id].bg->art)
-  {
-    menu_mask |= 0x10;
-  }
+  // if(arts[entities[entity_id].bg->art].cost <= party_commanders[entities[entity_id].id].meter && entities[entity_id].bg->art)
+  // {
+  //   menu_mask |= 0x10;
+  // }
   if(entities[entity_id].actionable)
   {
     menu_mask |= 0x0E;

@@ -43,23 +43,11 @@
 #define ADVANTAGE 1
 #define DISADVANTAGE 2
 
-#define NO_ATTACK 0
-#define SINGLE_HIT 1
-#define HEAL 2
-#define MULTI_ROW 3
-#define MULTI_COL_2 4
-#define MULTI_COL_3 5
-#define MULTI_ATTACK_AOE 6
-#define MULTI_HEAL_AOE 7
-#define PARALYZE 8
-#define CONFUSE 9
-#define ALL 10
-
 #define MAX_BUYABLE_UNITS 20
 #define TYPE_COUNT 6
 
 typedef struct{
-	unsigned char atk, def, mov, id, a_type,
+	unsigned char atk, def, mov, id, a_type, art,
                 rng, ign, spd, points, bonus_col, pow;
 
   char attacks[3];
@@ -69,6 +57,7 @@ typedef struct{
 typedef struct{
   Unit *unit;
   int hp;
+  char meter;
 } Unit_Entity;
 
 const char buyable_units[] = { SWORD_UNIT, SPEAR_UNIT, AXE_UNIT, MAGE_UNIT, LANCER_UNIT, ARCHER_UNIT, HOUND_UNIT,
@@ -116,18 +105,18 @@ void print_unit_info(Unit_Entity *ue, char x, char y)
   int hp;
   if(!ue->hp)
   {
-    put_string("   ",x,y);
-    put_string("   ",x,y+1);
-    put_string("   ",x,y+2);
+    put_string("    ",x,y);
+    put_string("    ",x,y+1);
+    put_string("    ",x,y+2);
     return;
   }
   hp = ue->hp * 100;
-//  print_unit_attack_icon(ue->unit->id,x+1,y);
-  print_unit_type(ue->unit->id,x,y);
-//  put_char('M',x,y+1);
-//  put_number(ue->unit->meter,2,x+1,y+1);
+  print_unit_attack_icon(ue->unit->id,x,y);
+  print_unit_type(ue->unit->id,x+1,y);
+  put_char('M',x,y+1);
+  put_number(ue->meter,3,x+1,y+1);
   put_char('%',x,y+2);
-  put_number(hp/ue->unit->hp,2,x+1,y+2);
+  put_number(hp/ue->unit->hp,3,x+1,y+2);
 }
 
 void print_unit_stats(char unit_id, char x, char y)
@@ -226,10 +215,12 @@ void initialize_units()
     unit_list[i].mov = 3;
     unit_list[i].ign = 0;
     unit_list[i].id = i;
+    unit_list[i].art = POWER_WAVE_ART;
     unit_list[i].a_type = NONE;
     unit_list[i].attacks[0] = SINGLE_HIT;
     unit_list[i].attacks[1] = SINGLE_HIT;
     unit_list[i].attacks[2] = SINGLE_HIT;
+    unit_list[i].art = NO_ART;
     unlocked_units[i] = 0;
   }
   unit_list[SPEAR_UNIT].hp  = 45;
@@ -240,6 +231,7 @@ void initialize_units()
   unit_list[SPEAR_UNIT].bonus_col = 1;
   unit_list[SPEAR_UNIT].spd = 15;
   unit_list[SPEAR_UNIT].ign = 0;
+  unit_list[SPEAR_UNIT].art = LIGHTENING_ART;
   unit_list[SPEAR_UNIT].id = SPEAR_UNIT;
   unit_list[SPEAR_UNIT].a_type = PIERCE;
   unlocked_units[SPEAR_UNIT] = 1;
@@ -263,6 +255,8 @@ void initialize_units()
   unit_list[SWORD_UNIT].spd = 13;
   unit_list[SWORD_UNIT].rng = 1;
   unit_list[SWORD_UNIT].ign = 0;
+  // unit_list[SWORD_UNIT].art = POWER_WAVE_ART;
+  unit_list[SWORD_UNIT].art = ICE_ART;
   unit_list[SWORD_UNIT].id = SWORD_UNIT;
   unit_list[SWORD_UNIT].a_type = NORMAL;
   unit_list[SWORD_UNIT].bonus_col = 2;
@@ -343,6 +337,7 @@ void initialize_units()
   unit_list[CLERIC_UNIT].mov = 3;
   unit_list[CLERIC_UNIT].id = CLERIC_UNIT;
   unit_list[CLERIC_UNIT].a_type = MAGIC;
+  unit_list[CLERIC_UNIT].art = HEALING_ART;
   unit_list[CLERIC_UNIT].attacks[0] = NO_ATTACK;
   unit_list[CLERIC_UNIT].attacks[1] = HEAL;
   unit_list[CLERIC_UNIT].attacks[2] = HEAL;

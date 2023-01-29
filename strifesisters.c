@@ -1,15 +1,27 @@
 #include <huc.h>
 char screen_dimensions = 0;
+#define NO_ATTACK 0
+#define SINGLE_HIT 1
+#define HEAL 2
+#define MULTI_ROW 3
+#define MULTI_COL_2 4
+#define MULTI_COL_3 5
+#define MULTI_ATTACK_AOE 6
+#define MULTI_HEAL_AOE 7
+#define PARALYZE 8
+#define CONFUSE 9
+#define ALL 10
+
 #include "map_dimension.h"
 #include "paths.c"
 #include "strifesisters.h"
 #include "item.c"
+#include "effects.c"
+#include "arts.c"
 #include "units.c"
 #include "terrain.c"
 #include "commander.c"
 #include "map.c"
-#include "effects.c"
-#include "arts.c"
 
 #define SELECTOR 0
 #define CURSOR 1
@@ -69,6 +81,9 @@ char screen_dimensions = 0;
 
 #incchr(king_gfx, "characters/king.pcx")
 #incpal(king_pal, "characters/king.pcx")
+
+#incspr(tinker, "characters/tinker.pcx")
+#incpal(tinker_pal, "characters/tinker.pcx")
 
 #define MAP_WIDTH 32
 #define TILE_WIDTH 16
@@ -254,7 +269,7 @@ char party_units_size = 0;
 
 void main()
 {
-  	char in;
+  char in;
 
 	game_loop = 1;
 
@@ -280,6 +295,8 @@ void main()
   add_commander_to_party(name1,VIOLET);
 
 	party_commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
+  party_commanders[0].bg.units[0].meter = 25;
+  // party_commanders[0].bg.units[1].meter = 25;
 	party_commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
   party_commanders[0].bg.units[1].unit = &unit_list[SPEAR_UNIT];
 	party_commanders[0].bg.units[1].hp = unit_list[SPEAR_UNIT].hp;
@@ -289,8 +306,7 @@ void main()
   party_commanders[0].bg.units[4].hp = unit_list[CLERIC_UNIT].hp;
   party_commanders[0].bg.units[2].unit = &unit_list[SWORD_UNIT];
 	party_commanders[0].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
-  // party_commanders[0].bg.art = LIGHTENING_ART;
-  party_commanders[0].bg.art = POWER_WAVE_ART;
+  // party_commanders[0].bg.art = POWER_WAVE_ART; 
   party_commanders[0].meter = 100;
 
   party_commanders[0].bg.units[3].unit = &unit_list[LANCER_UNIT];
@@ -368,6 +384,11 @@ void display_sprite(int x_pos, int y_pos, int location, char flip, char pal)
 {
 	spr_make(total_sprites++,x_pos,y_pos,location,flip,NO_FLIP|SZ_16x16,pal,0);
 	spr_pri(1);
+}
+
+void spr_flip()
+{
+  spr_ctrl(FLIP_MAS,FLIP_X);
 }
 
 int range(char min, char max)
@@ -762,7 +783,6 @@ initialize_commanders()
 	for(i=0, cmdr = party_commanders; i<TOTAL_COMMANDERS; i++, cmdr++)
 	{
 		cmdr->max_army_pts = 10;
-		cmdr->max_meter = 100;
 		cmdr->meter = 0;
 		cmdr->exp = 0;
 		cmdr->level = 1;
@@ -772,9 +792,9 @@ initialize_commanders()
 		for(j=0; j<9; j++)
 		{
 			cmdr->bg.units[j].unit = &unit_list[NO_UNIT];
-      		cmdr->bg.units[j].hp = 0;
+      cmdr->bg.units[j].hp = 0;
     }
-		cmdr->bg.art = NO_ART;
+    cmdr->bg.calling = 0;
 	}
 }
 
@@ -1088,7 +1108,7 @@ void display_dialog(int x, int y, char *str)
 {
 //	display_info_panel(x,y,32,8);
 	// put_number(str[1],4,10,45);
-  	display_window(y,x,32,8);
+  display_window(y,x,32,8);
 	write_text((s_x/8)+1,(s_y/8)+1,str);
 }
 
@@ -1191,23 +1211,8 @@ void display_healthbar(char x, char y, char percent)
   if(percent > 26) { load_vram(addr,health_4_15,5); return;}
   if(percent > 20) { load_vram(addr,health_3_15,5); return;}
   if(percent > 13) { load_vram(addr,health_2_15,5); return;}
-  if(percent > 6) { load_vram(addr,health_1_15,5); return;}
+  if(percent > 0) { load_vram(addr,health_1_15,5); return;}
   load_vram(addr,health_empty,5);
-}
-
-void reduce_healthbar(char x, char y, char dmg, char i)
-// void reduce_healthbar(char army_no, char dmg)
-{
-	int j, vaddr,z;
-	int ptr[1];
-	z=0;
-	for(j=i+dmg-1; j >= dmg; j--)
-	{
-		vaddr = vram_addr(x+j,y);
-		// ptr[0] = (0x1390 >> 4) + ((j+6) / (7 - ((j+5)/6))) + 0x2000;
-		ptr[0] = (0xe90 >> 4) + ((j+4) / (5 - ((j+3)/4))) + 0x2000;
-		load_vram(vaddr,ptr,1);
-	}
 }
 
 int min(int a, int b)
@@ -1302,6 +1307,11 @@ void load_commanders_gfx(int cmdr_id, int address, int pal)
 		load_palette(pal,cat_walk_pal,1);
 		break;
 
+		case TINKER:
+		load_vram(address,tinker,0x100);
+		load_palette(pal,tinker_pal,1);
+		break;
+
 		default:
 		load_vram(address,sld,0x100);
 		load_palette(pal,sldpal,1);
@@ -1316,7 +1326,7 @@ void list_commander_army(Battlegroup *bg, char x, char y)
   {
     for(j=0; j<3; j++)
     {
-      print_unit_info(&bg->units[(i*3)+j].unit,x+(i*4)+(s_x/8),y+(j*4)+(s_y/8));
+      print_unit_info(&bg->units[(i*3)+j].unit,x+(i*5)+(s_x/8),y+(j*4)+(s_y/8));
     }
   }
 }
@@ -1369,9 +1379,13 @@ void load_predefined_group_layout(char layout_type, char cmdr_id)
 
     case 24:
       enemy_commanders[cmdr_id].sprite_type = BLOB_UNIT;
-      load_unit_to_cmdr(cmdr_id,3,BLOB_UNIT);
-      load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT);
-      load_unit_to_cmdr(cmdr_id,5,BLOB_UNIT);
+      load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT);
+      load_unit_to_cmdr(cmdr_id,1,BLOB_UNIT);
+      load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT);
+
+      // load_unit_to_cmdr(cmdr_id,3,BLOB_UNIT);
+      // load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT);
+      // load_unit_to_cmdr(cmdr_id,5,BLOB_UNIT);
       break;
 
     case 25:

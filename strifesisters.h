@@ -34,7 +34,7 @@
 #define REI 29
 #define VIOLET 30
 #define KING 31
-#define ALUCARD 32
+#define TINKER 32
 #define KAIN 33
 #define SACHA 34
 #define ALMER 35
