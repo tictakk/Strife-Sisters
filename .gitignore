@@ -2,6 +2,7 @@ map/*
 tiles/*
 script/*
 assets/*
+characters/*
 *.rtf
 *.pce
 *.s
