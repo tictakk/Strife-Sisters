@@ -7,15 +7,17 @@
 #define HEALING_ART 6
 #define POWER_WAVE_ART 7
 
-#define TARGET_SELF 0
-#define TARGET_ENEMY 1
+#define NONE_TO_NONE 0
+#define ONE_TO_ONE 1
+#define ONE_TO_MANY 2
+#define MANY_TO_MANY 3
 
 #define MOD_ATK 1
 #define MOD_DEF 2
 #define MOD_HP 3
 
 typedef struct{
-  char cost, modifier_amt, modify, frame_count, target;
+  char cost, modifier_amt, modify, frame_count, target, relationship;
   char *name;
 } Art;
 
@@ -29,6 +31,7 @@ void init_arts()
   arts[0].modifier_amt = 0;
   arts[0].modify = 0;
   arts[0].target = NO_ATTACK;
+  arts[0].relationship = NONE_TO_NONE;
 
   arts[1].frame_count = 11;
   arts[1].name = "Lightening";
@@ -36,20 +39,23 @@ void init_arts()
   arts[1].modifier_amt = -15;
   arts[1].target = SINGLE_HIT;
   arts[1].modify = MOD_HP;
+  arts[1].relationship = ONE_TO_ONE;
 
-  arts[2].frame_count = 0;
+  arts[2].frame_count = 8;
   arts[2].name = "Fire";
   arts[2].cost = 100;
   arts[2].modifier_amt = -15;
   arts[2].target = SINGLE_HIT;
   arts[2].modify = MOD_HP;
+  arts[2].relationship = MANY_TO_MANY;
 
-  arts[3].frame_count = 11;
+  arts[3].frame_count = 8;
   arts[3].name = "Ice";
   arts[3].cost = 100;
   arts[3].modifier_amt = -15;
-  arts[3].target = SINGLE_HIT;
+  arts[3].target = MULTI_COL_3;
   arts[3].modify = MOD_HP;
+  arts[3].relationship = MANY_TO_MANY;
 
   arts[4].frame_count = 11;
   arts[4].name = "4";
@@ -57,6 +63,7 @@ void init_arts()
   arts[4].modifier_amt = 5;
   arts[4].target = SINGLE_HIT;
   arts[4].modify = MOD_DEF;
+  arts[4].relationship = NONE_TO_NONE;
  
   arts[5].frame_count = 11;
   arts[5].name = "5";
@@ -64,6 +71,7 @@ void init_arts()
   arts[5].modifier_amt = 5;
   arts[5].target = SINGLE_HIT;
   arts[5].modify = MOD_ATK;
+  arts[5].relationship = NONE_TO_NONE;
 
   arts[6].frame_count = 11;
   arts[6].name = "6";
@@ -71,6 +79,7 @@ void init_arts()
   arts[6].modifier_amt = 10;
   arts[6].target = MULTI_HEAL_AOE;
   arts[6].modify = MOD_HP;
+  arts[6].relationship = NONE_TO_NONE;
 
   arts[7].frame_count = 5;
   arts[7].name = "Power Wave";
@@ -78,6 +87,7 @@ void init_arts()
   arts[7].target = MULTI_COL_3;
   arts[7].modify = MOD_HP;
   arts[7].modifier_amt = -20;
+  arts[7].relationship = ONE_TO_MANY;
 }
 
 void load_art(char art_no, int x, int y, char flip)
@@ -112,11 +122,18 @@ void load_art(char art_no, int x, int y, char flip)
     display_window(2,8,12,3);
     put_string("Power Wave",3,9);
     create_power_wave(x,y,flip);
+    break;
     
     case ICE_ART:
     display_window(2,8,8,3);
     put_string(arts[art_no].name,3,9);
     create_ice(x+8,y+16,flip);
+    break;
+
+    case FIRE_ART:
+    display_window(2,8,8,3);
+    put_string(arts[art_no].name,3,9);
+    create_fire(x+8,y+16,flip);
     break;
   }
 }
@@ -125,6 +142,11 @@ void remove_art(char art_no)
 {
   switch(art_no)
   {
+    
+    case FIRE_ART:
+    remove_fire(0);
+    break;
+
     case LIGHTENING_ART:
     remove_lightening_effect(0);
     break;
@@ -160,19 +182,15 @@ void animate_effect(char effect_type, char effect_no)
     animate_lightening(effect_no);
     break;
 
-    // case HEALING_ART:
     case EFFECT_HEAL:
     animate_healing(effect_no);
     break;
 
-    // case ATK_5_ART:
-    // case DEF_5_ART:
     case EFFECT_ATK_5:
     case EFFECT_DEF_5:
     animate_word_effect(effect_no);
     break;
 
-    // case POWER_WAVE_ART:
     case EFFECT_WAVE:
     animate_power_wave(effect_no);
     break;
@@ -182,6 +200,10 @@ void animate_effect(char effect_type, char effect_no)
     break;
 
     case EFFECT_ICE:
+    animate_ice(effect_no);
+    break;
+
+    case EFFECT_FIRE:
     animate_ice(effect_no);
     break;
   }

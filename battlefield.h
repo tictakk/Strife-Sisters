@@ -485,7 +485,7 @@ void mask_menu()
   if(menu_mask & 0x02) { put_string("ATK",20,2); }
   if(menu_mask & 0x04) { put_string("END",24,2); }
   if(menu_mask & 0x08) { put_string("TRN",28,2); }
-  if(menu_mask & 0x10) { put_string("ART",24,1); }
+  if(menu_mask & 0x10) { put_string("CAL",24,1); }
   if(menu_mask & 0x20) { put_string("GRP",28,1); }
 }
 
@@ -496,7 +496,7 @@ void print_menu()
   put_string("ATK",20,2);
   put_string("END",24,2);
   put_string("TRN",28,2);
-  put_string("ART",24,1);
+  put_string("CAL",24,1);
   put_string("GRP",28,1);
   set_font_pal(10);
   mask_menu();

@@ -517,7 +517,8 @@ void target_single_unit(char b_id)
   char target;
   target = find_target_unit(b_id);
   // set_unit_attack(b_id);
-  set_unit_stunned(target);
+  // set_unit_stunned(target);
+  set_unit_target(target);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
 
@@ -566,7 +567,8 @@ void target_row(char position)
   {
     if(battleunits[(position*3)+i].active)
     {
-      set_unit_stunned((position*3)+i);
+      // set_unit_stunned((position*3)+i);
+      set_unit_target((position*3)+i);
     }
   }
 }
@@ -578,7 +580,8 @@ void target_col(char position, char hits)
   {
     if((position+(i*3)) < 18 && battleunits[(position+(i*3))].active)
     {
-      set_unit_stunned((position+(i*3)));
+      // set_unit_stunned((position+(i*3)));
+      set_unit_target(position+(3*i));
     }
   }
 }
@@ -589,6 +592,11 @@ void set_unit_state(char b_id, char state, char targeted, char animated)
   battleunits[b_id].target = targeted;
   battleunits[b_id].frame = 0;
   animating += animated;
+}
+
+void set_unit_target(char b_id)
+{
+  battleunits[b_id].target = 1;
 }
 
 void set_unit_stunned(char b_id)
@@ -610,7 +618,6 @@ void set_unit_meter(char b_id)
 {
   battleunits[b_id].state = METER_ATTACK;
   battleunits[b_id].frame = 0;
-  // animating++;
 }
 
 void set_unit_heal(char b_id)
@@ -618,6 +625,15 @@ void set_unit_heal(char b_id)
   battleunits[b_id].state = HEALING;
   battleunits[b_id].frame = 0;
   animating++;
+}
+
+void set_unit_waiting(char b_id)
+{
+  spr_set(b_id+5);
+  spr_pattern(idle_vrams[b_id]);
+  battleunits[b_id].state = WAITING;
+  battleunits[b_id].frame = 0;
+  animating--;
 }
 
 char find_lowest_hp(char b_id, char team)

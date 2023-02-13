@@ -1,6 +1,6 @@
-#incpal(npc_pal, "characters/mannpc.pcx")
-#incspr(man_walk, "characters/mannpc.pcx")
-#incspr(woman_walk, "characters/womannpc.pcx")
+// #incpal(npc_pal, "characters/mannpc.pcx")
+// #incspr(man_walk, "characters/mannpc.pcx")
+// #incspr(woman_walk, "characters/womannpc.pcx")
 
 // #define MAX_NPCS 42
 #define MAX_NPCS 20

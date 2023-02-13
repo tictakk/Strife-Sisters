@@ -661,16 +661,18 @@ void ctrls()
         break;
 
         case MENU_TAKE:
+        heal_calling(entities[id-1].id);
         // menu_option = ATTACK_WITH_ART;
-        if(menu_mask & 0x10)
-        {
-          selector_mode = ATTACK_WITH_ART;
-          hide_menu();
-          draw_selector();
-          highlight(unit_selected,0xD000,get_army_max_range(battle_grid[unit_selected]-1),0);
+        // if(menu_mask & 0x10)
+        // {
+          // selector_mode = ATTACK_WITH_ART;
+          // hide_menu();
+          // draw_selector();
+          // highlight(unit_selected,0xD000,get_army_max_range(battle_grid[unit_selected]-1),0);
           // pickup_item(battle_grid[unit_selected]-1);
           // end_unit_turn(battle_grid[unit_selected]-1);
-        }
+        // }
+
         break;
       }
     }

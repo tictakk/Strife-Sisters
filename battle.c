@@ -36,10 +36,10 @@ void battle_seq()
   load_pals(atker,0);
   load_pals(trgt,9);
 
-  if(battle_art)
-  {
-    d_art(art_target);
-  }
+  // if(battle_art)
+  // {
+  //   d_art(art_target);
+  // }
 
   battle_clock = get_highest_speed(atker);
   d_battle(atker);
@@ -62,7 +62,7 @@ void d_battle(char team)
   
   while(battle_clock != -1)
   {
-    if(b_ticker++ == 4)
+    if(b_ticker++ == 2)
     {
       b_ticker = 0;
 
@@ -82,46 +82,6 @@ void d_battle(char team)
   }
 }
 
-void d_art(char team)
-{
-  char i = 0, j = 0;
-  char count = 0;
-  animating = 0;
-  battle_clock = -1;
-
-  for(i=0; i<18; i++)
-  {
-    if(battleunits[i].active && battleunits[i].ent_id == team)
-    {
-      spr_set(i+5);
-      load_art(battle_art,spr_get_x(),spr_get_y(),0);
-      for(j=0; j<11; j++)
-      {
-        // battle_unit_state(i);
-        animate_effect(battle_art,0);
-        vsync(4);
-        satb_update();
-      }
-      remove_art(battle_art);
-      if(arts[battle_art].modify == MOD_HP)
-      {
-        complete_art_damage(battle_art,i);
-      }
-      spr_set(i+5);
-      spr_pattern(idle_vrams[i]);
-      battleunits[i].state = WAITING;
-      battleunits[i].frame = 0;
-      show_healthbar(battleunits[i].ent_id,battleunits[i].pos,spr_get_x(i+5),(spr_get_y(i+5)));
-      satb_update();
-    }
-  }
-  if(arts[battle_art].modify != MOD_HP)
-  {
-    if(art_target == atker){complete_art_modifier(TEAM_ONE);} else {complete_art_modifier(TEAM_TWO);}
-  }
-  hide_art_name();
-}
-
 void complete_art_damage(char art_type)
 {
   char i, amt;
@@ -138,20 +98,6 @@ void complete_art_damage(char art_type)
       battleunits[i].target = 0;
       update_healthbar(i);
     }
-  }
-}
-
-void complete_art_modifier(char target)
-{
-  switch(arts[battle_art].modify)
-  {
-    case MOD_ATK:
-    if(target == TEAM_ONE) {a_atk_bonus += arts[battle_art].modifier_amt;} else { t_atk_bonus += arts[battle_art].modifier_amt;}
-    break;
-
-    case MOD_DEF:
-    if(target == TEAM_ONE) {a_def_bonus += arts[battle_art].modifier_amt;} else { t_def_bonus += arts[battle_art].modifier_amt;}
-    break;
   }
 }
 
@@ -208,6 +154,7 @@ void b_u_meter(char b_id)
     spr_set(0);
     spr_show();
     battleunits[b_id].frame++;
+    load_art_by_relationship(battleunits[b_id].unit->unit->art);
   }
   else if(battleunits[b_id].frame < 11)
   {
@@ -220,12 +167,9 @@ void b_u_meter(char b_id)
   }
   else
   {
-    spr_set(b_id+5);
-    spr_pattern(idle_vrams[b_id]);
-    battleunits[b_id].state = WAITING;
-    battleunits[b_id].frame = 0;
+    set_targets_stunned();
+    set_unit_waiting(b_id);
     battleunits[b_id].attacks--;
-    animating--;
 
     complete_art_damage(battleunits[b_id].unit->unit->art);
     remove_effects();
@@ -243,8 +187,8 @@ void b_u_idle(char b_id)
     {
       determine_action(b_id,arts[battleunits[b_id].unit->unit->art].target);
       set_unit_meter(b_id);
-      spr_set(get_first_target()+5);
-      load_arts_by_targets(battleunits[b_id].unit->unit->art,(b_id>8)? 1 : 0);
+      // spr_set(get_first_target()+5);
+      // load_arts_by_targets(battleunits[b_id].unit->unit->art,(b_id>8)? 1 : 0);
       battleunits[b_id].unit->meter = 0;
     }
     else
@@ -255,7 +199,7 @@ void b_u_idle(char b_id)
 }
 
 void b_u_attack(char b_id)
-{
+{    
   if(battleunits[b_id].frame == 0) //check if unit has advantage
   {
     char i;
@@ -276,9 +220,13 @@ void b_u_attack(char b_id)
     if(adv)
     {
       spr_set(b_id+5);
-      create_effect(EFFECT_ADV,spr_get_x(),spr_get_y(),1);
+      create_effect(EFFECT_ADV,spr_get_x(),spr_get_y(),0);
       spr_show();
     }
+  }
+  if(battleunits[b_id].frame == 6)
+  {
+    set_targets_stunned();
   }
   if(battleunits[b_id].frame < 11)//animating attack
   {
@@ -301,12 +249,8 @@ void b_u_attack(char b_id)
         }
       }
     }
-    spr_set(b_id+5);
-    spr_pattern(idle_vrams[b_id]);
-    battleunits[b_id].state = WAITING;
-    battleunits[b_id].frame = 0;
+    set_unit_waiting(b_id);
     battleunits[b_id].attacks--;
-    animating--;
     remove_effects();
   }
 }
@@ -315,18 +259,13 @@ void b_u_stun(char b_id){
   if(battleunits[b_id].frame == 0)
   {
     spr_set(b_id+5);
-    spr_pattern(idle_vrams[b_id]);
-  }
-  if(battleunits[b_id].frame == 3)
-  {
-    spr_set(b_id+5);
     spr_pattern(stun_vrams[stun_count++]);
     battleunits[b_id].frame++;
     create_hit_spark(spr_get_x(),spr_get_y(),0);
     spr_show();
   }
-  else if(battleunits[b_id].frame < 12 && battleunits[b_id].frame > 6)
-  {    
+  else if(battleunits[b_id].frame < 6)
+  {
     spr_set(b_id+5);
     
     if(battleunits[b_id].frame % 2)
@@ -339,12 +278,9 @@ void b_u_stun(char b_id){
     }
     battleunits[b_id].frame++;
   }
-  else if(battleunits[b_id].frame == 12)
+  else
   {
-    spr_set(b_id+5);
-    spr_pattern(idle_vrams[b_id]);
-    battleunits[b_id].state = WAITING;
-    battleunits[b_id].frame = 0;
+    set_unit_waiting(b_id);
     show_healthbar(battleunits[b_id].ent_id,battleunits[b_id].pos,spr_get_x(b_id+5),(spr_get_y(b_id+5)));
 
     if(entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp <= 0)
@@ -352,11 +288,6 @@ void b_u_stun(char b_id){
       kill_unit(b_id);
       spr_hide();
     }
-    animating--;
-  }
-  else
-  {
-    battleunits[b_id].frame++;
   }
 }
 
@@ -398,12 +329,8 @@ void b_u_heal(char b_id)
         calc_heal(b_id,i,0,0,0);
       }
     }
-    spr_set(b_id+5);
-    spr_pattern(idle_vrams[b_id]);
-    battleunits[b_id].state = WAITING;
-    battleunits[b_id].frame = 0;
+    set_unit_waiting(b_id);
     battleunits[b_id].attacks--;
-    animating--;
     //This may cause an issue when there may be a time when heal is done at the same time as another
     //effect. This erases all effects.
     remove_effects();
@@ -424,7 +351,6 @@ void update_healthbar(char b_id)
   hp_p = hp / battleunits[b_id].unit->unit->hp;
   spr_set(b_id+5);
   display_healthbar(spr_get_x()/8,(spr_get_y()/8)+4,(char)hp_p);
-  // hp_p = hp / entities[entity_id].bg->units[unit_id].unit->hp;
 }
 
 void show_healthbar(char entity_id, char unit_id, int x, int y)
@@ -435,9 +361,6 @@ void show_healthbar(char entity_id, char unit_id, int x, int y)
   hp_p = hp / entities[entity_id].bg->units[unit_id].unit->hp;
 
 	display_healthbar(x/8,(y/8)+4,(char)hp_p);
-//  put_number(entities[entity_id].bg->units[unit_id].hp,2,x/8,y/8+4);
-//  put_char('/',x/8+2,y/8+4);
-//  put_number(entities[entity_id].bg->units[unit_id].unit->hp,2,x/8+3,y/8+4);
 }
 
 void hide_healthbar(char unit_id)
@@ -773,8 +696,24 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
 	spr_set(63);
 	spr_hide();
 	satb_update();
-
 	reset_satb();
+}
+
+void load_art_by_relationship(char art_id)
+{
+  switch(arts[art_id].relationship)
+  {
+    case ONE_TO_MANY:
+    case ONE_TO_ONE:
+    spr_set(get_first_target()+5);
+    put_number(get_first_target(),3,0,0);
+    load_art(art_id,spr_get_x(),spr_get_y(),0);
+    break;
+
+    case MANY_TO_MANY:
+    load_arts_by_targets(art_id,0);
+    break;
+  }
 }
 
 void load_arts_by_targets(char art_type, char flip)
@@ -786,6 +725,18 @@ void load_arts_by_targets(char art_type, char flip)
     {
       spr_set(i+5);
       load_art(art_type,spr_get_x(),spr_get_y(),flip);
+    }
+  }
+}
+
+void set_targets_stunned()
+{
+  char i;
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[i].target)
+    {
+      set_unit_stunned(i);
     }
   }
 }

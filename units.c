@@ -220,9 +220,9 @@ void initialize_units()
     unit_list[i].attacks[0] = SINGLE_HIT;
     unit_list[i].attacks[1] = SINGLE_HIT;
     unit_list[i].attacks[2] = SINGLE_HIT;
-    unit_list[i].art = NO_ART;
     unlocked_units[i] = 0;
   }
+
   unit_list[SPEAR_UNIT].hp  = 45;
   unit_list[SPEAR_UNIT].atk = 23;
   unit_list[SPEAR_UNIT].def = 12;
@@ -255,9 +255,9 @@ void initialize_units()
   unit_list[SWORD_UNIT].spd = 13;
   unit_list[SWORD_UNIT].rng = 1;
   unit_list[SWORD_UNIT].ign = 0;
-  // unit_list[SWORD_UNIT].art = POWER_WAVE_ART;
-  unit_list[SWORD_UNIT].art = ICE_ART;
-  unit_list[SWORD_UNIT].id = SWORD_UNIT;
+  // unit_list[SWORD_UNIT].art = FIRE_ART;
+  // unit_list[SWORD_UNIT].art = ICE_ART;
+  // unit_list[SWORD_UNIT].id = SWORD_UNIT;
   unit_list[SWORD_UNIT].a_type = NORMAL;
   unit_list[SWORD_UNIT].bonus_col = 2;
   unit_list[SWORD_UNIT].attacks[2] = NO_ATTACK;

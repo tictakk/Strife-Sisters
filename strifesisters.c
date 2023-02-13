@@ -1,4 +1,5 @@
 #include <huc.h>
+
 char screen_dimensions = 0;
 #define NO_ATTACK 0
 #define SINGLE_HIT 1
@@ -22,6 +23,7 @@ char screen_dimensions = 0;
 #include "terrain.c"
 #include "commander.c"
 #include "map.c"
+#include "calling.c"
 
 #define SELECTOR 0
 #define CURSOR 1
@@ -296,6 +298,7 @@ void main()
 
 	party_commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
   party_commanders[0].bg.units[0].meter = 25;
+  party_commanders[0].bg.units[0].unit->id
   // party_commanders[0].bg.units[1].meter = 25;
 	party_commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
   party_commanders[0].bg.units[1].unit = &unit_list[SPEAR_UNIT];
@@ -1384,7 +1387,7 @@ void load_predefined_group_layout(char layout_type, char cmdr_id)
       load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT);
 
       // load_unit_to_cmdr(cmdr_id,3,BLOB_UNIT);
-      // load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT);
+      load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT);
       // load_unit_to_cmdr(cmdr_id,5,BLOB_UNIT);
       break;
 

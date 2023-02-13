@@ -6,9 +6,11 @@
 #incspr(hit_spark,"map/effects/hit_spark.pcx")
 #incspr(power_wave,"map/effects/power_wave.pcx")
 #incspr(ice_effect,"map/effects/ice.pcx")
+#incspr(fire_effect,"map/effects/fire.pcx")
 
 #incpal(effect_pal,"map/effects/adv.pcx")
 #incpal(lightening_effect_pal,"map/effects/lightening.pcx")
+#incpal(fire_effect_pal,"map/effects/fire.pcx")
 
 #define EFFECTS_VRAM 0x3600
 #define EFFECTS_WORD_PAL 30
@@ -27,6 +29,7 @@
 #define EFFECT_HIT_SPARK 9
 #define EFFECT_WAVE 10
 #define EFFECT_ICE 11
+#define EFFECT_FIRE 12
 
 #define MAX_EFFECT_COUNT 5
 
@@ -120,11 +123,18 @@ void load_effect(char effect_no)
         load_vram(EFFECTS_VRAM+(effect_count*0x200),ice_effect,0x140);
         effects_pal[effect_count] = EFFECTS_ARTS_PAL;
         break;
+
+      case EFFECT_FIRE:
+        load_vram(EFFECTS_VRAM+(effect_count*0x200),fire_effect,0x140);
+        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+        break;
     }
 }
 
 void display_effect(char effect_no)
 {
+  // put_number(effects_x[effect_no],3,0,0);
+  // put_number(effects[effect_no],3,0,1);
   spr_make(effect_no,effects_x[effect_no],effects_y[effect_no],EFFECTS_VRAM+(effect_no*0x200),FLIP_MAS,effects_flip[effect_no],effects_pal[effect_no],1);
   spr_hide();
 }
@@ -151,10 +161,8 @@ void remove_effect(char effect_no)
   }
 }
 
-void remove_ice()
-{
-
-}
+void remove_ice(char n){}
+void remove_fire(char n){}
 
 void remove_effects()
 {
@@ -186,6 +194,12 @@ char create_ice(int x, int y, char flip)
 {
   load_palette(31,lightening_effect_pal,1);
   return create_effect(EFFECT_ICE,x,y,flip);
+}
+
+char create_fire(int x, int y, char flip)
+{
+  load_palette(31,fire_effect_pal,1);
+  return create_effect(EFFECT_FIRE,x,y,flip);
 }
 
 char create_hit_spark(int x, int y, char flip)
@@ -235,19 +249,9 @@ void animate_word_effect(char effect_no)
 
 void animate_ice(char effect_no)
 {
-  char frame_no;
-  // put_string("animating ice",0,0);
-  frame_no = effect_frames[effect_no]++;
-  if(frame_no > 11)
-  {
-    return;
-  }
-  // put_number(frame_no,3,0,0);
-  // put_hex(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[frame_no],5,0,1);
-  
   spr_set(effect_no);
   spr_show();
-  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[frame_no]);
+  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
 }
 
 void animate_hit_spark(char effect_no)
@@ -302,10 +306,8 @@ void animate_power_wave(char effect_no)
 {
   char direction;
   direction = (effects_flip[effect_no])? -12 : 12;
-
-  if(effects[effect_no])
-  {
-    spr_set(effect_no);
-    spr_x(spr_get_x()+direction);
-  }
+  spr_set(effect_no);
+  spr_show();
+  spr_x(effects_x[effect_no]);
+  effects_x[effect_no] += direction;
 }
