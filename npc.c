@@ -78,8 +78,7 @@ void reset_npcs()
 void load_npcs(char *data)
 {
   int i;
-  char x, y, type, level_counter, pal;
-  level_counter = 0;
+  char x, y, type, pal;
   i = 0;
   for(;;)
   {

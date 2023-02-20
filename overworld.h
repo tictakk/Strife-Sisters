@@ -1,4 +1,3 @@
-#define PANEL_VRAM 0x2000
 #define OVERWORLD 0
 #define SHOP_MENU 1
 #define RECRUIT_MENU 2
@@ -38,8 +37,6 @@ char swap_palette = 0;
 char selected_item = 0;
 char selected_unit = 0;
 char selected_cmdr = 0;
-char cycler = 0;
-char current = 0;
 char current_selected_castle = 0;
 char commander_select_cursor = 0;
 char cursor_column = 0;
@@ -144,16 +141,13 @@ void update_unit_battle_info(char unit_id, char x, char y)
   put_number(100,3,l_x+7,l_y+3);
 
   put_string("Front",l_x+1,l_y+5);
-  print_attack_type(unit_id,0,l_x+3,l_y+6);
+  print_attack_type(SINGLE_HIT,0,l_x+3,l_y+6);
 
   put_string("Middle",l_x+1,l_y+7); 
-  print_attack_type(unit_id,1,l_x+3,l_y+8);
+  print_attack_type(SINGLE_HIT,1,l_x+3,l_y+8);
 
   put_string("Rear",l_x+1,l_y+9);
-  print_attack_type(unit_id,2,l_x+3,l_y+10);
-
-  put_string("Advt.",l_x+1,l_y+11);
-  print_unit_advantage_position(unit_id,l_x+3,l_y+12);
+  print_attack_type(SINGLE_HIT,2,l_x+3,l_y+10);
 }
 
 //thoeretically, this window should never "update" outside of the cursor
@@ -216,10 +210,10 @@ void update_battle_group_window(char cmdr_id, char x, char y)
 
   spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
 
-  put_string("Points",l_x+12,l_y+1);
-  put_number(pts,2,l_x+13,l_y+2);
-  put_char('/',l_x+15,l_y+2);
-  put_number(party_commanders[cmdr_id].max_army_pts,2,l_x+16,l_y+2);
+  // put_string("Points",l_x+12,l_y+1);
+  // put_number(pts,2,l_x+13,l_y+2);
+  // put_char('/',l_x+15,l_y+2);
+  // put_number(party_commanders[cmdr_id].max_army_pts,2,l_x+16,l_y+2);
   
   put_string("Power",l_x+12,l_y+3);
   put_number(100,3,l_x+14,l_y+4);

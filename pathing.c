@@ -2,6 +2,8 @@
 struct Node neighbors[4];
 struct Node map[80];
 
+char visit_grid[464];
+
 // int get_neighbors(unsigned char x, unsigned char y, char size)
 int get_neighbors(int position)
 {
@@ -65,8 +67,8 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 	char found = 0;
 	char id = 0;
 
-  map_counter = 0;
-  map_size = 0;
+	map_counter = 0;
+	map_size = 0;
 
 	map[map_size].ownPos = pos;
 	map[map_size].fromPos = pos;
@@ -95,7 +97,6 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 						found = 1;
 		  		}
 					else if(entities[id-1].team != team && id != 0 && !(ignore_depth<=d_level))
-					// else if(entities[id-1].team == team && id != 0)
 					{
 						if(put_visited(p,fp,0))
 						{
@@ -132,6 +133,7 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		map_counter++;
 	}
 
+  reset_grid();
 	if(!found)
 	{
 		return -1;
@@ -146,8 +148,16 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		paths[i++] = node->ownPos;
     path_counter++;
   }
-
 	return path_counter-1;
+}
+
+void reset_grid()
+{
+  int i;
+  for(i=0; i<464; i++)
+  {
+    visit_grid[i] = 0;
+  }
 }
 
 char is_zero(char num, char size)
@@ -165,14 +175,20 @@ char is_zero(char num, char size)
 // int put_visited(int x, int y, int fx, int fy, char checked)
 int put_visited(int pos, int fpos, char checked)
 {
-	int i;
-	for(i=0; i<map_size+1; i++)
-	{
-		if(map[i].ownPos == pos)
-		{
-			return 0;
-		}
-	}
+	// int i;
+	// for(i=0; i<map_size+1; i++)
+	// {
+		// if(map[i].ownPos == pos)
+		// {
+			// return 0;
+		// }
+	// }
+  if(visit_grid[pos])
+  {
+    return 0;
+  }
+
+  visit_grid[pos] = 1;
 
 	++map_size;
 	map[map_size].ownPos = pos;
@@ -184,6 +200,8 @@ int put_visited(int pos, int fpos, char checked)
 unsigned char get(int pos)
 {
   unsigned char i = 0;
+  put_number(pos,3,0,0);
+  wait_for_I_input();
   for(i=0; i<map_size; i++)
 	{
 		if(map[i].ownPos == pos)

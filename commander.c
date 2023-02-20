@@ -14,16 +14,13 @@ const char *name20 = "Generic";
 
 typedef struct {
 	Unit_Entity units[9];
-  char calling;
+  char calling_stone;
 } Battlegroup;
 
 struct Commander{
-	char item;
   char meter;
-  char max_army_pts;
 	char *name;
 	char sprite_type;
-  char level;
   int exp;
 	Battlegroup bg;
 };
@@ -57,7 +54,6 @@ void clear_enemy_commander_ram()
   char i;
   for(i=0; i<MAX_ENEMY_COMMANDERS; i++)
   {
-    enemy_commanders[i].item = 0;
     enemy_commanders[i].sprite_type = 0;
     enemy_commanders[i].name = name20;
     clear_commander_battle_group(enemy_commanders+i);
@@ -78,29 +74,6 @@ void upgrade_unit(struct Commander *cmdr, char pos, char upgrade_id)
   cmdr->bg.units[pos].hp = new_hp;
 }
 
-char level_up_commander(char cmdr_id)
-{
-  while(party_commanders[cmdr_id].exp > next_level(party_commanders[cmdr_id].level))
-  {
-    party_commanders[cmdr_id].level++;
-    party_commanders[cmdr_id].max_army_pts++;
-  }
-  return party_commanders[cmdr_id].level;
-}
-
-void give_commander_exp(char cmdr_id, char unit_id)
-{
-  party_commanders[cmdr_id].exp += (unit_list[unit_id].points << 3);
-}
-
-int next_level(char level)
-{
-  int lvl;
-  lvl = (int)level;
-
-  return ((lvl * lvl * lvl) * 5);
-}
-
 void list_commanders(char x, char y)
 {
   char i;
@@ -112,6 +85,21 @@ void list_commanders(char x, char y)
   for(i; i<8; i++)
   {
     put_string("---",x,y+i);
+  }
+}
+
+void heal_commander_army(char cmdr_id)
+{
+  int x,y;
+  char i;
+
+  create_effect(EFFECT_HEAL,x,y,0);
+  for(i=0; i<9; i++)
+  {
+    if(party_commanders[cmdr_id].bg.units[i].unit->id)
+    {
+      party_commanders[cmdr_id].bg.units[i].hp = party_commanders[cmdr_id].bg.units[i].unit->hp;
+    }
   }
 }
 

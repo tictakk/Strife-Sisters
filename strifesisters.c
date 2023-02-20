@@ -1,6 +1,18 @@
 #include <huc.h>
 
+//squirrel
+#include "sound/psglib.c"
+#include "snginit.c"
+int VSyncCnt;
+int TimerCnt;
+int MainCnt;
+int SubCnt;
+//
+
 char screen_dimensions = 0;
+#define PLAYER 1
+#define CPU 2
+
 #define NO_ATTACK 0
 #define SINGLE_HIT 1
 #define HEAL 2
@@ -16,7 +28,7 @@ char screen_dimensions = 0;
 #include "map_dimension.h"
 #include "paths.c"
 #include "strifesisters.h"
-#include "item.c"
+// #include "item.c"
 #include "effects.c"
 #include "arts.c"
 #include "units.c"
@@ -49,15 +61,15 @@ char screen_dimensions = 0;
 #incchr(healthbar,"map/backgrounds/healthbars.pcx");
 #incpal(healthbarpal,"map/backgrounds/healthbars.pcx");
 
-#incchr(panel_gfx, "map/sprites/deploy_menu.pcx")
-#incpal(panel_pal, "map/sprites/deploy_menu.pcx")
+// #incchr(panel_gfx, "map/sprites/deploy_menu.pcx")
+// #incpal(panel_pal, "map/sprites/deploy_menu.pcx")
 
-#incchr(info_gfx, "map/sprites/infobox.pcx")
-#incpal(info_pal, "map/sprites/infobox.pcx")
-#incbat(info_bat, "map/sprites/infobox.pcx", 0x1500, 0, 0, 32, 4)
+// #incchr(info_gfx, "map/sprites/infobox.pcx")
+// #incpal(info_pal, "map/sprites/infobox.pcx")
+// #incbat(info_bat, "map/sprites/infobox.pcx", 0x1500, 0, 0, 32, 4)
 
-#incchr(dialog_gfx, "map/sprites/dialoguebox.pcx")
-#incpal(dialog_pal, "map/sprites/dialoguebox.pcx")
+// #incchr(dialog_gfx, "map/sprites/dialoguebox.pcx")
+// #incpal(dialog_pal, "map/sprites/dialoguebox.pcx")
 // #incbat(dialog_bat, "map/sprites/dialoguebox.pcx", 0x1500, 0, 0, 32, 4)
 
 #incchr(icons_gfx, "map/sprites/icons.pcx")
@@ -232,9 +244,9 @@ enum Direction{
 #incpal(bndpal,"characters/bandit.pcx",0,2)
 // #incpal(blobpal,"map/sprites/froggy.pcx",0,2)
 
-const char area_one_buyable_items[] = {
-	0, 1, 2, 3
-};
+// const char area_one_buyable_items[] = {
+// 	0, 1, 2, 3
+// };
 
 //const char row_names[17] = {
 //	70, 114, 111, 110, 116, 0,
@@ -243,7 +255,7 @@ const char area_one_buyable_items[] = {
 
 int menu_size = 0;
 unsigned int player_gold = 0;
-char buyable_items[4];
+// char buyable_items[4];
 char party_units[MAX_PARTY_UNIT_SIZE];
 
 int map_counter = 0;
@@ -272,33 +284,38 @@ char party_units_size = 0;
 void main()
 {
   char in;
+	//setup (one time)
+  psgInit(5);
+  psgOn(0);
 
+	sngInit();
+	psgDelay(0);
+	
+	//play music (probably move this to whatever place you want this music to play)
+	//right now you have 1 song, as you get more you can psgPlay( X ) where X is song number :)
+	// psgPlay(0);
+	
 	game_loop = 1;
 
 	for(in=0; in<MAX_PARTY_UNIT_SIZE; in++)
 	{
-		party_units[0] = 0;
+		party_units[in] = 0;
 	}
-
   party_units[0] = SPEAR_UNIT;
-
-	buyable_items[0] = 0;
-	buyable_items[1] = 1;
-	buyable_items[2] = 2;
-	buyable_items[3] = 3;
-	num_of_buyable_items = 4;
 
 	initialize_units();
 	initialize_commanders();
   init_arts();
+  init_stones();
 //	initialize_items();
 
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
 
 	party_commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
-  party_commanders[0].bg.units[0].meter = 25;
-  party_commanders[0].bg.units[0].unit->id
+  // party_commanders[0].bg.units[0].meter = 25;
+  party_commanders[0].bg.calling_stone = CALLING_MOVE_BUFF;
+  // party_commanders[0].bg.calling_stone = CALLING_DOUBLE_ATTACK;
   // party_commanders[0].bg.units[1].meter = 25;
 	party_commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
   party_commanders[0].bg.units[1].unit = &unit_list[SPEAR_UNIT];
@@ -353,7 +370,7 @@ void display_intro()
 	// load_background(build_screen,build_pal,build_bat,32,28);
 	cls();
 	disp_on();
-	put_string("Strife Sisters v0.7.1",6,13);
+	put_string("Strife Sisters v0.7.6",6,13);
 	// wait_for_I_input();
 	// sync(60*10);
 
@@ -381,17 +398,6 @@ int spriteno,spritex,spritey,spritepattern,ctrl1,ctrl2,sprpal,sprpri;
 	spr_ctrl(ctrl1,ctrl2);
 	spr_pal(sprpal);
 	spr_pri(sprpri);
-}
-
-void display_sprite(int x_pos, int y_pos, int location, char flip, char pal)
-{
-	spr_make(total_sprites++,x_pos,y_pos,location,flip,NO_FLIP|SZ_16x16,pal,0);
-	spr_pri(1);
-}
-
-void spr_flip()
-{
-  spr_ctrl(FLIP_MAS,FLIP_X);
 }
 
 int range(char min, char max)
@@ -606,33 +612,33 @@ void print_unit_attack_icon(char unit_no, int x, int y)
 {
 	switch(unit_list[unit_no].a_type)
 	{
-			case NORMAL:
-        put_string(":",x,y);//sword
-        break;
+		case NORMAL:
+      put_string(":",x,y);//sword
+      break;
 
-			case PIERCE:
-        put_string(";",x,y);//spear
-        break;
+		case PIERCE:
+       put_string(";",x,y);//spear
+       break;
 
-			case UNARMED:
-        put_string(">",x,y);//unarmed
-        break;
+		case UNARMED:
+       put_string(">",x,y);//unarmed
+       break;
 
-			case MAGIC:
-        put_string("=",x,y);//magic
-        break;
+		case MAGIC:
+       put_string("=",x,y);//magic
+       break;
 
-			case MISSILE:
-        put_string("<",x,y);//bow
-        break;
+		case MISSILE:
+       put_string("<",x,y);//bow
+       break;
 
-			case AXE:
-        put_string("?",x,y);
-        break;
+		case AXE:
+       put_string("?",x,y);
+       break;
 
-			default:
-        put_string("=",x,y);
-        break;
+		default:
+       put_string("=",x,y);
+       break;
 	}
 }
 
@@ -686,13 +692,6 @@ void load_cursor(int x, int y, int cursor_no)
   cursor_x = x;
   cursor_y = y;
   display_cursor();
-}
-
-void tick(){
-	if(++tic > 6)
-	{
-		tic = 0;
-	}
 }
 
 int write_text(char x, char y, char *text)
@@ -785,11 +784,8 @@ initialize_commanders()
 
 	for(i=0, cmdr = party_commanders; i<TOTAL_COMMANDERS; i++, cmdr++)
 	{
-		cmdr->max_army_pts = 10;
 		cmdr->meter = 0;
 		cmdr->exp = 0;
-		cmdr->level = 1;
-		cmdr->item = 0;
 		cmdr->sprite_type = SWORD_UNIT;
 		cmdr->name = name20;
 		for(j=0; j<9; j++)
@@ -797,7 +793,7 @@ initialize_commanders()
 			cmdr->bg.units[j].unit = &unit_list[NO_UNIT];
       cmdr->bg.units[j].hp = 0;
     }
-    cmdr->bg.calling = 0;
+    cmdr->bg.calling_stone = 0;
 	}
 }
 
@@ -909,37 +905,6 @@ void load_item(char item_id, int index)
 		load_palette(12+index,elixirpal,1);
 		break;
 	}
-}
-
-void display_spawn(int index, int spawn_x, int spawn_y, int sprite_offset, int spawn_offset)
-{
-	int sprite_location, sprite_no;
-	sprite_location = 0;//UNIT_VRAM_START;
-	sprite_no = 18;
-	switch(index)
-	{
-		case SWORD_UNIT:
-		sprite_location = 0;//UNIT_VRAM_START;
-		sprite_no = 18;
-		break;
-		case SPEAR_UNIT:
-		sprite_location = 0;//UNIT_VRAM_START + 0x100;
-		sprite_no = 18;
-		break;
-		case DEMON_UNIT:
-		sprite_location = 0;//UNIT_VRAM_START + 0x300;
-		sprite_no = 22;
-		break;
-		case ARCHER_UNIT:
-		sprite_location = 0;//UNIT_VRAM_START + 0x200;
-		sprite_no = 18;
-		break;
-		case HOUND_UNIT:
-		sprite_location = 0;//UNIT_VRAM_START + 0x400;
-		sprite_no = 22;
-		break;
-	}
-	spr_make(10+spawn_offset,spawn_x,spawn_y,sprite_location,FLIP_MAS|SIZE_MAS,SZ_16x32,sprite_no,1);
 }
 
 void display_item(char cmdr_id, int index, int x, int y)
@@ -1162,7 +1127,7 @@ void display_abs_info_panel(int x, int y, int width, int length)
 	{
 		for(i=0; i<width; i++)
 		{
-			z = (j*width) + i;
+			// z = (j*width) + i;
 			ptr[i] = (0x6400 >> 4) + ((i+(width-1)) / (width - ((i+(width-2))/(width-1)))) + ((((j+(length-1)) / (length - ((j+(length-2))/(length-1))))) * 3) + 0x8000;
 		}
 		vaddr = vram_addr(0,j);
@@ -1170,29 +1135,57 @@ void display_abs_info_panel(int x, int y, int width, int length)
 	}
 }
 
-void change_background_palette(int tile, int pal, int map_offset)
+void display_abs_black_panel(int x, int y, int width, int length)
+{
+	int j, i, z, vaddr, offset, size;
+	size = length * width;
+	offset = y*8+x;
+  vaddr = vram_addr(x,y);
+  
+  vreg(0x00,vaddr);
+
+	for(j=0; j<length; j++)
+	{
+		for(i=0; i<width; i++)
+		{
+      vreg(0x02,0xA4BB);
+		}
+      sync(2);
+	}
+}
+
+void change_background_palette(int tile, int pal)
 {
 	int vaddr, x, y;
-	int ptr[2];
-	x = (tile%16)*2;
-	y = ((tile/16)*2);// + ((yOffset/8));
-	if(y < 6){ return; }
+  int tiledata;
+
+  x = (tile&15)<<1;
+	y = ((tile>>4)<<1);
+	if(y < 3){ return; }
+
 	vaddr = vram_addr(x,y);
 
-	ptr[0] = (pal + 0x100) + ((battlefieldbat[map_offset+tile-32] * 4));
-	ptr[1] = (pal + 0x100) + ((battlefieldbat[map_offset+tile-32] * 4) + 1);
-	load_vram(vaddr,ptr,2);
+  vreg(0x01,vaddr);
+  tiledata = peekw(0x02) & 0xFFF;
 
-	ptr[0] += 2;
-	ptr[1] += 2;
-	load_vram(vaddr+0x20,ptr,2);
+  vreg(0x00,vaddr);
+  vreg(0x02,tiledata+pal);
+  vreg(0x02,tiledata+pal+1);
+
+  vreg(0x00,vaddr+0x20);
+
+  vreg(0x01,vaddr+0x20);
+  tiledata = peekw(0x02) & 0xFFF;
+
+  vreg(0x02,tiledata+pal);
+  vreg(0x02,tiledata+pal+1);
 }
 
 load_healthbars()
 {
 	load_palette(2,healthbarpal,1);
 //	load_vram(0xe00,healthbar,0xC0);
-  	load_vram(0xe00,healthbar,0x150);
+  load_vram(0xe00,healthbar,0x150);
 }
 
 void display_healthbar(char x, char y, char percent)
@@ -1230,65 +1223,7 @@ int max(int a, int b)
 
 int get_unit_cost(char id)
 {
-	// switch(unit_list[id].unit_type)
-	// {
-	// 	case SPEARS:
-	// 	return 500;
-	// 	break;
-	// 	case INFANTRY:
-	// 	return 350;
-	// 	break;
-	// 	case FLYERS:
-	// 	return 600;
-	// 	break;
-	// 	case MUSKETS:
-	// 	return 400;
-	// 	break;
-	// 	case HOUNDS:
-	// 	return 200;
-	// 	break;
-	// 	case MAGES:
-	// 	return 400;
-	// 	break;
-	// 	default:
-	// 	return 100;
-	// 	break;
-	// }
 	return 100;
-}
-
-void equip_item(int cmdr_index, int item_index, char item_type)
-{
-	char index = 0, item_id = 40;
-
-	if(party_commanders[cmdr_index].item != 0)
-	{
-		item_id = party_commanders[cmdr_index].item;
-	}
-	index = get_item_real_index(item_index,item_type);
-	party_commanders[cmdr_index].item = party_items[index];
-	// party_commanders[cmdr_index].no_of_items = 1;
-	if(item_id)
-	{
-		party_items[no_of_party_items++] = item_id;
-	}
-}
-
-char get_item_real_index(char item_index, char item_type)
-{
-	char i=0, j=0, real_index = 0;
-	for(i=0; i<no_of_party_items; i++)
-	{
-		if(items[party_items[i]].type == item_type)
-		{
-			if(j++ == item_index)
-			{
-				return i;
-			}
-		}
-	}
-	// return real_index;
-	return 0;
 }
 
 void load_commanders_gfx(int cmdr_id, int address, int pal)
@@ -1347,6 +1282,10 @@ int get_percentage(int num, int denom)
 {
   int hp, hp_p;
   if(denom == 0)
+  {
+    return 0;
+  }
+  if(num < 0)
   {
     return 0;
   }
@@ -1461,7 +1400,7 @@ void put_white_square(char x, char y)
 
 int calculate_power(char cmdr_id)
 {
-	int i, hp_total, hp_max, power, percent;
+  int i, hp_total, hp_max, power, percent;
   power = 0;
   hp_max = 0;
   hp_total = 0;
@@ -1479,6 +1418,20 @@ int calculate_power(char cmdr_id)
   //having an issue with multiplying a signed num with the get_percentage fn, so divide by ten I guess?
   percent = get_percentage(hp_total/10,hp_max/10);
   return (power * percent)/100;
+}
+
+int roundUp(int num, int div)
+{
+	int whole, remainder;
+	whole = num/div;
+  if (div == 0)
+      return 0;
+
+  remainder = num % div; //1
+  if (remainder == 0)
+      return whole;
+	else
+			return whole+1;
 }
 
 #include "overworld.c"

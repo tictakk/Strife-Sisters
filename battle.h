@@ -76,6 +76,15 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].target = 0;
   battleunits[index].unit = ue;
 
+  if(entities[entity_id].team == PLAYER && active_player_calling == CALLING_DOUBLE_ATTACK)
+  {
+    battleunits[index].attacks++;
+  }
+  if(entities[entity_id].team == CPU && active_cpu_calling == CALLING_DOUBLE_ATTACK)
+  {
+    battleunits[index].attacks++;
+  }
+  
   if(entities[entity_id].bg->units[position]->unit.rng < attack_range)
   {
     battleunits[index].attacks = 0;

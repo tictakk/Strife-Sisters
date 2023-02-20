@@ -1,21 +1,41 @@
-void execute_calling(char cmdr_id)
-{
-}
+#include "calling_stone.c"
+//12? Calling stones, player must collect them throughought the game.
+//Maybe theres a certain order the player must use the stones in to beat the
+//final boss
 
-void play_calling_scene()
-{
-  
-}
+char active_player_calling = CALLING_NONE;
+char active_cpu_calling = CALLING_NONE;
 
-void heal_calling(char cmdr_id)
+void set_calling(char calling_id, char team)
 {
-  char i;
-  for(i=0; i<9; i++)
+  if(team == PLAYER)
   {
-    if(party_commanders[cmdr_id].bg.units[i].unit->id)
-    {
-      // put_number(party_commanders[cmdr_id].bg.units[i],3,0,i);
-      party_commanders[cmdr_id].bg.units[i].hp = party_commanders[cmdr_id].bg.units[i].unit->hp;
-    }
+    active_player_calling = calling_id;
   }
+  else
+  {
+    active_cpu_calling = calling_id;
+  }
+}
+
+void reset_calling(char team)
+{
+  set_calling(CALLING_NONE,team);
+}
+
+void display_calling_background(int x, int y, char cmdr_id)
+{
+  scroll(0,0,y,32,224,0x80);
+  display_abs_black_panel(0,6,32,7);
+  load_portrait(party_commanders[cmdr_id].sprite_type,0);
+  display_item(0,0,7,6);
+  print_calling_name(party_commanders[cmdr_id].bg.calling_stone,11,8);
+  sync(120);
+  load_map(0,2,0,0,16,29);
+  scroll(0,0,y,32,224,0xC0);
+}
+
+void print_calling_name(char calling_id, char x, char y)
+{
+  put_string(calling_stones[calling_id].name,x,y);
 }

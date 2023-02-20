@@ -13,8 +13,6 @@
 #define ACTION_MODE 10
 //117 per entity
 #define MAX_ENTITIES 21
-#define PLAYER 1
-#define CPU 2
 
 #define MENU_ATTACK 1
 #define MENU_MOVE 0
@@ -30,12 +28,9 @@
 #define SWORD_ATTACK 4
 #define SPEAR_ATTACK 4
 
-#define COMMANDER_FIGURE_BEGIN 0x6000
-
 typedef struct{
   int pos;
   char team, id, actionable, movable;
-  unsigned char hp;
   Battlegroup *bg;
 } Entity;
 
@@ -43,18 +38,17 @@ int gold_gained;
 unsigned char battle_grid[464];//MAP_SIZE];
 Entity entities[MAX_ENTITIES];
 char selector_mode;
-int unit_selected, last_pos;
+int last_pos;
 char num_of_entities, menu_option, menu_rows,
-     menu_columns, menu_vert_size, selected_option, selected_entity;
+     menu_columns, menu_vert_size, selected_option;
 char one_total;
 char two_total;
-char cost;
 char turn;
 int path[20];
 char no_of_player_cmdrs;
 char last_command;
 char menu_mask;
-// const char spear_attack[4] = { 2, 0, 2, 0};
+char current_turn;
 
 const int range_3_coord1[2] = {1,-16};
 const int range_3_coord2[2] = {0,-32};
@@ -101,6 +95,7 @@ const int range_1_coord4[2] = {0, -16};
 
 // struct Coords coords[9];
 int coords[24];
+Entity *selected_entity;
 
 void load_coords(char id)
 {
@@ -145,6 +140,7 @@ char get_army_min_move(char entity_id)
 {
   char i, min;
   min = MAX_MOVE_RANGE;
+
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
     if(entities[entity_id].bg->units[i].hp && entities[entity_id].bg->units[i].unit->mov < min)
@@ -152,6 +148,29 @@ char get_army_min_move(char entity_id)
       min = entities[entity_id].bg->units[i].unit->mov;
     }
   }
+  if(entities[entity_id].team == PLAYER)
+  {
+    if(active_player_calling == CALLING_MOVE_BUFF)
+    {
+      return min << 1;
+    }
+    if(active_cpu_calling == CALLING_MOVE_DEBUFF)
+    {
+      return 1;
+    }
+  }
+  else
+  {
+    if(active_cpu_calling == CALLING_MOVE_BUFF)
+    {
+      return min << 1;
+    }
+    if(active_player_calling == CALLING_MOVE_DEBUFF)
+    {
+      return 1;
+    }
+  }
+
   return min;
 }
 
@@ -169,7 +188,6 @@ void add_entity(char team, char pal, char id, int pos, struct Commander *command
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
   entities[num_of_entities].movable = 1;
-  entities[num_of_entities].hp = 255;
   // party_commanders[entities[num_of_entities]].meter = 0;
 
   add_npc(pos%16,pos/16,commanders[id].sprite_type,pal);
@@ -286,7 +304,6 @@ void remove_unit_from_grid(int grid_pos)
     memcpy(&entities[i],&entities[i+1],sizeof(Entity));
   }
   reset_satb();
-  display_sprites_();
   hide_menu();
 
   num_of_entities--;
@@ -302,21 +319,36 @@ void move_unit(int to, int from)
   battle_grid[to] = battle_grid[from];
   battle_grid[from] = 0;
   entities[id].pos = to;
-  unit_selected = to;
+  // unit_selected = to;
   entities[id].movable = 0;
   // selector_mode = SELECT_MODE;
   update_map();
 }
 
-void select_unit(int unit)
+void move_unit_new(int to)
 {
-  char mv;
-  mv = get_army_min_move(battle_grid[unit]-1);
+  last_pos = selected_entity->pos;
+  battle_grid[to] = battle_grid[last_pos];
+  battle_grid[last_pos] = 0;
+  selected_entity->pos = to;
+  update_map();
+}
+
+void select_unit(char entity_id)
+{
+  selected_entity = &entities[entity_id];
+  // selector_mode = PLACE_MODE;
+  // menu_option = MENU_ATTACK;
+  // draw_selector();
+  // highlight(pos,0xC000);
+}
+
+void display_move_range(int pos)
+{
   selector_mode = PLACE_MODE;
   menu_option = MENU_ATTACK;
-
   draw_selector();
-  highlight(unit,0xC000,mv,mv);
+  highlight(pos,0xC000);
 }
 
 int calc_move_cost(int origin, int dest)
@@ -390,18 +422,18 @@ void post_battle_dialog()
   //spells learned
 }
 
-void print_items_gained()
-{
-  char i=0;
-  while(i<drop_count)
-  {
-    clear_text_field();
-    write_text(1,1,"received ");
-    write_text(10,1,items[battle_items[i]].name);
-    i++;
-    wait_for_I_input();
-  }
-}
+// void print_items_gained()
+// {
+//   char i=0;
+//   while(i<drop_count)
+//   {
+//     clear_text_field();
+//     write_text(1,1,"received ");
+//     write_text(10,1,items[battle_items[i]].name);
+//     i++;
+//     wait_for_I_input();
+//   }
+// }
 
 void print_post_battle_info(char *str, int value)
 {
@@ -410,9 +442,6 @@ void print_post_battle_info(char *str, int value)
   put_number(value,4,1,2);
   wait_for_I_input();
 }
-
-void print_level_up(){}
-void print_spells_learned(){}
 
 void print_new_stats(char cmdr_id)
 {
@@ -452,11 +481,11 @@ void print_new_stats(char cmdr_id)
 void undo()
 {
   set_cursor_pos(last_pos);
-  move_unit(last_pos,unit_selected);
-  entities[battle_grid[unit_selected]-1].movable = 1;
-  set_menu_mask(battle_grid[unit_selected]-1);
+  move_unit_new(last_pos);
+  selected_entity->movable = 1;
+  set_menu_mask(selected_entity->pos);
   print_menu();
-  select_unit(unit_selected);
+  display_move_range(selected_entity->pos);
   hide_cursor();
 }
 
@@ -505,7 +534,7 @@ void print_menu()
 void center_camera(int selector_abs)
 {
   int new_offset;
-  new_offset = min(max((((selector_abs/16)<<4) - 128),0),240);
+  new_offset = min(max((((selector_abs>>4)<<4) - 128),0),240);
   s_y = new_offset;
   yOffset = 0 - new_offset;
   update_map();

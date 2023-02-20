@@ -36,9 +36,6 @@ void overworld_loop()
 
 		if(menu_state == 0)
 		{
-			tick();
-			if(tic == 0)
-			{
 				int pos;
 				pos = (party_pos_y * 32) + party_pos_x;
 //				draw_npcs(5);
@@ -98,11 +95,6 @@ void overworld_loop()
 					scroll(0,s_x,s_y,0,223,0xC0);
 					selector_y = 16;
 				}
-			}
-			else
-			{
-				rand();
-			}
 		}
 		if(!party_moving)
 		{
@@ -128,25 +120,25 @@ void set_direction(int sprite_no, enum Direction direction)
 	{
 		case NORTH:
 		spr_set(sprite_no);
-		spr_pattern(0x6A00 + (0x40*framer) + 0x100);
+		spr_pattern(0x6A00 + 0x100);
 		break;
 		case NORTHEAST:
 		case SOUTHEAST:
 		case EAST:
 		spr_set(sprite_no);
-		spr_pattern(0x6A00 + (0x40*framer) + 0x200);
+		spr_pattern(0x6A00 + 0x200);
 		spr_ctrl(FLIP_MAS|SIZE_MAS,NO_FLIP_X|SZ_16x32);
 		break;
 		case NORTHWEST:
 		case WEST:
 		case SOUTHWEST:
 		spr_set(sprite_no);
-		spr_pattern(0x6A00 + (0x40*framer) + 0x200);
+		spr_pattern(0x6A00 + 0x200);
 		spr_ctrl(FLIP_MAS,FLIP_X|SZ_16x32);
 		break;
 		case SOUTH:
 		spr_set(sprite_no);
-		spr_pattern(0x6A00 + (0x40*framer));
+		spr_pattern(0x6A00);
 		break;
 	}
 }
@@ -370,24 +362,23 @@ void load_overworld_bg()
 	satb_update();
 }
 
-void display_inventory(int x, int y, char item_type)
-{
-	int j=0, i=0;
-  display_window(y,x,24,12);
-	put_string("Inventory",y+6+(s_x/8),x+1+(s_y/8));
+// void display_inventory(int x, int y, char item_type)
+// {
+// 	int j=0, i=0;
+//   display_window(y,x,24,12);
+// 	put_string("Inventory",y+6+(s_x/8),x+1+(s_y/8));
 
-	for(j=0; j<no_of_party_items; j++)
-	{
-		if(item_type == ANY_ITEM || items[party_items[j]].type == item_type)
-		{
-			print_item_name(j,y+2,x+3,i++);
-		}
-	}
+// 	for(j=0; j<no_of_party_items; j++)
+// 	{
+// 		if(item_type == ANY_ITEM || items[party_items[j]].type == item_type)
+// 		{
+// 			print_item_name(j,y+2,x+3,i++);
+// 		}
+// 	}
 
-	menu_options = i;
-	commander_select_cursor = 0;
-	// menu_state = CONSUME_MENU + (item_type & 1);
-}
+// 	menu_options = i;
+// 	commander_select_cursor = 0;
+// }
 
 void init_overworld_data()
 {
@@ -412,17 +403,17 @@ void display_shop_menu(char castle_no)
   display_window(0,12,16,16);
   display_window(16,12,16,16);
 
-	load_item(buyable_items[0],1);
+	// load_item(buyable_items[0],1);
 	display_item(0,1,18,14);
-	display_attribute_string(buyable_items[0],(s_x/8)+18,(s_y/8)+18);
+	// display_attribute_string(buyable_items[0],(s_x/8)+18,(s_y/8)+18);
 
 	put_string("Gold",1+(s_x/8),9+(s_y/8));
 	put_number(player_gold,5,(s_x/8)+1,10+(s_y/8));
 
-	for(i=0; i<num_of_buyable_items; i++)
-	{
-		print_commander_stats(buyable_items[i],i);
-	}
+	// for(i=0; i<num_of_buyable_items; i++)
+	// {
+	// 	print_commander_stats(buyable_items[i],i);
+	// }
 
 	for(i=0; i<party_size; i++)
 	{
@@ -464,7 +455,7 @@ void print_item_name(int i, int x_off, int y_off, char index)
 	x = x_off+(s_x/8);
 	y = y_off+(s_y/8);
 
-	put_string(items[i].name,x+((index/8) * 8),y+(index%8));
+	// put_string(items[i].name,x+((index/8) * 8),y+(index%8));
 }
 
 void print_commander_stats(char item_no, char i)
@@ -473,7 +464,7 @@ void print_commander_stats(char item_no, char i)
 	x = 2+(s_x/8);
 	y = 3+(s_y/8);
 
-	put_string(items[item_no].name,x,y+i);
+	// put_string(items[item_no].name,x,y+i);
 	put_number(100,3,x+9,y+i);
 }
 
@@ -501,12 +492,12 @@ void print_unit_row_by_type(char type, char x, char y)
   set_font_pal(10);
 }
 
-void buy_item(char item_index, char cmdr_index)
-{
-	player_gold -= 100;
-	party_commanders[cmdr_index].item = item_index;
-  select_buyable_item(item_index);
-}
+// void buy_item(char item_index, char cmdr_index)
+// {
+// 	player_gold -= 100;
+// 	party_commanders[cmdr_index].item = item_index;
+//   select_buyable_item(item_index);
+// }
 
 void buy_unit()
 {
@@ -834,8 +825,8 @@ void overworld_controls(){
 
 					if(menu_state == RECRUIT_MENU)
 					{
-						load_item(buyable_items[commander_select_cursor],1);
-						display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
+						// load_item(buyable_items[commander_select_cursor],1);
+						// display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
 					}
 					else if(menu_state == BUY_SELECT_MENU)
 					{
@@ -890,8 +881,8 @@ void overworld_controls(){
 
 			if(menu_state == RECRUIT_MENU)
 			{
-				load_item(buyable_items[commander_select_cursor],1);
-				display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
+				// load_item(buyable_items[commander_select_cursor],1);
+				// display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
 			}
 			if(menu_state == BUY_SELECT_MENU)
 			{
@@ -921,22 +912,22 @@ void overworld_controls(){
 		if(menu_state == RECRUIT_MENU) //actually the shop items menu
 		{
 			last_selected_cursor = commander_select_cursor;
-      		set_font_pal(11);
-			print_item_name(buyable_items[commander_select_cursor],2,3,commander_select_cursor);
+      set_font_pal(11);
+			// print_item_name(buyable_items[commander_select_cursor],2,3,commander_select_cursor);
 			set_font_pal(10);
-			select_buyable_item(buyable_items[commander_select_cursor]);
+			// select_buyable_item(buyable_items[commander_select_cursor]);
 
 			load_portrait(0);
 			display_item(0,0,2,14);
 
 			display_cmdr_info(0,2,16);
-			if(party_commanders[0].item)
-			{
-				put_string("Item",(s_x/8)+9,(s_y/8)+20);
-				load_item(party_commanders[0].item,2);
-				display_item(0,2,9,22);
-				display_attribute_string(party_commanders[0].item,(s_x/8)+9,(s_y/8)+26);
-			}
+			// if(party_commanders[0].item)
+			// {
+			// 	put_string("Item",(s_x/8)+9,(s_y/8)+20);
+			// 	load_item(party_commanders[0].item,2);
+			// 	display_item(0,2,9,22);
+			// 	display_attribute_string(party_commanders[0].item,(s_x/8)+9,(s_y/8)+26);
+			// }
 		}
 		else if(menu_state == SHOP_MENU)//actually the buy units menu...
 		{
@@ -1096,10 +1087,10 @@ void overworld_controls(){
 		if(menu_state == BUY_ITEM_MENU)
 		{
 			commander_select_cursor = last_selected_cursor;
-			print_item_name(buyable_items[commander_select_cursor],2,3,commander_select_cursor);
-			load_item(buyable_items[commander_select_cursor],1);
+			// print_item_name(buyable_items[commander_select_cursor],2,3,commander_select_cursor);
+			// load_item(buyable_items[commander_select_cursor],1);
 			display_item(0,1,18,14);
-			display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
+			// display_attribute_string(buyable_items[commander_select_cursor],(s_x/8)+18,(s_y/8)+18);
 			menu_state = RECRUIT_MENU;
 			menu_options = num_of_buyable_items;
       remove_cursor();

@@ -12,7 +12,8 @@
 #incpal(lightening_effect_pal,"map/effects/lightening.pcx")
 #incpal(fire_effect_pal,"map/effects/fire.pcx")
 
-#define EFFECTS_VRAM 0x3600
+// #define EFFECTS_VRAM 0x3600
+#define EFFECTS_VRAM 0x6C00
 #define EFFECTS_WORD_PAL 30
 #define EFFECTS_ARTS_PAL 31
 #define EFFECTS_SPR_NUM 0
@@ -133,8 +134,8 @@ void load_effect(char effect_no)
 
 void display_effect(char effect_no)
 {
-  // put_number(effects_x[effect_no],3,0,0);
-  // put_number(effects[effect_no],3,0,1);
+  // put_number(effect_no,3,0,0);
+  // wait_for_I_input();
   spr_make(effect_no,effects_x[effect_no],effects_y[effect_no],EFFECTS_VRAM+(effect_no*0x200),FLIP_MAS,effects_flip[effect_no],effects_pal[effect_no],1);
   spr_hide();
 }
@@ -172,6 +173,39 @@ void remove_effects()
     remove_effect(i);
   }
   effect_count = 0;
+}
+
+void create_art_by_type(char effect_no, int x, int y, char flip)
+{
+  switch(effect_no)
+  {
+    case EFFECT_LIGHTENING_BOT:
+    case EFFECT_LIGHTENING_MID_1:
+    case EFFECT_LIGHTENING_MID_2:
+    case EFFECT_LIGHTENING_TOP:
+    create_lightening(x,y,flip);
+    break;
+
+    case EFFECT_HEAL:
+    create_healing(x,y,flip);
+    break;
+
+    case EFFECT_ATK_5:
+    create_atk_up(x,y);
+    break;
+
+    case EFFECT_DEF_5:
+    create_def_up(x,y);
+    break;
+
+    case EFFECT_ICE:
+    create_ice(x,y,flip);
+    break;
+
+    case EFFECT_FIRE:
+    create_fire(x,y,flip);
+    break;
+  }
 }
 
 char create_lightening(int x, int y, char flip)
@@ -270,7 +304,7 @@ void animate_hit_spark(char effect_no)
 void animate_healing(char effect_no)
 {
   char frame_no;
-
+  // put_number(69,3,0,0);
   spr_set(effect_no);
   
   frame_no = effect_frames[effect_no]++;

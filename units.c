@@ -48,9 +48,8 @@
 
 typedef struct{
 	unsigned char atk, def, mov, id, a_type, art,
-                rng, ign, spd, points, bonus_col, pow;
+                rng, ign, spd, points, pow;
 
-  char attacks[3];
 	int hp;
 } Unit;
 
@@ -76,7 +75,6 @@ unsigned char check_advantage(unsigned char unit_1, unsigned char unit_2)
 
 char get_weapon_adv(unsigned char weapon_type)
 {
-    // return 0;
   switch(weapon_type)
   {
     case NORMAL:
@@ -140,10 +138,10 @@ void print_unit_stats(char unit_id, char x, char y)
   print_unit_attack_icon(unit_list[unit_id].id,x+5,y+5);
 }
 
-void print_attack_type(char unit_id, char row, char x, char y)
+void print_attack_type(char attack_type, char row, char x, char y)
 {
   set_font_pal(8);
-  switch(unit_list[unit_id].attacks[row])
+  switch(attack_type)
   {
     case SINGLE_HIT:
       put_char('[',x,y);
@@ -173,26 +171,6 @@ void print_attack_type(char unit_id, char row, char x, char y)
   set_font_pal(10);
 }
 
-void print_unit_advantage_position(char unit_id, char x, char y)
-{
-  set_font_pal(8);
-  switch(unit_list[unit_id].bonus_col)
-  {
-    case 0:
-      put_string("Front ",x,y);
-      break;
-
-    case 1:
-      put_string("Middle",x,y);
-      break;
-
-    case 2:
-      put_string("Rear  ",x,y);
-      break;
-  }
-  set_font_pal(10);
-}
-
 void unlock_unit(char unit_id)
 {
   unlocked_units[unit_id] = 1;
@@ -209,7 +187,6 @@ void initialize_units()
     unit_list[i].atk = 20;
     unit_list[i].def = 10;
     unit_list[i].spd = 15;
-    unit_list[i].bonus_col = 0;
     unit_list[i].points = 1;
     unit_list[i].rng = 1;
     unit_list[i].mov = 3;
@@ -217,9 +194,6 @@ void initialize_units()
     unit_list[i].id = i;
     unit_list[i].art = POWER_WAVE_ART;
     unit_list[i].a_type = NONE;
-    unit_list[i].attacks[0] = SINGLE_HIT;
-    unit_list[i].attacks[1] = SINGLE_HIT;
-    unit_list[i].attacks[2] = SINGLE_HIT;
     unlocked_units[i] = 0;
   }
 
@@ -228,7 +202,6 @@ void initialize_units()
   unit_list[SPEAR_UNIT].def = 12;
   unit_list[SPEAR_UNIT].rng = 2;
   unit_list[SPEAR_UNIT].mov = 3;
-  unit_list[SPEAR_UNIT].bonus_col = 1;
   unit_list[SPEAR_UNIT].spd = 15;
   unit_list[SPEAR_UNIT].ign = 0;
   unit_list[SPEAR_UNIT].art = LIGHTENING_ART;
@@ -241,7 +214,6 @@ void initialize_units()
   unit_list[LANCER_UNIT].def = 14;
   unit_list[LANCER_UNIT].rng = 2;
   unit_list[LANCER_UNIT].mov = 3;
-  unit_list[LANCER_UNIT].bonus_col = 1;
   unit_list[LANCER_UNIT].spd = 15;
   unit_list[LANCER_UNIT].ign = 0;
   unit_list[LANCER_UNIT].id = LANCER_UNIT;
@@ -259,8 +231,6 @@ void initialize_units()
   // unit_list[SWORD_UNIT].art = ICE_ART;
   // unit_list[SWORD_UNIT].id = SWORD_UNIT;
   unit_list[SWORD_UNIT].a_type = NORMAL;
-  unit_list[SWORD_UNIT].bonus_col = 2;
-  unit_list[SWORD_UNIT].attacks[2] = NO_ATTACK;
   unlocked_units[SWORD_UNIT] = 1;
 
   unit_list[ARCHER_UNIT].atk = 26;
@@ -269,7 +239,6 @@ void initialize_units()
   unit_list[ARCHER_UNIT].rng = 2;
   unit_list[ARCHER_UNIT].mov = 3;
   unit_list[ARCHER_UNIT].spd = 11;
-  unit_list[ARCHER_UNIT].bonus_col = 2;
   unit_list[ARCHER_UNIT].ign = 0;
   unit_list[ARCHER_UNIT].id = ARCHER_UNIT;
   unit_list[ARCHER_UNIT].a_type = MISSILE;
@@ -279,7 +248,6 @@ void initialize_units()
 	unit_list[HOUND_UNIT].def = 13;
 	unit_list[HOUND_UNIT].hp  = 45;
 	unit_list[HOUND_UNIT].ign = 0;
-  unit_list[HOUND_UNIT].bonus_col = 1;
   unit_list[HOUND_UNIT].mov = 4;
 	unit_list[HOUND_UNIT].id = HOUND_UNIT;
 	unit_list[HOUND_UNIT].a_type = NORMAL;
@@ -299,7 +267,6 @@ void initialize_units()
 	unit_list[AXE_UNIT].def = 13;
 	unit_list[AXE_UNIT].hp  = 50;
 	unit_list[AXE_UNIT].ign = 0;
-  unit_list[AXE_UNIT].bonus_col = 0;
   unit_list[AXE_UNIT].mov = 3;
 	unit_list[AXE_UNIT].id = AXE_UNIT;
 	unit_list[AXE_UNIT].a_type = AXE;
@@ -308,7 +275,6 @@ void initialize_units()
   unit_list[BERSERKER].def = 14;
   unit_list[BERSERKER].hp  = 60;
   unit_list[BERSERKER].ign = 0;
-  unit_list[BERSERKER].bonus_col = 0;
   unit_list[BERSERKER].mov = 3;
   unit_list[BERSERKER].id = BERSERKER;
   unit_list[BERSERKER].a_type = AXE;
@@ -318,35 +284,26 @@ void initialize_units()
   unit_list[MAGE_UNIT].def = 11;
   unit_list[MAGE_UNIT].hp = 35;
   unit_list[MAGE_UNIT].spd = 12;
-  unit_list[MAGE_UNIT].bonus_col = 1;
   unit_list[MAGE_UNIT].ign = 0;
   unit_list[MAGE_UNIT].rng = 2;
   unit_list[MAGE_UNIT].mov = 3;
   unit_list[MAGE_UNIT].id = MAGE_UNIT;
   unit_list[MAGE_UNIT].a_type = MAGIC;
-  unit_list[MAGE_UNIT].attacks[1] = SINGLE_HIT;
-  unit_list[MAGE_UNIT].attacks[2] = SINGLE_HIT;
-  unit_list[MAGE_UNIT].attacks[0] = NO_ATTACK;
 
   unit_list[CLERIC_UNIT].atk = 16;
   unit_list[CLERIC_UNIT].def = 12;
   unit_list[CLERIC_UNIT].hp = 29;
   unit_list[CLERIC_UNIT].spd = 16;
-  unit_list[CLERIC_UNIT].bonus_col = 1;
   unit_list[CLERIC_UNIT].ign = 0;
   unit_list[CLERIC_UNIT].mov = 3;
   unit_list[CLERIC_UNIT].id = CLERIC_UNIT;
   unit_list[CLERIC_UNIT].a_type = MAGIC;
   unit_list[CLERIC_UNIT].art = HEALING_ART;
-  unit_list[CLERIC_UNIT].attacks[0] = NO_ATTACK;
-  unit_list[CLERIC_UNIT].attacks[1] = HEAL;
-  unit_list[CLERIC_UNIT].attacks[2] = HEAL;
 
 	unit_list[DEMON_UNIT].atk = 22;
 	unit_list[DEMON_UNIT].def = 13;
 	unit_list[DEMON_UNIT].rng = 1;
 	unit_list[DEMON_UNIT].mov = 4;
-  unit_list[DEMON_UNIT].bonus_col = 1;
   unit_list[DEMON_UNIT].ign = 1;
 	unit_list[DEMON_UNIT].id = DEMON_UNIT;
 	unit_list[DEMON_UNIT].a_type = NORMAL;
@@ -356,7 +313,6 @@ void initialize_units()
   unit_list[MONK_UNIT].def = 15;
   unit_list[MONK_UNIT].rng = 1;
   unit_list[MONK_UNIT].mov = 3;
-  unit_list[MONK_UNIT].bonus_col = 0;
   unit_list[MONK_UNIT].ign = 1;
   unit_list[MONK_UNIT].id = MONK_UNIT;
   unit_list[MONK_UNIT].a_type = UNARMED;
@@ -366,7 +322,6 @@ void initialize_units()
   unit_list[MONK_UNIT].def = 15;
   unit_list[MONK_UNIT].rng = 1;
   unit_list[MONK_UNIT].mov = 3;
-  unit_list[MONK_UNIT].bonus_col = 0;
   unit_list[MONK_UNIT].ign = 1;
   unit_list[MONK_UNIT].id = MONK_UNIT;
   unit_list[MONK_UNIT].a_type = UNARMED;

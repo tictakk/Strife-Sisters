@@ -109,6 +109,11 @@ void start_turn(char team)
       entities[i].movable = 1;
     }
   }
+  if(team == PLAYER)
+  {
+    current_turn++;
+  }
+  reset_calling(team);
   center_camera(camera_pos);
   set_cursor_pos(camera_pos);
   satb_update();
@@ -346,7 +351,7 @@ void move_ai_unit(char ai_id, int dest)
   {
     return;
   }
-  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000,3,3);
+  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
   satb_update();
   sync(10);
   move_unit(dest,entities[ai_entities[ai_id].entity_id].pos);
