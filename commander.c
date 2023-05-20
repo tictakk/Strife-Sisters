@@ -1,8 +1,7 @@
-#define MAX_PARTY_COMMANDERS 6
+#define MAX_PARTY_COMMANDERS 8
 #define MAX_ENEMY_COMMANDERS 15
 #define MAX_ARMY_SIZE 9
-#define MAX_METER 100
-#define MAX_UNIT_METER 25
+#define MAX_METER 5
 #define TOTAL_COMMANDERS (MAX_PARTY_COMMANDERS + MAX_ENEMY_COMMANDERS)
 
 //names
@@ -15,13 +14,14 @@ const char *name20 = "Generic";
 typedef struct {
 	Unit_Entity units[9];
   char calling_stone;
+  char meter;
 } Battlegroup;
 
 struct Commander{
-  char meter;
+  // char meter;
 	char *name;
 	char sprite_type;
-  int exp;
+  char max_bp;
 	Battlegroup bg;
 };
 
@@ -37,6 +37,12 @@ void clear_commander_battle_group(struct Commander *cmdr)
     cmdr->bg.units[i].unit = &unit_list[NO_UNIT];
     cmdr->bg.units[i].hp = 0;
   }
+}
+
+void remove_unit_from_group(char cmdr_id, char position)
+{
+  party_commanders[cmdr_id].bg.units[position].unit = &unit_list[NO_UNIT];
+  party_commanders[cmdr_id].bg.units[position].hp = 0;
 }
 
 void add_commander_to_party(char *name, char st)
@@ -58,20 +64,6 @@ void clear_enemy_commander_ram()
     enemy_commanders[i].name = name20;
     clear_commander_battle_group(enemy_commanders+i);
   }
-}
-
-//TODO: I belive this can be removed, we are no longer "upgrading" units through exp
-void upgrade_unit(struct Commander *cmdr, char pos, char upgrade_id)
-{
-  int hp, hp_p, new_hp;
-
-  hp = cmdr->bg.units[pos].hp * 100;
-  hp_p = hp / cmdr->bg.units[pos].unit->hp;
-
-  new_hp = (unit_list[upgrade_id].hp * hp_p) / 100;
-
-  cmdr->bg.units[pos].unit = &unit_list[upgrade_id];
-  cmdr->bg.units[pos].hp = new_hp;
 }
 
 void list_commanders(char x, char y)
@@ -101,5 +93,20 @@ void heal_commander_army(char cmdr_id)
       party_commanders[cmdr_id].bg.units[i].hp = party_commanders[cmdr_id].bg.units[i].unit->hp;
     }
   }
+}
+
+char get_commander_battle_points(char cmdr_id)
+{
+  char bp, i;
+  bp = 0;
+
+  for(i=0; i<9; i++)
+  {
+    if(party_commanders[cmdr_id].bg.units[i].unit->id)
+    {
+      bp += party_commanders[cmdr_id].bg.units[i].unit->points;
+    }
+  }
+  return bp;
 }
 

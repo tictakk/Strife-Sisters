@@ -1,8 +1,8 @@
 #include "battlefield.h"
 struct Node neighbors[4];
-struct Node map[80];
+struct Node map[61]; //a unit with a max move of 5 will fill 60 nodes max.
 
-char visit_grid[464];
+char visit_grid[352];
 
 // int get_neighbors(unsigned char x, unsigned char y, char size)
 int get_neighbors(int position)
@@ -27,7 +27,8 @@ int get_neighbors(int position)
 		counter++;
 	}
 	//down
-	if((position + 16) < 464) //BREAKS OVERWORLD
+	// if((position + 16) < 464)
+	if((position + 16) < 352)
 	{
 		neighbors[counter].ownPos = position+16;
 		neighbors[counter].fromPos = position;
@@ -79,6 +80,7 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		if(map[map_counter].checked)
 		{
 			count = get_neighbors(map[map_counter].ownPos);
+
 			i = 0;
 			while(i < count)
 			{
@@ -126,7 +128,7 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		}
 		if(map_counter == next_d)
 		{
-			// put_number(d_count,3,10,5+(g++));
+			// put_number(d_count,3,10,20+(g++));
 			next_d = d_count;
 			d_level++;
 		}
@@ -154,7 +156,8 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 void reset_grid()
 {
   int i;
-  for(i=0; i<464; i++)
+//   for(i=0; i<464; i++)
+	for(i=0; i<352; i++)
   {
     visit_grid[i] = 0;
   }
@@ -175,14 +178,6 @@ char is_zero(char num, char size)
 // int put_visited(int x, int y, int fx, int fy, char checked)
 int put_visited(int pos, int fpos, char checked)
 {
-	// int i;
-	// for(i=0; i<map_size+1; i++)
-	// {
-		// if(map[i].ownPos == pos)
-		// {
-			// return 0;
-		// }
-	// }
   if(visit_grid[pos])
   {
     return 0;
@@ -200,14 +195,11 @@ int put_visited(int pos, int fpos, char checked)
 unsigned char get(int pos)
 {
   unsigned char i = 0;
-  put_number(pos,3,0,0);
-  wait_for_I_input();
   for(i=0; i<map_size; i++)
 	{
-		if(map[i].ownPos == pos)
+	if(map[i].ownPos == pos)
     {
       return i;
-      //return 0;
     }
   }
   return 0;

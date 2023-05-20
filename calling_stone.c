@@ -36,7 +36,7 @@ Calling_Stone calling_stones[CALLING_STONE_COUNT];
 init_stones()
 {
   calling_stones[0].cost = 127;
-  calling_stones[0].effect = EFFECT_ATK_5;
+  calling_stones[0].effect = EFFECT_ATK_3;
   calling_stones[0].name = calling0;
   calling_stones[0].s_name = stone_name;
 
@@ -51,12 +51,12 @@ init_stones()
   calling_stones[2].s_name = stone_name;
 
   calling_stones[3].cost = 4;
-  calling_stones[3].effect = EFFECT_DEF_5;
+  calling_stones[3].effect = EFFECT_DEF_UP;
   calling_stones[3].name = calling3;
   calling_stones[3].s_name = stone_name;
 
   calling_stones[4].cost = 4;
-  calling_stones[4].effect = EFFECT_ATK_5;
+  calling_stones[4].effect = EFFECT_ATK_3;
   calling_stones[4].name = calling4;
   calling_stones[4].s_name = stone_name;
 

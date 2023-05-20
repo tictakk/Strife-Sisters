@@ -28,18 +28,20 @@
 #define SWORD_ATTACK 4
 #define SPEAR_ATTACK 4
 
+#define BATTLEFIELD_CENTER_Y 128
+
 typedef struct{
   int pos;
   char team, id, actionable, movable;
   Battlegroup *bg;
 } Entity;
 
-int gold_gained;
-unsigned char battle_grid[464];//MAP_SIZE];
+// unsigned char battle_grid[464];
+unsigned char battle_grid[352];
 Entity entities[MAX_ENTITIES];
 char selector_mode;
 int last_pos;
-char num_of_entities, menu_option, menu_rows,
+char num_of_entities, menu_option,
      menu_columns, menu_vert_size, selected_option;
 char one_total;
 char two_total;
@@ -197,7 +199,7 @@ void add_entity(char team, char pal, char id, int pos, struct Commander *command
 
 void update_selector_pos(int x, int y)
 {
-  if(sy == 208 && y > 0 && s_y < 240) //scroll down
+  if(sy == 208 && y > 0 && s_y < 116) //scroll down
   {
     yOffset -= 16;
     s_y += 16;
@@ -268,7 +270,8 @@ char destroy_entity(int id)
 //      gold_gained += range(0,20);
       two_total--;
     }
-    for(i=0; i<464; i++)
+    // for(i=0; i<464; i++)
+    for(i=0; i<352; i++)
     {
       if(battle_grid[i] > entity_id+1)
       {
@@ -291,7 +294,8 @@ void remove_unit_from_grid(int grid_pos)
   entity_id = battle_grid[grid_pos]-1;
 
   battle_grid[grid_pos] = 0;
-  for(i=0; i<464; i++)
+  // for(i=0; i<464; i++)
+  for(i=0; i<352; i++)
   {
     if(battle_grid[i] > entity_id)
     {
@@ -336,6 +340,7 @@ void move_unit_new(int to)
 
 void select_unit(char entity_id)
 {
+  // put_number(entity_id,4,0,0);
   selected_entity = &entities[entity_id];
   // selector_mode = PLACE_MODE;
   // menu_option = MENU_ATTACK;
@@ -364,7 +369,7 @@ int calc_move_cost(int origin, int dest)
 char attack_unit(int src, int dst, char art)
 {
   char result;
-  int attacker, target, range;//, result;
+  int attacker, target, range, item_no;//, result;
   attacker = battle_grid[dst]-1;
   target = battle_grid[src]-1;
   range = get_range_from_distance(dst,src);
@@ -372,6 +377,11 @@ char attack_unit(int src, int dst, char art)
   if(entities[attacker].team != entities[target].team)
   {
     // if(attackable(attacker,target,coords))
+    item_no = check_item_pickup();
+    if(item_no > -1)
+    {
+      collect_item(item_no);
+    }
     last_command = selector_mode;
     entities[attacker].actionable = 0;
     hide_menu();
@@ -531,57 +541,124 @@ void print_menu()
   mask_menu();
 }
 
-void center_camera(int selector_abs)
+void center_camera(int position)
 {
   int new_offset;
-  new_offset = min(max((((selector_abs>>4)<<4) - 128),0),240);
+  new_offset = get_valid_map_s_y(position);
   s_y = new_offset;
   yOffset = 0 - new_offset;
   update_map();
   scroll(0,s_x,s_y+32,32,224,0xC0);
 }
 
-void item_gained_text(char item_no)
+void pan_camera_y(int position)
+{
+  int desired_s_y;
+  desired_s_y = get_valid_map_s_y(position);
+
+  hide_npcs(6);
+  draw_npcs(6);
+  satb_update();
+
+  while(desired_s_y != s_y)
+  {
+    if(desired_s_y - s_y < 0)
+    {
+      ++yOffset;
+      scroll(0,s_x,--s_y+32,32,224,0xC0);
+      draw_npcs(6);
+    }
+    else 
+    {
+      --yOffset;
+      scroll(0,s_x,++s_y+32,32,224,0xC0);
+      draw_npcs(6);
+    }
+    satb_update();
+    vsync();
+  }
+}
+
+int get_valid_map_s_y(int position)
+{
+  return min(max((((position>>4)<<4) - 128),0),112);
+}
+
+void item_gained_text(char item_no, int amt)
 {
   clear_text_field();
-  put_string("Gained 10",1,1);
+  put_string("Gained ",1,1);
+  if(amt < 100){ put_number(amt,2,8,1); } else {put_number(amt,3,8,1);}
   switch(item_no)
   {
-    case 0x7:
+    case RED_CRYSTAL:
       put_string("red gems",1,2);
-      red_crystal_count += 10;
+      red_crystal_count += amt;
       break;
 
-    case 0xA:
-      put_string("blue gems",1,2);
-      blue_crystal_count += 10;
+    case BLUE_CRYSTAL:
+      put_string("meter bar",1,2);
+      selected_entity->bg->meter = min(selected_entity->bg->meter+1,MAX_METER);
       break;
 
-    case 0xD:
+    case GREEN_CRYSTAL:
       put_string("green gems",1,2);
-      green_crystal_count += 10;
+      green_crystal_count += amt;
       break;
 
-    case 0x10:
-      put_char('0',10,1);
-      put_string("gold coins",1,2);
-      player_gold += 100;
+    case CHEST:
+      put_string("material",1,2);
+      player_gold += amt;
       break;
   }
 
-  wait_for_I_input();
+  sync(160);
   clear_text_field();
 }
 
 void end_unit_turn(char entity_id)
 {
+  char item_no;
   selector_mode = SELECT_MODE;
   menu_option = MENU_ATTACK;
   entities[entity_id].actionable = 0;
   menu_mask = 0x00;
   print_menu();
   hide_cursor();
+  item_no = check_item_pickup();
+  if(item_no > -1)
+  {
+    collect_item(item_no);
+  }
 }
+
+void collect_item(char item_no)
+{
+  switch(terrain_items[item_no].item_no)
+  {
+    case RED_CRYSTAL: 
+      item_gained_text(RED_CRYSTAL,range(10,20));
+      break;
+
+    case BLUE_CRYSTAL: 
+      item_gained_text(BLUE_CRYSTAL,1);
+      // selected_entity->bg->meter = min(selected_entity->bg->meter+1,MAX_METER);
+      break;
+
+    case GREEN_CRYSTAL: 
+      item_gained_text(GREEN_CRYSTAL,range(10,20));
+      break;
+
+    case CHEST:
+      item_gained_text(CHEST,range(100,300));
+      break;
+  }
+  remove_terrain_item(item_no);
+}
+
+// void increment_meter(char id)
+// {
+// }
 
 void update_map();
 void begin_battle(int src, int dst, int dst_p, char a_terrain, char t_terrain);

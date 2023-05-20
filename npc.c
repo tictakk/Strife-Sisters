@@ -6,7 +6,7 @@
 #define MAX_NPCS 20
 #define NO_OF_BASIC_TYPE 29
 #define MAX_UNIT_TYPES (NO_OF_BASIC_TYPE + TOTAL_COMMANDERS)
-#define UNIT_VRAM_START 0x3600//0x5200
+#define UNIT_VRAM_START 0x3A00//0x5200
 
 struct npc{
   unsigned char pos_x, pos_y, type, active, frame, pal;
@@ -15,7 +15,7 @@ struct npc{
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
-                                        19,19,21,22,23,
+                                        19,20,21,22,23,
                                         24,25,26,25,26,
                                         25,19,19,17,17,24,24};
 
@@ -35,7 +35,7 @@ void init_npcs()
 
   load_palette(17,sldpal,1);
   load_palette(18,magepal,2);
-  load_palette(20,dmnpal,2);
+  load_palette(20,dmnpal,1);
   load_palette(21,blobpal,2);
   load_palette(23,axebtlpal,1);
   load_palette(24,bndpal,2);
@@ -54,9 +54,10 @@ void clear_npcs()
 void hide_npcs(char offset)
 {
   char i;
-  for(i=0; i<npc_count; i++)
+  // for(i=0; i<npc_count; i++)
+  for(i=offset; i<64; i++)
   {
-    spr_hide(offset+i);
+    spr_hide(i);
   }
 }
 
@@ -146,9 +147,9 @@ void add_npc(char x, char y, char type, char pal)
           break;
 
           case CLERIC_UNIT:
-          load_vram(npc_vram[type],mag,0x100);
-          break;
-
+          // load_vram(npc_vram[type],mag,0x100);
+          // break;
+          case BLACK_MAGE_UNIT:
           case MAGE_UNIT:
           load_vram(npc_vram[type],mag,0x100);
           break;
@@ -183,13 +184,12 @@ void draw_npcs(char sprite_offset)
 {
   char i;
   int x, y;
-  increment_frame();
-
+  // increment_frame();
   for(i=0; i<npc_count; i++)
   {
     x = npcs[i].pos_x * 16;
     y = npcs[i].pos_y * 16;
-    draw_npc(sprite_offset+i,x,y,i);
+    draw_npc(sprite_offset+i,x,y-16,i);
   }
 }
 

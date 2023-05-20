@@ -1,3 +1,8 @@
+#incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
+#inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
+#inctile(battletiles,"tiles/battletiles.tiles.pcx")
+#incpal(battlepal,"tiles/battletiles.tiles.pcx")
+
 #define MAX_GROUP_SIZE 9
 #define TEAM_ONE 0
 #define TEAM_TWO 9
@@ -11,22 +16,35 @@
 #define HEALING 6
 #define METER_ATTACK 8
 
+#define STATUS_NORMAL 0
+#define STATUS_DAZED 1
+#define STATUS_CONFUSED 2
+#define STATUS_RAGE 3
+#define STATUS_BLOWBACK 4
+#define STATE_ACID 5
+
 typedef struct {
-    char ent_id, active, frame, pal, state, target_team, pos, attacks, target;
-    Unit_Entity *unit;
-} BattleUnit;
+  char ent_id, active, frame, pal, state, target_team, pos, attacks, 
+       target, meter, status, a_bonus, d_bonus;
+  Unit_Entity *unit;
+}BattleUnit;
 
 const char top_row_attack_chart[9]    = { 1, 1, 3, 2, 4, 5, 4, 5, 5};
 const char middle_row_attack_chart[9] = { 1, 1, 1, 2, 3, 2, 4, 5, 4};
 const char bottom_row_attack_chart[9] = { 3, 1, 1, 5, 4, 2, 5, 4, 4};
 
-int target, attacking_team, attacker_size, target_size,
-	team_one_count, team_two_count;
+char atker, trgt, meter_queued = 0, unit_meter_queued = 0, position_status = 0;//FINISH THIS STUFF
+
+int team_one_count, team_two_count;
 
 int a_def_bonus, a_atk_bonus, t_def_bonus, t_atk_bonus;
 
-char a_terrain, t_terrain, team_one_strategy, team_two_strategy,
-     attack_range, battle_clock, animating, attacker, speed_divider, stun_count;
+char a_terrain, t_terrain, attack_range, 
+     battle_clock, animating, attacker, speed_divider, stun_count;
+
+char team_one_judgement=0, team_two_judgement=0, clear_eyes_called=0, sea_legs_art=0;
+char team_one_tracked=0, team_two_tracked=0, team_one_tracking=0, team_two_tracking=0;
+char art_queued = 0, art_unit_id = 0, art_queue_id = 0;
 
 BattleUnit battleunits[18];
 
@@ -75,6 +93,9 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].attacks = 1;
   battleunits[index].target = 0;
   battleunits[index].unit = ue;
+  battleunits[index].meter = 0;
+  battleunits[index].a_bonus = 0;
+  battleunits[index].d_bonus = 0;
 
   if(entities[entity_id].team == PLAYER && active_player_calling == CALLING_DOUBLE_ATTACK)
   {
@@ -94,7 +115,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   {
     case BLOB_UNIT:
       load_vram(idle_vrams[index],blobbattle,0x100);
-      battleunits[index].pal = 16;
+      battleunits[index].pal = 28;
       break;
 
     case SWORD_UNIT:
@@ -107,9 +128,24 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
       battleunits[index].pal = 18;
       break;
 
+    case STALKER_UNIT:
+      load_vram(idle_vrams[index],stalkerbtl,0x100);
+      battleunits[index].pal = 27;
+      break;
+
     case ARCHER_UNIT:
       load_vram(idle_vrams[index],musketbtl,0x100);
       battleunits[index].pal = 19;
+      break;
+    
+    case SNIPER_UNIT:
+      load_vram(idle_vrams[index],sniperbtl,0x100);
+      battleunits[index].pal = 28;
+      break;
+
+    case BERSERKER_UNIT:
+      load_vram(idle_vrams[index],berserkerbtl,0x100);
+      battleunits[index].pal = 28;
       break;
 
     case DEMON_UNIT:
@@ -142,6 +178,26 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
       battleunits[index].pal = 23;
       break;
 
+    case WITCH_UNIT:
+      load_vram(idle_vrams[index],witchbtl,0x100);
+      battleunits[index].pal = 29;
+      break;
+
+    case PRIEST_UNIT:
+      load_vram(idle_vrams[index],priestbtl,0x100);
+      battleunits[index].pal = 29;
+      break;
+
+    // case BLACK_MAGE_UNIT:
+    //   load_vram(idle_vrams[index],magebtl,0x100);
+    //   battleunits[index].pal = 26;
+    //   break;
+
+    case PALADIN_UNIT:
+      load_vram(idle_vrams[index],paladinbtl,0x100);
+      battleunits[index].pal = 28;
+      break;
+
     case KNIGHT_UNIT:
       load_vram(idle_vrams[index],knightbtl,0x100);
       battleunits[index].pal = 18;
@@ -155,6 +211,16 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
     case MONK_UNIT:
       load_vram(idle_vrams[index],monkbtl,0x100);
       battleunits[index].pal = 24;
+      break;
+
+    case FIGHTER_UNIT:
+      load_vram(idle_vrams[index],fighterbtl,0x100);
+      battleunits[index].pal = 24;
+      break;
+
+    case BRAWLER_UNIT:
+      load_vram(idle_vrams[index],brawlerbtl,0x100);
+      battleunits[index].pal = 26;
       break;
 
     default:
@@ -188,8 +254,20 @@ void transfer_units_to_attack_vram(char type)
       load_vram(attack_vrams[0],attack2+0x300,0x500);
       break;
 
+    case STALKER_UNIT:
+      load_vram(attack_vrams[0],stalkerbtl+0x300,0x500);
+      break;
+
     case ARCHER_UNIT:
       load_vram(attack_vrams[0],musketbtl+0x300,0x500);
+      break;
+
+    case SNIPER_UNIT:
+      load_vram(attack_vrams[0],sniperbtl+0x300,0x500);
+      break;
+
+    case BERSERKER_UNIT:
+      load_vram(attack_vrams[0],berserkerbtl+0x300,0x500);
       break;
 
     case DEMON_UNIT:
@@ -208,6 +286,15 @@ void transfer_units_to_attack_vram(char type)
       load_vram(attack_vrams[0],raiderbtl+0x300,0x500);
       break;
 
+    case WITCH_UNIT:
+      load_vram(attack_vrams[0],witchbtl+0x300,0x500);
+      break;
+
+    case PRIEST_UNIT:
+      load_vram(attack_vrams[0],priestbtl+0x300,0x500);
+      break;
+
+    case BLACK_MAGE_UNIT:
     case CLERIC_UNIT:
     case MAGE_UNIT:
       load_vram(attack_vrams[0],magebtl+0x300,0x500);
@@ -215,6 +302,18 @@ void transfer_units_to_attack_vram(char type)
 
     case KNIGHT_UNIT:
       load_vram(attack_vrams[0],knightbtl+0x300,0x500);
+      break;
+
+    case PALADIN_UNIT:
+      load_vram(attack_vrams[0],paladinbtl+0x300,0x500);
+      break;
+
+    case FIGHTER_UNIT:
+      load_vram(attack_vrams[0],fighterbtl+0x300,0x500);
+      break;
+
+    case BRAWLER_UNIT:
+      load_vram(attack_vrams[0],brawlerbtl+0x300,0x500);
       break;
 
     case MONK_UNIT:
@@ -249,8 +348,20 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],attack2+0x900,0x100);
       break;
 
+    case STALKER_UNIT:
+      load_vram(stun_vrams[index],stalkerbtl+0x900,0x100);
+      break;
+
     case ARCHER_UNIT:
       load_vram(stun_vrams[index],musketbtl+0x900,0x100);
+      break;
+
+    case SNIPER_UNIT:
+      load_vram(stun_vrams[index],sniperbtl+0x900,0x100);
+      break;
+
+    case BERSERKER_UNIT:
+      load_vram(stun_vrams[index],berserkerbtl+0x900,0x100);
       break;
 
     case DEMON_UNIT:
@@ -265,6 +376,15 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],axebtl+0x900,0x100);
       break;
 
+    case WITCH_UNIT:
+      load_vram(stun_vrams[index],witchbtl+0x900,0x100);
+      break;
+
+    case PRIEST_UNIT:
+      load_vram(stun_vrams[index],priestbtl+0x900,0x100);
+      break;
+
+    case BLACK_MAGE_UNIT:
     case CLERIC_UNIT:
     case MAGE_UNIT:
       load_vram(stun_vrams[index],magebtl+0x900,0x100);
@@ -283,8 +403,20 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],attack2+0x900,0x100);
       break;
 
+    case STALKER_UNIT:
+      load_vram(stun_vrams[index],stalkerbtl+0x900,0x100);
+      break;
+
     case ARCHER_UNIT:
       load_vram(stun_vrams[index],musketbtl+0x900,0x100);
+      break;
+
+    case SNIPER_UNIT:
+      load_vram(stun_vrams[index],sniperbtl+0x900,0x100);
+      break;
+
+    case BERSERKER_UNIT:
+      load_vram(stun_vrams[index],berserkerbtl+0x900,0x100);
       break;
 
     case DEMON_UNIT:
@@ -299,6 +431,7 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],axebtl+0x900,0x100);
       break;
 
+    case BLACK_MAGE_UNIT:
     case CLERIC_UNIT:
     case MAGE_UNIT:
       load_vram(stun_vrams[index],magebtl+0x900,0x100);
@@ -309,12 +442,28 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],knightbtl+0x900,0x100);
       break;
 
+    case PALADIN_UNIT:
+      load_vram(stun_vrams[index],paladinbtl+0x900,0x100);
+      break;
+
     case LANCER_UNIT:
       load_vram(stun_vrams[index],knightbtl+0x900,0x100);
       break;
 
+    case FIGHTER_UNIT:
+      load_vram(stun_vrams[index],fighterbtl+0x900,0x100);
+      break;
+
+    case BRAWLER_UNIT:
+      load_vram(stun_vrams[index],brawlerbtl+0x900,0x100);
+      break;
+
     case MONK_UNIT:
       load_vram(stun_vrams[index],monkbtl+0x900,0x100);
+      break;
+
+    case RAIDER_UNIT:
+      load_vram(stun_vrams[index],raiderbtl+0x900,0x100);
       break;
 
     default:
@@ -473,6 +622,15 @@ void determine_action(char b_id, char target_type)
       set_unit_heal(b_id);
       heal_multi_aoe(b_id);
       break;
+    case ALL_OPPONENTS:
+      set_unit_attack(b_id);
+      target_opponents(b_id);
+      // transfer_units_to_attack_vram(b_id);
+      break;
+    case ALL_ALLIES:
+      set_unit_attack(b_id);
+      target_allies(b_id);
+      break;
     default:
       set_unit_attack(b_id);
       target_single_unit(b_id);
@@ -486,7 +644,6 @@ void heal_multi_aoe(char b_id)
   target = find_lowest_hp(b_id,battleunits[b_id].ent_id);
 
   target_aoe(target,battleunits[b_id].ent_id,IDLE,1,0);
-  // set_unit_heal(b_id);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
 
@@ -524,9 +681,19 @@ void target_multi_col(char b_id, char cnt)
 void target_single_unit(char b_id)
 {
   char target;
-  target = find_target_unit(b_id);
-  // set_unit_attack(b_id);
-  // set_unit_stunned(target);
+  if(team_one_tracked && !unit_direction(b_id))
+  {
+    target = team_one_tracked;
+  }
+  else if(team_two_tracked && unit_direction(b_id))
+  {
+    target = team_two_tracked;
+  }
+  else
+  {
+    target = find_target_unit(b_id);
+  }
+
   set_unit_target(target);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
 }
@@ -566,6 +733,36 @@ void target_aoe(char position, char team, char state, char targeted, char animat
   {
     set_unit_state(position+3,state,targeted,animated);
   }
+}
+
+void target_opponents(char position)
+{
+  char i, trgt_ent;
+  trgt_ent = (battleunits[position].ent_id == atker)? trgt : atker;
+
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[i].active && battleunits[i].ent_id == trgt_ent)
+    {
+      set_unit_target(i);
+    }
+  }
+  load_animations_to_vram(battleunits[position].unit->unit->id);
+}
+
+void target_allies(char position)
+{
+ char i, trgt_ent;
+  trgt_ent = (battleunits[position].ent_id == atker)? atker : trgt;
+
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[i].active && battleunits[i].ent_id == trgt_ent)
+    {
+      set_unit_target(i);
+    }
+  }
+  load_animations_to_vram(battleunits[position].unit->unit->id);
 }
 
 void target_row(char position)
@@ -668,3 +865,207 @@ char find_lowest_hp(char b_id, char team)
   return id;
 }
 
+char do_art(char b_id)
+{
+  switch(battleunits[b_id].unit->unit->art)
+  {
+    case JUDGEMENT_ART:
+    judgement(b_id);
+    return 0;
+
+    case FRENZY_ART:
+    return frenzy(b_id);
+
+    case TRACK_ART:
+    tracked(b_id);
+    return 1;
+
+    case INNVIGORATE_ART:
+    innvigorate(b_id);
+    return 0;
+
+    case RESTORE_ART:
+    restore(b_id);
+    return 0;
+
+    case RED_EYE_ART:
+    red_eye(b_id);
+    return 1;
+
+    case BLACK_EYE_ART:
+    black_eye(b_id);
+    return 1;
+
+    case CLEAR_EYES_ART:
+    clear_eyes(b_id);
+    return 0;
+
+    case RAPID_THRUST_ART:
+    rapid_thrust(b_id);
+    return 1;
+
+    case RAGE_CLOUD_ART:
+    rage_cloud(b_id);
+    return 1;
+
+    case SEA_LEGS_ART:
+    sea_legs(b_id);
+    return 1;
+  }
+  return 1;
+}
+
+void restore(char b_id)
+{
+  char i;
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[i].target)
+    {
+      battleunits[i].unit->hp =  battleunits[i].unit->unit->hp;
+      update_healthbar(i);
+    }
+  }
+  // set_unit_waiting(b_id);
+  clear_targets();
+  battleunits[b_id].attacks--;
+  hide_art_name();
+}
+
+void innvigorate(char b_id)
+{
+  char i, hp;
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[i].target)
+    {
+      hp = (char) calc_percentage(30,battleunits[i].unit->unit->hp);
+      battleunits[i].unit->hp = min(battleunits[i].unit->hp+hp,battleunits[i].unit->unit->hp);
+      update_healthbar(i);
+    }
+  }
+  clear_targets();
+  hide_art_name();
+}
+
+void tracked(char b_id)
+{
+  char i;
+
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[b_id].target)
+    {
+      if(battleunits[b_id].ent_id == atker)
+      {
+        team_one_tracking = 1;
+        team_one_tracked = i;
+      }
+      else
+      {
+        team_one_tracking = 1;
+        team_two_tracked = i;
+      }
+    }
+  }
+  // battleunits[b_id].attacks--;
+  hide_art_name();
+}
+
+void clear_eyes(char b_id)
+{
+  flash_screen();
+  reset_battle_screen();
+  battleunits[b_id].attacks--;
+  hide_art_name();
+  clear_eyes_called = 1;
+}
+
+void sea_legs(char b_id)
+{
+  sea_legs_art = 1;
+}
+
+void judgement(char b_id)
+{
+  flash_screen();
+  reset_battle_screen();
+  // set_unit_waiting(b_id);
+  battleunits[b_id].attacks--;
+  hide_art_name();
+  if(battleunits[b_id].ent_id == atker){ team_one_judgement = 1; } else { team_two_judgement = 1; }
+}
+
+char frenzy(char b_id)
+{
+  int r;
+
+  r = range(1,100);
+  if(r < 75 && battleunits[get_first_target()].unit->hp > 0)
+  {
+    battleunits[b_id].frame = 0;
+    set_unit_meter(b_id);
+    animating++;
+    return 0;//trigger again
+  }
+  return 1;//done
+}
+
+void rapid_thrust(char b_id)
+{
+  spr_set(b_id+5);
+  load_art(art_queue_id,spr_get_x()+8,spr_get_y()+16,!unit_direction(b_id));
+  animate_art(art_queue_id);
+  // apply_art(i);
+  remove_effects();
+  battleunits[b_id].attacks = 3;
+}
+
+void rage_cloud(char b_id)
+{
+  char i;
+  for(i=0; i<18; i++)
+  {
+    if(battleunits[i].target)
+    {
+      battleunits[i].attacks++;
+    }
+  }
+  clear_targets();
+}
+
+void red_eye(char b_id)
+{
+  char dmg, percent_dmg, missing_amt, percent_missing, full_hp, current_hp;
+
+  full_hp = battleunits[b_id].unit->unit->hp;
+  current_hp = battleunits[b_id].unit->hp;
+  missing_amt = full_hp - current_hp;
+
+  percent_missing = (char) get_percentage(missing_amt,full_hp);
+
+  dmg = 3 * max((percent_missing / 10),1);
+  apply_damage(get_first_target(),dmg);
+  update_healthbar(get_first_target());
+}
+
+void black_eye(char b_id)
+{
+  char target_id, dmg;
+  target_id = get_first_target();
+  dmg = calc_percentage(35,battleunits[target_id].unit->hp);
+
+  apply_damage(target_id,dmg);
+  update_healthbar(target_id);
+}
+
+void reset_battle_screen()
+{
+  load_palette(0,battlepal,1);
+  load_healthbars();
+  set_infobar();
+  load_palette(9,borderspal,1);
+  load_palette(10,fontpal,2);
+}
+
+char unit_direction(char b_id);

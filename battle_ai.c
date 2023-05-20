@@ -1,8 +1,8 @@
 #define PASS 0
 //Objective
-#define DEFEND 0
-#define CAPTURE 1
-#define TARGET 2
+#define MAP_DEFEND 0
+#define MAP_CAPTURE 1
+#define MAP_TARGET 2
 
 //AI states
 #define READY 0
@@ -107,6 +107,7 @@ void start_turn(char team)
       }
       entities[i].actionable = 1;
       entities[i].movable = 1;
+      // increment_meter(i);
     }
   }
   if(team == PLAYER)
@@ -114,8 +115,9 @@ void start_turn(char team)
     current_turn++;
   }
   reset_calling(team);
-  center_camera(camera_pos);
   set_cursor_pos(camera_pos);
+  center_camera(camera_pos);
+  // set_cursor_pos(camera_pos);
   satb_update();
   vsync();
 }
@@ -379,9 +381,9 @@ void do_ready(char ai_id)
 {
   switch(ai_objective)
   {
-    case DEFEND: do_defend_objective(ai_id); break;
-    case CAPTURE: do_capture_objective(ai_id); break;
-    case TARGET: do_target_objective(ai_id); break;
+    case MAP_DEFEND: do_defend_objective(ai_id); break;
+    case MAP_CAPTURE: do_capture_objective(ai_id); break;
+    case MAP_TARGET: do_target_objective(ai_id); break;
   }
 }
 

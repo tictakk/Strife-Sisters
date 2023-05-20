@@ -1,0 +1,148 @@
+;STRIFE SISTERS GAMEPLAY SONG 1
+; by Noelle Amelie Aman
+
+.TRACK 0 SONG1
+
+.CHANNEL 0 setup
+T117 V31 L2 ^D0
+
+fill=r1
+
+;leadsint
+leadint1=L8 O4 v26 @E0 d+2. v28 @E4 g+8a+8^SC-3^ST6 v26 @E0 a+2^SC0^ST0 @E11 &b2&b2. @E4 V28 g+a+b4a+4b4a+4
+leadint2=L8 O4 v26 ^SC-5^ST6 v26 @E0 b4^SC0^ST0 @E11 v27 >&c+4&c+4 <b8a+8 v26 @E0 g+2 @E11 &g+2&g+4 v26 @E4 d+16r16d+16r16d+4d+4e4r4d+4r4
+leadint3=L8 O4 v26 ^SC-5^ST6 v26 @E0 b4^SC0^ST0 @E11 v27 >&c+4&c+4 <b8a+8 v26 @E0 >f2 @E11 &f2&f4 v28 @E4 <c+4d+4e4f+4e4d+2
+
+;leadsa
+leadsa1=L8 O5 V26 @E0 @48 d+4 @E11 &d+4 @E0 f+4 @E11 &f+4 @E0 f2 @E11 &f8.r16 @E4 v28 d+4g+4f+16g+16f+8f8r8d+8r8 @E0 v26 f2 @E11 v27 &f4 c+4
+leadsa2=L8 O5 V26 @E0 d+4 @E11 &d+4 @E0 f+4 @E11 &f+4 @E0 f2 @E11 &f8.r16 @E4 v28 d+4b4a+16b16a+8g+8r8f+8r8a+8g+8 @E0 v26 a+4. @E11 v27 &a+4.
+leadsa3=L8 O5 V26 @E0 d+4 @E11 &d+4 @E0 f+4 @E11 &f+4 @E0 f2 @E11 &f8.r16 @E4 v28 d+4b4a+16b16a+8g+4f4 @E0 v26 b2 @E11 v27 &b2
+leadsa4=L8 O4 V26 @48 @E0 a+4. @E11 v28 &a+4. @E4 f+8a+8>c4c+4 @E11 d+2 @E0 V26 c4. @E11 v27 &c4. @E4 <a+4 @E0 v26 >c2 @E11 V27 &c2<
+leadsa5=L8 O4 V26 @48 @E0 g+2 @E11 v27 &g+2 V26 @E0 f+2 @E11 v27 &f+2 V26 @E0 f2 @E11 v27 &f2 V26 @E0 d+2 @E11 v27 &d+2
+leadsa6=L8 O4 V26 @48 @E0 a+4. @E11 v28 &a+4. @E4 f+8a+8>c4c+4 @E11 d+2 @E0 V26 f4. @E11 v27 &f4. @E4 d+4 @E0 v26 f2 @E11 V27 &f2
+leadsa7=L8 O5 V26 @48 @E0 f+2 @E11 v27 &f+2 V26 @E0 e2 @E11 v27 &e2 V26 @E0 a+2 @E11 v27 &a+2 V26 @E0 b2 @E11 v27 &b2
+
+;leadsaarp
+leadarp1=L4 O4 @E4 v24 @48 fgg+fgg+gff+g+af+g+af+g+
+leadarp2=L4 O4 @E4 v24 @48 c+d+ec+d+ed+c+d+ff+d+ff+fd+
+leadarp3=L4 O4 @E4 v24 @48 c+d+ec+d+ed+c+g+g+g+g+a v25 g+ v26 f+ v27 e
+
+;leadsb
+leadsb1=L8 O5 V28 @E0 @50 d+4 @e11 v29 &d+2 @e4 v30 f8f+8 @E0 v28 c+4 @e11 v29 &c+2 @e4 v30 d+8f8 @E0 v28 <b4 @e11 v29 &b2 @e4 v30 >d+8f8d+4c+8r8<a+4b4
+leadsb2=L8 O5 V28 @E0 @50 c+4 @e11 v29 &c+2 @e4 v30 c+8d+8 @E0 v28 f4 @e11 v29 &f2 @e4 v30 d+8c+8 @E4 d+16c+16 v27 @E0 d+8&d+2. v29 @E11 &d+2c+2
+leadsb3=L8 O5 V26 @E0 @50 c+4 @e11 v29 &c+2 @e4 v29 c+8d+8 @E0 v28 f4 @e11 v28 &f2 @e4 v29 d+8f8 @E0 v27 f+2 @E11 v27 &f+2&f+2 g+2
+leadsb4=L8 O5 V26 @E0 @50 f2 @e11 &f1 @E0 d+2 f+2 @E11 &f+1 v28 g+4 @e4 ed+
+leadsb5=L8 O5 V26 @E0 @50 c+2 @e11 &c+1 @E0 <a+2> @e4 v28 d+ed+ed+16e16 @E0 v27 d+8&d+4 @e11 v28 &d+1
+leadsb6=L8 O5 V26 @E0 @50 e2 @e11 &e1 @E0 f+2 @e4 v28 g+ag+ag+16a16 @E0 v27 g+8&g+4 @e11 v28 &g+1
+
+;harps
+harp1=L8 O4 v25 @E4 d+ff+a+ba+f+fd+ff+a+ba+f+fc+ff+a+ba+f+fc+ff+a+ba+f+f
+harp2=L8 O4 v25 @E4 <b>ff+a+ba+f+f<b>ff+a+ba+f+f<a+>ff+a+ba+f+f<a+>ff+a+ba+ba+
+ 
+;hornas
+horna1=L1 O3 @E0 v22 a+&a+&bb
+horna2=L1 O3 @E0 v22 >c+1<b1a+1g+1
+horna3=L1 O3 @E0 v22 >c+1f1d+1f+1
+horna4=L1 O3 @E0 v22 a+1&a+1>c1&c1<
+horna5=L1 O3 @E0 v22 >c+1<b1a+1g+1
+horna6=L1 O3 @E0 V22 a+1&a+1>c1&c1<
+horna7=L1 O3 @E0 V22 >c+1<b1a+1b1
+
+;hornbs
+hornb1=L1 O4 @E0 v22 d+&d+f+&f+
+hornb2=L1 O4 @E0 v22 g+1f+1f1c+1
+hornb3=L1 O4 @E0 v22 g+1a+1g+1a1
+hornb4=L1 O4 @E0 v22 f1&f1f+1&f+1
+hornb5=L1 O4 @E0 v22 g+1f+1f1c+1
+hornb6=L1 O4 @E0 v22 f1&f1&f1&f1
+hornb7=L1 O4 @E0 V22 f+1e1f1f+1
+
+;hornbx
+hornbx1=L1 O4 @E0 v23 d+1&d+2&d+4 c+16r16c+16r16 c+1&c+2&c+4 <b16r16b16r16>
+hornbx2=L1 O4 @E0 v23 <b1&b2&b4 b16r16b16r16 a+1&a+2&a+4 <a+16r16a+16r16>
+hornbx3=L1 O4 @E0 v23 <b1&b2&b4 b16r16b16r16 a+1b1
+
+;hornby
+hornby1=L1 O5 @E0 v22 f1&f1f+1&f+1
+hornby2=L1 O5 @E0 v22 g+1f+1f1c+1
+hornby3=L1 O5 @E0 v22 f1&f1&f1&f1
+hornby4=L1 O5 @E0 V22 f+1e1f1f+1
+
+;hornbz
+hornbz1=L1 O3 @E0 v23 f1&f2. d+16r16d+16r16f+1&f+2. c+16r16c+16r16
+hornbz2=L1 O3 @E0 v23 c+1&c+2. c16r16c16r16d+1&d+2. <a+16r16a+16r16>
+hornbz3=L1 O3 @E0 v23 b1&b2. a+16r16a+16r16>g+1a1
+
+;bass
+bass1=L8 V28 d+4.&d+16&r16 d+8&d+16&r16 d+16r16d+16r16d+8r8d+8r8f+4f4 b4.&b16&r16 b8&b16&r16 b16r16b16r16b8r8b8r8b4>c+8.r16
+bass2=L8 V28 O2 c+1<b1g+1f+1
+bass3=L8 V28 O2 c+1<f4>f4<f4>f4<g+1f+1
+bass4=L8 V27 O2 d+4.<d+8>d+4c+8r8d+2.c+8r8c+4.<c+8>c+4<b8>r8c+2.<b8r8>
+bass5=L8 V27 O2 b4.<b8>b4g+8r8b2&b4g+8r8a+4.<a+8>a+4g+8r8a+2.g+8r8
+bass6=L8 V27 O2 b4.<b8>b4g+8r8b2&b4g+8r8a+4.<a+8>a+4g+8r8<b8.r16b8.r16b8.r16b8.r16
+bass7=L8 V27 O1 a+4.&a+16&r16 a+8&a+16&r16 a+16r16a+16r16a+8r8a+8r8>c+4c8.r16 c4.&c16&r16 c8&c16&r16 c16r16c16r16c8r8c8r8c4c+4<
+bass8=L8 V27 O1 >c+1<b1g+1f+1
+bass9=L8 V27 O1 f+1e1a+1b1
+bass10=L8 V27 O1 f4>f2<f4>f2d+2<f+4>f+2<f+4>f+2f2
+bass11=L8 V27 O1 >c+8.r16c+8r8&r4c+8.r16c+8r8&r4<a+8.r16a+8r8>d+8.r16d+8r8&r4d+8.r16d+8r8&r4d+2
+bass12=L8 V27 O1 >e8.r16e8r8&r4e8.r16e8r8&r4f+8.r16f+8r8g+8.r16g+8r8&r4g+8.r16a+8r8&r4a+2
+
+;kicks
+kick1=L4 O4 ^SC127 ^ST28 crcrcrcr
+kick2=L4 O4 ^SC127 ^ST28 crcrccc8c8c8c8
+
+;noises
+noise1=L4 O1 P15,15 v27 @M2 @E13 ee8e8ee2e16e16e8ee
+noise2=L4 O1 P15,15 v27 @M2 @E13 ee8e8ee2e16e16e8e8e8e8e8
+noise3=L4 O1 @M1 P15,15 v17 r4c8c8 v29 @M2 @E13 e @M1 v17 c8c8c4c8c8 v29 @M2 @E13 e4 @M1 v17 c8c8c4c8c8 v29 @M2 @E13 e4 @M1 v17 c8c8c4c8c8 v29 @M2 @E13 e4 @M1 v17 c8c8
+noise4=L4 O1 @M1 P15,15 v17 r4c8c8 v29 @M2 @E13 e @M1 v17 c8c8c4c8c8 v29 @M2 @E13 e4 @M1 v17 c8c8c4c8c8 v29 @M2 @E13 e4 @M1 v17 c8c8c4 v29 @M2 @E13 e4e8e8e8e8 @M1 v17
+
+.CHANNEL 1 LEADED
+O4 P15,15 V30 @48 @E0
+{[1(leadint1)][1(leadint2)][1(leadint1)][1(leadint3)][1(leadsa1)][1(leadsa2)][1(leadsa1)][1(leadsa3)][1(leadsb1)][1(leadsb2)][1(leadsb1)][1(leadsb3)][1(leadsa4)][1(leadsa5)][1(leadsa6)][1(leadsa7)][1(leadsa4)][1(leadsa5)][1(leadsa6)][1(leadsa7)]
+[1(leadsb4)][1(leadsb5)][1(leadsb4)][1(leadsb6)][1(leadsb4)][1(leadsb5)][1(leadsb4)][1(leadsb6)][1(leadsa1)][1(leadsa2)][1(leadsa1)][1(leadsa3)]}
+
+.CHANNEL 2 GUITARA,HARP
+O3 V26 P15,15 @47 
+{[1(horna1)][1(horna2)][1(horna1)][1(horna3)][1(harp1)][1(harp2)][1(harp1)][1(harp2)][1(harp1)][1(harp2)][1(harp1)][1(harp2)][1(horna4)][1(horna5)][1(horna6)][1(horna7)][1(horna4)][1(horna5)][1(horna6)][1(horna7)]
+[16(fill)][1(leadarp1)][1(leadarp2)][1(leadarp1)][1(leadarp3)][1(harp1)][1(harp2)][1(harp1)][1(harp2)]}
+
+.CHANNEL 3 GUITARB
+O2 V26 P15,15 @47
+{[1(hornb1)][1(hornb2)][1(hornb1)][1(hornb3)][1(hornbx1)][1(hornbx2)][1(hornbx1)][1(hornbx3)][1(hornbx1)][1(hornbx2)][1(hornbx1)][1(hornbx3)][1(hornb4)][1(hornb5)][1(hornb6)][1(hornb7)][1(hornby1)][1(hornby2)][1(hornby3)][1(hornby4)]
+[1(hornbz1)][1(hornbz2)][1(hornbz1)][1(hornbz3)][1(hornbz1)][1(hornbz2)][1(hornbz1)][1(hornbz3)][1(hornbx1)][1(hornbx2)][1(hornbx1)][1(hornbx3)]}
+
+.CHANNEL 4 BASS
+O1 V29 P15,15 @46 @E0 
+{[1(bass1)][1(bass2)][1(bass1)][1(bass3)][1(bass4)][1(bass5)][1(bass4)][1(bass6)][1(bass4)][1(bass5)][1(bass4)][1(bass6)][1(bass7)][1(bass8)][1(bass7)][1(bass9)][1(bass7)][1(bass8)][1(bass7)][1(bass9)]
+[1(bass10)][1(bass11)][1(bass10)][1(bass12)][1(bass10)][1(bass11)][1(bass10)][1(bass12)][1(bass4)][1(bass5)][1(bass4)][1(bass6)]}
+
+.CHANNEL 5 NOISE
+O4 V17 P15,15 @0 @M1
+{[7(noise1)][1(noise2)][3(noise3)][1(noise4)][3(noise3)][1(noise4)][7(noise1)][1(noise2)][7(noise1)][1(noise2)][3(noise3)][1(noise4)][3(noise3)][1(noise4)][7(noise1)][1(noise2)]}
+
+.CHANNEL 6 KICKS
+O1 V31 P15,15 @45 @E4
+{[7(kick1)][1(kick2)][7(kick1)][1(kick2)][7(kick1)][1(kick2)][7(kick1)][1(kick2)][7(kick1)][1(kick2)][7(kick1)][1(kick2)][7(kick1)][1(kick2)][7(kick1)][1(kick2)][7(kick1)][1(kick2)]}
+
+.WAVE 45 KICK
+28 26 23 21 20 19 17 14 10 10 10 09 11 11 11 10 10 09 09 10 12 14 15 19 20 21 22 23 24 25 26 27
+
+.WAVE 46 BASSY
+28 28 27 26 23 22 20 19 17 16 14 11 09 07 05 04 03 03 02 02 02 02 02 02 02 02 02 05 13 16 18 23
+
+.WAVE 47 HORNS
+03 05 07 10 10 18 21 24 27 29 30 30 30 28 29 24 29 28 27 26 21 22 15 16 14 13 09 08 12 08 16 11
+
+.WAVE 48 LEAD1
+15 03 09 13 16 20 25 26 25 23 17 09 14 21 17 12 09 19 06 06 08 10 13 17 15 13 11 10 08 06 05 15
+
+.WAVE 49 HARP
+28 26 23 21 20 19 17 14 10 10 10 09 11 11 11 10 10 09 09 10 12 14 15 19 20 21 22 23 24 25 26 27
+
+.WAVE 50 SOFTLEAD
+11 11 12 13 15 19 21 22 23 24 24 23 23 22 20 18 16 15 14 12 10 09 08 07 06 05 05 06 10 13 14 16
+
+.Perc 0 
+       C:  E00 W00 N31 n30 n30 n29
+       D:  E04 W00 N31 n5 n5 n4

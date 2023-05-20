@@ -7,13 +7,15 @@ int VSyncCnt;
 int TimerCnt;
 int MainCnt;
 int SubCnt;
-//
 
 char screen_dimensions = 0;
+// char debug_number = 0;
+// char debug_array[24];
+
 #define PLAYER 1
 #define CPU 2
 
-#define NO_ATTACK 0
+#define NO_TARGET 0
 #define SINGLE_HIT 1
 #define HEAL 2
 #define MULTI_ROW 3
@@ -21,9 +23,11 @@ char screen_dimensions = 0;
 #define MULTI_COL_3 5
 #define MULTI_ATTACK_AOE 6
 #define MULTI_HEAL_AOE 7
-#define PARALYZE 8
-#define CONFUSE 9
-#define ALL 10
+#define ALL_OPPONENTS 8
+#define ALL_ALLIES 9
+#define ALL_UNITS 10
+
+int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 
 #include "map_dimension.h"
 #include "paths.c"
@@ -86,6 +90,7 @@ char screen_dimensions = 0;
 
 #incspr(rei_walk, "map/sprites/reiwalk.pcx")
 #incpal(rei_walk_pal, "map/sprites/reiwalk.pcx")
+#incpal(rei_grey, "map/sprites/reiwalk.pcx")
 
 #incspr(cat_walk, "characters/cat.pcx")
 #incpal(cat_walk_pal, "characters/cat.pcx")
@@ -156,12 +161,11 @@ struct Castle{
 };
 
 char j_1, j_2;
-int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 struct Castle castles[NO_OF_CASTLES];
 // struct Commander commanders[TOTAL_COMMANDERS];
 
 int total_sprites = 0;
-
+char menu_rows = 0;
 char no_of_party_items;
 char num_of_bad_terrains;
 
@@ -172,7 +176,8 @@ char party_items[MAX_INVENTORY];
 int script_pointer = 0;
 int spawn_positions[6];
 char enemies[7];
-int ptr[288];
+int ptr[32];
+char script_ram[256];
 
 /*
 	MENU STUFF
@@ -192,13 +197,8 @@ unsigned char game_state = PREBATTLE;
 #define BATTLE_MAP_HEIGHT 16
 
 struct Node{
-	// int ownX, ownY, fromX, fromY;
 	int ownPos, fromPos;
 	char checked;
-};
-
-enum SoldierState{
-	IDLE, ATTACKING, DYING
 };
 
 enum Direction{
@@ -234,24 +234,15 @@ enum Direction{
 #incspr(dark,"map/sprites/dark.pcx")
 // #incspr(blob,"map/sprites/froggy.pcx")
 
-#incpal(sldpal, "map/sprites/sldpiece.pcx",0,3)
+#incpal(sldpal, "map/sprites/sldpiece.pcx",0,1)
 #incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
-#incpal(sprpal, "map/sprites/sprpiece.pcx",0,3)
+// #incpal(sprpal, "map/sprites/sprpiece.pcx",0,3)
 #incpal(mskpal,"map/sprites/msktpiece.pcx",0,2)
 #incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
 #incpal(blobpal,"map/sprites/blob.pcx",0,2)
 #incpal(magepal,"map/sprites/mage.pcx",0,2)
 #incpal(bndpal,"characters/bandit.pcx",0,2)
 // #incpal(blobpal,"map/sprites/froggy.pcx",0,2)
-
-// const char area_one_buyable_items[] = {
-// 	0, 1, 2, 3
-// };
-
-//const char row_names[17] = {
-//	70, 114, 111, 110, 116, 0,
-//	82, 101, 97, 114, 0
-//};
 
 int menu_size = 0;
 unsigned int player_gold = 0;
@@ -276,9 +267,10 @@ char game_over = 0;
 char game_loop = 0;
 char cursor_x = 0;
 char cursor_y = 0;
-int red_crystal_count = 0;
-int blue_crystal_count = 0;
-int green_crystal_count = 0;
+int red_crystal_count = 0; //bp -> beast points
+int blue_crystal_count = 0; //ap -> art points
+int green_crystal_count = 0; //up -> upgrade points
+int materials_count = 1000;
 char party_units_size = 0;
 
 void main()
@@ -312,38 +304,39 @@ void main()
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
 
-	party_commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
-  // party_commanders[0].bg.units[0].meter = 25;
-  party_commanders[0].bg.calling_stone = CALLING_MOVE_BUFF;
-  // party_commanders[0].bg.calling_stone = CALLING_DOUBLE_ATTACK;
-  // party_commanders[0].bg.units[1].meter = 25;
-	party_commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[0].bg.units[1].unit = &unit_list[SPEAR_UNIT];
-	party_commanders[0].bg.units[1].hp = unit_list[SPEAR_UNIT].hp;
-  party_commanders[0].bg.units[7].unit = &unit_list[MAGE_UNIT];
-	party_commanders[0].bg.units[7].hp = unit_list[MAGE_UNIT].hp;
-  party_commanders[0].bg.units[4].unit = &unit_list[CLERIC_UNIT];
-  party_commanders[0].bg.units[4].hp = unit_list[CLERIC_UNIT].hp;
-  party_commanders[0].bg.units[2].unit = &unit_list[SWORD_UNIT];
-	party_commanders[0].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
-  // party_commanders[0].bg.art = POWER_WAVE_ART; 
-  party_commanders[0].meter = 100;
+  // party_commanders[0].bg.calling_stone = CALLING_MOVE_BUFF;
+  party_commanders[0].bg.calling_stone = CALLING_DOUBLE_ATTACK;
+	party_commanders[0].bg.units[4].unit = &unit_list[CLERIC_UNIT];
+	party_commanders[0].bg.units[4].hp = unit_list[CLERIC_UNIT].hp;
+  party_commanders[0].bg.units[0].unit = &unit_list[SNIPER_UNIT];
+	party_commanders[0].bg.units[0].hp = unit_list[SNIPER_UNIT].hp;
+  party_commanders[0].bg.units[1].unit = &unit_list[BRAWLER_UNIT];
+	party_commanders[0].bg.units[1].hp = unit_list[BRAWLER_UNIT].hp;
+  party_commanders[0].bg.units[2].unit = &unit_list[SPEAR_UNIT];
+  party_commanders[0].bg.units[2].hp = unit_list[SPEAR_UNIT].hp;
+  // party_commanders[0].bg.art = POWER_WAVE_ART;
 
-  party_commanders[0].bg.units[3].unit = &unit_list[LANCER_UNIT];
-	party_commanders[0].bg.units[3].hp = unit_list[LANCER_UNIT].hp;
-  party_commanders[0].bg.units[5].unit = &unit_list[LANCER_UNIT];
-	party_commanders[0].bg.units[5].hp = unit_list[LANCER_UNIT].hp;
+  party_commanders[1].bg.units[0].unit = &unit_list[SWORD_UNIT];
+	party_commanders[1].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
+  party_commanders[1].bg.units[3].unit = &unit_list[MAGE_UNIT];
+	party_commanders[1].bg.units[3].hp = unit_list[MAGE_UNIT].hp;
+  party_commanders[1].bg.units[2].unit = &unit_list[SWORD_UNIT];
+	party_commanders[1].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
+  party_commanders[1].bg.units[5].unit = &unit_list[MAGE_UNIT];
+  party_commanders[1].bg.units[5].hp = unit_list[MAGE_UNIT].hp;
 
-  party_commanders[1].bg.units[1].unit = &unit_list[SWORD_UNIT];
-	party_commanders[1].bg.units[1].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[1].bg.units[3].unit = &unit_list[ARCHER_UNIT];
-	party_commanders[1].bg.units[3].hp = unit_list[ARCHER_UNIT].hp;
-  party_commanders[1].bg.units[4].unit = &unit_list[ARCHER_UNIT];
-	party_commanders[1].bg.units[4].hp = unit_list[ARCHER_UNIT].hp;
-  party_commanders[1].bg.units[5].unit = &unit_list[ARCHER_UNIT];
-  party_commanders[1].bg.units[5].hp = unit_list[ARCHER_UNIT].hp;
+  // party_commanders[2].bg.units[0].unit = &unit_list[KNIGHT_UNIT];
+	// party_commanders[2].bg.units[0].hp = unit_list[KNIGHT_UNIT].hp;
+  // party_commanders[2].bg.units[1].unit = &unit_list[SWORD_UNIT];
+  // party_commanders[2].bg.units[1].hp = unit_list[SWORD_UNIT].hp;
+  // party_commanders[2].bg.units[2].unit = &unit_list[KNIGHT_UNIT];
+	// party_commanders[2].bg.units[2].hp = unit_list[KNIGHT_UNIT].hp;
+  // party_commanders[2].bg.units[3].unit = &unit_list[CLERIC_UNIT];
+	// party_commanders[2].bg.units[3].hp = unit_list[CLERIC_UNIT].hp;
+  // party_commanders[2].bg.units[5].unit = &unit_list[CLERIC_UNIT];
+  // party_commanders[2].bg.units[5].hp = unit_list[CLERIC_UNIT].hp;
 
-	player_gold = 1000;
+	player_gold = 2000;
 	no_of_party_items = 0;
 
 	disp_off();
@@ -363,6 +356,18 @@ void main()
 	{
 		display_outro();
 	}
+}
+
+void heal_commander_bg(char id)
+{
+  char i;
+  for(i=0; i<9; i++)
+  {
+    if(party_commanders[id].bg.units[i].unit->id)
+    {
+      party_commanders[id].bg.units[i].hp = unit_list[party_commanders[id].bg.units[i].unit->id].hp;
+    }
+  }
 }
 
 void display_intro()
@@ -400,7 +405,7 @@ int spriteno,spritex,spritey,spritepattern,ctrl1,ctrl2,sprpal,sprpri;
 	spr_pri(sprpri);
 }
 
-int range(char min, char max)
+int range(int min, int max)
 {
 	return (rand()%(max-min+1)) + min;
 }
@@ -421,8 +426,16 @@ void print_unit_type(char id, int x, int y)
       put_string("SPR",x,y);
       break;
 
+    case STALKER_UNIT:
+      put_string("STK",x,y);
+      break;
+
 		case ARCHER_UNIT:
       put_string("ARC",x,y);
+      break;
+
+    case SNIPER_UNIT:
+      put_string("SNP",x,y);
       break;
 
     case CLERIC_UNIT:
@@ -431,6 +444,18 @@ void print_unit_type(char id, int x, int y)
 
 		case MAGE_UNIT:
       put_string("MAG",x,y);
+      break;
+
+    case WITCH_UNIT:
+      put_string("WIT",x,y);
+      break;
+
+    case PRIEST_UNIT:
+      put_string("PRE",x,y);
+      break;
+
+    case BLACK_MAGE_UNIT:
+      put_string("BLK",x,y);
       break;
 
 		case HOUND_UNIT:
@@ -446,22 +471,34 @@ void print_unit_type(char id, int x, int y)
       break;
 
     case RAIDER_UNIT:
-      put_string("RAD",x,y);
+      put_string("RDR",x,y);
       break;
 
     case KNIGHT_UNIT:
       put_string("KNT",x,y);
       break;
 
+    case PALADIN_UNIT:
+      put_string("PAL",x,y);
+      break;
+
     case MONK_UNIT:
       put_string("MNK",x,y);
       break;
 
-    case LANCER_UNIT:
-      put_string("LCR",x,y);
+    case FIGHTER_UNIT:
+      put_string("FTR",x,y);
       break;
 
-    case BERSERKER:
+    case BRAWLER_UNIT:
+      put_string("BRW",x,y);
+      break;
+
+    case LANCER_UNIT:
+      put_string("LAN",x,y);
+      break;
+
+    case BERSERKER_UNIT:
       put_string("BRK",x,y);
       break;
 
@@ -490,8 +527,16 @@ void print_unit_fullname(char unit_id, int x, int y)
       put_string("Spearman",x,y);
       break;
 
+    case STALKER_UNIT:
+      put_string("Stalker ",x,y);
+      break;
+
     case ARCHER_UNIT:
       put_string("Archer  ",x,y);
+      break;
+
+    case SNIPER_UNIT:
+      put_string("Sniper  ",x,y);
       break;
 
     case CLERIC_UNIT:
@@ -500,6 +545,18 @@ void print_unit_fullname(char unit_id, int x, int y)
 
     case MAGE_UNIT:
       put_string("Mage    ",x,y);
+      break;
+
+    case WITCH_UNIT:
+      put_string("Witch   ",x,y);
+      break;
+
+    case PRIEST_UNIT:
+      put_string("Priest  ",x,y);
+      break;
+
+    case BLACK_MAGE_UNIT:
+      put_string("B.Mage  ",x,y);
       break;
 
     case HOUND_UNIT:
@@ -518,15 +575,27 @@ void print_unit_fullname(char unit_id, int x, int y)
       put_string("Knight  ",x,y);
       break;
 
+    case PALADIN_UNIT:
+      put_string("Paladin ",x,y);
+      break;
+
     case MONK_UNIT:
       put_string("Monk    ",x,y);
+      break;
+
+    case FIGHTER_UNIT:
+      put_string("Fighter ",x,y);
+      break;
+
+    case BRAWLER_UNIT:
+      put_string("Brawler ",x,y);
       break;
 
     case LANCER_UNIT:
       put_string("Lancer  ",x,y);
       break;
 
-    case BERSERKER:
+    case BERSERKER_UNIT:
       put_string("Berserkr",x,y);
       break;
 
@@ -534,7 +603,7 @@ void print_unit_fullname(char unit_id, int x, int y)
       put_string("Raider  ",x,y);
 
     default:
-      put_string("errorbig",x,y);
+      put_string("        ",x,y);
       break;
   }
 }
@@ -546,66 +615,120 @@ void draw_32x32_sprite(char type, int x, int y)
     case SWORD_UNIT:
       load_palette(30,soldierpal,1);
       load_vram(0x6E00,attack,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      break;
+
+    case SNIPER_UNIT:
+      load_palette(30,sniperbtlpal,1);
+      load_vram(0x6E00,sniperbtl,0x100);
+    break;
+
+    case BERSERKER_UNIT:
+      load_palette(30,sniperbtlpal,1);
+      load_vram(0x6E00,berserkerbtl,0x100);
+    break;
+
+    case KNIGHT_UNIT:
+      load_palette(30,spearpal,1);
+      load_vram(0x6E00,knightbtl,0x100);
+      break;
+    
+    case PALADIN_UNIT:
+      load_palette(30,paladinpal,1);
+      load_vram(0x6E00,paladinbtl,0x100);
       break;
 
     case SPEAR_UNIT:
       load_palette(30,spearpal,1);
       load_vram(0x6E00,attack2,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      break;
+
+    case STALKER_UNIT:
+      load_palette(30,stalkerpal,1);
+      load_vram(0x6E00,stalkerbtl,0x100);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     case ARCHER_UNIT:
       load_palette(30,musketbtlpal,1);
       load_vram(0x6E00,musketbtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     case AXE_UNIT:
       load_palette(30,axebtlpal,1);
       load_vram(0x6E00,axebtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     case HOUND_UNIT:
       load_palette(30,houndbtlpal,1);
       load_vram(0x6E00,houndbtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     case CLERIC_UNIT:
       load_palette(30,magebtlpal+16,1);
       load_vram(0x6E00,magebtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      break;
+
+    case WITCH_UNIT:
+      load_palette(30,witchbtlpal,1);
+      load_vram(0x6E00,witchbtl,0x100);
+      break;
+
+    case PRIEST_UNIT:
+      load_palette(30,witchbtlpal,1);
+      load_vram(0x6E00,priestbtl,0x100);
       break;
 
     case MAGE_UNIT:
       load_palette(30,magebtlpal,1);
       load_vram(0x6E00,magebtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      break;
+    
+    case BLACK_MAGE_UNIT:
+      load_palette(30,magebtlpal+32,1);
+      load_vram(0x6E00,magebtl,0x100);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      break;
+
+    case FIGHTER_UNIT:
+      load_palette(30,monkbtlpal,1);
+      load_vram(0x6E00,fighterbtl,0x100);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      break;
+
+    case BRAWLER_UNIT:
+      load_palette(30,monkbtlpal,1);
+      load_vram(0x6E00,brawlerbtl,0x100);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     case MONK_UNIT:
       load_palette(30,monkbtlpal,1);
       load_vram(0x6E00,monkbtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     case LANCER_UNIT:
       load_palette(30,spearpal,1);
       load_vram(0x6E00,lancerbtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     case RAIDER_UNIT:
       load_palette(30,raiderbtlpal,1);
       load_vram(0x6E00,raiderbtl,0x100);
-      spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
       break;
 
     // default:
       // spr_hide(1);
   }
+  spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
 }
 
 void print_unit_attack_icon(char unit_no, int x, int y)
@@ -734,14 +857,14 @@ void affirmative_question(char *request, char x, char y)
 
   question = 1;
   response = 0;
-  remove_cursor();
+  // remove_cursor();
 
+  display_window_rel(22,14,10,14);
   put_string(request,s_x_relative+x+1,s_y_relative+y+1);
   put_string("YES",s_x_relative+x+2,s_y_relative+y+3);
   put_string("NO",s_x_relative+x+6,s_y_relative+y+3);
 
   load_cursor(x+5,y+3,SLIDER_ONE);
-
   while(question > 0)
   {
     switch(joytrg(0))
@@ -769,9 +892,9 @@ void affirmative_question(char *request, char x, char y)
           curs_left(4);
           response = 1;
         }
-        break;
+        break;  
+      vsync();
     }
-    vsync();
   }
   remove_cursor();
   return response;
@@ -784,8 +907,8 @@ initialize_commanders()
 
 	for(i=0, cmdr = party_commanders; i<TOTAL_COMMANDERS; i++, cmdr++)
 	{
-		cmdr->meter = 0;
-		cmdr->exp = 0;
+		// cmdr->meter = 0;
+		cmdr->max_bp = 5;
 		cmdr->sprite_type = SWORD_UNIT;
 		cmdr->name = name20;
 		for(j=0; j<9; j++)
@@ -818,6 +941,19 @@ void fade_screen()
       darken_palette(i);
     }
   }
+}
+
+void flash_screen()
+{
+  char i, j;
+
+  for(j=0; j<3; j++)
+  {
+    for(i=0; i<16; i++)
+    {
+      lighten_palette(i);
+    }
+  } 
 }
 
 void modify_palette(int pal_num, char modifier)
@@ -972,29 +1108,24 @@ void display_cmdr_info(char cmdr_id, int x, int y)
 
 void story(unsigned char area, unsigned char state, char id)
 {
-	int offset = 0, value = 0;
+	int offset = 0, value = 0, i;
 	offset = find_area_offset(area);//find_offset_by_area(area);
+	offset = find_kv_offset(state,0,offset);
+	offset--;
 
-	if(state == EXPLORE)
-	{
-		offset = find_kv_offset(REQ,id,offset);
-	}
-	else
-	{
-		offset = find_kv_offset(state,0,offset);
-		offset--;
-	}
+  pan_camera_y(144);
+  scroll(0,s_x,s_y+48,48,224,0xC0);
+  scroll(1,0,0,0,64,0x80);
+  
+  for(i=0; i<256; i++)
+  {
+    script_ram[i] = (char)script[offset+i];
+  }
 
-	if(offset)
+  offset = 0;
+	for(;;)
 	{
-		hide_npcs(5);
-		satb_update();
-	}
-
-	while(offset)
-	{
-		value = do_story(0,0,script+offset);
-		// put_number(value,3,5,45);
+		value = do_story(0,0,script_ram+offset);
 		offset += value;
 		if(value == 0)
 		{
@@ -1010,13 +1141,13 @@ int do_story(int x, int y, char *str)
 {
 	if(str[0] == 0)//dialog
 	{
-//		display_info_panel(x,y,32,6);
-    display_window(y,x,32,6);
+    display_window_abs(y,x,32,6);
 		if(str[1] != 0)
 		{
-			load_portrait(str[1],0);
+      load_portrait(str[1] ,0);
 			display_item(str[1],0,x+1,y+1);
-			return write_text((s_x/8)+6,(s_y/8)+1,str+2) + 3;
+			// return write_text((s_x/8)+6,(s_y/8)+1,str+2) + 3;
+      return write_text(6,1,str+2) + 3;
 		}
 		else
 		{
@@ -1048,7 +1179,7 @@ int find_area_offset(char area)
 
 int find_kv_offset(unsigned char key, unsigned char value, int current_offset)
 {
-	int offset=0;
+	int offset = 0;
 	offset = current_offset;
 	while(offset < 2046)//just a large number, need to change this to how long out actually is
 	{
@@ -1072,19 +1203,22 @@ int find_kv_offset(unsigned char key, unsigned char value, int current_offset)
 	return 1;
 }
 
-void display_dialog(int x, int y, char *str)
-{
-//	display_info_panel(x,y,32,8);
-	// put_number(str[1],4,10,45);
-  display_window(y,x,32,8);
-	write_text((s_x/8)+1,(s_y/8)+1,str);
-}
-
-void display_window(int x, int y, char row_x, char row_y)
+void display_window_rel(int x, int y, char row_x, char row_y)
 {
   int vaddr;
-
   vaddr = vram_addr(x,y+(s_y_relative));
+  display_window(x,y,row_x,row_y,vaddr);
+}
+
+void display_window_abs(int x, int y, char row_x, char row_y)
+{
+  int vaddr;
+  vaddr = vram_addr(x,y);
+  display_window(x,y,row_x,row_y,vaddr);
+}
+
+void display_window(int x, int y, char row_x, char row_y, int vaddr)
+{
   switch(row_x)
   {
     case 8:
@@ -1099,8 +1233,16 @@ void display_window(int x, int y, char row_x, char row_y)
       window_12(vaddr,row_x,row_y);
       break;
 
+    case 14:
+      window_14(vaddr,row_x,row_y);
+      break;
+
     case 16:
       window_16(vaddr,row_x,row_y);
+      break;
+
+    case 18:
+      window_18(vaddr,row_x,row_y);
       break;
 
     case 22:
@@ -1128,7 +1270,7 @@ void display_abs_info_panel(int x, int y, int width, int length)
 		for(i=0; i<width; i++)
 		{
 			// z = (j*width) + i;
-			ptr[i] = (0x6400 >> 4) + ((i+(width-1)) / (width - ((i+(width-2))/(width-1)))) + ((((j+(length-1)) / (length - ((j+(length-2))/(length-1))))) * 3) + 0x8000;
+			ptr[i] = (0x6400 >> 4) + ((i+(width-1)) / (width - ((i+(width-2))/(width-1)))) + ((((j+(length-1)) / (length - ((j+(length-2))/(length-1))))) * 3) + 0x9000;
 		}
 		vaddr = vram_addr(0,j);
 		load_vram(vaddr+offset,ptr,width);
@@ -1211,6 +1353,41 @@ void display_healthbar(char x, char y, char percent)
   load_vram(addr,health_empty,5);
 }
 
+void display_meter_bars(char bar_count, char x, char y)
+{
+  switch(bar_count)
+  {
+    case 0: put_string("   ",x,y);break;
+    case 1: 
+    put_char('&',x,y);
+    put_string("  ",x+1,y);
+    break;
+
+    case 2:
+    put_char('$',x,y);
+    put_string("  ",x+1,y);
+    break;
+
+    case 3:
+    put_char('$',x,y);
+    put_char('&',x+1,y);
+    put_string(" ",x+2,y);
+    break;
+
+    case 4:
+    put_char('$',x,y);
+    put_char('$',x+1,y);
+    put_string(" ",x+2,y);
+    break;
+
+    case 5:
+    put_char('$',x,y);
+    put_char('$',x+1,y);
+    put_char('&',x+2,y);
+    break;
+  }
+}
+
 int min(int a, int b)
 {
 	(a<b)? a : b;
@@ -1219,11 +1396,6 @@ int min(int a, int b)
 int max(int a, int b)
 {
 	(a>b)? a : b;
-}
-
-int get_unit_cost(char id)
-{
-	return 100;
 }
 
 void load_commanders_gfx(int cmdr_id, int address, int pal)
@@ -1278,6 +1450,11 @@ void list_party_units(char x, char y)
   }
 }
 
+void remove_unit_from_convoy(char position)
+{
+  party_units[position] = NO_UNIT;
+}
+
 int get_percentage(int num, int denom)
 {
   int hp, hp_p;
@@ -1305,8 +1482,8 @@ int calc_percentage(int num, int denom)
 
 void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type)
 {
-  enemy_commanders[cmdr_id].bg.units[unit_pos] = &unit_list[unit_type];
-  enemy_commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[unit_type].hp;
+  party_commanders[cmdr_id].bg.units[unit_pos] = &unit_list[unit_type];
+  party_commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[unit_type].hp;
 }
 
 void load_predefined_group_layout(char layout_type, char cmdr_id)
@@ -1314,26 +1491,48 @@ void load_predefined_group_layout(char layout_type, char cmdr_id)
   switch(layout_type)
   {
     case 23:
-      enemy_commanders[cmdr_id].sprite_type = HOUND_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,HOUND_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,HOUND_UNIT);
+      party_commanders[cmdr_id].sprite_type = HOUND_UNIT;
+      load_unit_to_cmdr(cmdr_id,1,HOUND_UNIT);
+      // load_unit_to_cmdr(cmdr_id,2,HOUND_UNIT);
       break;
 
     case 24:
-      enemy_commanders[cmdr_id].sprite_type = BLOB_UNIT;
+      party_commanders[cmdr_id].sprite_type = BLOB_UNIT;
       load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT);
-      load_unit_to_cmdr(cmdr_id,1,BLOB_UNIT);
+      // load_unit_to_cmdr(cmdr_id,1,BLOB_UNIT);
       load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT);
 
       // load_unit_to_cmdr(cmdr_id,3,BLOB_UNIT);
-      load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT);
+      // load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT);
       // load_unit_to_cmdr(cmdr_id,5,BLOB_UNIT);
+
+      // load_unit_to_cmdr(cmdr_id,6,BLOB_UNIT);
+      // load_unit_to_cmdr(cmdr_id,7,BLOB_UNIT);
+      // load_unit_to_cmdr(cmdr_id,8,BLOB_UNIT);
       break;
 
     case 25:
-      enemy_commanders[cmdr_id].sprite_type = RAIDER_UNIT;
+      party_commanders[cmdr_id].sprite_type = RAIDER_UNIT;
       load_unit_to_cmdr(cmdr_id,0,RAIDER_UNIT);
       load_unit_to_cmdr(cmdr_id,2,RAIDER_UNIT);
+      break;
+
+    case 26:
+      party_commanders[cmdr_id].sprite_type = SWORD_UNIT;
+      load_unit_to_cmdr(cmdr_id,0,SWORD_UNIT);
+      load_unit_to_cmdr(cmdr_id,2,SWORD_UNIT);
+      break;
+
+    case 27:
+      party_commanders[cmdr_id].sprite_type = ARCHER_UNIT;
+      load_unit_to_cmdr(cmdr_id,0,ARCHER_UNIT);
+      load_unit_to_cmdr(cmdr_id,2,ARCHER_UNIT);
+      break;
+
+    case 28:
+      party_commanders[cmdr_id].sprite_type = SPEAR_UNIT;
+      load_unit_to_cmdr(cmdr_id,0,SPEAR_UNIT);
+      load_unit_to_cmdr(cmdr_id,2,SPEAR_UNIT);
       break;
   }
 }
@@ -1382,16 +1581,33 @@ void put_green_square(char x, char y)
   load_vram(vaddr+128,p,3);
 }
 
-void put_white_square(char x, char y)
+void put_highlight_square(char position, char x, char y)
+{
+  int p[3];
+  int vaddr, highlight_addr;
+
+  highlight_addr = (position%2 == 0)? 0x54F4 : 0x44F4;
+  vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
+
+  p[0] = highlight_addr;
+  p[1] = highlight_addr;
+  p[2] = highlight_addr;
+
+  load_vram(vaddr,p,3);
+  load_vram(vaddr+64,p,3);
+  load_vram(vaddr+128,p,3);
+}
+
+void put_blue_square(char x, char y)
 {
   int p[3];
   int vaddr;
 
   vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
 
-  p[0] = 0xAF4;
-  p[1] = 0xAF4;
-  p[2] = 0xAF4;
+  p[0] = 0x94F4;
+  p[1] = 0x94F4;
+  p[2] = 0x94F4;
 
   load_vram(vaddr,p,3);
   load_vram(vaddr+64,p,3);
@@ -1432,6 +1648,40 @@ int roundUp(int num, int div)
       return whole;
 	else
 			return whole+1;
+}
+
+void add_cmdr_from_story(char cmdr_id)
+{
+  switch(cmdr_id)
+  {
+    case KING:
+    add_commander_to_party(name2,KING);
+    load_unit_to_cmdr(party_size-1,0,KNIGHT_UNIT);
+    load_unit_to_cmdr(party_size-1,1,SWORD_UNIT);
+    load_unit_to_cmdr(party_size-1,2,KNIGHT_UNIT);
+    load_unit_to_cmdr(party_size-1,3,CLERIC_UNIT);
+    load_unit_to_cmdr(party_size-1,5,CLERIC_UNIT);
+    break;
+  }
+}
+
+void add_unit_to_convoy(char unit_id)
+{
+  char i;
+  for(i=0; i<MAX_PARTY_UNIT_SIZE; i++)
+  {
+    if(party_units[i] == 0)
+    {
+      party_units[i] = unit_id;
+      party_units_size++;
+      return;
+    }
+  }
+}
+
+void display_selector(char spr_num, int x, int y, char pal) //info sprites
+{
+  spr_make(spr_num,x,y,0x68C0,0,NO_FLIP|SZ_16x16,pal,1);
 }
 
 #include "overworld.c"

@@ -1,16 +1,20 @@
 #incspr(adv_effect,"map/effects/adv.pcx")
 #incspr(def_effect_5,"map/effects/def_5.pcx")
-#incspr(atk_effect_5,"map/effects/atk_5.pcx")
+#incspr(atk_effect_3,"map/effects/atk_5.pcx")
 #incspr(lightening_effect,"map/effects/lightening.pcx")
 #incspr(heal_effect,"map/effects/healing.pcx")
 #incspr(hit_spark,"map/effects/hit_spark.pcx")
 #incspr(power_wave,"map/effects/power_wave.pcx")
 #incspr(ice_effect,"map/effects/ice.pcx")
 #incspr(fire_effect,"map/effects/fire.pcx")
+#incspr(rain_arrow,"map/effects/arrow_fall.pcx")
+#incspr(atk_up,"map/effects/atk_up.pcx")
+#incspr(def_up,"map/effects/def_up.pcx")
 
 #incpal(effect_pal,"map/effects/adv.pcx")
 #incpal(lightening_effect_pal,"map/effects/lightening.pcx")
 #incpal(fire_effect_pal,"map/effects/fire.pcx")
+#incpal(arrow_effect_pal,"map/effects/arrow_fall.pcx")
 
 // #define EFFECTS_VRAM 0x3600
 #define EFFECTS_VRAM 0x6C00
@@ -25,12 +29,15 @@
 #define EFFECT_LIGHTENING_MID_2 4
 #define EFFECT_LIGHTENING_BOT 5
 #define EFFECT_DEF_5 6
-#define EFFECT_ATK_5 7
+#define EFFECT_ATK_3 7
 #define EFFECT_HEAL 8
 #define EFFECT_HIT_SPARK 9
 #define EFFECT_WAVE 10
 #define EFFECT_ICE 11
 #define EFFECT_FIRE 12
+#define EFFECT_ARROW 13
+#define EFFECT_ATK_UP 14
+#define EFFECT_DEF_UP 15
 
 #define MAX_EFFECT_COUNT 5
 
@@ -75,15 +82,25 @@ void load_effect(char effect_no)
         effects_pal[effect_count] = EFFECTS_WORD_PAL;
         break;
 
-      case EFFECT_DEF_5:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),def_effect_5,0x40);
+      // case EFFECT_DEF_5:
+      //   load_vram(EFFECTS_VRAM+(effect_count*0x200),def_effect_5,0x40);
+      //   effects_pal[effect_count] = EFFECTS_WORD_PAL;
+      //   break;
+
+      case EFFECT_ATK_3:
+        load_vram(EFFECTS_VRAM+(effect_count*0x200),atk_effect_3,0x40);
+        effects_pal[effect_count] = EFFECTS_WORD_PAL;
+        break;    
+
+      case EFFECT_ATK_UP:
+        load_vram(EFFECTS_VRAM+(effect_count*0x200),atk_up,0x40);
         effects_pal[effect_count] = EFFECTS_WORD_PAL;
         break;
 
-      case EFFECT_ATK_5:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),atk_effect_5,0x40);
+      case EFFECT_DEF_UP:
+        load_vram(EFFECTS_VRAM+(effect_count*0x200),def_up,0x40);
         effects_pal[effect_count] = EFFECTS_WORD_PAL;
-        break;    
+        break;
 
       case EFFECT_LIGHTENING_TOP:
         load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0x80,0x40);
@@ -127,6 +144,11 @@ void load_effect(char effect_no)
 
       case EFFECT_FIRE:
         load_vram(EFFECTS_VRAM+(effect_count*0x200),fire_effect,0x140);
+        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+        break;
+
+      case EFFECT_ARROW:
+        load_vram(EFFECTS_VRAM+(effect_count*0x200),rain_arrow,0x140);
         effects_pal[effect_count] = EFFECTS_ARTS_PAL;
         break;
     }
@@ -190,11 +212,15 @@ void create_art_by_type(char effect_no, int x, int y, char flip)
     create_healing(x,y,flip);
     break;
 
-    case EFFECT_ATK_5:
+    case EFFECT_ATK_3:
+    create_atk_3(x,y);
+    break;
+
+    case EFFECT_ATK_UP:
     create_atk_up(x,y);
     break;
 
-    case EFFECT_DEF_5:
+    case EFFECT_DEF_UP:
     create_def_up(x,y);
     break;
 
@@ -224,6 +250,12 @@ char create_healing(int x, int y, char flip)
   return create_effect(EFFECT_HEAL,x,y,flip);
 }
 
+char create_arrows(int x, int y, char flip)
+{
+  load_palette(31,arrow_effect_pal,1);
+  return create_effect(EFFECT_ARROW,x,y,flip);
+}
+
 char create_ice(int x, int y, char flip)
 {
   load_palette(31,lightening_effect_pal,1);
@@ -244,12 +276,17 @@ char create_hit_spark(int x, int y, char flip)
 
 char create_def_up(int x, int y)
 {
-  return create_effect(EFFECT_DEF_5,x,y,0);
+  return create_effect(EFFECT_DEF_UP,x,y,0);
+}
+
+char create_atk_3(int x, int y)
+{
+  return create_effect(EFFECT_ATK_3,x,y,0);
 }
 
 char create_atk_up(int x, int y)
 {
-  return create_effect(EFFECT_ATK_5,x,y,0);
+  return create_effect(EFFECT_ATK_UP,x,y,0);
 }
 
 char create_power_wave(int x, int y, char flip)
@@ -288,6 +325,13 @@ void animate_ice(char effect_no)
   spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
 }
 
+void animate_arrow(char effect_no)
+{
+  spr_set(effect_no);
+  spr_show();
+  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
+}
+
 void animate_hit_spark(char effect_no)
 {
   char frame_no;
@@ -304,7 +348,6 @@ void animate_hit_spark(char effect_no)
 void animate_healing(char effect_no)
 {
   char frame_no;
-  // put_number(69,3,0,0);
   spr_set(effect_no);
   
   frame_no = effect_frames[effect_no]++;

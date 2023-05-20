@@ -1,5 +1,5 @@
 #incbin(script, "script/out")
-#define NO_OF_MAPS 30
+#define NO_OF_MAPS 25
 
 #define NO_UNIT 0
 #define SWORD_UNIT 1 //soldier?
@@ -10,23 +10,23 @@
 #define HOUND_UNIT 6
 #define BLOB_UNIT 7
 #define AXE_UNIT 8
-#define PALADIN 9
+#define PALADIN_UNIT 9
 #define MONK_UNIT 10
-#define SNPIER 11
+#define SNIPER_UNIT 11
 #define LANCER_UNIT 12
 #define KNIGHT_UNIT 13
-#define BERSERKER 14
-#define STALKER 15
+#define BERSERKER_UNIT 14
+#define STALKER_UNIT 15
 #define ARTILLERY 16
 #define CLERIC_UNIT 17
-#define WMAGE 18
-#define CLERIC 19
-#define WITCH 20
+#define PRIEST_UNIT 18
+#define BLACK_MAGE_UNIT 19
+#define WITCH_UNIT 20
 #define RAIDER_UNIT 21
-#define PIRATE 22
+#define PIRATE_UNIT 22
 #define CAPTAIN 23
-#define FIGHTER 24
-#define BRAWLER 25
+#define FIGHTER_UNIT 24
+#define BRAWLER_UNIT 25
 #define CREATURE_1 26
 #define CREATURE_2 27
 #define CREATURE_3 28
