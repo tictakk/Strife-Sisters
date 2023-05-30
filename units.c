@@ -272,11 +272,11 @@ void initialize_units()
   unit_list[LANCER_UNIT].art = RUN_THROUGH_ART;
   unlocked_units[LANCER_UNIT] = 1;
 
-  unit_list[SWORD_UNIT].hp  = 60; //0x2BCE
-  unit_list[SWORD_UNIT].atk = 21;
-  unit_list[SWORD_UNIT].def = 9;
+  unit_list[SWORD_UNIT].hp  = 50; //0x2BCE
+  unit_list[SWORD_UNIT].atk = 20;
+  unit_list[SWORD_UNIT].def = 10;
   unit_list[SWORD_UNIT].mov = 3;
-  unit_list[SWORD_UNIT].spd = 13;
+  unit_list[SWORD_UNIT].spd = 11;
   unit_list[SWORD_UNIT].rng = 1;
   unit_list[SWORD_UNIT].ign = 0;
   unit_list[SWORD_UNIT].a_type = NORMAL;
@@ -295,7 +295,7 @@ void initialize_units()
   unit_list[ARCHER_UNIT].art = RAIN_ARROW_ART;
   unlocked_units[ARCHER_UNIT] = 1;
 
-  unit_list[SNIPER_UNIT].atk = 26;
+  unit_list[SNIPER_UNIT].atk = 28;
   unit_list[SNIPER_UNIT].hp  = 35;
   unit_list[SNIPER_UNIT].def = 9;
   unit_list[SNIPER_UNIT].rng = 2;
@@ -329,9 +329,9 @@ void initialize_units()
 	unit_list[HOUND_UNIT].id = HOUND_UNIT;
 	unit_list[HOUND_UNIT].a_type = NONE;
 
-	unit_list[BLOB_UNIT].atk = 22;
+	unit_list[BLOB_UNIT].atk = 20;
 	unit_list[BLOB_UNIT].def = 14;
-	unit_list[BLOB_UNIT].hp  = 55;
+	unit_list[BLOB_UNIT].hp  = 50;
 	unit_list[BLOB_UNIT].ign = 0;
   unit_list[BLOB_UNIT].spd = 17;
   unit_list[BLOB_UNIT].mov = 3;
@@ -357,8 +357,7 @@ void initialize_units()
   unit_list[BERSERKER_UNIT].a_type = AXE;
   unit_list[BERSERKER_UNIT].art = FRENZY_ART;
 
-  unit_list[MAGE_UNIT].atk = 18;
-  unit_list[MAGE_UNIT].hp = 16;
+  unit_list[MAGE_UNIT].atk = 20;
   unit_list[MAGE_UNIT].def = 7;
   unit_list[MAGE_UNIT].hp = 35;
   unit_list[MAGE_UNIT].spd = 12;
@@ -370,7 +369,6 @@ void initialize_units()
   unit_list[MAGE_UNIT].art = ZAP_ART;
 
   unit_list[WITCH_UNIT].atk = 18;
-  unit_list[WITCH_UNIT].hp = 16;
   unit_list[WITCH_UNIT].def = 8;
   unit_list[WITCH_UNIT].hp = 35;
   unit_list[WITCH_UNIT].spd = 12;
@@ -433,12 +431,13 @@ void initialize_units()
   unit_list[MONK_UNIT].a_type = UNARMED;
   unit_list[MONK_UNIT].art = CLEAR_EYES_ART;
 
-  unit_list[FIGHTER_UNIT].hp  = 60;
-  unit_list[FIGHTER_UNIT].atk = 23;
+  unit_list[FIGHTER_UNIT].hp  = 45;
+  unit_list[FIGHTER_UNIT].atk = 24;
   unit_list[FIGHTER_UNIT].def = 8;
   unit_list[FIGHTER_UNIT].rng = 1;
   unit_list[FIGHTER_UNIT].mov = 3;
   unit_list[FIGHTER_UNIT].ign = 1;
+  unit_list[FIGHTER_UNIT].spd = 19;
   unit_list[FIGHTER_UNIT].id = FIGHTER_UNIT;
   unit_list[FIGHTER_UNIT].a_type = UNARMED;
   unit_list[FIGHTER_UNIT].art = RED_EYE_ART;
@@ -452,13 +451,14 @@ void initialize_units()
   unit_list[BRAWLER_UNIT].id = BRAWLER_UNIT;
   unit_list[BRAWLER_UNIT].a_type = UNARMED;
   unit_list[BRAWLER_UNIT].art = BLACK_EYE_ART;
-
-  unit_list[RAIDER_UNIT].hp  = 60;
+  
+  unit_list[RAIDER_UNIT].hp  = 45;
   unit_list[RAIDER_UNIT].atk = 23;
   unit_list[RAIDER_UNIT].def = 9;
   unit_list[RAIDER_UNIT].rng = 1;
   unit_list[RAIDER_UNIT].mov = 3;
   unit_list[RAIDER_UNIT].ign = 1;
+  unit_list[RAIDER_UNIT].spd = 14;
   unit_list[RAIDER_UNIT].id = RAIDER_UNIT;
   unit_list[RAIDER_UNIT].a_type = NORMAL;
   unit_list[RAIDER_UNIT].art = PILLAGE_ART;

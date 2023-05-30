@@ -64,6 +64,7 @@
 #define MOUNTAIN 4
 #define WATER 5
 #define STRUCTURE 6
+#define WALL 7
 
 #define TERRAIN_CAP_PLAYER 1
 #define TERRAIN_CAP_CPU 2
@@ -199,6 +200,7 @@ char terrain_type(int t_type)
   if(t_type > 44 && t_type < 60) {return FOREST;}
   if(t_type > 88 && t_type < 119) {return WATER;}
   if(t_type > 118 && t_type < 124) {return STRUCTURE;}
+  if(t_type > 123 && t_type < 126){ return WALL;}
   if(t_type > 0 && t_type < 40) {return MOUNTAIN;}
   if(t_type == 154) {return RED_CRYSTAL;}
   if(t_type == 155) {return BLUE_CRYSTAL;}
@@ -214,7 +216,7 @@ char is_traversable(int pos)
 	terrain_no = battlefieldbat[map_offset+pos];
   t_type = terrain_type(terrain_no);
 	// if(terrain_no > 88 && terrain_no < 119)
-  if(t_type == MOUNTAIN || t_type == WATER)
+  if(t_type == MOUNTAIN || t_type == WATER || t_type == WALL)
 	{
 		return 0;
 	}
@@ -244,33 +246,35 @@ void swap_water_tiles()
 void cycle_terrain_items()
 {
   char i;
-  // if(item_trigger++ == 16)
-  // {
-    for(i=0; i<terrain_item_count; i++)
-    {
-      put_terrain_item(i,terrain_items[i].x,terrain_items[i].y,terrain_items[i].pal);
-      // put_terrain_item(terrain_items[i].item_no,terrain_items[i].x,terrain_items[i].y,terrain_items[i].pal);
-      // terrain_items[i].frame++;
-      // terrain_items[i].frame %= 4;
-    }
-    // item_trigger = 0;
-  // }
+  for(i=0; i<terrain_item_count; i++)
+  {
+    put_terrain_item(i,terrain_items[i].x,terrain_items[i].y,terrain_items[i].pal);
+  }
 }
 
 void remove_terrain_item(char item_index)
 {
   char i;
-
-  // put_number(item_index,2,0,0);
-  // wait_for_I_input();
-  put_tile(map_get_tile(terrain_items[item_index].x,terrain_items[item_index].y-2),
-           terrain_items[item_index].x,terrain_items[item_index].y);
+  //leaving this here to understand how put_tile and map_get_tile is used properly
+  // put_tile(map_get_tile(terrain_items[item_index].x,terrain_items[item_index].y-2),
+          //  terrain_items[item_index].x,terrain_items[item_index].y);
 
   for(i=item_index; i<terrain_item_count; i++)
   {
     memcpy(&terrain_items[i],&terrain_items[i+1],sizeof(Terrain_Item));
   }
+  spr_hide(item_index+1);
   terrain_item_count--;
+}
+
+void remove_terrain_items()
+{
+  char i;
+  for(i=0; i<terrain_item_count; i++)
+  {
+    remove_terrain_item(i);
+  }
+  terrain_item_count = 0;
 }
 
 char item_at_position(int position)
@@ -279,11 +283,7 @@ char item_at_position(int position)
   for(i=0; i<terrain_item_count; i++)
   {
     if(((terrain_items[i].y<<4)+terrain_items[i].x) == position)
-    { 
-      // put_number(position,3,0,0);
-      // put_number(terrain_items[i].y<<4+terrain_items[i].x,3,5,0);
-      // put_number(i,3,0,3);
-      // wait_for_I_input();
+    {
       return i;
     }
   }

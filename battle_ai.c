@@ -1,7 +1,7 @@
 #define PASS 0
 //Objective
-#define MAP_DEFEND 0
-#define MAP_CAPTURE 1
+#define MAP_DEFEND 1
+#define MAP_CAPTURE 0
 #define MAP_TARGET 2
 
 //AI states
@@ -25,7 +25,7 @@ char target_unit;
 char action;
 char ai_tracker;
 int hit_radius_size;
-int opp_hit_radius[24];
+int opp_hit_radius[26];
 
 struct Ai_Entity ai_entities[15]; //should be 15 but gave an extra 5 for possible, non-enemy ais
 
@@ -82,6 +82,8 @@ ai()
   g=0;
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
+    // put_number(ai_entities[ai_tracker].entity_id,4,0,0);
+    // wait_for_I_input();
     ai_do_state(ai_entities[ai_tracker].id);
     update_map();
     satb_update();
@@ -96,6 +98,7 @@ void start_turn(char team)
   first = 1;
   init_ai();
   turn = team;
+  turns_count++;
   for(i=0; i<num_of_entities; i++)
   {
     if(entities[i].team)
@@ -222,7 +225,7 @@ void do_defend_objective(char ai_id)
 
   mv = get_army_min_move(ai_entities[ai_id].entity_id);
   rng = get_army_max_range(ai_entities[ai_id].entity_id);
-  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,mv);
+  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,mv);
 
   if(num_of_units_in_range > 0)
   {
@@ -270,12 +273,10 @@ void do_capture_objective(char ai_id)
 
   mv = get_army_min_move(ai_entities[ai_id].entity_id);
   rng = get_army_max_range(ai_entities[ai_id].entity_id);
-  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,0);
+  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
 
   if(obj_in_range && battle_grid[objective_pos] == 0)
   {
-    // put_number(mv,2,1,1);
-    // wait_for_I_input();
     ai_entities[ai_id].state = MOVING;
     ai_entities[ai_id].dest = objective_pos;
     return;
@@ -283,8 +284,7 @@ void do_capture_objective(char ai_id)
   search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,mv);
   if(num_of_units_in_range == 1)
   {
-    // wait_for_I_input();
-    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,path,battle_grid,CPU,60,0);
+    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,path,battle_grid,CPU,60,mv);
     if(p == 0)
     {
       ai_entities[ai_id].state = ATTACKING;
@@ -307,9 +307,7 @@ void do_capture_objective(char ai_id)
   else
   {
     search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
-    p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size,map);
-    // put_number(p,3,1,2);
-    // wait_for_I_input();
+    p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size+1,map);
     ai_entities[ai_id].state = MOVING;
     ai_entities[ai_id].dest = p;
   }
@@ -349,15 +347,19 @@ char search_in_radius(int position, char radius_size, char ignore_depth)
 
 void move_ai_unit(char ai_id, int dest)
 {
+  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
   if(battle_grid[dest] != 0)
   {
+    sync(60);
+    unhighlight();
     return;
   }
-  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
+  // highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
   satb_update();
   sync(10);
   move_unit(dest,entities[ai_entities[ai_id].entity_id].pos);
   set_cursor_pos(entities[ai_entities[ai_id].entity_id].pos);
+  update_map();
   unhighlight();
   satb_update();
   sync(10);
@@ -368,7 +370,7 @@ void ai_do_state(char ai_id)
   // center_camera(graph_from_x_y(sx,sy));
   center_camera(entities[ai_entities[ai_id].entity_id].pos);
   set_cursor_pos(entities[ai_entities[ai_id].entity_id].pos);
-  display_position(14,1);
+  // display_position(14,1);
   satb_update();
   sync(60);
   if(ai_entities[ai_id].state == READY){ do_ready(ai_id); }
@@ -379,11 +381,12 @@ void ai_do_state(char ai_id)
 
 void do_ready(char ai_id)
 {
-  switch(ai_objective)
+  switch(map_type)
   {
-    case MAP_DEFEND: do_defend_objective(ai_id); break;
-    case MAP_CAPTURE: do_capture_objective(ai_id); break;
-    case MAP_TARGET: do_target_objective(ai_id); break;
+    case MAP_DEFEND: do_capture_objective(ai_id); break;
+    default: do_defend_objective(ai_id); break;
+    // case MAP_DEFEND: do_capture_objective(ai_id); break;
+    // case MAP_TARGET: do_target_objective(ai_id); break;
   }
 }
 
@@ -440,6 +443,7 @@ void do_attack(char ai_id)
 void do_pass(char ai_id)
 {
   entities[ai_entities[ai_id].entity_id].actionable = 0;
+  check_battle_complete();
 }
 
 int find_nearest_unoccupied_position(int position, int destination, char range, struct Node *grid)

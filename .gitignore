@@ -3,6 +3,7 @@ tiles/*
 script/*
 assets/*
 characters/*
+docs/*
 *.rtf
 *.pce
 *.s

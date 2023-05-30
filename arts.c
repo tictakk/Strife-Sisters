@@ -52,7 +52,7 @@ void init_arts()
 
   arts[1].frame_count = 12;
   arts[1].name = "Zap";
-  arts[1].cost = 1;
+  arts[1].cost = 2;
   arts[1].target = MULTI_ROW;
   arts[1].relationship = ONE_TO_ONE;
   arts[1].stunning = 1;
@@ -239,7 +239,7 @@ void load_art(char art_no, int x, int y, char flip)
     break;
 
     case RAIN_ARROW_ART:
-    create_arrows(x+8,y+16,flip);
+    create_arrows(x,y,flip);
     break;
   }
 }

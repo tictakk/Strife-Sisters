@@ -187,8 +187,8 @@ void draw_npcs(char sprite_offset)
   // increment_frame();
   for(i=0; i<npc_count; i++)
   {
-    x = npcs[i].pos_x * 16;
-    y = npcs[i].pos_y * 16;
+    x = npcs[i].pos_x << 4;
+    y = npcs[i].pos_y << 4;
     draw_npc(sprite_offset+i,x,y-16,i);
   }
 }
@@ -203,7 +203,7 @@ void draw_npc(char sprite_no, int x, int y, char index)
 void destroy_npc(char index)
 {
   char i;
-  // put_number(npc_count-1,3,1,36);
+
   for(i=index; i<npc_count; i++)
   {
     memcpy(&npcs[i],&npcs[i+1],sizeof(struct npc));

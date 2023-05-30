@@ -40,7 +40,7 @@ int team_one_count, team_two_count;
 int a_def_bonus, a_atk_bonus, t_def_bonus, t_atk_bonus;
 
 char a_terrain, t_terrain, attack_range, 
-     battle_clock, animating, attacker, speed_divider, stun_count;
+     battle_clock, animating, attacker, stun_count;
 
 char team_one_judgement=0, team_two_judgement=0, clear_eyes_called=0, sea_legs_art=0;
 char team_one_tracked=0, team_two_tracked=0, team_one_tracking=0, team_two_tracking=0;
@@ -96,15 +96,6 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].meter = 0;
   battleunits[index].a_bonus = 0;
   battleunits[index].d_bonus = 0;
-
-  if(entities[entity_id].team == PLAYER && active_player_calling == CALLING_DOUBLE_ATTACK)
-  {
-    battleunits[index].attacks++;
-  }
-  if(entities[entity_id].team == CPU && active_cpu_calling == CALLING_DOUBLE_ATTACK)
-  {
-    battleunits[index].attacks++;
-  }
   
   if(entities[entity_id].bg->units[position]->unit.rng < attack_range)
   {
@@ -467,7 +458,9 @@ void transfer_units_to_stun_vram(char type, char index)
       break;
 
     default:
-       put_string("error default stn",5,5);
+       put_string("error default",5,5);
+       put_number(type,3,19,5);
+      //  print_unit_fullname(type,19,5);
        break;
   }
 }
@@ -696,6 +689,11 @@ void target_single_unit(char b_id)
 
   set_unit_target(target);
   load_animations_to_vram(battleunits[b_id].unit->unit->id);
+  // if(debug_flag)
+  // {
+  //   put_number(b_id,3,0,0);
+  //   wait_for_I_input();
+  // }
 }
 
 void target_aoe(char position, char team, char state, char targeted, char animated)

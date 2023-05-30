@@ -26,10 +26,10 @@ void reset_calling(char team)
 void display_calling_background(int x, int y, char cmdr_id)
 {
   scroll(0,0,y,32,224,0x80);
-  display_abs_black_panel(0,6,32,7);
+  display_abs_black_panel(0,(y/8)+4,32,7);
   load_portrait(party_commanders[cmdr_id].sprite_type,0);
-  display_item(0,0,7,6);
-  print_calling_name(party_commanders[cmdr_id].bg.calling_stone,11,8);
+  display_item(0,0,7,(y/8)+4);
+  print_calling_name(party_commanders[cmdr_id].bg.calling_stone,11,10);
   sync(120);
   load_map(0,2,0,0,16,29);
   scroll(0,0,y,32,224,0xC0);
@@ -37,5 +37,5 @@ void display_calling_background(int x, int y, char cmdr_id)
 
 void print_calling_name(char calling_id, char x, char y)
 {
-  put_string(calling_stones[calling_id].name,x,y);
+  put_string(calling_stones[calling_id].name,x,y+(s_y/8));
 }

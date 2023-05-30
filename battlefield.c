@@ -3,12 +3,13 @@
 
 #incpal(bluepal,"map/sprites/bluetiles.pcx")
 #incpal(redpal,"map/sprites/redtiles.pcx")
+#incpal(greenpal,"map/sprites/greentiles.pcx")
 #incpal(greypal,"assets/faded_pal.pcx")
 
 #define MENU_ATK_X 152
 #define MENU_ATK_Y 16
 
-int map_no;
+int map_no, g_abs;
 int id;
 int s_x_holder, s_y_holder,y_off_holder;
 enum Direction cmdr_direction;
@@ -16,12 +17,12 @@ char exit_battlefield;
 char t = 0;
 
 //variables for update map routine
-int squares, index, sprite_counter, entity_no;
-char t_type, selector_frame = 0;
-const unsigned char selector_frames[5] = {0x00, 0x40, 0x80, 0x40, 0x00};
+int index, sprite_counter, entity_no;
+char t_type;
 
 void play_story()
 {
+  menu_height = 32;
   story(map_no,INBATTLE,0);
   scroll(0,s_x,s_y+32,32,224,0xC0);
   scroll(1,0,0,0,32,0x80);
@@ -29,10 +30,14 @@ void play_story()
   display_window_abs(18,0,14,4);
   menu_mask = 0x00;
   print_menu();
-  load_map(0,2,0,0,16,10);
+  load_map(0,2,0,0,16,20);
   load_palette(12,bluepal,1);
   load_palette(13,redpal,1);
+  menu_height = 32;
   pan_camera_y(entities[0].pos);
+  sx = (entities[0].pos&15) << 4;
+  sy = ((entities[0].pos>>4) << 4) - s_y;
+  display_selector(SELECTOR,sx,sy,16);
   clear_joy_events(0x1F);
 }
 
@@ -42,7 +47,6 @@ void begin_battlefield(char map_id)
   current_turn = 1;
   menu_mask = 0;
   map_no = map_id;
-  // map_offset = (464*map_no)-32;
   map_offset = (320*map_no)-32;
   objective_pos = battle_map_metadata.event_positions[0];
   if(map_id > 0 && party_size < 3)
@@ -70,17 +74,17 @@ void begin_battlefield(char map_id)
 void battlefield_loop(char map_id)
 {
   char id;
-  int item_index;
-  int position;
   char ss;
   last_command = SELECT_MODE;
   selected_option = -1;
+  turns_count = 0;
+  units_killed = 0;
+  units_lost = 0;
+  materials_collected = 0;
+  chests_collected = 0;
 
-  // objective_pos = 200;
-  // load_coords(0);
-
-  s_x_relative = (s_x/8);
-  s_y_relative = (s_y/8);
+  s_x_relative = 0;//(s_x/8);
+  s_y_relative = 0;//(s_y/8);
   ss = script[1];
 
   disp_on();
@@ -89,7 +93,8 @@ void battlefield_loop(char map_id)
   turn = PLAYER;
   select_unit(0);
   play_story();
-  psgPlay(0);
+  display_selector(SELECTOR,sx,sy,16);
+  // psgPlay(0);
   
   while(exit_battlefield)
   {
@@ -99,21 +104,18 @@ void battlefield_loop(char map_id)
     }
     else
     {
-      position = graph_from_x_y(sx,sy);
-      t_type =  terrain_type(battlefieldbat[map_offset+position]);
-      id = battle_grid[position];
+      // position = graph_from_x_y(sx,sy);
+      g_abs = graph_from_x_y(sx,sy);
+      t_type =  terrain_type(battlefieldbat[map_offset+g_abs]);
+      id = battle_grid[g_abs];
       display_position(14,1);
+      // display_enemy_remaining(13,1);
       display_terrain_bonus();
-      // display_id(id-1,13,1);
       swap_water_tiles();
       // if(selector_mode != ARMY_MODE){ cycle_terrain_items(); }
       ctrls();
       cycle_animations();
       check_battle_complete();
-      // check_item_pickup();
-      
-      // put_number(num_of_entities,2,3,0);
-      // display_position(12,1);
     }
     satb_update();
     vsync();
@@ -127,15 +129,10 @@ void battlefield_loop(char map_id)
 char check_item_pickup()
 {
   char item_no;
-  // if(!selected_entity->actionable)
-  // {
-    if((item_no = item_at_position(selected_entity->pos)) > -1)
-    {
-      return item_no;
-      // collect_item(item_no);
-    }
-  // }
-  return -1;
+  if((item_no = item_at_position(selected_entity->pos)) > -1)
+  {
+    collect_item(item_no);
+  }
 }
 
 void battle_start()
@@ -147,9 +144,10 @@ void battle_start()
 
   reset_satb();
   init_units();
+  load_map_items();
   update_map();
   load_battlefield_map();
-  load_map_items();
+  // load_map_items();
   // story(0,INBATTLE,0);
   sx = (entities[0].pos&15) << 4;
   sy = (entities[0].pos>>4) << 4;
@@ -171,6 +169,8 @@ void check_battle_complete()
   {
     if(entities[battle_grid[objective_pos]-1].team == CPU)
     {
+      put_string("lose",0,0);
+      wait_for_I_input();
       lose_condition();
       return;
     }
@@ -223,18 +223,20 @@ char check_terrain_triggered()
 
 void win_condition()
 {
+  post_battle_screen();
   satb_update();
   vsync();
   exit_battlefield = 0;
   s_x = s_x_holder;
   s_y = s_y_holder;
-  post_battle_dialog();
+  // post_battle_dialog();
 }
 
 void lose_condition()
 {
-  satb_update();
-  vsync();
+  // satb_update();
+  // vsync();
+  cleanup_battlefield();
   game_over = 0;
   exit_battlefield = 0;
   s_x = s_x_holder;
@@ -247,9 +249,7 @@ void cycle_animations()
   {
     increment_frame();
     update_map();
-    selector_frame = (selector_frame + 1) % 5;
-    spr_set(SELECTOR);
-    spr_pattern(0x68C0+selector_frames[selector_frame]);
+    cycle_selector();
   }
 }
 
@@ -389,6 +389,12 @@ void display_sprite_type(int pos)
   }
 }
 
+void display_enemy_remaining(char x, char y)
+{
+  put_string("Foes",x,y);
+  put_number(two_total,2,x+2,y+1);
+}
+
 void display_terrain_bonus()
 {
   // terrain_type =  terrain_type(battlefieldbat[map_offset+id]);
@@ -408,8 +414,6 @@ void load_sprites_() //load default sprites
 
 void update_map()
 {
-  // int squares, i, sprite_counter, entity_no;
-  // char s;
   t=0;
   squares = 224+s_y;//464;
   sprite_counter = 63;
@@ -486,7 +490,7 @@ void cursor_up()
 void ctrls()
 {
   unsigned char j;
-  int abs;
+  // int abs;
   j = joytrg(0);
 
   if(j & JOY_UP)
@@ -555,37 +559,39 @@ void ctrls()
     }
   }
 
-  abs = graph_from_x_y(sx,sy);
+  // abs = graph_from_x_y(sx,sy);
 
   if(j & JOY_I)
   {
     if(selector_mode == SELECT_MODE)
     {
-      if(battle_grid[abs] != 0)
+      if(battle_grid[g_abs] != 0)
       {
-        if(entities[battle_grid[abs]-1].team == PLAYER)
+        if(entities[battle_grid[g_abs]-1].team == PLAYER)
         {
           last_command = selector_mode;
-          id = battle_grid[abs];
+          id = battle_grid[g_abs];
           selector_mode = MENU_MODE;
           select_unit(id-1);
           set_menu_mask(id-1);
-          get_unit_radius(abs,get_army_min_move(selected_entity->id),entities[id-1].team,0);
+          get_unit_radius(g_abs,get_army_min_move(id-1),entities[id-1].team,get_army_min_move(id-1));
+          // put_number(map_size,3,0,0);
           display_menu(152,8);
         }
       }
     }
     else if(selector_mode == PLACE_MODE)
     {
-      if(battle_grid[abs] == 0 && (is_traversable(abs)) && valid_map_square(abs))
+      if(battle_grid[g_abs] == 0 && (is_traversable(g_abs)) && valid_map_square(g_abs))
       {
         remove_cursor();
         last_command = selector_mode;
-        move_unit_new(abs);
+        // move_unit_new(abs);
+        walk_entity(get_entity_id(selected_entity->pos),g_abs);
 
         selector_mode = ACTION_MODE;
 
-        set_menu_mask(battle_grid[abs]-1);
+        set_menu_mask(battle_grid[g_abs]-1);
         display_menu(MENU_ATK_X,MENU_ATK_Y);
         draw_selector();
 
@@ -594,13 +600,14 @@ void ctrls()
     }
     else if(selector_mode == ATTACK_MODE)
     {
-      if(battle_grid[abs] != 0 && valid_map_square(abs))
+      if(battle_grid[g_abs] != 0 && valid_map_square(g_abs))
       {
-        attack_unit(abs,selected_entity->pos,0);
+        if(entities[battle_grid[g_abs]-1].team != selected_entity->team)
+        {
+          check_item_pickup();
+          attack_unit(g_abs,selected_entity->pos,0);
+        }
       }
-    }
-    else if(selector_mode == ATTACK_WITH_ART)
-    {
     }
     else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
     {
@@ -613,8 +620,8 @@ void ctrls()
             selector_mode = ATTACK_MODE;
             hide_menu();
             draw_selector();
-            get_unit_radius(selected_entity->pos,get_army_max_range(selected_entity->id),selected_entity->team,0);
-            highlight(selected_entity->pos,0xD000);
+            get_unit_radius(selected_entity->pos,get_army_max_range(get_entity_id(selected_entity->pos)),selected_entity->team,0);
+            highlight(selected_entity->pos,ACTION_ATTACK);
           }
           break;
 
@@ -629,7 +636,7 @@ void ctrls()
         case MENU_END:
           if(menu_mask & 0x4)
           {
-            end_unit_turn(selected_entity->id);
+            end_unit_turn(get_entity_id(selected_entity->pos));
           }
           break;
 
@@ -648,8 +655,6 @@ void ctrls()
           remove_cursor();
           scroll(0,0,s_y+32,32,224,0x80);
           display_abs_info_panel(7+(s_x),32+(s_y/2),18,14); //find a way to remove
-          // display_window_abs(7+(s_x),32+(s_y/2),18,14);
-          // display_window_abs(7,8+(s_y/2),18,14);
           cursor_x = 8;
           cursor_y = 11 + (s_y/8);
           display_cursor();
@@ -662,13 +667,14 @@ void ctrls()
           break;
 
         case MENU_TAKE://calling
-          display_calling_background(0,s_y+32,selected_entity->id);
+          check_item_pickup();
+          display_calling_background(0,s_y+32,get_entity_id(selected_entity->pos));
           set_calling(selected_entity->bg->calling_stone,selected_entity->team);
           animate_calling(calling_stones[selected_entity->bg->calling_stone].effect,PLAYER);
           display_selector(0,sx,sy,16);
           hide_menu();
           selector_mode = SELECT_MODE;
-          load_palette(12,bluepal,1);
+          display_selector(SELECTOR,sx,sy,16);
           break;
       }
     }
@@ -743,22 +749,8 @@ void ctrls()
 
   if(j & JOY_RUN)
   {
-    // put_terrain_effect(5,10,10,7);
-    // put_terrain_effect(0,10,10,7);
-    // put_tile(147,10,10);
-    // display_calling_background();
-    // animate_calling(EFFECT_HEAL,PLAYER);
-    // remove_effect(0);
-    // display_selector();
-    // draw_selector();
-    // put_number(selected_entity->id,4,0,0);
-
-    // create_terrain_item(RED_CRYSTAL,5,5,4);
-    // create_terrain_item(BLUE_CRYSTAL,6,6,4);
-    // create_terrain_item(GREEN_CRYSTAL,7,7,4);
-    // create_terrain_item(CHEST,8,8,3);
-
-    // put_number(battle_map_metadata.item_positions[0],3,0,0);
+    // win_condition();
+    // walk_entity(0,150);
   }
 
   if(j & JOY_SEL){}
@@ -774,10 +766,11 @@ void animate_calling(char effect, char target_team)
     if(entities[i].team == target_team)
     {
       x = (entities[i].pos&15)<<4;
-      y = (entities[i].pos>>4)<<4;
+      y = ((entities[i].pos>>4)<<4)-s_y;
       create_art_by_type(effect,x,y,0);
+      // create_effect(effect,x,y,0);
       animate_calling_effect(x,y);
-      // remove_effect(0);
+      remove_effect(0);
     }
   }
 }
@@ -862,12 +855,19 @@ void display_menu(int x, int y)
   scroll(1,0,0,0,32,0x80);
 }
 
-void highlight(int square, int pal)
+void highlight(int square, char action_type)
 {
   int i;
+  char pal;
+  switch(action_type)
+  {
+    case ACTION_MOVE: load_palette(12,bluepal,1);break;
+    case ACTION_ATTACK: load_palette(12,redpal,1);break;
+    case ACTION_CALLING: load_palette(12,greenpal,1);break;
+  }
   for(i=0; i<map_size+1; i++)
   {
-    change_background_palette(map[i].ownPos,pal);
+    change_background_palette(map[i].ownPos,0xC000);
   }
 }
 
@@ -903,14 +903,6 @@ void display_selector_pos()
   put_number(sy,3,3,2);
 }
 
-// void pickup_item(int entity_id)
-// {
-//   char item_index;
-//   item_index = item_at_position(entities[entity_id].pos);
-//   item_gained_text(terrain_items[item_index].item_no);
-//   remove_terrain_item(item_index);
-// }
-
 void display_camera_info()
 {
   put_string("sy:",5,1);
@@ -940,8 +932,22 @@ void display_id(char id, int x, int y)
 
 void display_position(int x, int y)
 {
-  // put_number(graph_from_x_y(sx,sy),3,x,y);
-  put_number(s_y,3,x,y);
+  // if(battle_grid[graph_from_x_y(sx,sy)]-1 >= 0)
+  // {
+  //   put_string("cid",x-3,y);
+  //   put_number(entities[battle_grid[graph_from_x_y(sx,sy)]-1].id,3,x,y);
+  //   put_string("eid",x-3,y+1);
+  //   put_number(battle_grid[graph_from_x_y(sx,sy)]-1,3,x,y+1);
+  // }
+  // else
+  // {
+  //   put_string("    ",x-3,y);
+  //   put_string("   ",x,y);
+  //   put_string("    ",x-3,y+1);
+  //   put_string("   ",x,y+1);
+  // }
+  put_number(graph_from_x_y(sx,sy),3,x,y);
+  // put_number(s_y,3,x,y);
 }
 
 void display_unit_menu_mask(int x, int y)
@@ -987,11 +993,11 @@ void display_type(char id, int x, int y)
   // print_unit_type(entities[id].unit->id,x,y);
 }
 
-char begin_battle(int attacker, int target, char range, char a_terrain, char t_terrain, char art)
+char begin_battle(unsigned char attacker, unsigned char target, unsigned char range, char a_terrain, char t_terrain, char art)
 {
   int i, battle_result, resolution;
 
-  psgFadeOut(20);
+  // psgFadeOut(20);
   reset_satb();
   vsync();
 
@@ -1024,7 +1030,7 @@ char begin_battle(int attacker, int target, char range, char a_terrain, char t_t
   selector_mode = 0;
   vsync();
 
-  psgPlay(0);
+  // psgPlay(0);
   return resolution;
 }
 
@@ -1032,14 +1038,12 @@ void cleanup_battlefield()
 {
   int i, j, z;
 
-  // for(i=0; i<464; i++)
   for(i=0; i<352; i++)
   {
     battle_grid[i] = 0;
   }
   for(i=0; i<MAX_ENTITIES; i++)
   {
-    // entities[i].army_size = 0;
     entities[i].team = 0;
     entities[i].id = 0;
     entities[i].pos = 0;

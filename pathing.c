@@ -1,6 +1,6 @@
 #include "battlefield.h"
 struct Node neighbors[4];
-struct Node map[61]; //a unit with a max move of 5 will fill 60 nodes max.
+struct Node map[90]; //a unit with a max move of 5 will fill 60 nodes max.
 
 char visit_grid[352];
 
@@ -17,7 +17,6 @@ int get_neighbors(int position)
 		neighbors[counter].checked = 1;
 		counter++;
 	}
-
 	//up
 	if((position - 16) > -1)
 	{
@@ -100,6 +99,8 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		  		}
 					else if(entities[id-1].team != team && id != 0 && !(ignore_depth<=d_level))
 					{
+            // put_number(p,4,0,0);
+            // wait_for_I_input();
 						if(put_visited(p,fp,0))
 						{
 							d_count++;
@@ -183,6 +184,11 @@ int put_visited(int pos, int fpos, char checked)
     return 0;
   }
 
+  // if(pos == 108)
+  // {
+  //   put_number(map_size+1,4,0,0);
+  //   wait_for_I_input();
+  // }
   visit_grid[pos] = 1;
 
 	++map_size;

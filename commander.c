@@ -22,6 +22,7 @@ struct Commander{
 	char *name;
 	char sprite_type;
   char max_bp;
+  // char medals[4];
 	Battlegroup bg;
 };
 

@@ -45,7 +45,6 @@
 char menu_state = 0;
 char menu_cols = 0;
 char submenu_state = 0;
-char row_selected = 0;
 
 //party
 enum Direction party_direction;

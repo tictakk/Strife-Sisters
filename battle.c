@@ -1,4 +1,5 @@
 #include "battle.h"
+
 // #incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
 // #inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
 // #inctile(battletiles,"tiles/battletiles.tiles.pcx")
@@ -9,8 +10,12 @@
 void countdown(int timer, char x, char y, char *str)
 {
   int time, i, j;
+  if(simulation_mode)
+  {
+    return;
+  }
   time = (10) * timer;
-  display_window_rel(x,y,12,3);
+  display_window_abs(x,y,12,3);
   put_string(str,x+1,y+1);
   j = 240;
   while(j-- > 0)
@@ -18,7 +23,7 @@ void countdown(int timer, char x, char y, char *str)
     if(joytrg(0) == JOY_RUN)
     {
       battle_ctrls();
-      display_window_rel(x,y,12,3);
+      display_window_abs(x,y,12,3);
       put_string(str,x+1,y+1);
       put_number(time,3,x+7,y+1);
     }
@@ -193,7 +198,7 @@ void apply_art(char target)
 void end_sequence()
 {
   update_info_bar();
-  fade_screen();
+  // fade_screen();
 }
 
 void d_battle(char team)
@@ -281,6 +286,10 @@ char get_highest_speed(char team)
 {
   char i, hi_spd, highest;
 
+  if(team_one_count == 0 || team_two_count == 0)
+  {
+    return -1;
+  }
   hi_spd = 0;
   highest = -1;
 
@@ -590,6 +599,7 @@ void load_animations_to_vram(char attacker)
   char i, count;
   count = 0;
   transfer_units_to_attack_vram(attacker);
+
   for(i=0; i<18; i++)
   {
     if(battleunits[i].target)
@@ -607,60 +617,12 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t, char art, char 
 	attack_range = range;
 	xOffset = -36;
 	atker = i1, trgt = i2;
-  speed_divider = 10;
 
   entities[i1].bg->meter = min(entities[i1].bg->meter+1,MAX_METER);
   entities[i2].bg->meter = min(entities[i2].bg->meter+1,MAX_METER);
 
   // a_terrain = terrain_effect_by_type(terrain_type(a_t));
 	t_terrain = terrain_def_bonus(t_t);//terrain_effect_by_type(terrain_type(t_t));
-  if(active_player_calling == CALLING_ATK_BUFF)
-  {
-    if(entities[i1].team == PLAYER)
-    {
-      a_atk_bonus = 5;
-    }
-    else
-    {
-      t_atk_bonus = 5;
-    }
-  }
-
-  if(active_cpu_calling == CALLING_ATK_BUFF)
-  {
-    if(entities[i1].team == CPU)
-    {
-      a_atk_bonus = 5;
-    }
-    else
-    {
-      t_atk_bonus = 5;
-    }
-  }
-
-  if(active_player_calling == CALLING_DEF_BUFF)
-  {
-    if(entities[i1].team == PLAYER)
-    {
-      a_def_bonus = 5;
-    }
-    else
-    {
-      t_def_bonus = 5;
-    }
-  }
-
-  if(active_cpu_calling == CALLING_DEF_BUFF)
-  {
-    if(entities[i1].team == CPU)
-    {
-      a_def_bonus = 5;
-    }
-    else
-    {
-      t_def_bonus = 5;
-    }
-  }
 
 	//a_atk_bonus = 0;//terrain_atk_bonus(a_terrain);
 	//a_def_bonus = 0;//terrain_def_bonus(a_terrain);
@@ -678,10 +640,11 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t, char art, char 
   load_tile(TILE_VRAM);
   load_map(0,0,0,0,16,14);
 
+	load_healthbars();
+
 	init_armies(i1,i2);
 	scroll(0, 0, 0, 0, 223, 0xC0);
 
-	load_healthbars();
   set_infobar();
   // display_battle_menu();
 
@@ -717,8 +680,8 @@ void set_portrait(char index, char entity_id)
 
 void set_infobar()
 {
-  display_window_rel(0,0,16,6);
-  display_window_rel(16,0,16,6);
+  display_window_abs(0,0,16,6);
+  display_window_abs(16,0,16,6);
   set_portrait(0,atker);
   set_portrait(1,trgt);
   display_item(0,0,1,1);
@@ -740,7 +703,7 @@ void display_battle_menu()
   unit_offset = (entities[atker].team == PLAYER)? 0 : 9;
   cursor_x = 11;
   cursor_y = 1;
-  display_window_rel(10,0,12,12);
+  display_window_abs(10,0,12,12);
   display_cursor();
   print_army_combos(player_ent,unit_offset);
 }
@@ -980,6 +943,10 @@ void kill_unit(char b_id)
   entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].unit = &unit_list[NO_UNIT];
   battleunits[b_id].active = 0;
   // battleunits[b_id].target = 0;
+  if(entities[battleunits[b_id].ent_id].team == PLAYER)
+  {
+    units_lost++;
+  }
   if(battleunits[b_id].ent_id == atker)
   {
     team_one_count--;

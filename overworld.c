@@ -7,7 +7,6 @@ void overworld_loop()
 {
   int i;
 	// char s;
-	row_selected = ROW_ONE;
 	// s = script[0];
 	party_direction = NORTH;
 	s_y = 288;
@@ -106,7 +105,8 @@ void overworld_loop()
 
 void arrived(int pos)
 {
-//  story(get_map_id_by_pos(pos),PREBATTLE,0);
+  story(get_map_id_by_pos(pos),PREBATTLE,0);
+  scroll(0,s_x,288,0, 223, 0xC0);
 	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 	commander_select_cursor = 0;
 
@@ -346,7 +346,7 @@ void load_overworld_bg()
 
 	set_font_pal(10);
 	load_font(font,125,0x4800);
-  	load_terrains();
+  load_terrains();
 	load_vram(0x49A0,icons_gfx,0x60);
 	load_vram(0x4BB0,icons_gfx+0x60,0x60);
 
