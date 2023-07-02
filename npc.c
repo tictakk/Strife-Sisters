@@ -15,9 +15,9 @@ struct npc{
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
-                                        19,20,21,22,23,
-                                        24,25,26,25,26,
-                                        25,19,19,17,17,24,24};
+                                        18,20,21,22,19,
+                                        19,25,24,17,26,
+                                        25,19,19,17,17,24,23};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -34,11 +34,14 @@ void init_npcs()
   current_frame = 0;
 
   load_palette(17,sldpal,1);
-  load_palette(18,magepal,2);
+  load_palette(18,magepal,1);
+  load_palette(19,monkpal,1);
   load_palette(20,dmnpal,1);
-  load_palette(21,blobpal,2);
-  load_palette(23,axebtlpal,1);
-  load_palette(24,bndpal,2);
+  load_palette(21,blobpal,1);
+  load_palette(22,axebtlpal,1);
+  load_palette(23,bndpal,1);
+  load_palette(24,lancepal,1);
+  load_palette(25,sniperpal,1);
   load_palette(31,dark,1);
 }
 
@@ -57,6 +60,8 @@ void hide_npcs(char offset)
   // for(i=0; i<npc_count; i++)
   for(i=offset; i<64; i++)
   {
+    // put_number(i,4,0,0);
+    // wait_for_I_input();
     spr_hide(i);
   }
 }
@@ -158,11 +163,29 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],bnd,0x100);
           break;
 
+          case GOLEM_UNIT:
+          load_vram(npc_vram[type],gol,0x100);
+          break;
+
+          case MONK_UNIT:
+          load_vram(npc_vram[type],mnk,0x100);
+          break;
+
+          case LANCER_UNIT:
+          load_vram(npc_vram[type],lan,0x100);
+          break;
+
+          case SNIPER_UNIT:
+          load_vram(npc_vram[type],sniper,0x100);
+          break;
+
+          case KNIGHT_UNIT:
+          load_vram(npc_vram[type],knight,0x1000);
+          break;
+
           default:
           load_vram(npc_vram[type],sld,0x100);
           put_string("error default",5,5);
-//          put_number(type,3,13,9);
-//          wait_for_I_input();
           break;
         }
       }
@@ -185,11 +208,14 @@ void draw_npcs(char sprite_offset)
   char i;
   int x, y;
   // increment_frame();
-  for(i=0; i<npc_count; i++)
+  // for(i=63; i>63-npc_count; i--)
+  for(i=0;i<npc_count;i++)
   {
+    // put_number(i,4,0,0);
+    // wait_for_I_input();
     x = npcs[i].pos_x << 4;
     y = npcs[i].pos_y << 4;
-    draw_npc(sprite_offset+i,x,y-16,i);
+    draw_npc(63-i,x,y-16,i);
   }
 }
 

@@ -4,7 +4,7 @@
 #define RAPID_THRUST_ART 3
 #define PLUNDER_ART 4
 #define PILLAGE_ART 5
-#define RAGE_CLOUD_ART 6
+#define CAPTURE_ART 6
 #define POWER_WAVE_ART 7
 #define BLOW_BACK_ART 8
 #define CLEAVE_ART 9
@@ -60,12 +60,12 @@ void init_arts()
   arts[2].frame_count = 8;
   arts[2].name = "Volley";
   arts[2].cost = 1;
-  arts[2].target = NO_TARGET;
+  arts[2].target = SINGLE_HIT;
   arts[2].relationship = ONE_TO_ONE;
   arts[2].stunning = 1;
 
   arts[3].frame_count = 11; //rapid thrust
-  arts[3].name = "Rapid atk";
+  arts[3].name = "Rapid AT";
   arts[3].cost = 1;
   arts[3].target = SINGLE_HIT;
   arts[3].relationship = NONE_TO_NONE;
@@ -85,12 +85,17 @@ void init_arts()
   arts[5].relationship = MANY_TO_MANY;
   arts[5].stunning = 0;
 
+  // arts[6].frame_count = 11;
+  // arts[6].name = "Rage Mist";
+  // arts[6].cost = 1;
+  // arts[6].target = ALL_ALLIES;
+  // arts[6].relationship = NONE_TO_NONE;
+  // arts[6].stunning = 0;
   arts[6].frame_count = 11;
-  arts[6].name = "Rage Mist";
+  arts[6].name = "Capture";
   arts[6].cost = 1;
-  arts[6].target = ALL_ALLIES;
-  // arts[6].relationship = MANY_TO_MANY;
-  arts[6].relationship = NONE_TO_NONE;
+  arts[6].target = SINGLE_HIT;
+  arts[6].relationship = ONE_TO_ONE;
   arts[6].stunning = 0;
 
   arts[7].frame_count = 11;
@@ -110,7 +115,7 @@ void init_arts()
   arts[9].frame_count = 11;
   arts[9].name = "Cleave";
   arts[9].cost = 1;
-  arts[9].target = MULTI_ROW;
+  arts[9].target = MULTI_COL_3;
   arts[9].relationship = ONE_TO_MANY;
   arts[9].stunning = 1;
 
@@ -241,6 +246,10 @@ void load_art(char art_no, int x, int y, char flip)
     case RAIN_ARROW_ART:
     create_arrows(x,y,flip);
     break;
+
+    case CAPTURE_ART:
+    create_capture(x,y,flip);
+    break;
   }
 }
 
@@ -275,13 +284,10 @@ void animate_effect(char effect_type, char effect_no)
     animate_hit_spark(effect_no);
     break;
 
+    case EFFECT_CAPTURE:
     case EFFECT_ICE:
     animate_ice(effect_no);
     break;
-
-    // case EFFECT_FIRE:
-    // animate_ice(effect_no);
-    // break;
 
     case EFFECT_ARROW:
     animate_arrow(effect_no);
@@ -302,17 +308,17 @@ char get_modifier_amount(char art_id)
 {
   switch(art_id)
   {
-    case ZAP_ART: return -25;
-    case RAIN_ARROW_ART: return -15;
+    case ZAP_ART: return 25;
+    case RAIN_ARROW_ART: return 15;
     case PLUNDER_ART: return 5;
     case PILLAGE_ART: return 5;
-    case POWER_WAVE_ART: return -20;
-    case BLOW_BACK_ART: return -10;
-    case CLEAVE_ART: return -10;
-    case FRENZY_ART: return -10;
-    case RUN_THROUGH_ART: return -10;
-    case BOMBARD_ART: return -15;
-    case SEDUCE_ART: return -5;
+    case POWER_WAVE_ART: return 20;
+    case BLOW_BACK_ART: return 10;
+    case CLEAVE_ART: return 10;
+    case FRENZY_ART: return 10;
+    case RUN_THROUGH_ART: return 10;
+    case BOMBARD_ART: return 15;
+    case SEDUCE_ART: return 5;
     default: return 0;
   }
   return 0;

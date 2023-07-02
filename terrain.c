@@ -2,20 +2,13 @@
 #incchr(water_anim_two,"assets/water_anim_2.pcx")
 #incchr(terrain_icons,"map/sprites/terrain_icons.pcx",14,2)
 #incpal(t_icon_pal,"map/sprites/terrain_icons.pcx")
-//#incchr(buffs,"map/sprites/buff1.pcx")
-// #incchr(buffs,"map/sprites/buff1.pcx",12,3)
-// #incchr(buffs,"map/sprites/gems.pcx")
-// #incchr(chest,"map/sprites/chest.pcx")
+
 #incspr(buffs,"map/sprites/gems.pcx")
 #incspr(chest,"map/sprites/chest.pcx")
 #incpal(chest_pal,"map/sprites/chest.pcx")
 
 #incchr(cursor, "map/cursor.pcx");
 #incpal(cursorpal, "map/cursor.pcx");
-
-//Map images
-#incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
-#inctilepal(overworldtilespal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 // #inctilepal(overworldtilespal,"map/backgrounds/strifesisters.tiles.pcx")
 
 // #incpal(overworldpal,"map/backgrounds/default.pcx")
@@ -24,10 +17,10 @@
 #inctile(overworldtiles,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 
 #incbin(battlefieldbat,"map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map001.stm")
-#incbin(m1, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map002.stm")
-#incbin(m0, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map003.stm")
-#incbin(m2, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map004.stm")
+#incbin(m0, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map002.stm")
+#incbin(m1, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map004.stm")
 #incbin(m3, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map005.stm")
+#incbin(m2, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map003.stm")
 #incbin(m4, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map006.stm")
 #incbin(m5, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map007.stm")
 #incbin(m6, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map008.stm")
@@ -41,13 +34,17 @@
 #incbin(m14, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map016.stm")
 #incbin(m15, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map017.stm")
 #incbin(m16, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map018.stm")
-#incbin(m17, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map019.stm")
-#incbin(m18, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map020.stm")
-#incbin(m19, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map021.stm")
-#incbin(m20, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map022.stm")
-#incbin(m21, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map023.stm")
-#incbin(m22, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map024.stm")
-#incbin(m23, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map025.stm")
+// #incbin(m17, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map019.stm")
+// #incbin(m18, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map020.stm")
+// #incbin(m19, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map021.stm")
+// #incbin(m20, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map022.stm")
+// #incbin(m21, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map023.stm")
+// #incbin(m22, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map024.stm")
+// #incbin(m23, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map025.stm")
+
+//Map images
+#incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
+#inctilepal(overworldtilespal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 
 #define TERRAIN_EFFECT_COUNT 5
 #define NORMAL_TERRAIN 0

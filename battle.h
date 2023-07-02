@@ -33,6 +33,9 @@ const char top_row_attack_chart[9]    = { 1, 1, 3, 2, 4, 5, 4, 5, 5};
 const char middle_row_attack_chart[9] = { 1, 1, 1, 2, 3, 2, 4, 5, 4};
 const char bottom_row_attack_chart[9] = { 3, 1, 1, 5, 4, 2, 5, 4, 4};
 
+// char attacker_art_list[MAX_ARMY_SIZE];
+// char target_art_list[MAX_ARMY_SIZE];
+
 char atker, trgt, meter_queued = 0, unit_meter_queued = 0, position_status = 0;//FINISH THIS STUFF
 
 int team_one_count, team_two_count;
@@ -179,10 +182,10 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
       battleunits[index].pal = 29;
       break;
 
-    // case BLACK_MAGE_UNIT:
-    //   load_vram(idle_vrams[index],magebtl,0x100);
-    //   battleunits[index].pal = 26;
-    //   break;
+    case BLACK_MAGE_UNIT:
+      load_vram(idle_vrams[index],magebtl,0x100);
+      battleunits[index].pal = 26;
+      break;
 
     case PALADIN_UNIT:
       load_vram(idle_vrams[index],paladinbtl,0x100);
@@ -211,7 +214,12 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
 
     case BRAWLER_UNIT:
       load_vram(idle_vrams[index],brawlerbtl,0x100);
-      battleunits[index].pal = 26;
+      battleunits[index].pal = 24;
+      break;
+
+    case GOLEM_UNIT:
+      load_vram(idle_vrams[index],golembtl,0x100);
+      battleunits[index].pal = 28;
       break;
 
     default:
@@ -259,6 +267,10 @@ void transfer_units_to_attack_vram(char type)
 
     case BERSERKER_UNIT:
       load_vram(attack_vrams[0],berserkerbtl+0x300,0x500);
+      break;
+
+    case GOLEM_UNIT:
+      load_vram(attack_vrams[0],golembtl+0x300,0x500);
       break;
 
     case DEMON_UNIT:
@@ -355,6 +367,10 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],berserkerbtl+0x900,0x100);
       break;
 
+    case GOLEM_UNIT:
+      load_vram(stun_vrams[index],golembtl+0x900,0x100);
+      break;
+
     case DEMON_UNIT:
       load_vram(stun_vrams[index],demonbtl+0x900,0x100);
       break;
@@ -406,8 +422,8 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],sniperbtl+0x900,0x100);
       break;
 
-    case BERSERKER_UNIT:
-      load_vram(stun_vrams[index],berserkerbtl+0x900,0x100);
+    case GOLEM_UNIT:
+      load_vram(stun_vrams[index],golembtl+0x900,0x100);
       break;
 
     case DEMON_UNIT:
@@ -582,9 +598,6 @@ char get_first_target()
 
 void determine_action(char b_id, char target_type)
 {
-  // set_unit_meter(b_id);
-  // transfer_units_to_attack_vram(battleunits[b_id].unit->unit->id);
-  // spr_hide();
   switch(target_type)
   {
     case SINGLE_HIT:
@@ -902,8 +915,8 @@ char do_art(char b_id)
     rapid_thrust(b_id);
     return 1;
 
-    case RAGE_CLOUD_ART:
-    rage_cloud(b_id);
+    case CAPTURE_ART:
+    capture(b_id);
     return 1;
 
     case SEA_LEGS_ART:
@@ -1009,6 +1022,20 @@ char frenzy(char b_id)
   return 1;//done
 }
 
+void capture(char b_id)
+{
+  char t_id;
+  t_id = get_first_target();
+  if(battleunits[t_id].unit->unit->a_type == NONE)
+  {
+    if(range(1,100)<51)
+    {
+      add_unit_to_convoy(battleunits[t_id].unit->unit->id);
+      kill_unit(t_id);
+    }
+  }
+}
+
 void rapid_thrust(char b_id)
 {
   spr_set(b_id+5);
@@ -1017,19 +1044,6 @@ void rapid_thrust(char b_id)
   // apply_art(i);
   remove_effects();
   battleunits[b_id].attacks = 3;
-}
-
-void rage_cloud(char b_id)
-{
-  char i;
-  for(i=0; i<18; i++)
-  {
-    if(battleunits[i].target)
-    {
-      battleunits[i].attacks++;
-    }
-  }
-  clear_targets();
 }
 
 void red_eye(char b_id)

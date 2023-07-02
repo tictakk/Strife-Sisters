@@ -1,6 +1,6 @@
 #include "battlefield.h"
 struct Node neighbors[4];
-struct Node map[90]; //a unit with a max move of 5 will fill 60 nodes max.
+struct Node map[65]; //a unit with a max move of 5 will fill 60 nodes max.
 
 char visit_grid[352];
 

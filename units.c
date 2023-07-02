@@ -63,7 +63,7 @@
 
 typedef struct{
 	unsigned char atk, def, mov, id, a_type, art,
-                rng, ign, spd, points, pow;
+                rng, ign, spd, points, pow, exp;
 	int hp;
 } Unit;
 
@@ -73,9 +73,9 @@ typedef struct{
 } Unit_Entity;
 
 const char buyable_units[] = { SWORD_UNIT, SPEAR_UNIT, AXE_UNIT, MAGE_UNIT, LANCER_UNIT, ARCHER_UNIT, STALKER_UNIT, KNIGHT_UNIT,
-                              PALADIN_UNIT, MONK_UNIT, FIGHTER_UNIT, BRAWLER_UNIT, BERSERKER_UNIT, CLERIC_UNIT, WITCH_UNIT};
-
-const char buyable_monsters[] = { HOUND_UNIT, BLOB_UNIT };
+                              PALADIN_UNIT, MONK_UNIT, FIGHTER_UNIT, BRAWLER_UNIT, BERSERKER_UNIT, CLERIC_UNIT, WITCH_UNIT,
+                              BLACK_MAGE_UNIT
+                              };
 
 Unit unit_list[MAX_UNIT_COUNT];
 char unlocked_units[MAX_UNIT_COUNT];
@@ -178,32 +178,59 @@ void print_attack_type(char attack_type, char row, char x, char y)
   switch(attack_type)
   {
     case SINGLE_HIT:
-      put_char('[',x,y);
+      put_char(':',x,y);
       put_string("Single ",x+1,y);
       break;
 
     case MULTI_ROW:
-      put_char('\\',x,y);
+      put_char('<',x,y);
       put_string("Column ",x+1,y);
       break;
 
     case MULTI_COL_2:
     case MULTI_COL_3:
-      put_char(']',x,y);
+      put_char(';',x,y);
       put_string("Row    ",x+1,y);
       break;
 
     case NO_TARGET:
-      put_char('_',x,y);
+      put_char('=',x,y);
       put_string("None  ",x+1,y);
       break;
 
     default:
-      put_char('`',x,y);
+      put_char('>',x,y);
       put_string("All   ",x+1,y);
       break;
   }
   set_font_pal(10);
+}
+
+void print_target_type_icon(char attack_type, char x, char y)
+{
+  switch(attack_type)
+  {
+    case SINGLE_HIT:
+      put_char(':',x,y);
+      break;
+
+    case MULTI_ROW:
+      put_char('<',x,y);
+      break;
+
+    case MULTI_COL_2:
+    case MULTI_COL_3:
+      put_char(';',x,y);
+      break;
+
+    case NO_TARGET:
+      put_char('=',x,y);
+      break;
+
+    default:
+      put_char('>',x,y);
+      break;
+  }
 }
 
 void unlock_unit(char unit_id)
@@ -214,7 +241,7 @@ void unlock_unit(char unit_id)
 void initialize_units()
 {
   char i;
-  buyable_unit_count = 15;
+  buyable_unit_count = 16;
 
 	for(i=0; i<MAX_UNIT_COUNT; i++)
   {
@@ -232,6 +259,7 @@ void initialize_units()
     unit_list[i].art = NO_ART;
     unit_list[i].a_type = NONE;
     unlocked_units[i] = 0;
+    unit_list[i].exp = 4;
   }
 
   unit_list[0].hp  = 1;
@@ -253,7 +281,7 @@ void initialize_units()
   unit_list[SPEAR_UNIT].mov = 3;
   unit_list[SPEAR_UNIT].spd = 15;
   unit_list[SPEAR_UNIT].ign = 0;
-  unit_list[SPEAR_UNIT].points = 2;
+  unit_list[SPEAR_UNIT].points = 1;
   unit_list[SPEAR_UNIT].art = ZAP_ART;
   unit_list[SPEAR_UNIT].id = SPEAR_UNIT;
   unit_list[SPEAR_UNIT].a_type = PIERCE;
@@ -262,7 +290,7 @@ void initialize_units()
 
   unit_list[LANCER_UNIT].hp  = 55;
   unit_list[LANCER_UNIT].atk = 25;
-  unit_list[LANCER_UNIT].def = 11;
+  unit_list[LANCER_UNIT].def = 11;//180
   unit_list[LANCER_UNIT].rng = 2;
   unit_list[LANCER_UNIT].mov = 3;
   unit_list[LANCER_UNIT].spd = 14;
@@ -401,7 +429,8 @@ void initialize_units()
   unit_list[BLACK_MAGE_UNIT].mov = 3;
   unit_list[BLACK_MAGE_UNIT].id = BLACK_MAGE_UNIT;
   unit_list[BLACK_MAGE_UNIT].a_type = MAGIC;
-  unit_list[BLACK_MAGE_UNIT].art = ZAP_ART;
+  unit_list[BLACK_MAGE_UNIT].art = CAPTURE_ART;
+  unlocked_units[BLACK_MAGE_UNIT] = 1;
 
   unit_list[CLERIC_UNIT].atk = 16;
   unit_list[CLERIC_UNIT].def = 7;
@@ -483,6 +512,16 @@ void initialize_units()
   unit_list[PALADIN_UNIT].a_type = NORMAL;
   unit_list[PALADIN_UNIT].art = JUDGEMENT_ART;
 
+  unit_list[GOLEM_UNIT].hp  = 200;
+  unit_list[GOLEM_UNIT].atk = 15;
+  unit_list[GOLEM_UNIT].def = 19;
+  unit_list[GOLEM_UNIT].rng = 1;
+  unit_list[GOLEM_UNIT].mov = 3;
+  unit_list[GOLEM_UNIT].ign = 1;
+  unit_list[GOLEM_UNIT].id = GOLEM_UNIT;
+  unit_list[GOLEM_UNIT].a_type = NONE;
+  unit_list[GOLEM_UNIT].art = NO_ART;
+
   for(i=0; i<MAX_UNIT_COUNT; i++)
   {
     unit_list[i].pow = 0;
@@ -539,5 +578,6 @@ void get_unit_cost(char unit_id)
     case MONK_UNIT: unit_cost = 500; break;
     case RAIDER_UNIT: unit_cost = 100; break;
     case PIRATE_UNIT: unit_cost = 200; break;
+    default: unit_cost = 100;
   }
 }

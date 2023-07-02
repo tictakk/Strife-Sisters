@@ -50,7 +50,7 @@ char num_of_entities, menu_option,
 char one_total;
 char two_total;
 char turn, turns_count;
-int path[20];
+int path[10];
 char no_of_player_cmdrs;
 char last_command;
 char menu_mask;
@@ -525,7 +525,13 @@ void pan_camera_y(int position)
   int desired_s_y;
   desired_s_y = get_valid_map_s_y(position);
 
-  hide_npcs(6);
+  // hide_npcs(6);
+  spr_hide(0);
+  spr_hide(1);
+  spr_hide(2);
+  spr_hide(3);
+  spr_hide(5);
+  spr_hide(6);
   draw_npcs(6);
   satb_update();
 
@@ -538,7 +544,7 @@ void pan_camera_y(int position)
       draw_npcs(6);
       cycle_terrain_items();
     }
-    else 
+    else
     {
       --yOffset;
       scroll(0,s_x,++s_y+menu_height,menu_height,224,0xC0);
@@ -627,16 +633,20 @@ void collect_item(char item_no)
   remove_terrain_item(item_no);
 }
 
-void walk_sprite(char sprite_no, int location, int distance)
+void walk_sprite(char entity_id, int location, int distance)
 {
   char i;
   int x, y, desired_x, desired_y, loc_x, loc_y;
   
-  spr_set(sprite_no);
+  spr_set(get_entity_sprite_no(entity_id));
+  spr_show();
+  satb_update();
   x = spr_get_x();
   y = spr_get_y();
   loc_y = ((location>>4)<<4);
   loc_x = (location&15)<<4;
+  npcs[entity_id].pos_y = loc_y>>4;
+  npcs[entity_id].pos_x = location&15;
   desired_x = x - loc_x;
   desired_y = y - loc_y+16+s_y;
 
@@ -661,7 +671,7 @@ void walk_sprite(char sprite_no, int location, int distance)
     {
       spr_y(spr_get_y()-2);
       desired_y-=2;
-    }
+    }    
     satb_update();
     vsync();
   }
@@ -669,12 +679,9 @@ void walk_sprite(char sprite_no, int location, int distance)
 
 void walk_entity(char entity_id, int position)
 {
-  char i, sprite_no;
-  int distance;
-  sprite_no = get_entity_sprite_no(entity_id);
-
-  walk_sprite(sprite_no,position,0);
-  move_unit(position,entities[entity_id].pos);
+  select_unit(entity_id);
+  walk_sprite(entity_id,position,0);
+  move_unit_new(position);
 }
 
 char get_entity_sprite_no(char entity_id)

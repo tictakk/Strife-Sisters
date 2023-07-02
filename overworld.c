@@ -1,5 +1,5 @@
-#include "pathing.c"
 #include "npc.c"
+#include "pathing.c"
 #include "battlefield.c"
 #include "overworld.h"
 
@@ -105,7 +105,10 @@ void overworld_loop()
 
 void arrived(int pos)
 {
+  // if(prebattle_flag == get_map_id_by_pos(pos))
+  // {
   story(get_map_id_by_pos(pos),PREBATTLE,0);
+  // }
   scroll(0,s_x,288,0, 223, 0xC0);
 	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 	commander_select_cursor = 0;
@@ -347,8 +350,10 @@ void load_overworld_bg()
 	set_font_pal(10);
 	load_font(font,125,0x4800);
   load_terrains();
-	load_vram(0x49A0,icons_gfx,0x60);
-	load_vram(0x4BB0,icons_gfx+0x60,0x60);
+  load_vram(0x4BB0,icons_gfx,0x60);
+	load_vram(0x49A0,icons_gfx+0x60,0x50);
+	// load_vram(0x49A0,icons_gfx,0x60);
+	// load_vram(0x4BB0,icons_gfx+0x60,0x50);
 
 	load_vram(0x6A00,rei_walk,0x300);
 	load_palette(16,rei_walk_pal,1);
@@ -379,33 +384,6 @@ void load_castle_data(int pos, int map_id)
 {
 	castles[map_id].pos = pos;
 	castles[map_id].map_id = map_id;
-}
-
-void display_shop_menu(char castle_no)
-{
-	char i;
-  display_window_rel(0,0,22,12);
-	put_string("Shop",9+(s_x/8),1+(s_y/8));
-
-  display_window_rel(22,0,10,12);
-  display_window_rel(0,12,16,16);
-  display_window_rel(16,12,16,16);
-
-	display_item(0,1,18,14);
-
-	put_string("Gold",1+(s_x/8),9+(s_y/8));
-	put_number(player_gold,5,(s_x/8)+1,10+(s_y/8));
-
-	for(i=0; i<party_size; i++)
-	{
-		put_string(party_commanders[i].name,24,(s_y/8)+2+i);
-	}
-
-  load_cursor(1,3,SLIDER_ONE);
-
-  menu_rows = num_of_buyable_items;
-	menu_state = RECRUIT_MENU;
-	commander_select_cursor = 0;
 }
 
 void display_castle_menu(char castle_no)
@@ -665,7 +643,7 @@ void overworld_controls(){
       {
         cursor_column--;
         curs_left(4);
-        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],12,14);
+        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],11,14);
       }
       return;
     }
@@ -723,7 +701,7 @@ void overworld_controls(){
       {
         cursor_column++;
         curs_right(4);
-        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],12,14);
+        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],11,14);
       }
       return;
     }
@@ -778,11 +756,11 @@ void overworld_controls(){
 				if(menu_state == PARTY_MENU)
 				{
           selected_cmdr = commander_select_cursor;
-          update_party_commander_window(22,14);
+          update_party_commander_window(20,14);
 				}
 				else if(menu_state == DEPLOY_SELECT_MENU  || menu_state == DISMISS_SELECT_MENU)
 				{
-          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],12,14);
+          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],11,14);
 				}
 				else if(menu_state == BUY_ITEM_MENU)
 				{
@@ -811,7 +789,6 @@ void overworld_controls(){
           remove_cursor();
           cursor_y += 1;
           display_cursor();
-
           update_hire_menu(selected_unit);
         }
         return;
@@ -829,11 +806,11 @@ void overworld_controls(){
         if(menu_state == PARTY_MENU)
         {
           selected_cmdr = commander_select_cursor;
-          update_party_commander_window(22,14);
+          update_party_commander_window(20,14);
         }
         if(menu_state == DEPLOY_SELECT_MENU || menu_state == DISMISS_SELECT_MENU)
         {
-          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],12,14);
+          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],11,14);
         }
       }
       return;
@@ -864,6 +841,7 @@ void overworld_controls(){
 		}
 		else if(menu_state == SHOP_MENU)//actually the buy units menu...
 		{
+      put_number(selected_unit,3,0,36);
       clear_joy_events(0x1F);
 			if(unlocked_units[selected_unit])
 			{
@@ -883,7 +861,7 @@ void overworld_controls(){
       update_hire_menu(selected_unit);
       load_cursor(1+(cursor_column*4),3+commander_select_cursor,SLIDER_ONE);
       display_window_rel(22,14,10,14);
-      put_number(party_units_size,4,0,36);
+      // put_number(party_units_size,4,0,36);
 		}
     else if(menu_state == RETURN_SELECT_MENU)
     {
@@ -897,6 +875,7 @@ void overworld_controls(){
         update_party_commander_window(ARMY_PARTY_COMMANDER_WINDOW_X,ARMY_PARTY_COMMANDER_WINDOW_Y);
         update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
         update_unit_stats_window(NO_UNIT,ARMY_STATS_X,ARMY_STATS_Y);
+        spr_show(63);
       }
     }
     else if(menu_state == DISMISS_SELECT_MENU)
@@ -910,11 +889,12 @@ void overworld_controls(){
         if(affirmative_question("Dismiss",22,18))
         {
           remove_unit_from_convoy(unit_pos);
-          update_unit_stats_window(0,12,14);
-          display_commander_window(selected_cmdr,ARMY_PARTY_COMMANDER_WINDOW_X,ARMY_PARTY_COMMANDER_WINDOW_Y);
+          update_unit_stats_window(0,11,14);
           update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-          load_cursor(23+(cursor_column*4),3+commander_select_cursor,SLIDER_ONE);
         }
+        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor],ARMY_STATS_X,ARMY_STATS_Y);
+        display_commander_window(selected_cmdr,ARMY_PARTY_COMMANDER_WINDOW_X,ARMY_PARTY_COMMANDER_WINDOW_Y);
+        load_cursor(23+(cursor_column*4),3+commander_select_cursor,SLIDER_ONE);
       }
     }
 		else if(menu_state == DEPLOY_SWAP_MENU)
@@ -926,7 +906,7 @@ void overworld_controls(){
         swap_unit = 0;
         display_deploy_select_menu();
         update_battle_group_window(ARMY_BATTLE_GROUP_WINDOW_X,ARMY_BATTLE_GROUP_WINDOW_Y);
-        update_party_commander_window(22,14);
+        update_party_commander_window(20,14);
         spr_hide(63);
         satb_update();
       }
@@ -1083,7 +1063,7 @@ void overworld_controls(){
       commander_select_cursor = swap_unit % 8;
       cursor_column = swap_unit / 8;
       set_deploy_select_state();
-      update_unit_stats_window(party_units[swap_unit],12,14);
+      update_unit_stats_window(party_units[swap_unit],11,14);
       display_cursor();
       spr_hide(63);
       satb_update();

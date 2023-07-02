@@ -1,15 +1,12 @@
+#include "commander.h"
+
 #define MAX_PARTY_COMMANDERS 8
 #define MAX_ENEMY_COMMANDERS 15
 #define MAX_ARMY_SIZE 9
 #define MAX_METER 5
 #define TOTAL_COMMANDERS (MAX_PARTY_COMMANDERS + MAX_ENEMY_COMMANDERS)
-
-//names
-const char *name0 = "Rei";
-const char *name1 = "Violet";
-const char *name2 = "King";
-const char *name3 = "Yuri";
-const char *name20 = "Generic";
+#define MAX_LEVEL 20
+#define MAX_COMMANDER_STAT 50
 
 typedef struct {
 	Unit_Entity units[9];
@@ -17,12 +14,16 @@ typedef struct {
   char meter;
 } Battlegroup;
 
+//Tactics - Improves units attack stat
+//Wisdom - Improves art damage
+//Fortitude - Improves units def stats
 struct Commander{
-  // char meter;
 	char *name;
 	char sprite_type;
   char max_bp;
-  // char medals[4];
+  int exp;
+  char level;
+  unsigned char tac, wis,fort; 
 	Battlegroup bg;
 };
 
@@ -111,3 +112,18 @@ char get_commander_battle_points(char cmdr_id)
   return bp;
 }
 
+void set_commander_stats(char id, char level, char tac, char wis, char fort)
+{
+  party_commanders[id].level = level;
+  party_commanders[id].tac = tac;
+  party_commanders[id].wis = wis;
+  party_commanders[id].fort = fort;
+}
+
+void level_commander(char cmdr_id)
+{
+  party_commanders[cmdr_id].tac += COMMANDER_STATS_DISTRIBUTION_CHART[cmdr_id * 3];
+  party_commanders[cmdr_id].wis += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+1];
+  party_commanders[cmdr_id].fort += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+2];
+  party_commanders[cmdr_id].max_bp++;
+}

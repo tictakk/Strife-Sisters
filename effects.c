@@ -10,6 +10,7 @@
 #incspr(rain_arrow,"map/effects/arrow_fall.pcx")
 #incspr(atk_up,"map/effects/atk_up.pcx")
 #incspr(def_up,"map/effects/def_up.pcx")
+#incspr(capture_effect,"map/effects/capture_effect.pcx")
 
 #incpal(effect_pal,"map/effects/adv.pcx")
 #incpal(lightening_effect_pal,"map/effects/lightening.pcx")
@@ -38,6 +39,7 @@
 #define EFFECT_ARROW 13
 #define EFFECT_ATK_UP 14
 #define EFFECT_DEF_UP 15
+#define EFFECT_CAPTURE 16
 
 #define MAX_EFFECT_COUNT 5
 
@@ -124,6 +126,11 @@ void load_effect(char effect_no)
         
       case EFFECT_HEAL:
         load_vram(EFFECTS_VRAM+(effect_count*0x200),heal_effect,0x100);
+        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+        break;
+
+      case EFFECT_CAPTURE:
+        load_vram(EFFECTS_VRAM+(effect_count*0x200),capture_effect,0x100);
         effects_pal[effect_count] = EFFECTS_ARTS_PAL;
         break;
         
@@ -248,6 +255,12 @@ char create_healing(int x, int y, char flip)
 {
   load_palette(31,lightening_effect_pal,1);
   return create_effect(EFFECT_HEAL,x,y,flip);
+}
+
+char create_capture(int x, int y, char flip)
+{
+  load_palette(31,lightening_effect_pal,1);
+  return create_effect(EFFECT_CAPTURE,x,y,flip);
 }
 
 char create_arrows(int x, int y, char flip)

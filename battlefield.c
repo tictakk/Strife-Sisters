@@ -9,7 +9,7 @@
 #define MENU_ATK_X 152
 #define MENU_ATK_Y 16
 
-int map_no, g_abs;
+int g_abs;
 int id;
 int s_x_holder, s_y_holder,y_off_holder;
 enum Direction cmdr_direction;
@@ -39,6 +39,7 @@ void play_story()
   sy = ((entities[0].pos>>4) << 4) - s_y;
   display_selector(SELECTOR,sx,sy,16);
   clear_joy_events(0x1F);
+  npcs[1].pos_y = 0;
 }
 
 void begin_battlefield(char map_id)
@@ -52,7 +53,10 @@ void begin_battlefield(char map_id)
   if(map_id > 0 && party_size < 3)
   {
     add_cmdr_from_story(KING);
-    // add_commander_to_party(name3,TINKER);
+  }
+  if(map_id>4 && party_size < 4)
+  {
+    add_cmdr_from_story(TINKER);
   }
 
   yOffset = 0;
@@ -85,7 +89,7 @@ void battlefield_loop(char map_id)
 
   s_x_relative = 0;//(s_x/8);
   s_y_relative = 0;//(s_y/8);
-  ss = script[1];
+  // ss = script[1];
 
   disp_on();
   satb_update();
@@ -109,6 +113,7 @@ void battlefield_loop(char map_id)
       t_type =  terrain_type(battlefieldbat[map_offset+g_abs]);
       id = battle_grid[g_abs];
       display_position(14,1);
+      display_level(4,1);
       // display_enemy_remaining(13,1);
       display_terrain_bonus();
       swap_water_tiles();
@@ -265,14 +270,15 @@ void init_units()
 
   for(i=0; i<cpu_cmdr_count; i++)
   {
-    load_predefined_group_layout((char)battle_map_metadata.cpu_commander_ids[i],i+MAX_PARTY_COMMANDERS);
+    load_predefined_group_layout((char)battle_map_metadata.cpu_commander_ids[i],i+MAX_PARTY_COMMANDERS,(char)map_no);
     load_group(i,CPU,battle_map_metadata.cpu_start_pos+i,enemy_commanders);
   }
 }
 
 void load_group(char id, char team, int positions[7], struct Commander *commanders)
 {
-  // put_number(id,4,10,5+(g++));
+  // put_number(positions[0],5,0,0);
+  // wait_for_I_input();
   add_entity(team,UNIT_PALS[commanders[id].sprite_type],id,positions[0],commanders);
   battle_grid[positions[0]] = num_of_entities;
 }
@@ -285,15 +291,15 @@ void load_ents()
   {
     if(entities[i].team == PLAYER)
     {
-    add_npc(entities[i].pos%16,entities[i].pos/16,
+      add_npc(entities[i].pos%16,entities[i].pos/16,
             party_commanders[entities[i].id].sprite_type,
             UNIT_PALS[party_commanders[entities[i].id].sprite_type]);
     }
     else
     {
-          add_npc(entities[i].pos%16,entities[i].pos/16,
-            party_commanders[entities[i].id].sprite_type,
-            UNIT_PALS[party_commanders[entities[i].id].sprite_type]);
+      add_npc(entities[i].pos%16,entities[i].pos/16,
+          party_commanders[entities[i].id].sprite_type,
+          UNIT_PALS[party_commanders[entities[i].id].sprite_type]);
     }
   }
 }
@@ -330,7 +336,7 @@ void load_battlefield_map()
   load_palette(10,fontpal,2);
   set_font_pal(10);
 	load_font(font,125,0x4800);
-  load_vram(0x49A0,icons_gfx,0x60);
+	load_vram(0x4BB0,icons_gfx,0x60);
 
   load_palette(9,borderspal,1);
   load_palette(12,bluepal,1);
@@ -913,41 +919,24 @@ void display_camera_info()
   put_number(yOffset,3,10,3);
 }
 
-void display_id(char id, int x, int y)
+void display_position(int x, int y)
 {
+  put_number(graph_from_x_y(sx,sy),3,x,y);
+}
+
+void display_level(char x, char y)
+{
+  char id;
+  id = battle_grid[graph_from_x_y(sx,sy)]-1;
   if(id >= 0)
   {
-    // put_number(entities[id].id,3,6,1);
-    put_char('P',x,y);
-    put_number(calculate_power(entities[id].id),3,x+1,y);
-    put_char('M',x,y+1);
-    put_number(0,3,x+1,y+1);
+    put_string("lv",x,y);
+    put_number(party_commanders[entities[id].id].level,2,x+2,y);
   }
   else
   {
     put_string("    ",x,y);
-    put_string("    ",x,y+1);
   }
-}
-
-void display_position(int x, int y)
-{
-  // if(battle_grid[graph_from_x_y(sx,sy)]-1 >= 0)
-  // {
-  //   put_string("cid",x-3,y);
-  //   put_number(entities[battle_grid[graph_from_x_y(sx,sy)]-1].id,3,x,y);
-  //   put_string("eid",x-3,y+1);
-  //   put_number(battle_grid[graph_from_x_y(sx,sy)]-1,3,x,y+1);
-  // }
-  // else
-  // {
-  //   put_string("    ",x-3,y);
-  //   put_string("   ",x,y);
-  //   put_string("    ",x-3,y+1);
-  //   put_string("   ",x,y+1);
-  // }
-  put_number(graph_from_x_y(sx,sy),3,x,y);
-  // put_number(s_y,3,x,y);
 }
 
 void display_unit_menu_mask(int x, int y)
@@ -978,19 +967,6 @@ void display_team(int x, int y)
   {
     put_number(0,2,x+5,y);
   }
-}
-
-void display_stats(char id, int x, int y)
-{
-  // print_unit_attack_icon(entities[id].id,x,y);
-  // put_number(entities[id].unit->atk,2,x+1,y);
-  // print_unit_defense_icon(entities[id].id,x+3,y);
-  // put_number(entities[id].unit->def,2,x+4,y);
-}
-
-void display_type(char id, int x, int y)
-{
-  // print_unit_type(entities[id].unit->id,x,y);
 }
 
 char begin_battle(unsigned char attacker, unsigned char target, unsigned char range, char a_terrain, char t_terrain, char art)
