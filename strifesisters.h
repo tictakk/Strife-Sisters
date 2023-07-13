@@ -5,16 +5,21 @@
 // #incbin(area_3,"script/area_3")
 // #incbin(area_4,"script/area_4")
 // #incbin(area_5,"script/area_5")
+
 // #asm
 // .bank 35
 // .org $8000
-// _scipt: 
+// _script: 
 // .incbin "script/area_0", 
 // .incbin "script/area_1", 
 // .incbin "script/area_2", 
 // .incbin "script/area_3", 
 // .incbin "script/area_4", 
 // .incbin "script/area_5"
+
+// .data
+// .bank DATA_BANK
+// .code
 // #endasm  
 
 #define NO_OF_MAPS 25

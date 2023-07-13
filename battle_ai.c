@@ -112,14 +112,18 @@ void start_turn(char team)
       entities[i].movable = 1;
       // increment_meter(i);
     }
+    if(entities[i].team == PLAYER)
+    {
+      load_commander_palette(party_commanders[entities[i].id].sprite_type);
+    }
   }
   if(team == PLAYER)
   {
     current_turn++;
   }
   reset_calling(team);
-  set_cursor_pos(camera_pos);
   center_camera(camera_pos);
+  set_cursor_pos(camera_pos);
   // set_cursor_pos(camera_pos);
   satb_update();
   vsync();

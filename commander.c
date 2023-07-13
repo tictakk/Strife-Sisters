@@ -127,3 +127,20 @@ void level_commander(char cmdr_id)
   party_commanders[cmdr_id].fort += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+2];
   party_commanders[cmdr_id].max_bp++;
 }
+
+void level_enemy_commander(char cmdr_id, char base_type, char level)
+{
+  char i;
+  set_commander_stats(cmdr_id,1,
+                      GENERIC_BASE_STATS[(base_type*3)],
+                      GENERIC_BASE_STATS[(base_type*3)+1],
+                      GENERIC_BASE_STATS[(base_type*3)+2]);
+
+  for(i=1; i<level; i++)
+  {
+    party_commanders[cmdr_id].tac += GENERIC_STATS_DISTRIBUTION_CHART[base_type * 3];
+    party_commanders[cmdr_id].wis += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+1];
+    party_commanders[cmdr_id].fort += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+2];
+  }
+  party_commanders[cmdr_id].level = level;
+}

@@ -26,7 +26,9 @@ sngInit()
 	sta	<_dh
 	lda	#BANK(_sngBank1)
 	sta	<_al
-	stz	<_ah
+	lda #BANK(_sngBank2)
+	sta <_ah
+;	stz	<_ah
 	jsr	psg_bios
 
 ;--------------------------------
@@ -85,7 +87,14 @@ sngInit()
     .bank   9
     .org    $8000
 _sngBank1:
-    .include  "SISTMAP1.asm"
+    .include  "SISTALL.asm"
+    .code
+
+    .data
+    .bank   10
+    .org    $A000
+_sngBank2:
+    .include  "SISTALL2.asm"
     .code
 
 #endasm

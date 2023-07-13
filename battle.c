@@ -9,32 +9,33 @@
 int battle_exp = 0, damage_dealt = 0;
 char battle_killed = 0, battle_lost = 0, player_id;
 
-void countdown(int timer, char x, char y, char *str)
+void countdown(char x, char y, char *str,char len)
 {
   int time, i, j;
   if(simulation_mode)
   {
     return;
   }
-  time = (10) * timer;
-  display_window_abs(x,y,12,3);
+  display_window_abs(x,y,len,3);
   put_string(str,x+1,y+1);
-  j = 240;
+  j = 150;
   while(j-- > 0)
   {
+    cycle_button_press(10,9);
     if(joytrg(0) == JOY_RUN)
     {
       battle_ctrls();
       display_window_abs(x,y,12,3);
       put_string(str,x+1,y+1);
-      put_number(time,3,x+7,y+1);
+      // put_number(time,3,x+7,y+1);
     }
-    if(j==0 && time > 0)
-    {
-      j = 240;
-      time--;
-    }
-    put_number(time,3,x+7,y+1);
+    // if(j==0 && time > 0)
+    // {
+    //   j = 240;
+    //   time--;
+    // }
+    // put_string(" ",x+8,y+1);
+    vsync();
   }
   hide_art_name();
 }
@@ -72,14 +73,15 @@ void battle_end_screen()
     put_number(++party_commanders[entities[player_id].id].level,2,16,7);
     level_commander(entities[player_id].id);
   }
-  sync(120);
+  sync(60);
 }
 
 void battle_seq()
 {
   load_pals(atker,0);
   load_pals(trgt,9);
-  countdown(3,2,8,"start ");
+  countdown(2,8,"Prepare",12);
+  // countdown(2,8," Press Run for arts",22);
   d_battle(atker);
   if(clear_eyes_called == 0)
   {
@@ -250,7 +252,6 @@ void d_battle(char team)
   
   while(battle_clock != -1)
   {
-    // battle_ctrls();
     if(joytrg(0) == JOY_RUN)
     {
       battle_ctrls();
@@ -258,6 +259,7 @@ void d_battle(char team)
     if(b_ticker++ == 2)
     {
       // put_number(animating,3,0,0);
+      // cycle_button_press(10,1);
       b_ticker = 0;
 
       if(animating == 0)
@@ -375,7 +377,7 @@ void b_u_meter(char b_id)
 void b_u_idle(char b_id)
 {
   if(battle_clock == b_id && battleunits[b_id].active
-    && entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos]->unit.rng >= attack_range
+    // && entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos]->unit.rng >= attack_range
     && animating == 0)
   {
     if(battleunits[b_id].meter)
@@ -719,21 +721,34 @@ void set_portrait(char index, char entity_id)
   if(entities[entity_id].team == PLAYER)
   {
     load_portrait(party_commanders[entities[entity_id].id].sprite_type,index);
+    if(index == 0)
+    {
+      display_item(0,0,1,1);
+      put_string("arts",6,1);
+      put_string("*+",10,1);
+    }
+    else
+    {
+      display_item(1,1,27,1);
+      put_string("arts",20,1);
+      put_string("*+",24,1);
+    }
   }
-  else
-  {
-    load_portrait(enemy_commanders[entities[entity_id].id].sprite_type,index);
-  }
+  // else
+  // {
+  //   load_portrait(enemy_commanders[entities[entity_id].id].sprite_type,index);
+  // }
 }
 
 void set_infobar()
 {
   display_window_abs(0,0,16,6);
   display_window_abs(16,0,16,6);
+  
   set_portrait(0,atker);
   set_portrait(1,trgt);
-  display_item(0,0,1,1);
-  display_item(1,1,27,1);
+  // display_item(0,0,1,1);
+  // display_item(1,1,27,1);
 
   put_string("Pow",5,3);
   put_string("Meter",9,3);
@@ -796,29 +811,36 @@ void battle_ctrls()
       }
       if(battleunits[curs_pos].active && arts[battleunits[curs_pos].unit->unit->art].cost <= entities[battleunits[curs_pos].ent_id].bg->meter)
       {
-        while(display_battle_selector(battleunits[curs_pos].ent_id == atker,arts[battleunits[curs_pos].unit->unit->art].target))
-        {
-          if(is_valid_meter_targets())
+        // display_battle_selector(battleunits[curs_pos].ent_id == atker,arts[battleunits[curs_pos].unit->unit->art].target);
+        // while(display_battle_selector(battleunits[curs_pos].ent_id == atker,battleunits))
+        // {
+          // put_number(curs_pos,3,6,0);
+          if(display_battle_selector(battleunits[curs_pos].ent_id == atker,arts[battleunits[curs_pos].unit->unit->art].target))
           {
-            entities[battleunits[curs_pos].ent_id].bg->meter -= arts[battleunits[curs_pos].unit->unit->art].cost;
-            loop_ctrls = 0;
-            meter_queued = 1;
-            battleunits[curs_pos].meter = 1;
-            battleunits[curs_pos].attacks++;
-            highlight_target_type(0);
-            clear_bs_settings();
-            break;
-          }
-          else
-          {
-            display_window_abs(22,7,10,4);
-            // put_string(str,x+1,y+1);
-            put_string("invalid",23,8);
-            put_string("target",23,9);
-            sync(120);
-            load_map(27,3,0,3,5,4);
-          }
-        }
+            if(is_valid_meter_targets())
+            {
+              entities[battleunits[curs_pos].ent_id].bg->meter -= arts[battleunits[curs_pos].unit->unit->art].cost;
+              loop_ctrls = 0;
+              meter_queued = 1;
+              battleunits[curs_pos].meter = 1;
+              battleunits[curs_pos].attacks++;
+              highlight_target_type(0);
+              clear_bs_settings();
+            }
+            else
+            {
+              display_window_abs(22,7,10,4);
+              // put_string(str,x+1,y+1);
+              put_string("invalid",23,8);
+              put_string("target",23,9);
+              highlight_target_type(0);
+              sync(80);
+              clear_bs_settings();
+              picker = 0;
+              load_map(27,3,0,3,5,4);
+            }
+          } 
+        // }
       }
       break;
 
@@ -828,8 +850,9 @@ void battle_ctrls()
     }
     vsync();
   }
-  set_infobar();
+  // set_infobar();
   hide_art_name();
+  set_infobar();
 }
 
 void print_army_combos(char entity_id, char unit_offset)
@@ -956,6 +979,9 @@ void load_pals(char entity_id, int off)
           break;
 
         case GOLEM_UNIT:
+          load_palette(battleunits[i+off].pal,golempal,1);
+          break;
+        
         case BERSERKER_UNIT:
         case SNIPER_UNIT:
           load_palette(battleunits[i+off].pal,sniperbtlpal,1);
@@ -1199,6 +1225,7 @@ void set_meter_targets()
     }
   }
   unmark_all();
+  picker = 0;
 }
 
 char is_valid_meter_targets()

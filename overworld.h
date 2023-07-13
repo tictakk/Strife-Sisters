@@ -67,9 +67,6 @@ char last_selected_cursor = 0;
 char last_selected_col = 0;
 char last_selected_row = 0;
 
-char hz = 0;
-int secs = 0;
-
 //menus
 void display_hire_window(char unit_id)
 {

@@ -144,7 +144,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
 
     case DEMON_UNIT:
       load_vram(idle_vrams[index],demonbtl,0x100);
-      battleunits[index].pal = 20;
+      // battleunits[index].pal = 20;
       break;
 
     case HOUND_UNIT:
@@ -219,7 +219,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
 
     case GOLEM_UNIT:
       load_vram(idle_vrams[index],golembtl,0x100);
-      battleunits[index].pal = 28;
+      battleunits[index].pal = 20;
       break;
 
     default:
@@ -420,10 +420,6 @@ void transfer_units_to_stun_vram(char type, char index)
 
     case SNIPER_UNIT:
       load_vram(stun_vrams[index],sniperbtl+0x900,0x100);
-      break;
-
-    case GOLEM_UNIT:
-      load_vram(stun_vrams[index],golembtl+0x900,0x100);
       break;
 
     case DEMON_UNIT:

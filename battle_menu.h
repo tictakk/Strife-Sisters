@@ -14,12 +14,15 @@ char bs_max_index_y = 0;
 char bs_max_index_x = 0;
 char marked_targets[MAX_ARMY_SIZE];
 
-void display_battle_selector(char is_attcker, char type)
+char display_battle_selector(char is_attacker, char type)
+// void display_battle_selector(char is_attacker, BattleUnit *battleunits, char cursor_pos)
 {
+  // put_number(picker,3,0,0);
   if(picker == 0)
   {
+    put_number(69,3,6,0);
     target_type = type;
-    determine_picker(is_attcker,target_type == ALL_ALLIES);
+    determine_picker(is_attacker,target_type == ALL_ALLIES);
     set_picker_params();
     set_target_params();
   }
@@ -47,10 +50,13 @@ char battle_selector_picker(int x, int y)
             return 1;
 
             case JOY_II:
+            put_number(-1,3,0,0);
+            put_number(-1,3,6,0);
             loop = 0;
             unmark_all();
             highlight_target_type(0);
             clear_bs_settings();
+            picker = 0;
             return 0;
 
             case JOY_RIGHT:
@@ -188,6 +194,7 @@ void set_picker_params()
 
 void set_target_params()
 {
+  put_number(target_type,3,0,0);
   switch(target_type)
   {
     case SINGLE_HIT: set_target_single_params(); break;
@@ -348,6 +355,6 @@ void clear_bs_settings()
   bs_max_index_y = 0;
   bs_min_index_x = 0;
   bs_min_index_y = 0;
-  picker = 0;
+  // picker = 0;
   target_type = 0;
 }

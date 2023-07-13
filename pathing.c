@@ -74,7 +74,7 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 	map[map_size].fromPos = pos;
 	map[map_size].checked = 1;
 
-	while(exit == 1 && d_level < depth)
+	while(exit == 1 && d_level < depth && map_size >= map_counter)
 	{
 		if(map[map_counter].checked)
 		{
@@ -129,7 +129,6 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		}
 		if(map_counter == next_d)
 		{
-			// put_number(d_count,3,10,20+(g++));
 			next_d = d_count;
 			d_level++;
 		}
@@ -184,11 +183,6 @@ int put_visited(int pos, int fpos, char checked)
     return 0;
   }
 
-  // if(pos == 108)
-  // {
-  //   put_number(map_size+1,4,0,0);
-  //   wait_for_I_input();
-  // }
   visit_grid[pos] = 1;
 
 	++map_size;

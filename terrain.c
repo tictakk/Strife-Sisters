@@ -9,6 +9,7 @@
 
 #incchr(cursor, "map/cursor.pcx");
 #incpal(cursorpal, "map/cursor.pcx");
+#incchr(run_button,"map/sprites/run_button.pcx")
 // #inctilepal(overworldtilespal,"map/backgrounds/strifesisters.tiles.pcx")
 
 // #incpal(overworldpal,"map/backgrounds/default.pcx")

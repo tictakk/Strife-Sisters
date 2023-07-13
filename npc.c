@@ -17,7 +17,9 @@ const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
                                         18,20,21,22,19,
                                         19,25,24,17,26,
-                                        25,19,19,17,17,24,23};
+                                        25,19,19,17,17,
+                                        24,23,25,25,25,
+                                        25,25};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -41,7 +43,8 @@ void init_npcs()
   load_palette(22,axebtlpal,1);
   load_palette(23,bndpal,1);
   load_palette(24,lancepal,1);
-  load_palette(25,sniperpal,1);
+  load_palette(25,golpal,1);
+  // load_palette(26,gol_pal,1);
   load_palette(31,dark,1);
 }
 

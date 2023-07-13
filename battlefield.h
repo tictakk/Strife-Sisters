@@ -5,8 +5,8 @@
 #define MENU_MODE 2
 #define SPLIT_MODE 3
 #define ATTACK_MODE 4
-#define ARMY_MODE 5
-#define OBSERVE_MODE 6
+#define PLAYER_ARMY_MODE 5
+#define CPU_ARMY_MODE 6
 #define ATTACK_WITH_ART 7
 #define EXPLORE_MODE 8
 #define EXPLORE_MENU_MODE 9
@@ -33,6 +33,13 @@
 #define ACTION_CALLING 2
 
 #define BATTLEFIELD_CENTER_Y 128
+
+#define MASK_MOVE 0x01
+#define MASK_ATTACK 0x02
+#define MASK_END 0x04
+#define MASK_TURN 0x08
+#define MASK_CALLING 0x10
+#define MASK_GROUP 0x20
 
 typedef struct{
   int pos;
@@ -191,7 +198,6 @@ void update_selector_pos(int x, int y)
   {
     yOffset -= 16;
     s_y += 16;
-    // s_y_relative = s_y >> 3;
     update_map();
     scroll(0,s_x,s_y+32,32,224,0xC0);
   }
@@ -199,7 +205,6 @@ void update_selector_pos(int x, int y)
   {
     yOffset += 16;
     s_y -= 16;
-    // s_y_relative = s_y >> 3;
     update_map();
     scroll(0,s_x,s_y+32,32,224,0xC0);
   }
@@ -329,8 +334,8 @@ void select_unit(char entity_id)
 void display_move_range(int pos)
 {
   // put_number(pos,4,0,0);
-  selector_mode = PLACE_MODE;
-  menu_option = MENU_ATTACK;
+  // selector_mode = PLACE_MODE;
+  // menu_option = MENU_ATTACK;
   draw_selector();
   highlight(pos,ACTION_MOVE);
 }
@@ -359,6 +364,10 @@ char attack_unit(int src, int dst, char art)
   {
     last_command = selector_mode;
     entities[attacker].actionable = 0;
+    // if(entities[attacker].team == PLAYER)
+    // {
+    //   darken_palette(26+attacker);
+    // }
     hide_menu();
     cursor_x = -32;
     cursor_y = -32;
@@ -465,14 +474,19 @@ void undo()
   set_menu_mask(selected_entity->pos);
   print_menu();
   display_move_range(selected_entity->pos);
+  selector_mode = PLACE_MODE;
+  menu_option = MENU_ATTACK;
   hide_cursor();
 }
 
 void set_menu_mask(char entity_id)
 {
-  char item_index;
-
-  menu_mask = 0x28;
+  menu_mask = MASK_GROUP;
+  if(entities[entity_id].team == CPU)
+  {
+    return;
+  }
+  menu_mask |= MASK_TURN;
   // if(arts[entities[entity_id].bg->art].cost <= party_commanders[entities[entity_id].id].meter && entities[entity_id].bg->art)
   // {
   //   menu_mask |= 0x10;
@@ -602,6 +616,7 @@ void end_unit_turn(char entity_id)
   selector_mode = SELECT_MODE;
   menu_option = MENU_ATTACK;
   entities[entity_id].actionable = 0;
+  darken_palette(26+entity_id);
   menu_mask = 0x00;
   print_menu();
   hide_cursor();

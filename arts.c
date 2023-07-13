@@ -136,14 +136,14 @@ void init_arts()
   arts[12].frame_count = 5;
   arts[12].name = "Run Thru";
   arts[12].cost = 1;
-  arts[12].target = MULTI_COL_3;
+  arts[12].target = MULTI_ROW;
   arts[12].relationship = ONE_TO_MANY;
   arts[12].stunning = 1;
 
   arts[13].frame_count = 5;
   arts[13].name = "Ftl Shot";
   arts[13].cost = 1;
-  arts[13].target = SINGLE_HIT;
+  arts[13].target = //SINGLE_HIT;
   arts[13].relationship = ONE_TO_MANY;
   arts[13].stunning = 0;
 
@@ -163,7 +163,7 @@ void init_arts()
 
   arts[16].frame_count = 11;
   arts[16].name = "Renew";
-  arts[16].cost = 1;
+  arts[16].cost = 2;
   arts[16].target = ALL_ALLIES;
   arts[16].relationship = ONE_TO_ONE;
   arts[16].stunning = 0;
@@ -316,7 +316,7 @@ char get_modifier_amount(char art_id)
     case BLOW_BACK_ART: return 10;
     case CLEAVE_ART: return 10;
     case FRENZY_ART: return 10;
-    case RUN_THROUGH_ART: return 10;
+    case RUN_THROUGH_ART: return 15;
     case BOMBARD_ART: return 15;
     case SEDUCE_ART: return 5;
     default: return 0;

@@ -3,9 +3,9 @@
 #include "battlefield.c"
 #include "overworld.h"
 
-void overworld_loop()
+void overworld_loop(int x, int y)
 {
-  int i;
+  // int i;
 	// char s;
 	// s = script[0];
 	party_direction = NORTH;
@@ -13,18 +13,18 @@ void overworld_loop()
 	s_x = 0;
 	// s_y_relative = s_y / 8;
 	// s_x_relative = s_x / 8;
-	selector_y = 208-16;
-	selector_x = 80;
+  party_pos_x = x;//5;
+	party_pos_y = y;//31;
+	selector_y = (y*16)-288-16;//208-16;
+	selector_x = x*16;//80;
 	game_over = 1;
-	hz = 60;
-	secs = 180;
-	party_pos_x = 5;
-	party_pos_y = 31;
+	// hz = 60;
+	// secs = 180;
 	menu_cols = 3;
 
-	disp_off();
+  // psgPlay(2);
+	// disp_off();
   load_overworld_bg();
-
 //	draw_npcs(5);
 	satb_update();
 	arrived(get_absolute_pos());
@@ -107,14 +107,16 @@ void arrived(int pos)
 {
   // if(prebattle_flag == get_map_id_by_pos(pos))
   // {
-  story(get_map_id_by_pos(pos),PREBATTLE,0);
+    // story(get_map_id_by_pos(pos),PREBATTLE,0);
   // }
   scroll(0,s_x,288,0, 223, 0xC0);
 	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 	commander_select_cursor = 0;
 
 	display_castle_menu(get_map_id_by_pos(pos));
-  spr_hide(0);
+  // put_number(party_pos_x,3,0,36);
+  // put_number(party_pos_y,3,10,36);
+  // spr_hide(0);
   // put_number(pos,4,1,37);
 }
 
@@ -389,22 +391,18 @@ void load_castle_data(int pos, int map_id)
 void display_castle_menu(char castle_no)
 {
 	hide_npcs(5);
-
-  display_window_rel(0,0,10,12);
-
+  display_window_rel(0,0,10,7);
   set_font_pal(11);
   //Get rid of shop, add "gems" menu for upgrading and 
   //Menu for upgrading Gems, "gems"
-	put_string("Heroes",2+s_x/8,3+s_y/8); 
+	put_string("Heroes",2+s_x/8,1+s_y/8);
+	put_string("Hire",2+s_x/8,2+s_y/8);
+	put_string("Army",2+s_x/8,3+s_y/8);
+	put_string("Info",2+s_x/8,4+s_y/8); // becomes B.Smith
   set_font_pal(10);
-	put_string("Hire",2+s_x/8,4+s_y/8);
-	put_string("Army",2+s_x/8,5+s_y/8);
-  set_font_pal(11);
-	put_string("Info",2+s_x/8,6+s_y/8); // becomes B.Smith
-  set_font_pal(10);
-	put_string("Begin",2+s_x/8,7+s_y/8);
+	put_string("Begin",2+s_x/8,5+s_y/8);
 
-  load_cursor(1,3,SLIDER_ONE);
+  load_cursor(1,1,SLIDER_ONE);
 	menu_state = CASTLE_MENU;
 	menu_rows = 5;
 	current_selected_castle = castle_no;
@@ -950,23 +948,24 @@ void overworld_controls(){
           break;
 
 				case 1:
-          cursor_column = 0;
-          commander_select_cursor = 0;
-          display_hire_window(SWORD_UNIT);
+          // cursor_column = 0;
+          // commander_select_cursor = 0;
+          // display_hire_window(SWORD_UNIT);
           break;
 
         case 2:
-          commander_select_cursor = 0;
-          cursor_column = 0;
-          display_party_commanders_window(0,0);
+          // commander_select_cursor = 0;
+          // cursor_column = 0;
+          // display_party_commanders_window(0,0);
           break;
 
 				case 4:
 				  reset_npcs();
 					init_map_data(get_map_id_by_pos(get_absolute_pos()));
 					begin_battlefield(get_map_id_by_pos(get_absolute_pos()));
-					disp_off();
-					if(get_map_id_by_pos(get_absolute_pos()) == 2)
+					// disp_off();
+					// if(get_map_id_by_pos(get_absolute_pos()) == 2)
+          if(1)
 					{
 						game_over = 0;
 						reset_npcs();
@@ -978,6 +977,8 @@ void overworld_controls(){
 						reset_npcs();
 						satb_update();
 						menu_state = OVERWORLD;
+            // story(get_map_id_by_pos(get_absolute_pos()),POSTBATTLE,0);
+            // load_overworld_bg();
 					}
 					break;
 			}
@@ -1018,14 +1019,14 @@ void overworld_controls(){
 		}
 		if(menu_state == CASTLE_MENU)
 		{
-			load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
-      spr_show(0);
-			satb_update();
-      menu_state = OVERWORLD;
-      menu_rows = 0;
-      commander_select_cursor = 0;
-      last_selected_cursor = 0;
-			return;
+			// load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+      // spr_show(0);
+			// satb_update();
+      // menu_state = OVERWORLD;
+      // menu_rows = 0;
+      // commander_select_cursor = 0;
+      // last_selected_cursor = 0;
+			// return;
 		}
 		if(menu_state == BUY_ITEM_MENU)
 		{
@@ -1186,22 +1187,22 @@ void menu_select_unit()
   selected_unit = (cursor_column % 3) + (commander_select_cursor * 3);
 }
 
-timer()
-{
-	if(hz-- == 0)
-	{
-		put_number(--secs/SECONDS,1,26,2);
-		put_string(":",27,2);
-		put_number(secs%SECONDS,2,28,2);
-		hz = 60;
+// timer()
+// {
+// 	if(hz-- == 0)
+// 	{
+// 		put_number(--secs/SECONDS,1,26,2);
+// 		put_string(":",27,2);
+// 		put_number(secs%SECONDS,2,28,2);
+// 		hz = 60;
 
-		if(secs%SECONDS < 10)
-		{
-			put_number(0,1,28,2);
-		}
-		if(secs < 1)
-		{
-			secs = 180;
-		}
-	}
-}
+// 		if(secs%SECONDS < 10)
+// 		{
+// 			put_number(0,1,28,2);
+// 		}
+// 		if(secs < 1)
+// 		{
+// 			secs = 180;
+// 		}
+// 	}
+// }
