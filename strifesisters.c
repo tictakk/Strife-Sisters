@@ -409,7 +409,7 @@ void display_demo()
   load_vram(0x4DB0,cursor,0x10);
   set_screen_size(SCR_SIZE_32x32);
   load_palette(0,sisters_logo_pal,1);
-  load_default_font();
+  // load_default_font();
   cls();
   load_background(sisters_logo,sisters_logo_pal,sisters_bat,32,16);
   load_font(font,125,0x4800);
@@ -1858,67 +1858,80 @@ int max(int a, int b)
 	(a>b)? a : b;
 }
 
-void load_commanders_gfx(int cmdr_id, int address, int pal)
+void load_commanders_gfx(int cmdr_id, int address)
 {
 	switch(cmdr_id)
 	{
 		case REI:
 		load_vram(address,rei_walk,0x100);
-    load_commander_palette(REI);
-		// load_palette(pal,rei_walk_pal,1);
+    // load_commander_palette(REI);
+		load_palette(get_commander_palette(cmdr_id),rei_walk_pal,1);
 		break;
 
 		case VIOLET:
 		load_vram(address,violet_walk,0x100);
-    load_commander_palette(VIOLET);
-		// load_palette(pal,violet_walk_pal,1);
+    // load_commander_palette(VIOLET);
+		load_palette(get_commander_palette(cmdr_id),violet_walk_pal,1);
 		break;
 
 		case KING:
 		load_vram(address,cat_walk,0x100);
-    load_commander_palette(KING);
-		// load_palette(pal,cat_walk_pal,1);
+    // load_commander_palette(KING);
+		load_palette(get_commander_palette(cmdr_id),cat_walk_pal,1);
 		break;
 
 		case TINKER:
 		load_vram(address,tinker,0x100);
-    load_commander_palette(TINKER);
-		// load_palette(pal,tinker_pal,1);
+    // load_commander_palette(TINKER);
+		load_palette(get_commander_palette(cmdr_id),tinker_pal,1);
 		break;
 
-		default:
-		load_vram(address,sld,0x100);
+		// default:
+		// load_vram(address,sld,0x100);
     // load_commander_palette()
-		load_palette(pal,sldpal,1);
-		break;
+		// load_palette(get_commander_palette(cmdr_id),sldpal,1);
+		// break;
 	}
 }
 
-void load_commander_palette(char cmdr_id)
+void load_commanders_palettes()
+{
+  load_palette(26,rei_walk_pal,1);
+  load_palette(27,violet_walk_pal,1);
+  load_palette(28,cat_walk_pal,1);
+  load_palette(29,tinker_pal,1);
+}
+
+char get_commander_palette(char cmdr_id)
 {
   switch(cmdr_id)
 	{
 		case REI:
-		load_palette(26,rei_walk_pal,1);
-		break;
+    return 26;
+		// load_palette(26,rei_walk_pal,1);
+		// break;
 
 		case VIOLET:
-		load_palette(27,violet_walk_pal,1);
-		break;
+    return 27;
+		// load_palette(27,violet_walk_pal,1);
+		// break;
 
 		case KING:
-		load_palette(28,cat_walk_pal,1);
-		break;
+    return 28;
+		// load_palette(28,cat_walk_pal,1);
+		// break;
 
 		case TINKER:
-		load_palette(29,tinker_pal,1);
-		break;
+    return 29;
+		// load_palette(29,tinker_pal,1);
+		// break;
 
 		// default:
 		// load_vram(address,sld,0x100);
 		// load_palette(pal,sldpal,1);
 		// break;
 	}
+  return 26;
 }
 
 void list_commander_army(Battlegroup *bg, char x, char y)
@@ -2280,6 +2293,8 @@ void flash_selector(int location_x, int location_y, unsigned char flashes)
     sync(6);
   }
 }
+
+// char 
 
 void display_number_incrementing(char x, char y, int final_number, char num_len)
 {

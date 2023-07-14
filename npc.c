@@ -194,8 +194,8 @@ void add_npc(char x, char y, char type, char pal)
       }
       else
       {
-        npcs[npc_count-1].pal = cmdr_pal_count;
-        load_commanders_gfx(type,npc_vram[type],cmdr_pal_count++);
+        npcs[npc_count-1].pal = get_commander_palette(type);//cmdr_pal_count;
+        load_commanders_gfx(type,npc_vram[type]);//,cmdr_pal_count++);
       }
     }
   }

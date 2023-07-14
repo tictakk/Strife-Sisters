@@ -78,11 +78,11 @@ int find_weakest_opp_in_range(char id, char range)
 
 ai()
 {
-  char f=0;
-  g=0;
+  // char f=0;
+  // g=0;
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
-    // put_number(ai_entities[ai_tracker].entity_id,4,0,0);
+    // put_number(ai_tracker,4,0,0);
     // wait_for_I_input();
     ai_do_state(ai_entities[ai_tracker].id);
     update_map();
@@ -103,26 +103,30 @@ void start_turn(char team)
   {
     if(entities[i].team)
     {
-      if(first)
-      {
-        first = 0;
-        camera_pos = entities[i].pos;
-      }
+      // if(first)
+      // {
+      //   first = 0;
+      //   camera_pos = entities[i].pos;
+      // }
       entities[i].actionable = 1;
       entities[i].movable = 1;
       // increment_meter(i);
     }
-    if(entities[i].team == PLAYER)
-    {
-      load_commander_palette(party_commanders[entities[i].id].sprite_type);
-    }
+    load_commanders_palettes();
+    // if(entities[i].team == PLAYER)
+    // {
+      // load_commander_palette(party_commanders[entities[i].id].sprite_type);
+      // load_palette(get_commander_palette(party_commanders[entities[i].id].sprite_type))
+    // }
   }
+  camera_pos = entities[0].pos;
   if(team == PLAYER)
   {
     current_turn++;
   }
-  reset_calling(team);
+  // reset_calling(team);
   center_camera(camera_pos);
+
   set_cursor_pos(camera_pos);
   // set_cursor_pos(camera_pos);
   satb_update();
@@ -373,6 +377,7 @@ void ai_do_state(char ai_id)
 {
   // center_camera(graph_from_x_y(sx,sy));
   center_camera(entities[ai_entities[ai_id].entity_id].pos);
+  // put_number(entities[ai_entities[ai_id].entity_id].pos,3,0,0);
   set_cursor_pos(entities[ai_entities[ai_id].entity_id].pos);
   // display_position(14,1);
   satb_update();
@@ -426,14 +431,16 @@ void do_move(char ai_id)
 
 void do_attack(char ai_id)
 {
-  char result, track_tracker;
+  char result, i;
 
+  result = -1;
   satb_update();
   sync(30);
   set_cursor_pos(entities[ai_entities[ai_id].target].pos);
   satb_update();
   sync(30);
   result = attack_unit(entities[ai_entities[ai_id].target].pos,entities[ai_entities[ai_id].entity_id].pos,0);
+  ai_entities[ai_id].target = 0;
   if(result == 1)
   {
     init_ai();
@@ -441,6 +448,13 @@ void do_attack(char ai_id)
     // ai_tracker--;
     // num_of_ai--;
     // return;
+  }
+  else if(result == 0)
+  {
+    for(i=0; i<num_of_ai; i++)
+    {
+      ai_entities[i].entity_id -= 1;
+    }
   }
 }
 

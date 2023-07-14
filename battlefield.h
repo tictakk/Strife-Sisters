@@ -58,13 +58,14 @@ char one_total;
 char two_total;
 char turn, turns_count;
 int path[10];
-char no_of_player_cmdrs;
+char no_of_player_cmdrs = 0;
 char last_command;
 char menu_mask;
 char current_turn;
 char enemy_count;
 char units_lost, units_killed, chests_collected;
 int turn_bonus, killed_bonus, lost_bonus, total_bonus, materials_collected;
+char map_result_status;
 
 const int range_3_coord1[2] = {1,-16};
 const int range_3_coord2[2] = {0,-32};
@@ -240,7 +241,6 @@ void hide_cursor()
 
 void destroy_entity(char id)
 {
-  //NEXT THING TO DO
   int i, id_location;
   char entity_id;
   entity_id = id;
@@ -269,6 +269,7 @@ void destroy_entity(char id)
     // entities[i].id--;
   }
   num_of_entities--;
+
   select_unit(0);
 }
 
@@ -372,7 +373,7 @@ char attack_unit(int src, int dst, char art)
     cursor_x = -32;
     cursor_y = -32;
     selector_mode = SELECT_MODE;
-    result = begin_battle(attacker,target,range,battlefieldbat[map_offset+dst],battlefieldbat[map_offset+src],art);
+    result = begin_battle(attacker,target,range,battlefieldbat[map_offset+dst],battlefieldbat[map_offset+src]);
   }
   return result;
 }
@@ -403,7 +404,19 @@ void post_battle_screen()
   satb_update();
 
   display_window_rel(4,6,24,18);
-  put_string("Victory!",s_x_relative+12,s_y_relative+8);
+  if(map_result_status == MAP_RESULT_WIN)
+  {
+    put_string("Victory",s_x_relative+12,s_y_relative+8);
+  }
+  else if(map_result_status == MAP_RESULT_LOSE)
+  {
+    put_string("Defeat",s_x_relative+12,s_y_relative+8);
+  }
+  else
+  {
+    put_string("Error result",s_x_relative+12,s_y_relative+8);
+  }
+
   get_units_kill_bonus();
   get_units_lost_bonus();
   get_turn_bonus();
@@ -431,6 +444,12 @@ void post_battle_screen()
   write_text(s_x_relative+6,s_y_relative+20,"Materials       ");
   display_number_incrementing(s_x_relative+24,s_y_relative+20,materials_collected,3);
 
+  write_text(s_x_relative+12,s_y_relative+22,"Grade");
+  set_font_pal(9);
+  put_char(get_map_grade_result(map_no,total_bonus),s_x_relative+18,s_y_relative+22);
+  set_font_pal(10);
+  // put_char('S',s_x_relative+18,s_y_relative+22);
+  // put_number(map_grades[3],5,0,0);
   player_gold += total_bonus;
   materials_count += materials_collected;
   wait_for_I_input();
@@ -438,17 +457,36 @@ void post_battle_screen()
 
 void get_units_kill_bonus()
 {
-  killed_bonus = units_killed * 35;
+  //max == 525
+  if(map_result_status == MAP_RESULT_LOSE)
+  {
+    killed_bonus = 0;
+    return;
+  }
+  killed_bonus = min(525,units_killed * 35);
 }
 
 void get_units_lost_bonus()
 {
+  //max == 500
+  if(map_result_status == MAP_RESULT_LOSE)
+  {
+    lost_bonus = 0;
+    return;
+  }
   lost_bonus = max(500-(units_lost * 65),0);
 }
 
 void get_turn_bonus()
 {
-  turn_bonus = max(9-(turns_count>>2),0) * 100;
+  if(map_result_status == MAP_RESULT_LOSE)
+  {
+    turn_bonus = 0;
+    return;
+  }
+  turn_bonus = max(8-(turns_count>>2),0) * 100;
+
+  //max == 900 I guess? Not really possible
 }
 
 void get_total_bonus()
@@ -726,6 +764,6 @@ char get_entity_id(int position)
 }
 
 void update_map();
-void begin_battle(char src, char dst, unsigned char dst_p, char a_terrain, char t_terrain);
+char begin_battle(char src, char dst, unsigned char dst_p, char a_terrain, char t_terrain);
 void set_cursor_pos(int pos);
 

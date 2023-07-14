@@ -653,7 +653,7 @@ void load_animations_to_vram(char attacker)
 /*
 	BATTLE ROUTINE
 */
-char battle_loop(int i1, int i2, char range, char a_t, char t_t, char art, char a_target)
+char battle_loop(int i1, int i2, char range, char a_t, char t_t)
 {
 	attack_range = range;
 	xOffset = -26;

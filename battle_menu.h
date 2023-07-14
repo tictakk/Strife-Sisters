@@ -20,7 +20,7 @@ char display_battle_selector(char is_attacker, char type)
   // put_number(picker,3,0,0);
   if(picker == 0)
   {
-    put_number(69,3,6,0);
+    // put_number(69,3,6,0);
     target_type = type;
     determine_picker(is_attacker,target_type == ALL_ALLIES);
     set_picker_params();
@@ -50,8 +50,8 @@ char battle_selector_picker(int x, int y)
             return 1;
 
             case JOY_II:
-            put_number(-1,3,0,0);
-            put_number(-1,3,6,0);
+            // put_number(-1,3,0,0);
+            // put_number(-1,3,6,0);
             loop = 0;
             unmark_all();
             highlight_target_type(0);
@@ -194,7 +194,7 @@ void set_picker_params()
 
 void set_target_params()
 {
-  put_number(target_type,3,0,0);
+  // put_number(target_type,3,0,0);
   switch(target_type)
   {
     case SINGLE_HIT: set_target_single_params(); break;

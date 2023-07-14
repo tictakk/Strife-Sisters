@@ -450,7 +450,7 @@ void transfer_units_to_stun_vram(char type, char index)
       break;
 
     case LANCER_UNIT:
-      load_vram(stun_vrams[index],knightbtl+0x900,0x100);
+      load_vram(stun_vrams[index],lancerbtl+0x900,0x100);
       break;
 
     case FIGHTER_UNIT:

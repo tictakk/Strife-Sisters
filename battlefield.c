@@ -76,7 +76,7 @@ void begin_battlefield(char map_id)
 
   selector_mode = 0;
 
-  for(i=0; i<12; i++)
+  for(i=0; i<8; i++)
   {
     if(battle_map_metadata.player_start_pos[i] != 0)
     {
@@ -91,6 +91,7 @@ void battlefield_loop(char map_id)
 {
   char id;
   last_command = SELECT_MODE;
+  map_result_status = MAP_RESULT_NONE;
   selected_option = -1;
   turns_count = 0;
   units_killed = 0;
@@ -108,10 +109,10 @@ void battlefield_loop(char map_id)
   vsync();
   turn = PLAYER;
   select_unit(0);
-  // play_story();
+  play_story();
   display_selector(SELECTOR,sx,sy,16);
   psgPlay(3);
-  
+  // put_number(raw_map_data[0]&0xFF,3,0,0);
   while(exit_battlefield)
   {
     if(turn == CPU)
@@ -120,6 +121,7 @@ void battlefield_loop(char map_id)
     }
     else
     {
+      // check_battle_complete();
       // position = graph_from_x_y(sx,sy);
       g_abs = graph_from_x_y(sx,sy);
       t_type =  terrain_type(battlefieldbat[map_offset+g_abs]);
@@ -187,8 +189,8 @@ void check_battle_complete()
   {
     if(entities[battle_grid[objective_pos]-1].team == CPU)
     {
-      put_string("lose",0,0);
-      wait_for_I_input();
+      // put_string("lose",0,0);
+      // wait_for_I_input();
       lose_condition();
       return;
     }
@@ -201,6 +203,8 @@ void check_battle_complete()
 
   if(one_total <= 0)
   {
+    // put_string("lose",0,0);
+    // wait_for_I_input();
     lose_condition();
     return;
   }
@@ -241,6 +245,7 @@ char check_terrain_triggered()
 
 void win_condition()
 {
+  map_result_status = MAP_RESULT_WIN;
   post_battle_screen();
   satb_update();
   vsync();
@@ -254,9 +259,11 @@ void lose_condition()
 {
   // satb_update();
   // vsync();
-  cleanup_battlefield();
+  map_result_status = MAP_RESULT_LOSE;
   game_over = 0;
   exit_battlefield = 0;
+  post_battle_screen();
+  // cleanup_battlefield();
   s_x = s_x_holder;
   s_y = s_y_holder;
 }
@@ -306,13 +313,13 @@ void load_ents()
     {
       add_npc(entities[i].pos%16,entities[i].pos/16,
             party_commanders[entities[i].id].sprite_type,
-            UNIT_PALS[party_commanders[entities[i].id].sprite_type]);
-      // put_number(entities[i].actionable,3,0,0);
+            0);
+      // put_number(UNIT_PALS[party_commanders[entities[i].id].sprite_type],3,0,0);
       // wait_for_I_input();
       sync(1);
       if(entities[i].actionable == 0)
       {
-        darken_palette(26+i);
+        darken_palette(get_commander_palette(party_commanders[entities[i].id].sprite_type));
       }
     }
     else
@@ -850,8 +857,7 @@ void ctrls()
 
   if(j & JOY_RUN)
   {
-    win_condition();
-    // walk_entity(0,150);
+    // win_condition();
   }
 
   if(j & JOY_SEL)
@@ -1111,22 +1117,15 @@ void display_team(int x, int y)
   }
 }
 
-char begin_battle(unsigned char attacker, unsigned char target, unsigned char range, char a_terrain, char t_terrain, char art)
+char begin_battle(unsigned char attacker, unsigned char target, unsigned char range, char a_terrain, char t_terrain)
 {
-  int i, battle_result, resolution;
+  int resolution;
 
   // psgFadeOut(20);
   reset_satb();
   vsync();
 
-  if(arts[art].target)//if targeting enemy
-  {
-    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,0,target);
-  }
-  else
-  {
-    resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,0,attacker);
-  }
+  resolution = battle_loop(attacker,target,range,a_terrain,t_terrain);
     // resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,LIGHTENING_ART,target);
 
   if(resolution == 0)//attacking team kills army
@@ -1137,10 +1136,8 @@ char begin_battle(unsigned char attacker, unsigned char target, unsigned char ra
   {
     destroy_entity(attacker);
   }
-
-  battle_result = -1;
   // load_ents();
-
+  
   load_battlefield_map();
   load_sprites_();
   update_map();
@@ -1148,6 +1145,7 @@ char begin_battle(unsigned char attacker, unsigned char target, unsigned char ra
   disp_on();
   // load_ents();
   selector_mode = 0;
+
   vsync();
 
   // psgPlay(3);

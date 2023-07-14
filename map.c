@@ -3,6 +3,10 @@
 // #define MAP_METADATA_SIZE 117 //I think
 #define MAP_METADATA_SIZE 135 //I think
 
+#define MAP_RESULT_NONE 1
+#define MAP_RESULT_WIN 2
+#define MAP_RESULT_LOSE 3
+
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 //'                        Map meta data structure                           '
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -28,6 +32,13 @@ struct battle_map_data{
 unsigned char raw_map_data[MAP_METADATA_SIZE];
 struct battle_map_data battle_map_metadata;
 int capture_position;
+//F, D, C, B, A, S
+const int map_1_grades[] = {600, 800, 1000, 1200, 1400, 1600};
+const int map_2_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
+const int map_3_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
+const char grades[] = {70,68,67,66,65,83};
+
+int *map_grades;
 
 void init_map_data(int map_id)
 {
@@ -57,15 +68,23 @@ void init_map_data(int map_id)
       // debug_number = battle_map_metadata.cpu_commander_ids[i];
     }
   }
+
+  map_grades = map_1_grades + (map_id*6);
   // debug_number = cpu_cmdr_count;
   // battle_map_metadata.map_obj = raw_map_data[1];
 }
 
-void join_byte_list_positions(unsigned char *bytes, int *ints, int ints_size)
+char get_map_grade_result(char map_no, int score)
 {
-  int i;
-  for(i=0; i<ints_size; i++)
+  char i, grade;
+  grade = 70;
+  for(i=0; i<6; i++)
   {
-    ints[i] = (bytes[i*2] + ((bytes[(i*2)+1]) << 8));
+    if(score>=map_grades[i])
+    {
+      // return grades[i];
+      grade = grades[i];
+    }
   }
+  return grade;
 }

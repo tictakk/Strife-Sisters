@@ -107,17 +107,14 @@ void arrived(int pos)
 {
   // if(prebattle_flag == get_map_id_by_pos(pos))
   // {
-    // story(get_map_id_by_pos(pos),PREBATTLE,0);
+	story(get_map_id_by_pos(pos),PREBATTLE,0);
   // }
   scroll(0,s_x,288,0, 223, 0xC0);
 	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 	commander_select_cursor = 0;
 
 	display_castle_menu(get_map_id_by_pos(pos));
-  // put_number(party_pos_x,3,0,36);
-  // put_number(party_pos_y,3,10,36);
   // spr_hide(0);
-  // put_number(pos,4,1,37);
 }
 
 void set_direction(int sprite_no, enum Direction direction)
