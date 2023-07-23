@@ -34,17 +34,10 @@
 #incbin(m13, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map015.stm")
 #incbin(m14, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map016.stm")
 #incbin(m15, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map017.stm")
-#incbin(m16, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map018.stm")
-// #incbin(m17, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map019.stm")
-// #incbin(m18, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map020.stm")
-// #incbin(m19, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map021.stm")
-// #incbin(m20, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map022.stm")
-// #incbin(m21, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map023.stm")
-// #incbin(m22, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map024.stm")
-// #incbin(m23, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map025.stm")
 
 //Map images
-#incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
+// #incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
+#incbin(overworldmap,"map/backgrounds/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
 #inctilepal(overworldtilespal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 
 #define TERRAIN_EFFECT_COUNT 5
@@ -149,7 +142,14 @@ void put_terrain_effect(int vram, char num, int x, int y, char pal)
 
 void put_terrain_icon(char terrain_no, int x, int y)
 {
-  put_terrain_effect(TERRAIN_ICON_VRAM,terrain_no,x,y,TERRAIN_ICON_PAL);
+  if(terrain_no == WALL)
+  {
+    put_terrain_effect(TERRAIN_ICON_VRAM,STRUCTURE,x,y,TERRAIN_ICON_PAL);
+  }
+  else
+  {
+    put_terrain_effect(TERRAIN_ICON_VRAM,terrain_no,x,y,TERRAIN_ICON_PAL);
+  }
 }
 
 void put_terrain_item(char item_no, int x, int y, char pal)

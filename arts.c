@@ -308,7 +308,7 @@ char get_modifier_amount(char art_id)
 {
   switch(art_id)
   {
-    case ZAP_ART: return 25;
+    case ZAP_ART: return 35;
     case RAIN_ARROW_ART: return 15;
     case PLUNDER_ART: return 5;
     case PILLAGE_ART: return 5;

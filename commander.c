@@ -21,9 +21,9 @@ struct Commander{
 	char *name;
 	char sprite_type;
   char max_bp;
-  int exp;
-  char level;
-  unsigned char tac, wis,fort; 
+  // int exp;
+  // char level;
+  // unsigned char tac, wis,fort; 
 	Battlegroup bg;
 };
 
@@ -112,35 +112,68 @@ char get_commander_battle_points(char cmdr_id)
   return bp;
 }
 
-void set_commander_stats(char id, char level, char tac, char wis, char fort)
-{
-  party_commanders[id].level = level;
-  party_commanders[id].tac = tac;
-  party_commanders[id].wis = wis;
-  party_commanders[id].fort = fort;
-}
+// void set_commander_stats(char id, char level, char tac, char wis, char fort)
+// {
+//   party_commanders[id].level = level;
+//   party_commanders[id].tac = tac;
+//   party_commanders[id].wis = wis;
+//   party_commanders[id].fort = fort;
+// }
 
-void level_commander(char cmdr_id)
-{
-  party_commanders[cmdr_id].tac += COMMANDER_STATS_DISTRIBUTION_CHART[cmdr_id * 3];
-  party_commanders[cmdr_id].wis += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+1];
-  party_commanders[cmdr_id].fort += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+2];
-  party_commanders[cmdr_id].max_bp++;
-}
+// void level_commander(char cmdr_id)
+// {
+//   party_commanders[cmdr_id].tac += COMMANDER_STATS_DISTRIBUTION_CHART[cmdr_id * 3];
+//   party_commanders[cmdr_id].wis += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+1];
+//   party_commanders[cmdr_id].fort += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+2];
+//   party_commanders[cmdr_id].max_bp++;
+//   party_commanders[cmdr_id].level++;
+// }
 
-void level_enemy_commander(char cmdr_id, char base_type, char level)
-{
-  char i;
-  set_commander_stats(cmdr_id,1,
-                      GENERIC_BASE_STATS[(base_type*3)],
-                      GENERIC_BASE_STATS[(base_type*3)+1],
-                      GENERIC_BASE_STATS[(base_type*3)+2]);
+// void level_up_commander(char cmdr_id)
+// {
+//   while(party_commanders[cmdr_id].exp > next_level((int)party_commanders[cmdr_id].level))
+//   {
+//     level_commander(cmdr_id);
+//   }
+// }
 
-  for(i=1; i<level; i++)
+// void level_enemy_commander(char cmdr_id, char base_type, char level)
+// {
+//   char i;
+//   set_commander_stats(cmdr_id,1,
+//                       GENERIC_BASE_STATS[(base_type*3)],
+//                       GENERIC_BASE_STATS[(base_type*3)+1],
+//                       GENERIC_BASE_STATS[(base_type*3)+2]);
+
+//   for(i=1; i<level; i++)
+//   {
+//     party_commanders[cmdr_id].tac += GENERIC_STATS_DISTRIBUTION_CHART[base_type * 3];
+//     party_commanders[cmdr_id].wis += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+1];
+//     party_commanders[cmdr_id].fort += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+2];
+//   }
+//   party_commanders[cmdr_id].level = level;
+// }
+
+void check_add_new_commander(char map_no)
+{
+  if(map_no == 1)
   {
-    party_commanders[cmdr_id].tac += GENERIC_STATS_DISTRIBUTION_CHART[base_type * 3];
-    party_commanders[cmdr_id].wis += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+1];
-    party_commanders[cmdr_id].fort += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+2];
+    add_commander_to_party(name2,KING);
+    // set_commander_stats(2,1,8,8,10);
+    // party_commanders[2].exp = 40;
+    // level_up_commander(2);
+    load_unit_to_cmdr(2,3,LANCER_UNIT);
+    load_unit_to_cmdr(2,1,SWORD_UNIT);
+    load_unit_to_cmdr(2,5,LANCER_UNIT);
+    load_unit_to_cmdr(2,7,CLERIC_UNIT);
+    return;
   }
-  party_commanders[cmdr_id].level = level;
+
+  if(map_no == 5)
+  {
+    //add tinker
+    //return;
+  }
+
+  // if(map_no == )
 }

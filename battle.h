@@ -109,7 +109,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   {
     case BLOB_UNIT:
       load_vram(idle_vrams[index],blobbattle,0x100);
-      battleunits[index].pal = 28;
+      battleunits[index].pal = 22;
       break;
 
     case SWORD_UNIT:
@@ -154,7 +154,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
 
     case AXE_UNIT:
       load_vram(idle_vrams[index],axebtl,0x100);
-      battleunits[index].pal = 22;
+      // battleunits[index].pal = 22;
       break;
 
     case RAIDER_UNIT:

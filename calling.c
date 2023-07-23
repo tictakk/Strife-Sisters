@@ -26,6 +26,7 @@ void reset_calling(char team)
 void display_calling_background(int x, int y, char cmdr_id)
 {
   scroll(0,0,y,32,224,0x80);
+  // display_window_rel(11,11,10,4);
   display_abs_black_panel(0,(y/8)+4,32,7);
   load_portrait(party_commanders[cmdr_id].sprite_type,0);
   display_item(0,0,7,(y/8)+4);

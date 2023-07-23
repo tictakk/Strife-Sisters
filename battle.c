@@ -64,15 +64,15 @@ void battle_end_screen()
   sync(30);
   display_number_incrementing(16,4,battle_exp,3);
 
-  party_commanders[entities[player_id].id].exp += battle_exp;
+  // party_commanders[entities[player_id].id].exp += battle_exp;
 
-  while(party_commanders[entities[player_id].id].exp > next_level((int)party_commanders[entities[player_id].id].level))
-  {
-    write_text(9,6,"new level!");
-    write_text(9,7,"level");
-    put_number(++party_commanders[entities[player_id].id].level,2,16,7);
-    level_commander(entities[player_id].id);
-  }
+  // while(party_commanders[entities[player_id].id].exp > next_level((int)party_commanders[entities[player_id].id].level))
+  // {
+  //   write_text(9,6,"new level!");
+  //   write_text(9,7,"level");
+  //   level_commander(entities[player_id].id);
+  //   put_number(party_commanders[entities[player_id].id].level,2,16,7);
+  // }
   sync(60);
 }
 
@@ -602,8 +602,8 @@ unsigned char calc_damage(char a_id, char t_id, char a_a_bonus, char t_d_bonus)
   a_base_atk = entities[battleunits[a_id].ent_id].bg->units[battleunits[a_id].pos].unit->atk;
   t_base_def = entities[battleunits[t_id].ent_id].bg->units[battleunits[t_id].pos].unit->def;
 
-  cmdr_attack_bonus = party_commanders[entities[battleunits[a_id].ent_id].id].tac;
-  cmdr_defense_bonus = party_commanders[entities[battleunits[t_id].ent_id].id].fort;
+  cmdr_attack_bonus = 0;//party_commanders[entities[battleunits[a_id].ent_id].id].tac;
+  cmdr_defense_bonus = 0;//party_commanders[entities[battleunits[t_id].ent_id].id].fort;
 
   a_atk = cmdr_attack_bonus + a_base_atk;
   t_def = cmdr_defense_bonus + t_base_def;
@@ -632,7 +632,8 @@ void apply_damage(char t_id, unsigned char damage)
 
 unsigned char calc_art_damage(char attacker_id, int base_damage)
 {
-  return (unsigned char) max(((base_damage + party_commanders[entities[attacker_id].id].wis) * 4) / 6,0);
+  // return (unsigned char) max(((base_damage + party_commanders[entities[attacker_id].id].wis) * 4) / 6,0);
+  return base_damage;
 }
 
 void load_animations_to_vram(char attacker)
@@ -953,7 +954,7 @@ void load_pals(char entity_id, int off)
 			switch(entities[entity_id].bg->units[i].unit->id)
 			{
 				case BLOB_UNIT:
-          load_palette(battleunits[i+off].pal,sniperbtlpal,1);
+          load_palette(battleunits[i+off].pal,blobbattlepal,1);
           break;
 
 				case SWORD_UNIT:
@@ -1052,7 +1053,7 @@ void kill_unit(char b_id)
   {
     units_killed++;
     battle_killed++;
-    battle_exp += battleunits[b_id].unit->unit->exp;
+    // battle_exp += battleunits[b_id].unit->unit->exp;
   }
   if(battleunits[b_id].ent_id == atker)
   {

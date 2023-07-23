@@ -441,7 +441,7 @@ void post_battle_screen()
 
   write_text(s_x_relative+6,s_y_relative+19,"Total");
   put_number(total_bonus,4,s_x_relative+23,s_y_relative+19);
-  write_text(s_x_relative+6,s_y_relative+20,"Materials       ");
+  write_text(s_x_relative+6,s_y_relative+20,"Ore       ");
   display_number_incrementing(s_x_relative+24,s_y_relative+20,materials_collected,3);
 
   write_text(s_x_relative+12,s_y_relative+22,"Grade");
@@ -648,6 +648,27 @@ void item_gained_text(char item_no, int amt)
   clear_text_field();
 }
 
+void check_end_turn()
+{
+  if(!remaining_unit_turns())
+  {
+    end_player_turn();
+  }
+}
+
+void end_player_turn()
+{
+  selector_mode = SELECT_MODE;
+  menu_option = MENU_ATTACK;
+  last_pos = 0;
+  hide_cursor();
+  check_battle_complete();
+  start_turn(CPU);
+  menu_mask = 0x00;
+  print_menu();
+  hide_cursor();
+}
+
 void end_unit_turn(char entity_id)
 {
   char item_no;
@@ -659,27 +680,42 @@ void end_unit_turn(char entity_id)
   print_menu();
   hide_cursor();
   check_item_pickup();
+  check_end_turn();
+}
+
+char remaining_unit_turns()
+{
+  char i, remain;
+  remain = 0;
+  for(i=0; i<MAX_ENTITIES; i++)
+  {
+    if(entities[i].team == PLAYER && entities[i].actionable)
+    {
+      remain++;
+    }
+  }
+  return remain;
 }
 
 void collect_item(char item_no)
 {
   switch(terrain_items[item_no].item_no)
   {
-    case RED_CRYSTAL: 
-      item_gained_text(RED_CRYSTAL,2);
-      break;
+    // case RED_CRYSTAL: 
+    //   item_gained_text(RED_CRYSTAL,2);
+    //   break;
 
-    case BLUE_CRYSTAL: 
-      item_gained_text(BLUE_CRYSTAL,1);
-      // selected_entity->bg->meter = min(selected_entity->bg->meter+1,MAX_METER);
-      break;
+    // case BLUE_CRYSTAL: 
+    //   item_gained_text(BLUE_CRYSTAL,1);
+    //   break;
 
-    case GREEN_CRYSTAL: 
-      item_gained_text(GREEN_CRYSTAL,range(10,20));
-      break;
+    // case GREEN_CRYSTAL: 
+    //   item_gained_text(GREEN_CRYSTAL,range(10,20));
+    //   break;
 
     case CHEST:
-      item_gained_text(CHEST,range(100,300));
+      // item_gained_text(CHEST,range(100,300));
+      display_popup("200 ore\n gained");
       chests_collected++;
       break;
   }
@@ -761,6 +797,20 @@ char get_entity_sprite_no(char entity_id)
 char get_entity_id(int position)
 {
   return battle_grid[position]-1;
+}
+
+void display_popup(char *str)
+// void display_turn(char *str)
+{
+  s_y_relative = (s_y/8);
+  scroll(0,0,s_y+32,32,224,0x80);
+  display_window_rel(11,11,10,4);
+  write_text(12,12+s_y_relative,str);
+
+  sync(100);
+  load_map(0,2,0,0,16,29);
+  scroll(0,0,s_y+32,32,224,0xC0);
+  s_y_relative = 0;
 }
 
 void update_map();

@@ -85,20 +85,42 @@ ai()
     // put_number(ai_tracker,4,0,0);
     // wait_for_I_input();
     ai_do_state(ai_entities[ai_tracker].id);
+    check_battle_complete();
+    if(map_result_status != MAP_RESULT_NONE)
+    {
+      break;
+    }
     update_map();
     satb_update();
   }
-  start_turn(PLAYER);
+  // if(map_result_status == MAP_RESULT_NONE)
+  // {
+    // break;
+    start_turn(PLAYER);
+  // }
 }
 
 void start_turn(char team)
 {
   int camera_pos;
   char i, first;
+  if(map_result_status != MAP_RESULT_NONE)
+  {
+    return;
+  }
   first = 1;
   init_ai();
   turn = team;
   turns_count++;
+  // display_turn(team);
+  if(team == PLAYER)
+  {
+    display_popup("Player\n  Turn");
+  }
+  else
+  {
+    display_popup("Enemy\n  Turn");
+  }
   for(i=0; i<num_of_entities; i++)
   {
     if(entities[i].team)
@@ -119,6 +141,7 @@ void start_turn(char team)
       // load_palette(get_commander_palette(party_commanders[entities[i].id].sprite_type))
     // }
   }
+
   camera_pos = entities[0].pos;
   if(team == PLAYER)
   {
@@ -461,7 +484,7 @@ void do_attack(char ai_id)
 void do_pass(char ai_id)
 {
   entities[ai_entities[ai_id].entity_id].actionable = 0;
-  check_battle_complete();
+  // check_battle_complete();
 }
 
 int find_nearest_unoccupied_position(int position, int destination, char range, struct Node *grid)

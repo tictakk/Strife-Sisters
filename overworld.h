@@ -73,7 +73,7 @@ void display_hire_window(char unit_id)
   display_window_rel(0,0,22,14);
   display_window_rel(22,14,10,14);
   put_string("Hire",8+s_x_relative,s_y_relative+1);
-  put_string("Materials",s_x_relative+1,s_y_relative+11);
+  put_string("Ore",s_x_relative+1,s_y_relative+11);
   put_string("Gold",s_x_relative+1,s_y_relative+12);
   put_number(player_gold,4,s_x_relative+11,s_y_relative+12);
   put_number(materials_count,4,s_x_relative+11,s_y_relative+11);
@@ -347,17 +347,17 @@ void update_party_commander_window(char x, char y)
   put_string("      ",x_rel+5,y_rel+1);
   put_string(party_commanders[selected_cmdr].name,x_rel+5,y_rel+1);
 
-  put_string("LV",x_rel+5,y_rel+3);
-  put_number(party_commanders[selected_cmdr].level,2,x_rel+8,y_rel+3);
+  // put_string("LV",x_rel+5,y_rel+3);
+  // put_number(party_commanders[selected_cmdr].level,2,x_rel+8,y_rel+3);
 
-  put_string("FORT",x_rel+2,y_rel+7);
-  put_number(party_commanders[selected_cmdr].fort,3,x_rel+6,y_rel+7);
+  // put_string("FORT",x_rel+2,y_rel+7);
+  // put_number(party_commanders[selected_cmdr].fort,3,x_rel+6,y_rel+7);
 
-  put_string("TACT",x_rel+2,y_rel+8);
-  put_number(party_commanders[selected_cmdr].tac,3,x_rel+6,y_rel+8);
+  // put_string("TACT",x_rel+2,y_rel+8);
+  // put_number(party_commanders[selected_cmdr].tac,3,x_rel+6,y_rel+8);
 
-  put_string("WISD",x_rel+2,y_rel+9);
-  put_number(party_commanders[selected_cmdr].wis,3,x_rel+6,y_rel+9);
+  // put_string("WISD",x_rel+2,y_rel+9);
+  // put_number(party_commanders[selected_cmdr].wis,3,x_rel+6,y_rel+9);
 
   put_string("Pow",x_rel+2,y_rel+10);
   put_number(99,3,x_rel+6,y_rel+10);

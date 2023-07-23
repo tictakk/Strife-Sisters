@@ -183,7 +183,7 @@ void add_npc(char x, char y, char type, char pal)
           break;
 
           case KNIGHT_UNIT:
-          load_vram(npc_vram[type],knight,0x1000);
+          load_vram(npc_vram[type],knight,0x100);
           break;
 
           default:
