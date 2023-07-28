@@ -27,6 +27,7 @@ char npc_count = 0;
 char npc_type_count = 0;
 char cmdr_pal_count = 0;
 char current_frame = 0;
+char highlight_pal_no = 0;
 
 void init_npcs()
 {
@@ -45,7 +46,8 @@ void init_npcs()
   load_palette(24,lancepal,1);
   load_palette(25,golpal,1);
   // load_palette(26,gol_pal,1);
-  load_palette(31,dark,1);
+  // load_palette(31,dark,1);
+  // load_palette(31,sldpal,1);
 }
 
 void clear_npcs()
@@ -147,7 +149,7 @@ void add_npc(char x, char y, char type, char pal)
           break;
 
           case BLOB_UNIT:
-          load_vram(npc_vram[type],blob,0x100);
+          load_vram(npc_vram[type],blobsmall,0x100);
           break;
 
           case AXE_UNIT:
@@ -179,11 +181,11 @@ void add_npc(char x, char y, char type, char pal)
           break;
 
           case SNIPER_UNIT:
-          load_vram(npc_vram[type],sniper,0x100);
+          load_vram(npc_vram[type],snipersmall,0x100);
           break;
 
           case KNIGHT_UNIT:
-          load_vram(npc_vram[type],knight,0x100);
+          load_vram(npc_vram[type],knightsmall,0x100);
           break;
 
           default:
@@ -252,4 +254,15 @@ char check_collision(int x, int y)
     }
   }
   return -1;
+}
+
+char highlight_npc(char npc_no)
+{
+  load_palette(31,sldpal,1);
+  vsync();
+  npcs[npc_no].pal = 31;
+  spr_set(5);
+  spr_pal(31);
+  darken_palette(31);
+  satb_update();
 }

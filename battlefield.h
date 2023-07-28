@@ -143,32 +143,34 @@ char get_army_max_range(char entity_id)
 {
   char i, max;
   max = 1;
+  //TODO: can make this faster by next if statements. If hp is zero, don't bother getting range
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
-    if(entities[entity_id].bg->units[i].hp && entities[entity_id].bg->units[i].unit->rng > max)
+    load_unit_header(entities[entity_id].bg->units[i].id,0);
+    if(entities[entity_id].bg->units[i].hp && unit_header[0].rng > max)
     {
-      max = entities[entity_id].bg->units[i].unit->rng;
+      max = unit_header[0].rng;//entities[entity_id].bg->units[i].unit->rng;
     }
   }
   return max;
+  // return 3;
 }
 
 char get_army_min_move(char entity_id)
 {
-  char i, min;
-  min = MAX_MOVE_RANGE;
+  // char i, min;
+  // min = MAX_MOVE_RANGE;
 
-  for(i=0; i<MAX_ARMY_SIZE; i++)
-  {
-    if(entities[entity_id].bg->units[i].hp && entities[entity_id].bg->units[i].unit->mov < min)
-    {
-      min = entities[entity_id].bg->units[i].unit->mov;
-    }
-  }
-
+  // for(i=0; i<MAX_ARMY_SIZE; i++)
+  // {
+  //   if(entities[entity_id].bg->units[i].hp && entities[entity_id].bg->units[i].unit->mov < min)
+  //   {
+  //     min = entities[entity_id].bg->units[i].unit->mov;
+  //   }
   // }
 
-  return min;
+  // return min;
+  return 3;
 }
 
 void add_entity(char team, char pal, char id, int pos, struct Commander *commanders)

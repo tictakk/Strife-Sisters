@@ -65,14 +65,6 @@ void begin_battlefield(char map_id)
   map_offset = (320*map_no)-32;
   objective_pos = battle_map_metadata.event_positions[0];
   check_add_new_commander(map_no);
-  // if(map_id > 0 && party_size < 3)
-  // {
-  //   add_cmdr_from_story(KING);
-  // }
-  // if(map_id>4 && party_size < 4)
-  // {
-  //   add_cmdr_from_story(TINKER);
-  // }
 
   yOffset = 0;
   init_battlefield();
@@ -116,6 +108,7 @@ void battlefield_loop(char map_id)
   display_selector(SELECTOR,sx,sy,16);
   // psgPlay(3);
   // while(exit_battlefield)
+  // put_number((char)unit_header[0].hp,3,0,0);
   while(map_result_status == MAP_RESULT_NONE)
   {
     if(turn == CPU)
@@ -757,7 +750,7 @@ void ctrls()
       {
         set_font_pal(11);
         selected_option = dumb_table[menu_option];
-        print_unit_info(&entities[id-1].bg->units[selected_option].unit,9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
+        print_unit_info(&entities[id-1].bg->units[selected_option],9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
         set_font_pal(10);
       }
       else
@@ -821,7 +814,7 @@ void ctrls()
       }
       else //unselect
       {
-        print_unit_info(&entities[id-1].bg->units[selected_option].unit,9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
+        print_unit_info(&entities[id-1].bg->units[selected_option],9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
         selected_option = -1;
       }
     }
@@ -850,6 +843,8 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
+    put_number(hits,3,0,0);
+    put_number(misses,3,10,0);
     // char idee;
     // idee = battle_grid[graph_from_x_y(sx,sy)] - 1;
     // if(selector_mode == SELECT_MODE)
@@ -1085,21 +1080,6 @@ void display_unit_menu_mask(int x, int y)
   else
   {
     put_hex(0,3,x,y);
-  }
-}
-
-void display_team(int x, int y)
-{
-  char id;
-  id = battle_grid[graph_from_x_y(sx,sy)];
-  put_string("team:",x,y);
-  if(id)
-  {
-    put_number(entities[id-1].team,2,x+5,y);
-  }
-  else
-  {
-    put_number(0,2,x+5,y);
   }
 }
 

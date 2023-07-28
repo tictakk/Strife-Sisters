@@ -8,20 +8,20 @@
 #define BOTTOM_CENTER_WINDOW 0x94F7
 #define BOTTOM_RIGHT_WINDOW 0x94F8
 
-const int top_8[] = {
-        TOP_LEFT_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW,
-        TOP_CENTER_WINDOW, TOP_CENTER_WINDOW,TOP_RIGHT_WINDOW
-};
+// const int top_8[] = {
+//         TOP_LEFT_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW,
+//         TOP_CENTER_WINDOW, TOP_CENTER_WINDOW,TOP_RIGHT_WINDOW
+// };
 
-const int mid_8[] = {
-        MIDDLE_LEFT_WINDOW, MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW,
-        MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW,MIDDLE_RIGHT_WINDOW
-};
+// const int mid_8[] = {
+//         MIDDLE_LEFT_WINDOW, MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW,
+//         MIDDLE_CENTER_WINDOW, MIDDLE_CENTER_WINDOW,MIDDLE_RIGHT_WINDOW
+// };
 
-const int bot_8[] = {
-        BOTTOM_LEFT_WINDOW, BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW,
-        BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW,BOTTOM_RIGHT_WINDOW
-};
+// const int bot_8[] = {
+//         BOTTOM_LEFT_WINDOW, BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW,
+//         BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW,BOTTOM_RIGHT_WINDOW
+// };
 
 const int top_10[] = {
         TOP_LEFT_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW, TOP_CENTER_WINDOW,
@@ -194,21 +194,21 @@ const int bot_32[] = {
         BOTTOM_CENTER_WINDOW, BOTTOM_CENTER_WINDOW, BOTTOM_RIGHT_WINDOW
 };
 
-void window_8(int vaddr, char row_x, char row_y)
-{
-  char i;
-  int offset;
+// void window_8(int vaddr, char row_x, char row_y)
+// {
+//   char i;
+//   int offset;
 
-  offset = 0;
-  load_vram(vaddr+offset,top_8,row_x);
-  for(i=0; i<row_y-2; i++)
-  {
-    offset+=screen_dimensions;
-    load_vram(vaddr+offset,mid_8,row_x);
-  }
-  offset+=screen_dimensions;
-  load_vram(vaddr+offset,bot_8,row_x);
-}
+//   offset = 0;
+//   load_vram(vaddr+offset,top_8,row_x);
+//   for(i=0; i<row_y-2; i++)
+//   {
+//     offset+=screen_dimensions;
+//     load_vram(vaddr+offset,mid_8,row_x);
+//   }
+//   offset+=screen_dimensions;
+//   load_vram(vaddr+offset,bot_8,row_x);
+// }
 
 void window_10(int vaddr, char row_x, char row_y )
 {

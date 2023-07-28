@@ -77,49 +77,5 @@
 #define ROW_THREE 2
 #define MAX_UNITS_PER_ROW 3
 
-const int EXP_CHART[10] = //ten levels max
-{
-  50, 150, 350, 700, 1500, 2500, 5000, 10000, 25000, 50000
-};
-
 char s_y_relative = 0;
 char s_x_relative = 0;
-
-char *location_lookup(int position)
-{
-  switch(position)
-  {
-    case 997:
-    return "Fort Begin";
-
-    case 971:
-    return "Port Here";
-
-    case 876:
-    return "Circle Stop";
-
-    case 780:
-    return "Castle Grr";
-
-    case 713:
-    return "Wonderton";
-
-    case 611:
-    return "Fort Scary";
-
-    case 705:
-    return "Smallton";
-
-    case 807:
-    return "Townsville";
-
-    case 833:
-    return "Wet Fork";
-
-    case 903:
-    return "Sea Views";
-
-    default:
-    return "No Location";
-  }
-}

@@ -135,7 +135,6 @@ void highlight_target_type(int pal)
   switch(target_type)
   {
     case SINGLE_HIT: highlight_single(pal); break;
-    case MULTI_COL_2:
     case MULTI_COL_3: highlight_column(pal); break;
     case MULTI_ROW: highlight_row(pal); break;
     default: highlight_all(pal); break;
@@ -198,7 +197,6 @@ void set_target_params()
   switch(target_type)
   {
     case SINGLE_HIT: set_target_single_params(); break;
-    case MULTI_COL_2:
     case MULTI_COL_3: set_target_column_params(); break;
     case MULTI_ROW: set_target_row_params(); break;
     case ALL_ALLIES:
@@ -246,7 +244,6 @@ void mark_bs_targets()
   switch(target_type)
   {
     case SINGLE_HIT: mark_single(); break;
-    case MULTI_COL_2:
     case MULTI_COL_3: mark_column(); break;
     case MULTI_ROW: mark_row(); break;
     case ALL_ALLIES:

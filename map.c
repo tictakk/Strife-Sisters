@@ -33,9 +33,9 @@ unsigned char raw_map_data[MAP_METADATA_SIZE];
 struct battle_map_data battle_map_metadata;
 int capture_position;
 //F, D, C, B, A, S
-const int map_1_grades[] = {600, 800, 1000, 1200, 1400, 1600};
-const int map_2_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
-const int map_3_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
+// const int map_1_grades[] = {600, 800, 1000, 1200, 1400, 1600};
+// const int map_2_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
+// const int map_3_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
 const char grades[] = {70,68,67,66,65,83};
 
 int *map_grades;
@@ -69,7 +69,7 @@ void init_map_data(int map_id)
     }
   }
 
-  map_grades = map_1_grades + (map_id*6);
+  // map_grades = map_1_grades + (map_id*6);
   // debug_number = cpu_cmdr_count;
   // battle_map_metadata.map_obj = raw_map_data[1];
 }

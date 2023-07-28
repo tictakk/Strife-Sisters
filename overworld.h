@@ -5,8 +5,8 @@
 #define ARMY_BATTLE_GROUP_WINDOW_Y 14
 #define ARMY_STATS_X 11
 #define ARMY_STATS_Y 14
-#define ARMY_PARTY_COMMANDER_WINDOW_X 20
-#define ARMY_PARTY_COMMANDER_WINDOW_Y 14
+#define ARMY_GROUP_UNITS_WINDOW_X 22
+#define ARMY_GROUP_UNITS_WINDOW_Y 14
 
 //ARMY MENU VARS ... "options" in this instance actually means "rows"
 #define ARMY_BATTLE_GROUP_COLS 2 //cols is always one less than the actual amount of cols
@@ -126,14 +126,14 @@ void update_unit_stats_window(char unit_id, char x, char y)
 {
   if(unit_id)
   {
-    draw_32x32_sprite(unit_id,(x*8)+16,(y*8)+18);
+    draw_32x32_sprite(unit_id,(x*8)+32,(y*8)+18);
   }
   else
   {
     spr_hide(1);
   }
-  print_unit_fullname(unit_id,x+1,s_y_relative+y+1);
-  print_unit_stats(unit_id,x+1,s_y_relative+y+7);
+  // print_unit_fullname(unit_id,x+3,s_y_relative+y+1);
+  print_unit_stats(unit_id,x+3,s_y_relative+y+7);
 }
 
 void display_convoy_window(char x, char y)
@@ -159,6 +159,7 @@ void update_unit_battle_info(char unit_id, char x, char y)
   char l_x,l_y;
   l_y = s_y_relative+y;
   l_x = s_x_relative+x;
+  load_unit_header(unit_id,0);
 
   get_upgrade_cost(unit_id);
   get_unit_cost(unit_id);
@@ -169,15 +170,10 @@ void update_unit_battle_info(char unit_id, char x, char y)
   put_string("Upgrade",l_x+1,l_y+3);
   put_number(upgrade_cost,3,l_x+2,l_y+4);
 
-  put_string("Art info",l_x+1,l_y+6);
-  put_string("Name",l_x+1,l_y+7);
-  put_string("         ",l_x+2,l_y+8);
-  put_string(arts[unit_list[unit_id].art].name,l_x+2,l_y+8);
-  put_string("AP Cost",l_x+1,l_y+9);
-  put_number(arts[unit_list[unit_id].art].cost,1,l_x+2,l_y+10);
-
-  put_string("Target",l_x+1,l_y+11);
-  print_attack_type(arts[unit_list[unit_id].art].target,1,l_x+2,l_y+12);
+  put_string("A.Targets",l_x+1,l_y+6);
+  print_attack_type(unit_header[0].attacks[0],1,l_x+2,l_y+7);
+  print_attack_type(unit_header[0].attacks[1],1,l_x+2,l_y+8);
+  print_attack_type(unit_header[0].attacks[2],1,l_x+2,l_y+9);
 }
 
 //thoeretically, this window should never "update" outside of the cursor
@@ -192,7 +188,7 @@ void display_party_commanders_window(char x, char y)
   display_convoy_window(22,0);
   display_window_rel(10,0,12,14);
   display_window_rel(0,14,22,14);
-  display_commander_window(selected_cmdr,20,14);
+  display_commander_window(selected_cmdr,ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y);
 
   load_cursor(1,commander_select_cursor + 2,SLIDER_ONE);
 }
@@ -205,9 +201,10 @@ void display_battle_group_window(char x, char y)
   load_vram(0x68C0,selector,0x40);
   load_palette(28,selectorpal,1);
   
-  update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].unit->id,x+11,y);
+  update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,x+11,y);
   update_battle_group_window(selected_cmdr,x,y);
-  display_selector(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,28);
+
+  display_selector(63,get_iso_x(1,17,commander_select_cursor,cursor_column),get_iso_y(1,17,commander_select_cursor,cursor_column)+14,28);
   satb_update();
 }
 
@@ -222,28 +219,35 @@ void update_battle_group_window(char x, char y)
 
   hide_npcs(5);
   load_cmdr_army_to_npcs(selected_cmdr,0,0);
-
   for(i=0; i<9; i++)
   {
-    if(party_commanders[selected_cmdr].bg.units[i].unit->id)
+    if(party_commanders[selected_cmdr].bg.units[i].id)
     {
-      draw_npc(j+5,((i%3)*24)+20,((i/3)*24)+(8*15),j++);
-      pts += party_commanders[selected_cmdr].bg.units[i].unit->points;
+      load_unit_header(party_commanders[selected_cmdr].bg.units[i].id,0);
+      // draw_npc(j+5,((i/3)*32)+16,((i%3)*32)+130,j++);
+      draw_iso_npc(j,1,17,i/3,i%3,j++);
+      pts += unit_header[0].points;
     }
   }
   
-  put_green_square(2,17);
-  put_blue_square(5,17);
-  put_green_square(8,17);
-  put_blue_square(2,20);
-  put_green_square(5,20);
-  put_blue_square(8,20);
-  put_green_square(2,23);
-  put_blue_square(5,23);
-  put_green_square(8,23);
+  put_green_square(1,17);
+  // read_tile_data(1,17);
+  put_string("Front",s_x_relative+1,s_y_relative+25);
+  put_string("Rear",s_x_relative+8,s_y_relative+15);
 
-  put_string("Front",s_x_relative+4,s_y_relative+15);
-  put_string("Rear",s_x_relative+4,s_y_relative+26);
+  update_party_commander_window(ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y);
+}
+
+void draw_iso_npc(char sprite_no, int iso_x, int iso_y, int sprite_x, int sprite_y, char spr_index)
+{
+  int x_start, y_start, x, y; 
+  
+  y_start = (iso_y * 8)-6;
+  x_start = (iso_x * 16);
+
+  x = (sprite_x * 16) + (sprite_y * 16); //this works because it's starting from bottom left, ending top right.
+  y = (sprite_y * 8) - (sprite_x * 8); //won't work same if going another direction.
+  draw_npc(sprite_no+5,x_start+x,y_start+y,spr_index);
 }
 
 void display_return_select_menu()
@@ -331,9 +335,9 @@ void set_menu_state(char state, char options, char columns)
 
 void display_commander_window(char cmdr_id, char x, char y)
 {
-  display_window_rel(20,14,12,14);
-  load_portrait(party_commanders[cmdr_id].sprite_type,0);
-  display_item(0,0,s_x_relative+x+1,s_y_relative+y+2);
+  display_window_rel(x,y,10,14);
+  // load_portrait(party_commanders[cmdr_id].sprite_type,0);
+  // display_item(0,0,s_x_relative+x+1,s_y_relative+y+2);
   update_party_commander_window(x,y);
 }
 
@@ -343,40 +347,34 @@ void update_party_commander_window(char x, char y)
   x_rel = s_x_relative + x;
   y_rel = s_y_relative + y;
 
-  load_portrait(party_commanders[selected_cmdr].sprite_type,0);
-  put_string("      ",x_rel+5,y_rel+1);
-  put_string(party_commanders[selected_cmdr].name,x_rel+5,y_rel+1);
+  put_string("F",x_rel+1,y_rel+1);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[0].id,x_rel+2,y_rel+2);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[1].id,x_rel+2,y_rel+3);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[2].id,x_rel+2,y_rel+4);
 
-  // put_string("LV",x_rel+5,y_rel+3);
-  // put_number(party_commanders[selected_cmdr].level,2,x_rel+8,y_rel+3);
+  put_string("M",x_rel+1,y_rel+5);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[3].id,x_rel+2,y_rel+6);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[4].id,x_rel+2,y_rel+7);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[5].id,x_rel+2,y_rel+8);
 
-  // put_string("FORT",x_rel+2,y_rel+7);
-  // put_number(party_commanders[selected_cmdr].fort,3,x_rel+6,y_rel+7);
+  put_string("R",x_rel+1,y_rel+9);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[6].id,x_rel+2,y_rel+10);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[7].id,x_rel+2,y_rel+11);
+  print_unit_fullname(party_commanders[selected_cmdr].bg.units[8].id,x_rel+2,y_rel+12);
 
-  // put_string("TACT",x_rel+2,y_rel+8);
-  // put_number(party_commanders[selected_cmdr].tac,3,x_rel+6,y_rel+8);
+  // put_string("Pow",x_rel+2,y_rel+10);
+  // put_number(99,3,x_rel+6,y_rel+10);
 
-  // put_string("WISD",x_rel+2,y_rel+9);
-  // put_number(party_commanders[selected_cmdr].wis,3,x_rel+6,y_rel+9);
-
-  put_string("Pow",x_rel+2,y_rel+10);
-  put_number(99,3,x_rel+6,y_rel+10);
-
-  put_string("BP",x_rel+2,y_rel+11);
-  put_number(get_commander_battle_points(selected_cmdr),3,x_rel+4,y_rel+11);
-  put_char('/',x_rel+7,y_rel+11);
-  put_number(party_commanders[selected_cmdr].max_bp,2,x_rel+8,y_rel+11);
+  // put_string("BP",x_rel+2,y_rel+11);
+  // put_number(get_commander_battle_points(selected_cmdr),3,x_rel+4,y_rel+11);
+  // put_char('/',x_rel+7,y_rel+11);
+  // put_number(party_commanders[selected_cmdr].max_bp,2,x_rel+8,y_rel+11);
 }
 
 void reset_cursor()
 {
   commander_select_cursor = 0;
   cursor_column = 0;
-}
-
-void display_bg_selector()
-{
-  display_selector(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,28);
 }
 
 void load_cmdr_army_to_npcs(char cmdr_id);

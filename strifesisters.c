@@ -8,6 +8,96 @@ int TimerCnt;
 int MainCnt;
 int SubCnt;
 
+int hits=0;
+int misses=0;
+
+#asm
+GROWTH_DPS = 0
+GROWTH_RANGED_DPS = 1
+GROWTH_MAGIC_DPS = 2
+GROWTH_MAGIC_SUPPORT = 3
+GROWTH_TANK_MELEE = 4
+GROWTH_RESIST_MELEE = 5
+GROWTH_REI = 6
+GROWTH_VIOLET = 7
+GROWTH_KING = 8
+GROWTH_TINKER = 9
+GROWTH_SPEED_DPS = 10
+
+    .data
+    .bank 3
+_nounit:
+    .include "game_data/units/no_unit.asm"
+_soldier:
+    .include "game_data/units/soldier.asm"
+_spearman: 
+    .include "game_data/units/spearman.asm"
+_archer:
+    .include "game_data/units/archer.asm"
+_mage:
+    .include "game_data/units/mage.asm"
+_demon:
+    .include "game_data/units/demon.asm"
+_hound:
+    .include "game_data/units/hound.asm"
+_blob:
+    .include "game_data/units/blob.asm"
+_axeman:
+    .include "game_data/units/axeman.asm"
+_paladin:
+    .include "game_data/units/paladin.asm"
+_monk:
+    .include "game_data/units/monk.asm"
+_sniper:
+    .include "game_data/units/sniper.asm"
+_lancer:
+    .include "game_data/units/lancer.asm"
+_knight:
+    .include "game_data/units/knight.asm"
+_berserker:
+    .include "game_data/units/berserker.asm"
+_stalker:
+    .include "game_data/units/stalker.asm"
+_artillery:
+    .include "game_data/units/artillery.asm"
+_cleric:
+    .include "game_data/units/cleric.asm"
+_priest:
+    .include "game_data/units/priest.asm"
+_black_mage:
+    .include "game_data/units/blackmage.asm"
+_witch:
+    .include "game_data/units/witch.asm"
+_raider:
+    .include "game_data/units/raider.asm"
+_thief:
+    .include "game_data/units/thief.asm"
+_captain:
+    .include "game_data/units/captain.asm"
+_fighter:
+    .include "game_data/units/fighter.asm"
+_brawler:
+    .include "game_data/units/brawler.asm"
+_golem:
+    .include "game_data/units/golem.asm"
+_holder1:
+    .include "game_data/units/holder1.asm"
+_holder2:
+    .include "game_data/units/holder2.asm"
+_rei:
+    .include "game_data/units/rei.asm"
+_violet:
+    .include "game_data/units/violet.asm"
+_king:
+    .include "game_data/units/king.asm"
+    .code
+#endasm
+
+extern const char nounit[];
+// extern const char soldier[];
+// extern const char spearman[];
+// extern const char archer[];
+
 char screen_dimensions = 0;
 // char debug_number = 0;
 // char debug_array[24];
@@ -19,15 +109,20 @@ char screen_dimensions = 0;
 #define SINGLE_HIT 1
 #define HEAL 2
 #define MULTI_ROW 3
-#define MULTI_COL_2 4
+// #define MULTI_COL_2 4
 #define MULTI_COL_3 5
 #define MULTI_ATTACK_AOE 6
-#define MULTI_HEAL_AOE 7
+#define HEAL_ALL 7
 #define ALL_OPPONENTS 8
 #define ALL_ALLIES 9
 #define ALL_UNITS 10
 
+#define FRONT_COLUMN 0
+#define MIDDLE_COLUMN 1
+#define REAR_COLUMN 2
+
 int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
+int g = 0;
 
 #include "map_dimension.h"
 #include "paths.c"
@@ -39,7 +134,6 @@ int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 #include "terrain.c"
 #include "commander.c"
 #include "map.c"
-#include "calling.c"
 
 #define SELECTOR 0
 #define CURSOR 1
@@ -102,15 +196,18 @@ int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 #incspr(rei_walk, "map/sprites/reiwalk.pcx")
 #incpal(rei_walk_pal, "map/sprites/reiwalk.pcx")
 #incpal(rei_grey, "map/sprites/reiwalk.pcx")
+#incpal(rei_battle_pal,"map/sprites/swordy.pcx",2,1)
 
 #incspr(cat_walk, "characters/cat.pcx")
 #incpal(cat_walk_pal, "characters/cat.pcx")
 
 #incspr(violet_walk, "characters/violetwalk.pcx")
 #incpal(violet_walk_pal, "characters/violetwalk.pcx")
+#incpal(violet_battle_pal,"map/sprites/magebattle.pcx",3,3)
 
 #incchr(king_gfx, "characters/king.pcx")
 #incpal(king_pal, "characters/king.pcx")
+#incpal(king_battle_pal,"map/sprites/swordy.pcx",3,1)
 
 #incspr(tinker, "characters/tinker.pcx")
 #incpal(tinker_pal, "characters/tinker.pcx")
@@ -155,6 +252,20 @@ int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 #define BL_0_3 0x20EF
 
 #define MAX_PARTY_UNIT_SIZE 16
+
+
+// const char soldier[] = {
+  // 50, 20, 10, 10, 10, 15, 3, 100, 1, 1, 1, 0, 1, 5, 0, 24, 7, 0
+// };
+
+// #incasmlabel(soldier,"game_data/units/soldier.asm")
+// extern const char soldier[];
+
+// extern int unit_first[];
+
+// const char unit_first[] = {
+//   #asm .db 50, 20, 10, 10, 10, 15, 3, 100, 1, 1, 1, 0, 1, 5, 0, 24, 7, 0 #endasm
+// };
 
 const int health_full[]  = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_3_3 };
 const int health_14_15[] = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_2_3 };
@@ -206,9 +317,7 @@ int ptr[32];
 char script_ram[256];
 int map_no = 0;
 
-
 // extern char *script;
-
 /*
 	MENU STUFF
 */
@@ -223,7 +332,6 @@ unsigned char game_state = PREBATTLE;
 /*
 	BATTLE STUFF
 */
-#define SOLDIER_SIZE 32
 #define BATTLE_MAP_HEIGHT 16
 
 struct Node{
@@ -241,14 +349,14 @@ enum Direction{
 #incspr(hnd,"map/sprites/houndpiece.pcx")
 #incspr(arch0,"map/sprites/archpiece0.pcx")
 #incspr(mag,"map/sprites/mage.pcx",2,2)
-#incspr(blob,"map/sprites/blob.pcx")
+#incspr(blobsmall,"map/sprites/blob.pcx")
 #incspr(bnd,"characters/bandit.pcx")
 #incspr(dark,"map/sprites/dark.pcx")
 #incspr(gol,"characters/golem_small.pcx")
 #incspr(mnk,"characters/monk.pcx")
 #incspr(lan,"characters/lance.pcx")
-#incspr(sniper,"characters/sniper_small.pcx")
-#incspr(knight,"characters/knight.pcx")
+#incspr(snipersmall,"characters/sniper_small.pcx")
+#incspr(knightsmall,"characters/knight.pcx")
 
 #incpal(sldpal, "map/sprites/sldpiece.pcx",0,1)
 #incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
@@ -280,7 +388,7 @@ int xOffset = 0;
 int total_units = 0;
 int n = 0;
 char num_of_buyable_items = 0;
-char g = 0;
+// char g = 0;
 char game_over = 0;
 // char game_loop = 0;
 char cursor_x = 0;
@@ -360,13 +468,12 @@ void main()
 	// {
 	// 	party_units[in] = 0;
 	// }
-  // party_units[0] = SPEAR_UNIT;
+  party_units[0] = SPEAR_UNIT;
 
-	initialize_units();
+	// initialize_units();
 	initialize_commanders();
   
   init_arts();
-  init_stones();
 //	initialize_items();
 
   // add_commander_to_party(name0,REI);
@@ -403,9 +510,12 @@ void heal_commander_bg(char id)
   char i;
   for(i=0; i<9; i++)
   {
-    if(party_commanders[id].bg.units[i].unit->id)
+    if(party_commanders[id].bg.units[i].id)
     {
-      party_commanders[id].bg.units[i].hp = unit_list[party_commanders[id].bg.units[i].unit->id].hp;
+      load_unit_header(party_commanders[id].bg.units[i].id,0);
+      apply_level_to_header(party_commanders[id].bg.units[i].level,0);
+      party_commanders[id].bg.units[i].hp = unit_header[0].hp;
+      // party_commanders[id].bg.units[i].hp = unit_list[party_commanders[id].bg.units[i].unit->id].hp;
     }
   }
 }
@@ -516,59 +626,55 @@ void select_level(char level)
   }
 }
 
+void load_unit_header(int id, char header_no)
+{
+  memcpy(&unit_header[header_no],nounit+(id*sizeof(Unit)),sizeof(Unit));
+}
+
+void apply_level_to_header(char level, char header_no)
+{
+  unsigned char l, offset;
+  l = level - 1;
+  offset = 6 * unit_header[header_no].growth_chart;
+  unit_header[header_no].hp += (STAT_GROWTH_CHART[offset+0] * l);
+  unit_header[header_no].atk += (STAT_GROWTH_CHART[offset+1] * l);
+  unit_header[header_no].def += (STAT_GROWTH_CHART[offset+2] * l);
+  unit_header[header_no].intel += (STAT_GROWTH_CHART[offset+3] * l);
+  unit_header[header_no].res += (STAT_GROWTH_CHART[offset+4] * l);
+  unit_header[header_no].spd += (STAT_GROWTH_CHART[offset+5] * l);
+}
+
 void preload_commanders_map_1()
 {
   party_size = 0;
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
-  // set_commander_stats(0,1,10,8,8);
-  // set_commander_stats(1,1,7,10,8);
 
-	party_commanders[0].bg.units[3].unit = &unit_list[CLERIC_UNIT];
-	party_commanders[0].bg.units[3].hp = unit_list[CLERIC_UNIT].hp;
-  party_commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
-	party_commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[0].bg.units[2].unit = &unit_list[SWORD_UNIT];
-  party_commanders[0].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
+  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
+  load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,1);
+  load_unit_to_cmdr(0,0,REI,1,1);
 
-  party_commanders[1].bg.units[0].unit = &unit_list[SWORD_UNIT];
-	party_commanders[1].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[1].bg.units[1].unit = &unit_list[SWORD_UNIT];
-	party_commanders[1].bg.units[1].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[1].bg.units[4].unit = &unit_list[ARCHER_UNIT];
-	party_commanders[1].bg.units[4].hp = unit_list[ARCHER_UNIT].hp;
-  party_commanders[1].bg.units[3].unit = &unit_list[ARCHER_UNIT];
-	party_commanders[1].bg.units[3].hp = unit_list[ARCHER_UNIT].hp;
+  // party_commanders[0].bg.units[0].exp = 188;
+  // level_up_unit(&party_commanders[0].bg.units[0]);
+
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(1,2,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(1,7,VIOLET,1,1);
 }
 
 void preload_commanders_map_2()
 {
-  // add_cmdr_from_story(KING);
   party_size = 0;
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
   add_commander_to_party(name2,KING);
-  // set_commander_stats(0,3,16,10,12);
-  // set_commander_stats(1,3,11,16,10);
-  // set_commander_stats(2,3,13,14,16);
 
-	party_commanders[0].bg.units[4].unit = &unit_list[CLERIC_UNIT];
-	party_commanders[0].bg.units[4].hp = unit_list[CLERIC_UNIT].hp;
-  party_commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
-	party_commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[0].bg.units[1].unit = &unit_list[SWORD_UNIT];
-	party_commanders[0].bg.units[1].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[0].bg.units[2].unit = &unit_list[SWORD_UNIT];
-  party_commanders[0].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
+  load_unit_to_cmdr(0,4,CLERIC_UNIT,0);
+  load_unit_to_cmdr(0,0,SWORD_UNIT,0);
 
-  party_commanders[1].bg.units[0].unit = &unit_list[SWORD_UNIT];
-	party_commanders[1].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[1].bg.units[2].unit = &unit_list[SWORD_UNIT];
-	party_commanders[1].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[1].bg.units[3].unit = &unit_list[ARCHER_UNIT];
-	party_commanders[1].bg.units[3].hp = unit_list[ARCHER_UNIT].hp;
-  party_commanders[1].bg.units[5].unit = &unit_list[ARCHER_UNIT];
-	party_commanders[1].bg.units[5].hp = unit_list[ARCHER_UNIT].hp;
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0);
+  load_unit_to_cmdr(1,2,SWORD_UNIT,0);
 
   load_unit_to_cmdr(2,3,SPEAR_UNIT);
   load_unit_to_cmdr(2,1,SWORD_UNIT);
@@ -582,29 +688,12 @@ void preload_commanders_map_3()
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
   add_commander_to_party(name2,KING);
-  // set_commander_stats(0,5,22,12,16);
-  // set_commander_stats(1,5,17,22,12);
-  // set_commander_stats(2,5,15,16,22);
 
-	party_commanders[0].bg.units[3].unit = &unit_list[CLERIC_UNIT];
-	party_commanders[0].bg.units[3].hp = unit_list[CLERIC_UNIT].hp;
-  party_commanders[0].bg.units[0].unit = &unit_list[SWORD_UNIT];
-	party_commanders[0].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[0].bg.units[1].unit = &unit_list[SWORD_UNIT];
-	party_commanders[0].bg.units[1].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[0].bg.units[2].unit = &unit_list[SWORD_UNIT];
-  party_commanders[0].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[0].bg.units[5].unit = &unit_list[BLACK_MAGE_UNIT];
-  party_commanders[0].bg.units[5].hp = unit_list[BLACK_MAGE_UNIT].hp;
+  load_unit_to_cmdr(0,4,CLERIC_UNIT,0);
+  load_unit_to_cmdr(0,0,SWORD_UNIT,0);
 
-  party_commanders[1].bg.units[0].unit = &unit_list[SWORD_UNIT];
-	party_commanders[1].bg.units[0].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[1].bg.units[2].unit = &unit_list[SWORD_UNIT];
-	party_commanders[1].bg.units[2].hp = unit_list[SWORD_UNIT].hp;
-  party_commanders[1].bg.units[3].unit = &unit_list[BLACK_MAGE_UNIT];
-	party_commanders[1].bg.units[3].hp = unit_list[BLACK_MAGE_UNIT].hp;
-  party_commanders[1].bg.units[5].unit = &unit_list[ARCHER_UNIT];
-	party_commanders[1].bg.units[5].hp = unit_list[ARCHER_UNIT].hp;
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0);
+  load_unit_to_cmdr(1,2,SWORD_UNIT,0);
 
   load_unit_to_cmdr(2,3,LANCER_UNIT);
   load_unit_to_cmdr(2,1,SWORD_UNIT);
@@ -624,25 +713,25 @@ void preload_default()
   // set_commander_stats(2,5,15,16,22);
   // set_commander_stats(3,5,15,15,15);
 
-  load_unit_to_cmdr(0,0,SWORD_UNIT);
-  load_unit_to_cmdr(0,1,SWORD_UNIT);
-  load_unit_to_cmdr(0,2,SWORD_UNIT);
-  load_unit_to_cmdr(0,4,CLERIC_UNIT);
+  load_unit_to_cmdr(0,0,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(0,1,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(0,4,CLERIC_UNIT,0,1);
   
-  load_unit_to_cmdr(1,0,SWORD_UNIT);
-  load_unit_to_cmdr(1,1,SWORD_UNIT);
-  load_unit_to_cmdr(1,2,SWORD_UNIT);
-  load_unit_to_cmdr(1,4,MAGE_UNIT);
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(1,1,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(1,2,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(1,4,MAGE_UNIT,1,1);
 
-  load_unit_to_cmdr(2,0,SWORD_UNIT);
-  load_unit_to_cmdr(2,2,SWORD_UNIT);
-  load_unit_to_cmdr(2,3,ARCHER_UNIT);
-  load_unit_to_cmdr(2,5,ARCHER_UNIT);
+  load_unit_to_cmdr(2,0,SWORD_UNIT,1,1);
+  load_unit_to_cmdr(2,2,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(2,3,ARCHER_UNIT,0,1);
+  load_unit_to_cmdr(2,5,ARCHER_UNIT,0,1);
 
-  load_unit_to_cmdr(3,0,SWORD_UNIT);
-  load_unit_to_cmdr(3,2,SWORD_UNIT);
-  load_unit_to_cmdr(3,3,ARCHER_UNIT);
-  load_unit_to_cmdr(3,5,ARCHER_UNIT);
+  load_unit_to_cmdr(3,0,SWORD_UNIT,1,1);
+  load_unit_to_cmdr(3,2,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(3,3,ARCHER_UNIT,0,1);
+  load_unit_to_cmdr(3,5,ARCHER_UNIT,0,1);
 }
 
 void display_intro()
@@ -650,7 +739,7 @@ void display_intro()
 	// load_background(build_screen,build_pal,build_bat,32,28);
 	cls();
 	disp_on();
-	put_string("Strife Sisters v0.8.0",6,13);
+	put_string("Strife Sisters v0.9.4",6,13);
 	// wait_for_I_input();
 	// sync(60*10);
 
@@ -799,11 +888,20 @@ void print_unit_type(char id, int x, int y)
       put_string("BRK",x,y);
       break;
 
+    case REI:
+      put_string("REI",x,y);
+      break;
+
+    case VIOLET:
+      put_string("VIO",x,y);
+      break;
+
+    case KING:
+      put_string("KNG",x,y);
+      break;
+
 		default:
       put_string("---",x,y);
-//		  put_string("err ",x,y);
-//      put_number(id,3,x+4,y);
-      // put_string(commanders[id-16].name,x,y);
       break;
 	}
 }
@@ -812,48 +910,51 @@ void print_unit_fullname(char unit_id, int x, int y)
 {
   switch(unit_id)
   {
+    case NO_UNIT:
+      put_string(" ----  ",x,y);
+      break; 
     case SWORD_UNIT:
-      put_string("Soldier ",x,y);
+      put_string("Soldier",x,y);
       break;
 
     case DEMON_UNIT:
-      put_string("Demon   ",x,y);
+      put_string("Demon  ",x,y);
       break;
 
     case SPEAR_UNIT:
-      put_string("Pikeman ",x,y);
+      put_string("Pikeman",x,y);
       break;
 
     case STALKER_UNIT:
-      put_string("Stalker ",x,y);
+      put_string("Stalker",x,y);
       break;
 
     case ARCHER_UNIT:
-      put_string("Archer  ",x,y);
+      put_string("Archer ",x,y);
       break;
 
     case SNIPER_UNIT:
-      put_string("Sniper  ",x,y);
+      put_string("Sniper ",x,y);
       break;
 
     case CLERIC_UNIT:
-      put_string("Cleric  ",x,y);
+      put_string("Cleric ",x,y);
       break;
 
     case MAGE_UNIT:
-      put_string("Mage    ",x,y);
+      put_string("Mage   ",x,y);
       break;
 
     case WITCH_UNIT:
-      put_string("Witch   ",x,y);
+      put_string("Witch  ",x,y);
       break;
 
     case PRIEST_UNIT:
-      put_string("Priest  ",x,y);
+      put_string("Priest ",x,y);
       break;
 
     case BLACK_MAGE_UNIT:
-      put_string("Cultist ",x,y);
+      put_string("Cultist",x,y);
       break;
 
     case HOUND_UNIT:
@@ -861,35 +962,35 @@ void print_unit_fullname(char unit_id, int x, int y)
       break;
 
     case BLOB_UNIT:
-      put_string("Blob    ",x,y);
+      put_string("Blob   ",x,y);
       break;
 
     case AXE_UNIT:
-      put_string("Axeman  ",x,y);
+      put_string("Axeman ",x,y);
       break;
 
     case KNIGHT_UNIT:
-      put_string("Knight  ",x,y);
+      put_string("Knight ",x,y);
       break;
 
     case PALADIN_UNIT:
-      put_string("Paladin ",x,y);
+      put_string("Paladin",x,y);
       break;
 
     case MONK_UNIT:
-      put_string("Monk    ",x,y);
+      put_string("Monk   ",x,y);
       break;
 
     case FIGHTER_UNIT:
-      put_string("Fighter ",x,y);
+      put_string("Fighter",x,y);
       break;
 
     case BRAWLER_UNIT:
-      put_string("Brawler ",x,y);
+      put_string("Brawler",x,y);
       break;
 
     case LANCER_UNIT:
-      put_string("Lancer  ",x,y);
+      put_string("Lancer ",x,y);
       break;
 
     case BERSERKER_UNIT:
@@ -897,7 +998,23 @@ void print_unit_fullname(char unit_id, int x, int y)
       break;
 
     case RAIDER_UNIT:
-      put_string("Raider  ",x,y);
+      put_string("Raider ",x,y);
+      break;
+
+    case REI:
+      put_string("Rei    ",x,y);
+      break;
+
+    case VIOLET:
+      put_string("Violet ",x,y);
+      break;
+
+    case KING:
+      put_string("King   ",x,y);
+      break;
+
+    case TINKER:
+      put_string("Tinker ",x,y);
       break;
 
     default:
@@ -1031,7 +1148,8 @@ void draw_32x32_sprite(char type, int x, int y)
 
 void print_unit_attack_icon(char unit_no, int x, int y)
 {
-	switch(unit_list[unit_no].a_type)
+  load_unit_header(unit_no,0);
+	switch(unit_header[0].a_type)
 	{
 		case NORMAL:
       put_char('[',x,y);//sword
@@ -1216,17 +1334,12 @@ initialize_commanders()
 		cmdr->max_bp = 8;
 		cmdr->sprite_type = SWORD_UNIT;
 		cmdr->name = name20;
-    // cmdr->level = 1;
-    // cmdr->exp = 1;
-    // cmdr->tac = 10;//range(11,20);//11;
-    // cmdr->wis = 10;//range(10,20);//17;
-    // cmdr->fort = 10;//range(11,20);//14;
 		for(j=0; j<9; j++)
 		{
-			cmdr->bg.units[j].unit = &unit_list[NO_UNIT];
+			cmdr->bg.units[j].id = 0;//&unit_list[NO_UNIT];
       cmdr->bg.units[j].hp = 0;
     }
-    cmdr->bg.calling_stone = 0;
+    // cmdr->bg.calling_stone = 0;
 	}
 }
 
@@ -1589,9 +1702,9 @@ void display_window(int x, int y, char row_x, char row_y, int vaddr)
 {
   switch(row_x)
   {
-    case 8:
-      window_8(vaddr,row_x,row_y);
-      break;
+    // case 8:
+    //   window_8(vaddr,row_x,row_y);
+    //   break;
 
     case 10:
       window_10(vaddr,row_x,row_y);
@@ -1862,53 +1975,53 @@ char run_sim(char cmdr_one, char cmdr_two, int *attacker, int *target, char atta
 
 void display_simulation_results(char type_one, char type_two)
 {
-  display_window_rel(0,6,32,22);
-  put_string("SIMULATION RESULTS",6,7);
-  print_unit_fullname(type_one,5,9);
-  put_string("vs",14,9);
-  print_unit_fullname(type_two,18,9);
-  set_font_pal(9);
-  put_string("POW",6,10);
-  put_string("POW",19,10);
-  put_number(unit_list[type_one].pow,3,9,10);
-  put_number(unit_list[type_two].pow,3,22,10);
-  put_string("rds",28,10);
+  // display_window_rel(0,6,32,22);
+  // put_string("SIMULATION RESULTS",6,7);
+  // print_unit_fullname(type_one,5,9);
+  // put_string("vs",14,9);
+  // print_unit_fullname(type_two,18,9);
+  // set_font_pal(9);
+  // put_string("POW",6,10);
+  // put_string("POW",19,10);
+  // put_number(unit_list[type_one].pow,3,9,10);
+  // put_number(unit_list[type_two].pow,3,22,10);
+  // put_string("rds",28,10);
 
-  set_font_pal(10);
+  // set_font_pal(10);
 
-  put_number(one_pow_9x9_attacker,3,7,11);
-  put_string("9x9",13,11);
-  put_number(two_pow_9x9_target,3,18,11);
-  put_number(round_one,3,28,11);
+  // put_number(one_pow_9x9_attacker,3,7,11);
+  // put_string("9x9",13,11);
+  // put_number(two_pow_9x9_target,3,18,11);
+  // put_number(round_one,3,28,11);
 
-  put_number(one_pow_6x6_attacker,3,7,12);
-  put_string("6x6",13,12);
-  put_number(two_pow_6x6_target,3,18,12);
-  put_number(round_two,3,28,12);
+  // put_number(one_pow_6x6_attacker,3,7,12);
+  // put_string("6x6",13,12);
+  // put_number(two_pow_6x6_target,3,18,12);
+  // put_number(round_two,3,28,12);
 
-  put_number(one_pow_3x3_attacker,3,7,13);
-  put_string("3x3",13,13);
-  put_number(two_pow_3x3_target,3,18,13);
-  put_number(round_three,3,28,13);
+  // put_number(one_pow_3x3_attacker,3,7,13);
+  // put_string("3x3",13,13);
+  // put_number(two_pow_3x3_target,3,18,13);
+  // put_number(round_three,3,28,13);
 
-  print_unit_fullname(type_two,5,15);
-  put_string("vs",14,15);
-  print_unit_fullname(type_one,18,15);
+  // print_unit_fullname(type_two,5,15);
+  // put_string("vs",14,15);
+  // print_unit_fullname(type_one,18,15);
 
-  put_number(one_pow_3x3_target,3,7,17);
-  put_string("3x3",13,17);
-  put_number(two_pow_3x3_attacker,3,18,17);
-  put_number(round_four,3,28,17);
+  // put_number(one_pow_3x3_target,3,7,17);
+  // put_string("3x3",13,17);
+  // put_number(two_pow_3x3_attacker,3,18,17);
+  // put_number(round_four,3,28,17);
 
-  put_number(one_pow_6x6_target,3,7,18);
-  put_string("6x6",13,18);
-  put_number(two_pow_6x6_attacker,3,18,18);
-  put_number(round_five,3,28,18);
+  // put_number(one_pow_6x6_target,3,7,18);
+  // put_string("6x6",13,18);
+  // put_number(two_pow_6x6_attacker,3,18,18);
+  // put_number(round_five,3,28,18);
 
-  put_number(one_pow_9x9_target,3,7,19);
-  put_string("9x9",13,19);
-  put_number(two_pow_9x9_attacker,3,18,19);
-  put_number(round_six,3,28,19);
+  // put_number(one_pow_9x9_target,3,7,19);
+  // put_string("9x9",13,19);
+  // put_number(two_pow_9x9_attacker,3,18,19);
+  // put_number(round_six,3,28,19);
 }
 
 void add_units_to_cmdr(char cmdr_id, char unit_type, char count)
@@ -1916,7 +2029,7 @@ void add_units_to_cmdr(char cmdr_id, char unit_type, char count)
   char i;
   for(i=0; i<count; i++)
   {
-    load_unit_to_cmdr(cmdr_id,i,unit_type);
+    load_unit_to_cmdr(cmdr_id,i,unit_type,0);
   }
 }
 
@@ -2014,9 +2127,29 @@ void list_commander_army(Battlegroup *bg, char x, char y)
     for(j=0; j<3; j++)
     {
       // print_unit_info(&bg->units[(i*3)+j].unit,x+(i*5)+(s_x/8),y+(j*4)+(s_y/8));
-      print_unit_info(&bg->units[(j*3)+i].unit,x+(i*5)+(s_x/8),y+(j*4)+(s_y/8));
+      print_unit_info(&bg->units[(j*3)+i],x+(i*5)+(s_x/8),y+(j*4)+(s_y/8));
     }
   }
+}
+
+int get_iso_x(int iso_x, int iso_y, int sprite_x, int sprite_y)
+{
+  int x_start, x; 
+  
+  x_start = (iso_x * 16);
+
+  x = (sprite_x * 16) + (sprite_y * 16);
+  return x_start+x;
+}
+
+int get_iso_y(int iso_x, int iso_y, int sprite_x, int sprite_y)
+{
+  int y_start, y; 
+  
+  y_start = (iso_y * 8);
+
+  y = (sprite_y * 8) - (sprite_x * 8);
+  return y_start+y;
 }
 
 void list_party_units(char x, char y)
@@ -2058,11 +2191,22 @@ int calc_percentage(int num, int denom)
   return p / 100;
 }
 
-void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type)
+void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr, char level)
 {
-  party_commanders[cmdr_id].bg.units[unit_pos] = &unit_list[unit_type];
-  party_commanders[cmdr_id].bg.units[unit_pos].hp = unit_list[unit_type].hp;
+  load_unit_header(unit_type,0);
+  apply_level_to_header(level,0);
+  party_commanders[cmdr_id].bg.units[unit_pos].id = unit_type;//&unit_list[unit_type];
+  party_commanders[cmdr_id].bg.units[unit_pos].hp = unit_header[0].hp;//unit_list[unit_type].hp;
+  party_commanders[cmdr_id].bg.units[unit_pos].sta = unit_header[0].sta;//unit_list[unit_type].sta;
+  party_commanders[cmdr_id].bg.units[unit_pos].exp = (level > 1)? next_level(level-1) : 0;
+  party_commanders[cmdr_id].bg.units[unit_pos].level = level;
 }
+
+// void load_and_level_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr, char level)
+// {
+//   load_unit_to_cmdr(cmdr_id,unit_pos,unit_type,is_cmdr);
+//   level_unit_to(&party_commanders[cmdr_id].bg.units[unit_pos],level);
+// }
 
 void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
 {
@@ -2070,138 +2214,160 @@ void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
   {
     case 22://double hounds 
       party_commanders[cmdr_id].sprite_type = HOUND_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,HOUND_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,HOUND_UNIT);
+      load_unit_to_cmdr(cmdr_id,0,HOUND_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,2,HOUND_UNIT,0,map_level_table[level]);
       break;
 
     case 23://hounds
       party_commanders[cmdr_id].sprite_type = HOUND_UNIT;
-      load_unit_to_cmdr(cmdr_id,1,HOUND_UNIT);
-      // set_commander_stats(cmdr_id,map_level_table[level],15,15,15);
-      // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,1,HOUND_UNIT,0,map_level_table[level]);
       break;
 
     case 24://blobs
       party_commanders[cmdr_id].sprite_type = BLOB_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],10,10,10);
+      load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,1,BLOB_UNIT,0,map_level_table[level]);
       break;
 
     case 25://raider
       party_commanders[cmdr_id].sprite_type = RAIDER_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,RAIDER_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,RAIDER_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],17,11,14);
+      load_unit_to_cmdr(cmdr_id,0,RAIDER_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,2,RAIDER_UNIT,0,map_level_table[level]);
       break;
 
     case 26://swords
       party_commanders[cmdr_id].sprite_type = SWORD_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,SWORD_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,SWORD_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_TANK_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],20,15,20);
+      load_unit_to_cmdr(cmdr_id,0,SWORD_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,2,SWORD_UNIT,0,map_level_table[level]);
       break;
 
     case 27://archer
       party_commanders[cmdr_id].sprite_type = ARCHER_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,ARCHER_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,ARCHER_UNIT);
+      load_unit_to_cmdr(cmdr_id,0,ARCHER_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,2,ARCHER_UNIT,0,map_level_table[level]);
       // level_enemy_commander(cmdr_id,GENERIC_RANGED_STATS,map_level_table[level]);
       // set_commander_stats(cmdr_id,map_level_table[level],22,14,17);
       break;
 
     case 28://spear
       party_commanders[cmdr_id].sprite_type = SPEAR_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,SPEAR_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,SPEAR_UNIT);
+      load_unit_to_cmdr(cmdr_id,0,SPEAR_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,2,SPEAR_UNIT,0,map_level_table[level]);
       // set_commander_stats(cmdr_id,map_level_table[level],21,13,19);
       // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
       break;
     
     case 29://golem
       party_commanders[cmdr_id].sprite_type = GOLEM_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,GOLEM_UNIT);
-      load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT);
-      load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_TANK_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],21,13,19);
+      load_unit_to_cmdr(cmdr_id,4,GOLEM_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT,0,map_level_table[level]);
+      load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT,0,map_level_table[level]);
       break;
 
     case 30://monk
       party_commanders[cmdr_id].sprite_type = MONK_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,MONK_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],21,13,19);
+      load_unit_to_cmdr(cmdr_id,4,MONK_UNIT,0,map_level_table[level]);
       break;
 
     case 31://lancer
       party_commanders[cmdr_id].sprite_type = LANCER_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,LANCER_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],21,13,19);
+      load_unit_to_cmdr(cmdr_id,4,LANCER_UNIT,0,map_level_table[level]);
       break;
 
     case 32://sniper
       party_commanders[cmdr_id].sprite_type = SNIPER_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,SNIPER_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_RANGED_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],21,13,19);
+      load_unit_to_cmdr(cmdr_id,4,SNIPER_UNIT,0,map_level_table[level]);
       break;
 
     case 33://knight
       party_commanders[cmdr_id].sprite_type = KNIGHT_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,KNIGHT_UNIT);
-      // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],21,13,19);
-      break; 
+      load_unit_to_cmdr(cmdr_id,4,KNIGHT_UNIT,0,map_level_table[level]);
+      break;
   }
 }
 
 void swap_commander_units(char cmdr_id, char first, char second)
 {
-  int tmp_hp;
-  char tmp_meter;
-  Unit *tmp_unit;
+  unsigned char tmp_hp, tmp_sta;
+  char tmp_id;
+  int tmp_exp;
+  // Unit *tmp_unit;
 
   tmp_hp = party_commanders[cmdr_id].bg.units[first].hp;
-  tmp_unit = party_commanders[cmdr_id].bg.units[first].unit;
+  tmp_id = party_commanders[cmdr_id].bg.units[first].id;
+  tmp_sta = party_commanders[cmdr_id].bg.units[first].sta;
+  tmp_exp = party_commanders[cmdr_id].bg.units[first].exp;
 
   party_commanders[cmdr_id].bg.units[first].hp = party_commanders[cmdr_id].bg.units[second].hp;
-  party_commanders[cmdr_id].bg.units[first].unit = party_commanders[cmdr_id].bg.units[second].unit;
+  party_commanders[cmdr_id].bg.units[first].id = party_commanders[cmdr_id].bg.units[second].id;
+  party_commanders[cmdr_id].bg.units[first].sta = party_commanders[cmdr_id].bg.units[second].sta;
+  party_commanders[cmdr_id].bg.units[first].exp = party_commanders[cmdr_id].bg.units[second].exp;
 
   party_commanders[cmdr_id].bg.units[second].hp = tmp_hp;
-  party_commanders[cmdr_id].bg.units[second].unit = tmp_unit;
+  party_commanders[cmdr_id].bg.units[second].id = tmp_id;
+  party_commanders[cmdr_id].bg.units[second].sta = tmp_sta;
+  party_commanders[cmdr_id].bg.units[second].exp = tmp_exp;
 }
 
 void swap_convoy_units(char cmdr_id, char unit_id, char convoy_id)
 {
   char tmp_id;
 
-  tmp_id = party_commanders[cmdr_id].bg.units[unit_id].unit->id;
+  load_unit_header(party_commanders[cmdr_id].bg.units[unit_id].id,0);
+  load_unit_header(party_units[convoy_id],1);
+  tmp_id = party_commanders[cmdr_id].bg.units[unit_id].id;
 
-  party_commanders[cmdr_id].bg.units[unit_id].hp = unit_list[party_units[convoy_id]].hp;
-  party_commanders[cmdr_id].bg.units[unit_id].unit = &unit_list[party_units[convoy_id]];
+  party_commanders[cmdr_id].bg.units[unit_id].hp = unit_header[1].hp;//unit_list[party_units[convoy_id]].hp;
+  party_commanders[cmdr_id].bg.units[unit_id].id = unit_header[1].id;//&unit_list[party_units[convoy_id]];
 
   party_units[convoy_id] = tmp_id;
 }
 
 void put_green_square(char x, char y)
 {
-  int p[3];
-  int vaddr;
 
+  // vaddr = vram_addr(x,y);
+
+  // vreg(0x01,vaddr);
+  // tiledata = peekw(0x02) & 0xFFF;
+
+  // vreg(0x00,vaddr);
+  // vreg(0x02,tiledata+pal);
+  // vreg(0x02,tiledata+pal+1);
+  int addr;
+  int p[12];
+  int vaddr;
+  char i, j;
+
+  addr = 0xF5B0;
   vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
 
-  p[0] = 0x4F4;
-  p[1] = 0x4F4;
-  p[2] = 0x4F4;
+  for(i=0; i<8; i++)
+  {
+    // p[i] = addr;
+    for(j=0; j<12; j++, addr++)
+    {
+      p[j] = addr;
+    }
+    load_vram(vaddr+(i*64),p,12);
+  }
+}
 
-  load_vram(vaddr,p,3);
-  load_vram(vaddr+64,p,3);
-  load_vram(vaddr+128,p,3);
+void read_tile_data(int x, int y)
+{
+  // int vaddr, tiledata;
+  // int tiledata1, tiledata2;
+  // vaddr = vram_addr(x,y+36);
+  // vreg(0x01,vaddr);
+  // tiledata1 = peek(0x02);
+  // tiledata2 = peek(0x03); 
+  // tiledata = (tiledata2<<8) + tiledata1;
+  // put_hex(vaddr,6,s_x_relative,s_y_relative);
+
+  // vreg(0x00,vaddr);
+  // vreg(0x02,tiledata&0xFFF);
 }
 
 void put_highlight_square(char position, char x, char y)
@@ -2247,10 +2413,11 @@ int calculate_power(char cmdr_id)
   
 	for(i=0; i<9; i++)
   {
-    if(party_commanders[cmdr_id].bg.units[i].unit->id)
+    if(party_commanders[cmdr_id].bg.units[i].id)
     {
-      power += party_commanders[cmdr_id].bg.units[i].unit->pow;
-      hp_max += party_commanders[cmdr_id].bg.units[i].unit->hp;
+      load_unit_header(party_commanders[cmdr_id].bg.units[i].id,0);
+      power += unit_header[0].pow;//party_commanders[cmdr_id].bg.units[i].unit->pow;
+      hp_max += unit_header[0].hp;//party_commanders[cmdr_id].bg.units[i].unit->hp;
       hp_total += party_commanders[cmdr_id].bg.units[i].hp;
     }
   }
@@ -2268,9 +2435,9 @@ int roundUp(int num, int div)
 
   remainder = num % div; //1
   if (remainder == 0)
-      return whole;
+    return whole;
 	else
-			return whole+1;
+		return whole+1;
 }
 
 int next_level(int level)

@@ -23,16 +23,22 @@
 #define STATUS_BLOWBACK 4
 #define STATE_ACID 5
 
+#define COMMANDER_PALETTE_1 30
+#define COMMANDER_PALETTE_2 31
+
 typedef struct {
   char ent_id, active, frame, pal, state, target_team, pos, attacks, 
-       target, meter, status, a_bonus, d_bonus;
+       target, meter, column, a_bonus, d_bonus;
   Unit_Entity *unit;
 }BattleUnit;
+
+// const char big_palettes[] = {17,18,};
 
 const char top_row_attack_chart[9]    = { 1, 1, 3, 2, 4, 5, 4, 5, 5};
 const char middle_row_attack_chart[9] = { 1, 1, 1, 2, 3, 2, 4, 5, 4};
 const char bottom_row_attack_chart[9] = { 3, 1, 1, 5, 4, 2, 5, 4, 4};
 
+char cmdr_count = 30;
 // char attacker_art_list[MAX_ARMY_SIZE];
 // char target_art_list[MAX_ARMY_SIZE];
 
@@ -45,7 +51,7 @@ int a_def_bonus, a_atk_bonus, t_def_bonus, t_atk_bonus;
 char a_terrain, t_terrain, attack_range, 
      battle_clock, animating, attacker, stun_count;
 
-char team_one_judgement=0, team_two_judgement=0, clear_eyes_called=0, sea_legs_art=0;
+char clear_eyes_called=0, sea_legs_art=0;
 char team_one_tracked=0, team_two_tracked=0, team_one_tracking=0, team_two_tracking=0;
 char art_queued = 0, art_unit_id = 0, art_queue_id = 0;
 
@@ -99,122 +105,128 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].meter = 0;
   battleunits[index].a_bonus = 0;
   battleunits[index].d_bonus = 0;
+  battleunits[index].column = position/3;
+
+  load_unit_header(ue->id,0);
   
-  if(entities[entity_id].bg->units[position]->unit.rng < attack_range)
+  if(unit_header[0].rng < attack_range)
   {
     battleunits[index].attacks = 0;
   }
 
-  switch(ue->unit->id)
+  switch(ue->id)
   {
     case BLOB_UNIT:
       load_vram(idle_vrams[index],blobbattle,0x100);
-      battleunits[index].pal = 22;
+      battleunits[index].pal = 19;
       break;
 
+    case REI:
     case SWORD_UNIT:
       load_vram(idle_vrams[index],attack,0x100);
       battleunits[index].pal = 17;
       break;
 
+    case KING:
     case SPEAR_UNIT:
       load_vram(idle_vrams[index],attack2,0x100);
-      battleunits[index].pal = 18;
+      battleunits[index].pal = 17;
       break;
 
     case STALKER_UNIT:
       load_vram(idle_vrams[index],stalkerbtl,0x100);
-      battleunits[index].pal = 27;
+      battleunits[index].pal = 21;
       break;
 
     case ARCHER_UNIT:
       load_vram(idle_vrams[index],musketbtl,0x100);
-      battleunits[index].pal = 19;
+      battleunits[index].pal = 17;
       break;
     
     case SNIPER_UNIT:
       load_vram(idle_vrams[index],sniperbtl,0x100);
-      battleunits[index].pal = 28;
+      battleunits[index].pal = 23;
       break;
 
     case BERSERKER_UNIT:
       load_vram(idle_vrams[index],berserkerbtl,0x100);
-      battleunits[index].pal = 28;
+      battleunits[index].pal = 23;
       break;
 
     case DEMON_UNIT:
       load_vram(idle_vrams[index],demonbtl,0x100);
-      // battleunits[index].pal = 20;
+      battleunits[index].pal = 25;
       break;
 
     case HOUND_UNIT:
       load_vram(idle_vrams[index],houndbtl,0x100);
-      battleunits[index].pal = 21;
+      battleunits[index].pal = 25;
       break;
 
     case AXE_UNIT:
       load_vram(idle_vrams[index],axebtl,0x100);
-      // battleunits[index].pal = 22;
+      battleunits[index].pal = 17;
       break;
 
     case RAIDER_UNIT:
       load_vram(idle_vrams[index],raiderbtl,0x100);
-      battleunits[index].pal = 25;
+      battleunits[index].pal = 17;
       break;
 
+    case VIOLET:
     case CLERIC_UNIT:
       load_vram(idle_vrams[index],magebtl,0x100);
-      battleunits[index].pal = 24;
+      battleunits[index].pal = 27;
       break;
 
     case MAGE_UNIT:
       load_vram(idle_vrams[index],magebtl,0x100);
-      battleunits[index].pal = 23;
+      battleunits[index].pal = 27;
       break;
 
     case WITCH_UNIT:
       load_vram(idle_vrams[index],witchbtl,0x100);
-      battleunits[index].pal = 29;
+      battleunits[index].pal = 22;
       break;
 
     case PRIEST_UNIT:
       load_vram(idle_vrams[index],priestbtl,0x100);
-      battleunits[index].pal = 29;
+      battleunits[index].pal = 22;
       break;
 
     case BLACK_MAGE_UNIT:
       load_vram(idle_vrams[index],magebtl,0x100);
-      battleunits[index].pal = 26;
+      battleunits[index].pal = 24;
       break;
 
     case PALADIN_UNIT:
       load_vram(idle_vrams[index],paladinbtl,0x100);
-      battleunits[index].pal = 28;
+      battleunits[index].pal = 17;
       break;
 
     case KNIGHT_UNIT:
       load_vram(idle_vrams[index],knightbtl,0x100);
-      battleunits[index].pal = 18;
+      battleunits[index].pal = 17;
       break;
 
     case LANCER_UNIT:
       load_vram(idle_vrams[index],lancerbtl,0x100);
-      battleunits[index].pal = 18;
+      battleunits[index].pal = 17;
       break;
 
     case MONK_UNIT:
       load_vram(idle_vrams[index],monkbtl,0x100);
-      battleunits[index].pal = 24;
+      battleunits[index].pal = 17;
       break;
 
     case FIGHTER_UNIT:
       load_vram(idle_vrams[index],fighterbtl,0x100);
-      battleunits[index].pal = 24;
+      battleunits[index].pal = 17;
       break;
 
     case BRAWLER_UNIT:
       load_vram(idle_vrams[index],brawlerbtl,0x100);
-      battleunits[index].pal = 24;
+      battleunits[index].pal = 17;
       break;
 
     case GOLEM_UNIT:
@@ -236,6 +248,11 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   }
 }
 
+void bid_to_unit_header(char b_id, char header_no)
+{
+  load_unit_header(battleunits[b_id].unit->id,header_no);
+}
+
 void transfer_units_to_attack_vram(char type)
 {
   switch(type)
@@ -245,10 +262,12 @@ void transfer_units_to_attack_vram(char type)
       load_vram(attack_vrams[0],blobbattle+0x300,0x500);
       break;
 
+    case REI:
     case SWORD_UNIT:
       load_vram(attack_vrams[0],attack+0x300,0x500);
       break;
 
+    case KING:
     case SPEAR_UNIT:
       load_vram(attack_vrams[0],attack2+0x300,0x500);
       break;
@@ -297,6 +316,7 @@ void transfer_units_to_attack_vram(char type)
       load_vram(attack_vrams[0],priestbtl+0x300,0x500);
       break;
 
+    case VIOLET:
     case BLACK_MAGE_UNIT:
     case CLERIC_UNIT:
     case MAGE_UNIT:
@@ -343,10 +363,12 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],blobbattle+0x900,0x100);
       break;
 
+    case REI:
     case SWORD_UNIT:
       load_vram(stun_vrams[index],attack+0x900,0x100);
       break;
 
+    case KING:
     case SPEAR_UNIT:
       load_vram(stun_vrams[index],attack2+0x900,0x100);
       break;
@@ -391,6 +413,7 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],priestbtl+0x900,0x100);
       break;
 
+    case VIOLET:
     case BLACK_MAGE_UNIT:
     case CLERIC_UNIT:
     case MAGE_UNIT:
@@ -402,10 +425,12 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],blobbattle+0x900,0x100);
       break;
 
+    case REI:
     case SWORD_UNIT:
       load_vram(stun_vrams[index],attack+0x900,0x100);
       break;
 
+    case KING:
     case SPEAR_UNIT:
       load_vram(stun_vrams[index],attack2+0x900,0x100);
       break;
@@ -434,6 +459,7 @@ void transfer_units_to_stun_vram(char type, char index)
       load_vram(stun_vrams[index],axebtl+0x900,0x100);
       break;
 
+    case VIOLET:
     case BLACK_MAGE_UNIT:
     case CLERIC_UNIT:
     case MAGE_UNIT:
@@ -592,6 +618,75 @@ char get_first_target()
   return -1;
 }
 
+void determine_targets(char b_id)
+{
+  // switch(arts[battleunits[b_id].unit->unit->attacks[battleunits[b_id].column]].target)
+  switch(arts[unit_header[0].attacks[battleunits[b_id].column]].target)
+  {
+    case SINGLE_HIT:
+      // set_unit_attack(b_id);
+      target_single_unit(b_id);
+      break;
+    case MULTI_ROW:
+      // set_unit_attack(b_id);
+      target_multi_row(b_id);
+      break;
+    case MULTI_COL_3:
+      // set_unit_attack(b_id);
+      target_multi_col(b_id);
+      break;
+    case MULTI_ATTACK_AOE:
+      // set_unit_attack(b_id);
+      attack_multi_aoe(b_id);
+      break;
+    case HEAL:
+      // set_unit_heal(b_id);
+      heal_single_unit(b_id);
+      break;
+    case HEAL_ALL:
+      // put_number(3,3,0,0);
+      // wait_for_I_input();
+      // set_unit_heal(b_id);
+      target_allies(b_id);
+      // heal_all(b_id);
+      break;
+    case ALL_OPPONENTS:
+      // set_unit_attack(b_id);
+      target_opponents(b_id);
+      break;
+    case ALL_ALLIES:
+      // set_unit_attack(b_id);
+      target_allies(b_id);
+      break;
+    default:
+      // set_unit_attack(b_id);
+      target_single_unit(b_id);
+      break;
+  }
+}
+
+void determine_action_state(char b_id)
+{
+  switch(arts[unit_header[0].attacks[battleunits[b_id].column]].move_type)
+  {
+    case MOVE_PHYSICAL_ATTACK:
+    set_unit_attack(b_id);
+    break;
+
+    case MOVE_ART_ATTACK:
+    // load_animations_to_vram(battleunits[b_id].unit->unit->id);
+    load_animations_to_vram(battleunits[b_id].unit->id);
+    set_unit_meter(b_id);
+    battleunits[b_id].meter = 0;
+    animating++;
+    break;
+
+    case MOVE_HEAL:
+    set_unit_heal(b_id);
+    break;
+  }
+}
+
 void determine_action(char b_id, char target_type)
 {
   switch(target_type)
@@ -604,13 +699,9 @@ void determine_action(char b_id, char target_type)
       set_unit_attack(b_id);
       target_multi_row(b_id);
       break;
-    case MULTI_COL_2:
-      set_unit_attack(b_id);
-      target_multi_col(b_id,2);
-      break;
     case MULTI_COL_3:
       set_unit_attack(b_id);
-      target_multi_col(b_id,3);
+      target_multi_col(b_id);
       break;
     case MULTI_ATTACK_AOE:
       set_unit_attack(b_id);
@@ -620,9 +711,10 @@ void determine_action(char b_id, char target_type)
       set_unit_heal(b_id);
       heal_single_unit(b_id);
       break;
-    case MULTI_HEAL_AOE:
+    case HEAL_ALL:
       set_unit_heal(b_id);
-      heal_multi_aoe(b_id);
+      target_allies(b_id);
+      // heal_all(b_id);
       break;
     case ALL_OPPONENTS:
       set_unit_attack(b_id);
@@ -640,14 +732,14 @@ void determine_action(char b_id, char target_type)
   }
 }
 
-void heal_multi_aoe(char b_id)
-{
-  char target;
-  target = find_lowest_hp(b_id,battleunits[b_id].ent_id);
+// void heal_all(char b_id)
+// {
+//   char target;
+//   target = find_lowest_hp(b_id,battleunits[b_id].ent_id);
 
-  target_aoe(target,battleunits[b_id].ent_id,IDLE,1,0);
-  load_animations_to_vram(battleunits[b_id].unit->unit->id);
-}
+//   target_aoe(target,battleunits[b_id].ent_id,IDLE,1,0);
+//   load_animations_to_vram(battleunits[b_id].unit->unit->id);
+// }
 
 void heal_single_unit(char b_id)
 {
@@ -656,28 +748,27 @@ void heal_single_unit(char b_id)
 
   // set_unit_heal(b_id);
   battleunits[target].target = 1;
-  load_animations_to_vram(battleunits[b_id].unit->unit->id);
+  load_animations_to_vram(battleunits[b_id].unit->id);
 }
 
 void attack_multi_aoe(char b_id)
 {
   // set_unit_attack(b_id);
   target_aoe(find_target_unit(b_id),get_opposing_team_id(battleunits[b_id].ent_id),STUNNED,1,1);
-  load_animations_to_vram(battleunits[b_id].unit->unit->id);
+  load_animations_to_vram(battleunits[b_id].unit->id);
 }
 
 void target_multi_row(char b_id)
 {
   // set_unit_attack(b_id);
-  target_row(find_target_unit(b_id)/3);
-  load_animations_to_vram(battleunits[b_id].unit->unit->id);
+  target_row(find_target_unit(b_id));
+  load_animations_to_vram(battleunits[b_id].unit->id);
 }
 
-void target_multi_col(char b_id, char cnt)
+void target_multi_col(char b_id)
 {
-  // set_unit_attack(b_id);
-  target_col(find_target_unit(b_id),cnt);
-  load_animations_to_vram(battleunits[b_id].unit->unit->id);
+  target_col(find_target_unit(b_id)/3);
+  load_animations_to_vram(battleunits[b_id].unit->id);
 }
 
 void target_single_unit(char b_id)
@@ -697,7 +788,7 @@ void target_single_unit(char b_id)
   }
 
   set_unit_target(target);
-  load_animations_to_vram(battleunits[b_id].unit->unit->id);
+  load_animations_to_vram(battleunits[b_id].unit->id);
   // if(debug_flag)
   // {
   //   put_number(b_id,3,0,0);
@@ -754,7 +845,7 @@ void target_opponents(char position)
       set_unit_target(i);
     }
   }
-  load_animations_to_vram(battleunits[position].unit->unit->id);
+  load_animations_to_vram(battleunits[position].unit->id);
 }
 
 void target_allies(char position)
@@ -769,10 +860,10 @@ void target_allies(char position)
       set_unit_target(i);
     }
   }
-  load_animations_to_vram(battleunits[position].unit->unit->id);
+  load_animations_to_vram(battleunits[position].unit->id);
 }
 
-void target_row(char position)
+void target_col(char position)
 {
   char i;
 
@@ -786,10 +877,10 @@ void target_row(char position)
   }
 }
 
-void target_col(char position, char hits)
+void target_row(char position)
 {
   char i;
-  for(i=0; i<hits; i++)
+  for(i=0; i<3; i++)
   {
     if((position+(i*3)) < 18 && battleunits[(position+(i*3))].active)
     {
@@ -854,14 +945,18 @@ char find_lowest_hp(char b_id, char team)
   int lowest, hp_p;
   char i, id;
   hp_p = 0;
-  lowest = get_percentage(battleunits[b_id].unit->hp,battleunits[b_id].unit->unit->hp);
+  bid_to_unit_header(b_id,1);
+  apply_level_to_header(battleunits[b_id].unit->level,1);
+  lowest = get_percentage(battleunits[b_id].unit->hp,unit_header[1].hp);
   id = b_id;
 
   for(i=0; i<18; i++)
   {
     if(battleunits[i].active && battleunits[i].ent_id == team)
     {
-      hp_p = get_percentage(battleunits[i].unit->hp,battleunits[i].unit->unit->hp);
+      bid_to_unit_header(i,1);
+      apply_level_to_header(battleunits[i].unit->level,1);
+      hp_p = get_percentage(battleunits[i].unit->hp,unit_header[1].hp);
       if(hp_p < lowest)
       {
         lowest = hp_p;
@@ -874,11 +969,12 @@ char find_lowest_hp(char b_id, char team)
 
 char do_art(char b_id)
 {
-  switch(battleunits[b_id].unit->unit->art)
+  // switch(battleunits[b_id].unit->unit->art)
+  switch(art_queue_id)
   {
-    case JUDGEMENT_ART:
-    judgement(b_id);
-    return 0;
+    // case JUDGEMENT_ART:
+    // judgement(b_id);
+    // return 0;
 
     case FRENZY_ART:
     return frenzy(b_id);
@@ -929,7 +1025,9 @@ void restore(char b_id)
   {
     if(battleunits[i].target)
     {
-      battleunits[i].unit->hp =  battleunits[i].unit->unit->hp;
+      bid_to_unit_header(i,0);
+      apply_level_to_header(battleunits[i].unit->level,0);
+      battleunits[i].unit->hp =  unit_header[0].hp;//battleunits[i].unit->unit->hp;
       update_healthbar(i);
     }
   }
@@ -946,8 +1044,10 @@ void innvigorate(char b_id)
   {
     if(battleunits[i].target)
     {
-      hp = (char) calc_percentage(30,battleunits[i].unit->unit->hp);
-      battleunits[i].unit->hp = min(battleunits[i].unit->hp+hp,battleunits[i].unit->unit->hp);
+      bid_to_unit_header(i,1);
+      apply_level_to_header(battleunits[i].unit->level,1);
+      hp = (char) calc_percentage(30,unit_header[1].hp);
+      battleunits[i].unit->hp = min(battleunits[i].unit->hp+hp,unit_header[1].hp);
       update_healthbar(i);
     }
   }
@@ -993,15 +1093,15 @@ void sea_legs(char b_id)
   sea_legs_art = 1;
 }
 
-void judgement(char b_id)
-{
-  flash_screen();
-  reset_battle_screen();
-  // set_unit_waiting(b_id);
-  battleunits[b_id].attacks--;
-  hide_art_name();
-  if(battleunits[b_id].ent_id == atker){ team_one_judgement = 1; } else { team_two_judgement = 1; }
-}
+// void judgement(char b_id)
+// {
+//   flash_screen();
+//   reset_battle_screen();
+//   // set_unit_waiting(b_id);
+//   battleunits[b_id].attacks--;
+//   hide_art_name();
+//   if(battleunits[b_id].ent_id == atker){ team_one_judgement = 1; } else { team_two_judgement = 1; }
+// }
 
 char frenzy(char b_id)
 {
@@ -1020,16 +1120,18 @@ char frenzy(char b_id)
 
 void capture(char b_id)
 {
-  char t_id;
-  t_id = get_first_target();
-  if(battleunits[t_id].unit->unit->a_type == NONE)
-  {
-    if(range(1,100)<51)
-    {
-      add_unit_to_convoy(battleunits[t_id].unit->unit->id);
-      kill_unit(t_id);
-    }
-  }
+  // char t_id;
+  // t_id = get_first_target();
+  // bid_to_unit_header(t_id,1);
+  // // if(battleunits[t_id].unit->unit->a_type == NONE)
+  // if(unit_header[1].a_type == NONE)
+  // {
+  //   if(range(1,100)<51)
+  //   {
+  //     add_unit_to_convoy(battleunits[t_id].unit->unit->id);
+  //     kill_unit(t_id);
+  //   }
+  // }
 }
 
 void rapid_thrust(char b_id)
@@ -1045,8 +1147,9 @@ void rapid_thrust(char b_id)
 void red_eye(char b_id)
 {
   char dmg, percent_dmg, missing_amt, percent_missing, full_hp, current_hp;
-
-  full_hp = battleunits[b_id].unit->unit->hp;
+  bid_to_unit_header(b_id,0);
+  apply_level_to_header(battleunits[b_id].unit->level,0);
+  full_hp = unit_header[0].hp;
   current_hp = battleunits[b_id].unit->hp;
   missing_amt = full_hp - current_hp;
 

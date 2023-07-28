@@ -2,6 +2,8 @@
 #incchr(water_anim_two,"assets/water_anim_2.pcx")
 #incchr(terrain_icons,"map/sprites/terrain_icons.pcx",14,2)
 #incpal(t_icon_pal,"map/sprites/terrain_icons.pcx")
+#incchr(square,"assets/bigger_square.pcx",12,10)
+#incpal(square_pal,"assets/bigger_square.pcx")
 
 #incspr(buffs,"map/sprites/gems.pcx")
 #incspr(chest,"map/sprites/chest.pcx")
@@ -117,7 +119,9 @@ void load_terrains()
 void load_terrain_icons()
 {
   load_vram(TERRAIN_ICON_VRAM,terrain_icons,0x1C0);
+  load_vram(0x5B00,square,0x700);
   load_palette(TERRAIN_ICON_PAL,t_icon_pal,1);
+  load_palette(15,square_pal,1);
 }
 
 void load_terrain_items()

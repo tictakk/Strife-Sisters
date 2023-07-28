@@ -12,7 +12,7 @@
 #define PASSING 4
 
 struct Ai_Entity{
-  char state, entity_id, id, action, target;
+  char state, entity_id, id, target;
   int dest;
 };
 
@@ -20,19 +20,19 @@ char player_units[6];
 char units_in_range[6];
 char num_of_units_in_range;
 char num_of_ai;
-char num_of_players;
+// char num_of_players;
 char target_unit;
-char action;
+// char action;
 char ai_tracker;
 int hit_radius_size;
 int opp_hit_radius[26];
 
-struct Ai_Entity ai_entities[15]; //should be 15 but gave an extra 5 for possible, non-enemy ais
+struct Ai_Entity ai_entities[12]; //should be 15 but gave an extra 5 for possible, non-enemy ais
 
 init_ai()
 {
     char i,j,m;
-    num_of_players = 0;
+    // num_of_players = 0;
     num_of_ai = 0;
     j = 0;
     m = 0;
@@ -52,7 +52,7 @@ init_ai()
       }
     }
     num_of_ai = j;
-    num_of_players = m;
+    // num_of_players = m;
 }
 
 int find_weakest_opp_in_range(char id, char range)
@@ -174,7 +174,6 @@ void get_opps_in_range(char id, char range)
       }
     }
   }
-  g = 0;
 }
 
 char find_weakest_opp()
@@ -204,7 +203,9 @@ int calc_unit_rating(char id)
   {
     if(entities[id].bg->units[i].hp>0)
     {
-      total += (int)entities[id].bg->units[i].unit->def;
+      load_unit_header(entities[id].bg->units->id,0);
+      total += unit_header[0].def;
+      // total += (int)entities[id].bg->units[i].unit->def;
     }
   }
   return total;
@@ -234,6 +235,7 @@ int get_attack_square(char id, char atkr)
   int pos, square;
   char i, j, len;
   square = entities[id].pos;
+  //TODO:BUG HERE, len is never initialized
   // len = get_pattern_length(atkr);
   for(i=0; i<map_size+1; i++)
   {

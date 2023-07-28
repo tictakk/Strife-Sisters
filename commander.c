@@ -1,29 +1,23 @@
 #include "commander.h"
 
-#define MAX_PARTY_COMMANDERS 8
-#define MAX_ENEMY_COMMANDERS 15
+#define MAX_PARTY_COMMANDERS 6
+#define MAX_ENEMY_COMMANDERS 8
 #define MAX_ARMY_SIZE 9
 #define MAX_METER 5
 #define TOTAL_COMMANDERS (MAX_PARTY_COMMANDERS + MAX_ENEMY_COMMANDERS)
 #define MAX_LEVEL 20
-#define MAX_COMMANDER_STAT 50
+#define MAX_COMMANDER_STAT 100
 
 typedef struct {
+  // char units[9];
 	Unit_Entity units[9];
-  char calling_stone;
   char meter;
 } Battlegroup;
 
-//Tactics - Improves units attack stat
-//Wisdom - Improves art damage
-//Fortitude - Improves units def stats
 struct Commander{
 	char *name;
 	char sprite_type;
   char max_bp;
-  // int exp;
-  // char level;
-  // unsigned char tac, wis,fort; 
 	Battlegroup bg;
 };
 
@@ -36,14 +30,14 @@ void clear_commander_battle_group(struct Commander *cmdr)
   char i;
   for(i=0; i<9; i++)
   {
-    cmdr->bg.units[i].unit = &unit_list[NO_UNIT];
+    cmdr->bg.units[i].id = 0;//&unit_list[NO_UNIT];
     cmdr->bg.units[i].hp = 0;
   }
 }
 
 void remove_unit_from_group(char cmdr_id, char position)
 {
-  party_commanders[cmdr_id].bg.units[position].unit = &unit_list[NO_UNIT];
+  party_commanders[cmdr_id].bg.units[position].id = 0;// = &unit_list[NO_UNIT];
   party_commanders[cmdr_id].bg.units[position].hp = 0;
 }
 
@@ -76,7 +70,7 @@ void list_commanders(char x, char y)
   {
     put_string(party_commanders[i].name,x,y+i);
   }
-  for(i; i<8; i++)
+  for(i; i<6; i++)
   {
     put_string("---",x,y+i);
   }
@@ -90,9 +84,10 @@ void heal_commander_army(char cmdr_id)
   create_effect(EFFECT_HEAL,x,y,0);
   for(i=0; i<9; i++)
   {
-    if(party_commanders[cmdr_id].bg.units[i].unit->id)
+    if(party_commanders[cmdr_id].bg.units[i].id)
     {
-      party_commanders[cmdr_id].bg.units[i].hp = party_commanders[cmdr_id].bg.units[i].unit->hp;
+      load_unit_header(party_commanders[cmdr_id].bg.units[i].id,0);
+      party_commanders[cmdr_id].bg.units[i].hp = unit_header[0].hp;
     }
   }
 }
@@ -104,9 +99,10 @@ char get_commander_battle_points(char cmdr_id)
 
   for(i=0; i<9; i++)
   {
-    if(party_commanders[cmdr_id].bg.units[i].unit->id)
+    if(party_commanders[cmdr_id].bg.units[i].id)
     {
-      bp += party_commanders[cmdr_id].bg.units[i].unit->points;
+      load_unit_header(party_commanders[cmdr_id].bg.units[i].id,0);
+      bp += unit_header[0].points;//party_commanders[cmdr_id].bg.units[i].unit->points;
     }
   }
   return bp;
@@ -154,6 +150,7 @@ char get_commander_battle_points(char cmdr_id)
 //   party_commanders[cmdr_id].level = level;
 // }
 
+
 void check_add_new_commander(char map_no)
 {
   if(map_no == 1)
@@ -162,10 +159,11 @@ void check_add_new_commander(char map_no)
     // set_commander_stats(2,1,8,8,10);
     // party_commanders[2].exp = 40;
     // level_up_commander(2);
-    load_unit_to_cmdr(2,3,LANCER_UNIT);
-    load_unit_to_cmdr(2,1,SWORD_UNIT);
-    load_unit_to_cmdr(2,5,LANCER_UNIT);
-    load_unit_to_cmdr(2,7,CLERIC_UNIT);
+    load_unit_to_cmdr(2,3,KING,1,3);
+    // load_unit_to_cmdr(2,3,LANCER_UNIT,0);
+    load_unit_to_cmdr(2,1,SWORD_UNIT,0,3);
+    load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
+    load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
     return;
   }
 

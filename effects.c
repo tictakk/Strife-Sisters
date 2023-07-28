@@ -63,6 +63,8 @@ char create_effect(char effect_type, int x, int y, char flip)
 {
   if(effect_count >= MAX_EFFECT_COUNT)
   {
+    put_string("max effects",10,0);
+    wait_for_I_input();
     return;
   }
   effects[effect_count] = effect_type;
@@ -362,10 +364,14 @@ void animate_healing(char effect_no)
 {
   char frame_no;
   spr_set(effect_no);
-  
-  frame_no = effect_frames[effect_no]++;
-  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+HEAL_ANIMATION[frame_no]);
-  spr_y(spr_get_y()-1);
+  // put_number(g,3,10,g++);
+  if(effect_frames[effect_no]++ < 11)
+  {
+    // wait_for_I_input();
+    frame_no = effect_frames[effect_no];
+    spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+HEAL_ANIMATION[frame_no]);
+    spr_y(spr_get_y()-1);
+  }
 }
 
 void animate_lightening(char effect_no)
