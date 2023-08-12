@@ -11,6 +11,8 @@
 #incspr(atk_up,"map/effects/atk_up.pcx")
 #incspr(def_up,"map/effects/def_up.pcx")
 #incspr(capture_effect,"map/effects/capture_effect.pcx")
+#incspr(miss_effect,"map/effects/miss.pcx")
+#incspr(crit_effect,"map/effects/crit.pcx")
 
 #incpal(effect_pal,"map/effects/adv.pcx")
 #incpal(lightening_effect_pal,"map/effects/lightening.pcx")
@@ -40,8 +42,10 @@
 #define EFFECT_ATK_UP 14
 #define EFFECT_DEF_UP 15
 #define EFFECT_CAPTURE 16
+#define EFFECT_MISS 17
+#define EFFECT_CRIT 18
 
-#define MAX_EFFECT_COUNT 5
+#define MAX_EFFECT_COUNT 10
 
 const char LIGHTENING_TOP_ANIMATION[]   = { 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0 };
 const char LIGHTENING_MID_1_ANIMATION[] = { 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0 };
@@ -63,8 +67,8 @@ char create_effect(char effect_type, int x, int y, char flip)
 {
   if(effect_count >= MAX_EFFECT_COUNT)
   {
-    put_string("max effects",10,0);
-    wait_for_I_input();
+    // put_string("max effects",10,0);
+    // wait_for_I_input();
     return;
   }
   effects[effect_count] = effect_type;
@@ -81,86 +85,91 @@ void load_effect(char effect_no)
 {
   switch(effect_no)
   {
-      case EFFECT_ADV:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),adv_effect,0x40);
-        effects_pal[effect_count] = EFFECTS_WORD_PAL;
-        break;
+    case EFFECT_CRIT:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),crit_effect,0x40);
+      effects_pal[effect_count] = EFFECTS_WORD_PAL;
+      break;
 
-      // case EFFECT_DEF_5:
-      //   load_vram(EFFECTS_VRAM+(effect_count*0x200),def_effect_5,0x40);
-      //   effects_pal[effect_count] = EFFECTS_WORD_PAL;
-      //   break;
+    case EFFECT_ADV:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),adv_effect,0x40);
+      effects_pal[effect_count] = EFFECTS_WORD_PAL;
+      break;
 
-      case EFFECT_ATK_3:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),atk_effect_3,0x40);
-        effects_pal[effect_count] = EFFECTS_WORD_PAL;
-        break;    
+    case EFFECT_MISS:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),miss_effect,0x40);
+      effects_pal[effect_count] = EFFECTS_WORD_PAL;
+      break;
 
-      case EFFECT_ATK_UP:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),atk_up,0x40);
-        effects_pal[effect_count] = EFFECTS_WORD_PAL;
-        break;
+    case EFFECT_ATK_3:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),atk_effect_3,0x40);
+      effects_pal[effect_count] = EFFECTS_WORD_PAL;
+      break;    
 
-      case EFFECT_DEF_UP:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),def_up,0x40);
-        effects_pal[effect_count] = EFFECTS_WORD_PAL;
-        break;
+    case EFFECT_ATK_UP:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),atk_up,0x40);
+      effects_pal[effect_count] = EFFECTS_WORD_PAL;
+      break;
 
-      case EFFECT_LIGHTENING_TOP:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0x80,0x40);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_DEF_UP:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),def_up,0x40);
+      effects_pal[effect_count] = EFFECTS_WORD_PAL;
+      break;
 
-      case EFFECT_LIGHTENING_MID_1:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0xC0,0x40);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_LIGHTENING_TOP:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0x80,0x40);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
 
-      case EFFECT_LIGHTENING_MID_2:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0x100,0x40);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_LIGHTENING_MID_1:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0xC0,0x40);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
 
-      case EFFECT_LIGHTENING_BOT:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0x140,0x40);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_LIGHTENING_MID_2:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0x100,0x40);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
+
+    case EFFECT_LIGHTENING_BOT:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),lightening_effect+0x140,0x40);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
         
-      case EFFECT_HEAL:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),heal_effect,0x100);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_HEAL:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),heal_effect,0x100);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
 
-      case EFFECT_CAPTURE:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),capture_effect,0x100);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_CAPTURE:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),capture_effect,0x100);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
         
-      case EFFECT_HIT_SPARK:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),hit_spark,0x140);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_HIT_SPARK:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),hit_spark,0x140);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
 
-      case EFFECT_WAVE:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),power_wave,0x40);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_WAVE:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),power_wave,0x40);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
 
-      case EFFECT_ICE:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),ice_effect,0x140);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_ICE:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),ice_effect,0x140);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
 
-      case EFFECT_FIRE:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),fire_effect,0x140);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
+    case EFFECT_FIRE:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),fire_effect,0x140);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
 
-      case EFFECT_ARROW:
-        load_vram(EFFECTS_VRAM+(effect_count*0x200),rain_arrow,0x140);
-        effects_pal[effect_count] = EFFECTS_ARTS_PAL;
-        break;
-    }
+    case EFFECT_ARROW:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),rain_arrow,0x140);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
+  }
 }
 
 void display_effect(char effect_no)
@@ -302,6 +311,24 @@ char create_atk_3(int x, int y)
 char create_atk_up(int x, int y)
 {
   return create_effect(EFFECT_ATK_UP,x,y,0);
+}
+
+void create_adv_up(int x, int y)
+{
+  load_palette(30,effect_pal,1);
+  return create_effect(EFFECT_ADV,x,y,0);
+}
+
+void create_miss_effect(int x, int y)
+{
+  load_palette(30,effect_pal,1);
+  return create_effect(EFFECT_MISS,x,y,0);
+}
+
+void create_crit_effect(int x, int y)
+{
+  load_palette(30,effect_pal,1);
+  return create_effect(EFFECT_CRIT,x,y,0);
 }
 
 char create_power_wave(int x, int y, char flip)

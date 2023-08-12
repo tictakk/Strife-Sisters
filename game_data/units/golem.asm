@@ -18,3 +18,7 @@ Golem:
 
   ;unit growth
   .db GROWTH_TANK_MELEE
+
+  ;graphic
+  .db bank(_musketbtl)
+  .dw _musketbtl & $1fff

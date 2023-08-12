@@ -38,6 +38,7 @@
 #incspr(lancerbtl, "map/sprites/lancerbattle.pcx")
 #incspr(raiderbtl,"characters/banditbattle.pcx")
 #incpal(raiderbtlpal,"characters/banditbattle.pcx")
+#incspr(thiefbtl,"characters/thiefbattle.pcx")
 // #incspr(raiderbtl,"characters/piratebtl.pcx")
 // #incpal(raiderbtlpal,"characters/piratebtl.pcx")
 
@@ -57,33 +58,6 @@
 #define UNARMED 0b00100000 //bare
 #define NONE    0b00000000
 
-//attack position types
-// #define NO_ATTACK 0
-// #define MELEE_SINGLE_ATTACK 1
-// #define MELEE_COLUMN_ATTACK 2
-// #define MELEE_ROW_ATTACK 3
-// #define MELEE_ALL_ATTACK 4
-
-// #define RANGED_SINGLEATTACK 5
-// #define RANGED_COLUMN_ATTACK 6
-// #define RANGED_ROW_ATTACK 7
-// #define RANGED_ALL_ATTACK 8
-
-// #define ART_SINGLE_ATTACK 9
-// #define ART_COLUMN_ATTACK 10
-// #define ART_ROW_ATTACK 11
-// #define ART_ALL_ATTACK 12
-
-// #define BUFF_SINGLE_ATTACK 13
-// #define BUFF_COLUMN_ATTACK 14
-// #define BUFF_ROW_ATTACK 15
-// #define BUFF_ALL_ATTACK 16
-
-// #define DEBUFF_SINGLE_ATTACK 17
-// #define DEBUFF_COLUMN_ATTACK 18
-// #define DEBUFF_ROW_ATTACK 19
-// #define DEBUFF_ALL_ATTACK 20
-
 //advantage types
 #define NO_ADV 0
 #define ADVANTAGE 1
@@ -98,11 +72,11 @@ typedef struct{
                 art, points, pow, is_cmdr;
   char attacks[3];
   char growth_chart;
+  char bank; int address;
 	// int hp;
 } Unit;
 
 typedef struct{
-  // Unit *unit;//725
   char id;
   unsigned char hp, sta;
   int exp;
@@ -636,7 +610,7 @@ void get_upgrade_cost(char unit_id)
     case BRAWLER_UNIT: upgrade_cost = 200; break;
     case MONK_UNIT: upgrade_cost = 400; break;
     case RAIDER_UNIT: upgrade_cost = 50; break;
-    case PIRATE_UNIT: upgrade_cost = 150; break;
+    case THIEF_UNIT: upgrade_cost = 150; break;
   }
 }
 
@@ -660,7 +634,7 @@ void get_unit_cost(char unit_id)
     case BRAWLER_UNIT: unit_cost = 200; break;
     case MONK_UNIT: unit_cost = 500; break;
     case RAIDER_UNIT: unit_cost = 100; break;
-    case PIRATE_UNIT: unit_cost = 200; break;
+    case THIEF_UNIT: unit_cost = 200; break;
     default: unit_cost = 100;
   }
 }

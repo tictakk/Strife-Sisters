@@ -144,9 +144,13 @@ char get_army_max_range(char entity_id)
   char i, max;
   max = 1;
   //TODO: can make this faster by next if statements. If hp is zero, don't bother getting range
+
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
     load_unit_header(entities[entity_id].bg->units[i].id,0);
+    // put_number(unit_header[0].id,3,0,0);
+    // put_hex(myPointers.addr[0],5,0,1);
+    // wait_for_I_input();
     if(entities[entity_id].bg->units[i].hp && unit_header[0].rng > max)
     {
       max = unit_header[0].rng;//entities[entity_id].bg->units[i].unit->rng;
@@ -799,20 +803,6 @@ char get_entity_sprite_no(char entity_id)
 char get_entity_id(int position)
 {
   return battle_grid[position]-1;
-}
-
-void display_popup(char *str)
-// void display_turn(char *str)
-{
-  s_y_relative = (s_y/8);
-  scroll(0,0,s_y+32,32,224,0x80);
-  display_window_rel(11,11,10,4);
-  write_text(12,12+s_y_relative,str);
-
-  sync(100);
-  load_map(0,2,0,0,16,29);
-  scroll(0,0,s_y+32,32,224,0xC0);
-  s_y_relative = 0;
 }
 
 void update_map();

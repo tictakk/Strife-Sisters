@@ -14,7 +14,11 @@ Thief:
   .db 3   ;points
   .db 15   ;pow
   .db 0   ;is_cmdr
-  .db 24, 7, 0 ;attack positions
+  .db 23, 23, 23 ;attack positions
 
   ;unit growth
   .db GROWTH_SPEED_DPS
+
+  ;graphic
+  .db bank(_thiefbtl)
+  .dw _thiefbtl & $1fff

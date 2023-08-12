@@ -42,6 +42,8 @@
 #define MOD_ATK 1
 #define MOD_DEF 2
 #define MOD_HP 3
+#define MOD_SPD 4
+#define MOD_POW 5
 
 #define MOVE_NONE 0
 #define MOVE_PHYSICAL_ATTACK 1
@@ -97,19 +99,15 @@ void init_arts()
   arts[4].relationship = MANY_TO_MANY;
   arts[4].stunning = 0;
 
-  arts[5].frame_count = 11;
-  arts[5].name = "Pillage ";
-  arts[5].cost = 1;
-  arts[5].target = ALL_ALLIES;
-  arts[5].relationship = MANY_TO_MANY;
-  arts[5].stunning = 0;
+  arts[PILLAGE_ART].frame_count = 11;
+  arts[PILLAGE_ART].name = "Fortify ";
+  arts[PILLAGE_ART].cost = 7;
+  arts[PILLAGE_ART].target = ALL_ALLIES;
+  arts[PILLAGE_ART].relationship = MANY_TO_MANY;
+  arts[PILLAGE_ART].stunning = 0;
+  arts[PILLAGE_ART].base_amt = 3;
+  arts[PILLAGE_ART].move_type = MOVE_ART_ATTACK;
 
-  // arts[6].frame_count = 11;
-  // arts[6].name = "Rage Mist";
-  // arts[6].cost = 1;
-  // arts[6].target = ALL_ALLIES;
-  // arts[6].relationship = NONE_TO_NONE;
-  // arts[6].stunning = 0;
   arts[6].frame_count = 11;
   arts[6].name = "Capture  ";
   arts[6].cost = 1;
@@ -240,6 +238,7 @@ void init_arts()
   arts[PHYSICAL_SINGLE_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_SINGLE_ATTACK].stunning = 1;
   arts[PHYSICAL_SINGLE_ATTACK].move_type = MOVE_PHYSICAL_ATTACK;
+  arts[PHYSICAL_SINGLE_ATTACK].base_amt = 10;
 
   arts[PHYSICAL_COLUMN_ATTACK].frame_count = 0;
   arts[PHYSICAL_COLUMN_ATTACK].name = "Column  ";
@@ -248,6 +247,7 @@ void init_arts()
   arts[PHYSICAL_COLUMN_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_COLUMN_ATTACK].stunning = 1;
   arts[PHYSICAL_COLUMN_ATTACK].move_type = MOVE_PHYSICAL_ATTACK;
+  arts[PHYSICAL_COLUMN_ATTACK].base_amt = 7;
 
   arts[PHYSICAL_ROW_ATTACK].frame_count = 0;
   arts[PHYSICAL_ROW_ATTACK].name = "Row     ";
@@ -256,7 +256,8 @@ void init_arts()
   arts[PHYSICAL_ROW_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_ROW_ATTACK].stunning = 1;
   arts[PHYSICAL_ROW_ATTACK].move_type = MOVE_PHYSICAL_ATTACK;
-
+  arts[PHYSICAL_ROW_ATTACK].base_amt = 7;
+  
   arts[PHYSICAL_ALL_ATTACK].frame_count = 0;
   arts[PHYSICAL_ALL_ATTACK].name = "All      ";
   arts[PHYSICAL_ALL_ATTACK].cost = 0;
@@ -264,6 +265,7 @@ void init_arts()
   arts[PHYSICAL_ALL_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_ALL_ATTACK].stunning = 1;
   arts[PHYSICAL_ALL_ATTACK].move_type = MOVE_PHYSICAL_ATTACK;
+  arts[PHYSICAL_ALL_ATTACK].base_amt = 7;
 }
 
 void load_art(char art_no, int x, int y, char flip)
@@ -327,6 +329,9 @@ void animate_effect(char effect_type, char effect_no)
     case EFFECT_DEF_UP:
     case EFFECT_ATK_UP:
     case EFFECT_ATK_3:
+    case EFFECT_ADV:
+    case EFFECT_MISS:
+    case EFFECT_CRIT:
     // case EFFECT_DEF_5:
     animate_word_effect(effect_no);
     break;

@@ -18,3 +18,7 @@ King:
 
   ;unit growth
   .db GROWTH_KING
+
+  ;graphic
+  .db bank(_attack2)
+  .dw _attack2 & $1fff

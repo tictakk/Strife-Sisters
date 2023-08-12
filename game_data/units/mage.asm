@@ -18,3 +18,7 @@ Mage:
 
   ;unit growth
   .db GROWTH_MAGIC_DPS
+
+  ;graphic
+  .db bank(_musketbtl)
+  .dw _musketbtl & $1fff

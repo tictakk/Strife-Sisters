@@ -1,27 +1,4 @@
 #incbin(script, "script/out")
-// #incbin(area_0,"script/area_0")
-// #incbin(area_1,"script/area_1")
-// #incbin(area_2,"script/area_2")
-// #incbin(area_3,"script/area_3")
-// #incbin(area_4,"script/area_4")
-// #incbin(area_5,"script/area_5")
-
-// #asm
-// .bank 35
-// .org $8000
-// _script: 
-// .incbin "script/area_0", 
-// .incbin "script/area_1", 
-// .incbin "script/area_2", 
-// .incbin "script/area_3", 
-// .incbin "script/area_4", 
-// .incbin "script/area_5"
-
-// .data
-// .bank DATA_BANK
-// .code
-// #endasm  
-
 #define NO_OF_MAPS 25
 
 #define NO_UNIT 0
@@ -46,7 +23,7 @@
 #define BLACK_MAGE_UNIT 19
 #define WITCH_UNIT 20
 #define RAIDER_UNIT 21
-#define PIRATE_UNIT 22
+#define THIEF_UNIT 22
 #define CAPTAIN 23
 #define FIGHTER_UNIT 24
 #define BRAWLER_UNIT 25

@@ -18,3 +18,7 @@ Rei:
 
   ;unit growth
   .db GROWTH_REI
+
+  ;graphic
+  .db bank(_attack)
+  .dw _attack & $1fff

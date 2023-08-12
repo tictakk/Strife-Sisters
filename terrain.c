@@ -5,17 +5,13 @@
 #incchr(square,"assets/bigger_square.pcx",12,10)
 #incpal(square_pal,"assets/bigger_square.pcx")
 
-#incspr(buffs,"map/sprites/gems.pcx")
-#incspr(chest,"map/sprites/chest.pcx")
-#incpal(chest_pal,"map/sprites/chest.pcx")
-
 #incchr(cursor, "map/cursor.pcx");
 #incpal(cursorpal, "map/cursor.pcx");
 #incchr(run_button,"map/sprites/run_button.pcx")
-// #inctilepal(overworldtilespal,"map/backgrounds/strifesisters.tiles.pcx")
 
-// #incpal(overworldpal,"map/backgrounds/default.pcx")
-// #inctile(overworldtiles,"map/backgrounds/default.pcx")
+#incspr(chest,"map/sprites/chest.pcx")
+#incpal(chest_pal,"map/sprites/chest.pcx")
+
 #incpal(overworldpal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 #inctile(overworldtiles,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 
@@ -101,7 +97,7 @@ int map_offset = 0;
 char water_frame = 0;
 char water_trigger = 0;
 char item_trigger = 0;
-char terrain_item_count = 0;
+unsigned char terrain_item_count = 0;
 
 //CHEST -> Gold, used for units and upgrades?
 //BLUE GEM -> Meter boost
@@ -126,7 +122,7 @@ void load_terrain_icons()
 
 void load_terrain_items()
 {
-  load_vram(TERRAIN_ITEM_VRAM,buffs,0xC0);
+  // load_vram(TERRAIN_ITEM_VRAM,buffs,0xC0);
   load_vram(TERRAIN_ITEM_VRAM+0xC0,chest,0x80);
   load_palette(30,chest_pal,1);
 }

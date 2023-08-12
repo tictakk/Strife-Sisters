@@ -1,7 +1,7 @@
-#incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
-#inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
-#inctile(battletiles,"tiles/battletiles.tiles.pcx")
-#incpal(battlepal,"tiles/battletiles.tiles.pcx")
+// #incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
+// #inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
+// #inctile(battletiles,"tiles/battletiles.tiles.pcx")
+// #incpal(battlepal,"tiles/battletiles.tiles.pcx")
 
 #define MAX_GROUP_SIZE 9
 #define TEAM_ONE 0
@@ -15,6 +15,7 @@
 #define WAITING 5
 #define HEALING 6
 #define METER_ATTACK 8
+#define STATE_EVADE 9
 
 #define STATUS_NORMAL 0
 #define STATUS_DAZED 1
@@ -23,12 +24,12 @@
 #define STATUS_BLOWBACK 4
 #define STATE_ACID 5
 
-#define COMMANDER_PALETTE_1 30
-#define COMMANDER_PALETTE_2 31
+#define COMMANDER_PALETTE_1 28
+#define COMMANDER_PALETTE_2 29
 
 typedef struct {
   char ent_id, active, frame, pal, state, target_team, pos, attacks, 
-       target, meter, column, a_bonus, d_bonus;
+       target, meter, column, a_bonus, d_bonus, s_bonus, p_bonus;
   Unit_Entity *unit;
 }BattleUnit;
 
@@ -38,7 +39,8 @@ const char top_row_attack_chart[9]    = { 1, 1, 3, 2, 4, 5, 4, 5, 5};
 const char middle_row_attack_chart[9] = { 1, 1, 1, 2, 3, 2, 4, 5, 4};
 const char bottom_row_attack_chart[9] = { 3, 1, 1, 5, 4, 2, 5, 4, 4};
 
-char cmdr_count = 30;
+char vram_temp[256];
+char cmdr_count = 28;
 // char attacker_art_list[MAX_ARMY_SIZE];
 // char target_art_list[MAX_ARMY_SIZE];
 
@@ -105,6 +107,8 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].meter = 0;
   battleunits[index].a_bonus = 0;
   battleunits[index].d_bonus = 0;
+  battleunits[index].s_bonus = 0;
+  battleunits[index].p_bonus = 0;
   battleunits[index].column = position/3;
 
   load_unit_header(ue->id,0);
@@ -114,138 +118,22 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
     battleunits[index].attacks = 0;
   }
 
-  switch(ue->id)
-  {
-    case BLOB_UNIT:
-      load_vram(idle_vrams[index],blobbattle,0x100);
-      battleunits[index].pal = 19;
-      break;
+  myPointers.bank[2] = unit_header[0].bank;
+  myPointers.addr[2] = unit_header[0].address;
 
-    case REI:
-    case SWORD_UNIT:
-      load_vram(idle_vrams[index],attack,0x100);
-      battleunits[index].pal = 17;
-      break;
+  load_vram_fptr( setFarLoadvram(idle_vrams[index], myPointers.bank[2], myPointers.addr[2], 0x100) );
+  // battleunits[index].pal = 20;//figure out how I wanna do palettes
+  // farMemcpy( setFarMemcpy(vram_temp, myPointers.bank[2], myPointers.addr[2], 256) );
+  // load_vram(idle_vrams[index],vram_temp,0x100);
 
-    case KING:
-    case SPEAR_UNIT:
-      load_vram(idle_vrams[index],attack2,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case STALKER_UNIT:
-      load_vram(idle_vrams[index],stalkerbtl,0x100);
-      battleunits[index].pal = 21;
-      break;
-
-    case ARCHER_UNIT:
-      load_vram(idle_vrams[index],musketbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-    
-    case SNIPER_UNIT:
-      load_vram(idle_vrams[index],sniperbtl,0x100);
-      battleunits[index].pal = 23;
-      break;
-
-    case BERSERKER_UNIT:
-      load_vram(idle_vrams[index],berserkerbtl,0x100);
-      battleunits[index].pal = 23;
-      break;
-
-    case DEMON_UNIT:
-      load_vram(idle_vrams[index],demonbtl,0x100);
-      battleunits[index].pal = 25;
-      break;
-
-    case HOUND_UNIT:
-      load_vram(idle_vrams[index],houndbtl,0x100);
-      battleunits[index].pal = 25;
-      break;
-
-    case AXE_UNIT:
-      load_vram(idle_vrams[index],axebtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case RAIDER_UNIT:
-      load_vram(idle_vrams[index],raiderbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case VIOLET:
-    case CLERIC_UNIT:
-      load_vram(idle_vrams[index],magebtl,0x100);
-      battleunits[index].pal = 27;
-      break;
-
-    case MAGE_UNIT:
-      load_vram(idle_vrams[index],magebtl,0x100);
-      battleunits[index].pal = 27;
-      break;
-
-    case WITCH_UNIT:
-      load_vram(idle_vrams[index],witchbtl,0x100);
-      battleunits[index].pal = 22;
-      break;
-
-    case PRIEST_UNIT:
-      load_vram(idle_vrams[index],priestbtl,0x100);
-      battleunits[index].pal = 22;
-      break;
-
-    case BLACK_MAGE_UNIT:
-      load_vram(idle_vrams[index],magebtl,0x100);
-      battleunits[index].pal = 24;
-      break;
-
-    case PALADIN_UNIT:
-      load_vram(idle_vrams[index],paladinbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case KNIGHT_UNIT:
-      load_vram(idle_vrams[index],knightbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case LANCER_UNIT:
-      load_vram(idle_vrams[index],lancerbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case MONK_UNIT:
-      load_vram(idle_vrams[index],monkbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case FIGHTER_UNIT:
-      load_vram(idle_vrams[index],fighterbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case BRAWLER_UNIT:
-      load_vram(idle_vrams[index],brawlerbtl,0x100);
-      battleunits[index].pal = 17;
-      break;
-
-    case GOLEM_UNIT:
-      load_vram(idle_vrams[index],golembtl,0x100);
-      battleunits[index].pal = 20;
-      break;
-
-    default:
-      put_string("errorz",5,5);
-      // put_number(entity_id,3,5,6);
-      break;
-  }
   p_x = (int)(x << 5);
   p_y = (int)(y << 5);
 
   if(active)
   {
-	  spr_make(index+5,((p_x/4)*5)+xOffset,((p_y/4)*5)-16,idle_vrams[index],FLIP_MAS|SIZE_MAS,SZ_32x32,battleunits[index].pal,1);
+	  spr_make(index+MAX_EFFECT_COUNT,((p_x/4)*5)+xOffset,((p_y/4)*5)-16,idle_vrams[index],FLIP_MAS|SIZE_MAS,SZ_32x32,UNIT_PALS[ue->id],1);
   }
+  satb_update();
 }
 
 void bid_to_unit_header(char b_id, char header_no)
@@ -255,252 +143,20 @@ void bid_to_unit_header(char b_id, char header_no)
 
 void transfer_units_to_attack_vram(char type)
 {
-  switch(type)
-  {
-    case BLOB_UNIT:
-//      load_vram(attack_vrams[npc_id%9],blobbattle+0x300,0x500);
-      load_vram(attack_vrams[0],blobbattle+0x300,0x500);
-      break;
+  load_unit_header(type,0);
+  myPointers.bank[2] = unit_header[0].bank;
+  myPointers.addr[2] = unit_header[0].address;
 
-    case REI:
-    case SWORD_UNIT:
-      load_vram(attack_vrams[0],attack+0x300,0x500);
-      break;
-
-    case KING:
-    case SPEAR_UNIT:
-      load_vram(attack_vrams[0],attack2+0x300,0x500);
-      break;
-
-    case STALKER_UNIT:
-      load_vram(attack_vrams[0],stalkerbtl+0x300,0x500);
-      break;
-
-    case ARCHER_UNIT:
-      load_vram(attack_vrams[0],musketbtl+0x300,0x500);
-      break;
-
-    case SNIPER_UNIT:
-      load_vram(attack_vrams[0],sniperbtl+0x300,0x500);
-      break;
-
-    case BERSERKER_UNIT:
-      load_vram(attack_vrams[0],berserkerbtl+0x300,0x500);
-      break;
-
-    case GOLEM_UNIT:
-      load_vram(attack_vrams[0],golembtl+0x300,0x500);
-      break;
-
-    case DEMON_UNIT:
-      load_vram(attack_vrams[0],demonbtl+0x300,0x500);
-      break;
-
-    case HOUND_UNIT:
-      load_vram(attack_vrams[0],houndbtl+0x300,0x500);
-      break;
-
-    case AXE_UNIT:
-      load_vram(attack_vrams[0],axebtl+0x300,0x500);
-      break;
-
-    case RAIDER_UNIT:
-      load_vram(attack_vrams[0],raiderbtl+0x300,0x500);
-      break;
-
-    case WITCH_UNIT:
-      load_vram(attack_vrams[0],witchbtl+0x300,0x500);
-      break;
-
-    case PRIEST_UNIT:
-      load_vram(attack_vrams[0],priestbtl+0x300,0x500);
-      break;
-
-    case VIOLET:
-    case BLACK_MAGE_UNIT:
-    case CLERIC_UNIT:
-    case MAGE_UNIT:
-      load_vram(attack_vrams[0],magebtl+0x300,0x500);
-      break;
-
-    case KNIGHT_UNIT:
-      load_vram(attack_vrams[0],knightbtl+0x300,0x500);
-      break;
-
-    case PALADIN_UNIT:
-      load_vram(attack_vrams[0],paladinbtl+0x300,0x500);
-      break;
-
-    case FIGHTER_UNIT:
-      load_vram(attack_vrams[0],fighterbtl+0x300,0x500);
-      break;
-
-    case BRAWLER_UNIT:
-      load_vram(attack_vrams[0],brawlerbtl+0x300,0x500);
-      break;
-
-    case MONK_UNIT:
-      load_vram(attack_vrams[0],monkbtl+0x300,0x500);
-      break;
-
-    case LANCER_UNIT:
-      load_vram(attack_vrams[0],lancerbtl+0x300,0x500);
-      break;
-
-    default:
-    // put_string("error default atk",5,5);
-    // put_number(npcs[npc_id].type,2,5,6);
-    break;
-  }
+  load_vram_fptr( setFarOffsetLoadvram(attack_vrams[0], myPointers.bank[2], myPointers.addr[2], 0x500 , 0x400) );
 }
 
 void transfer_units_to_stun_vram(char type, char index)
 {
-  switch(type)
-  {
-    case BLOB_UNIT:
-//      load_vram(stun_vrams[npc_id%9],blobbattle+0x900,0x100);
-      load_vram(stun_vrams[index],blobbattle+0x900,0x100);
-      break;
+  load_unit_header(type,1);
+  myPointers.bank[2] = unit_header[1].bank;
+  myPointers.addr[2] = unit_header[1].address;
 
-    case REI:
-    case SWORD_UNIT:
-      load_vram(stun_vrams[index],attack+0x900,0x100);
-      break;
-
-    case KING:
-    case SPEAR_UNIT:
-      load_vram(stun_vrams[index],attack2+0x900,0x100);
-      break;
-
-    case STALKER_UNIT:
-      load_vram(stun_vrams[index],stalkerbtl+0x900,0x100);
-      break;
-
-    case ARCHER_UNIT:
-      load_vram(stun_vrams[index],musketbtl+0x900,0x100);
-      break;
-
-    case SNIPER_UNIT:
-      load_vram(stun_vrams[index],sniperbtl+0x900,0x100);
-      break;
-
-    case BERSERKER_UNIT:
-      load_vram(stun_vrams[index],berserkerbtl+0x900,0x100);
-      break;
-
-    case GOLEM_UNIT:
-      load_vram(stun_vrams[index],golembtl+0x900,0x100);
-      break;
-
-    case DEMON_UNIT:
-      load_vram(stun_vrams[index],demonbtl+0x900,0x100);
-      break;
-
-    case HOUND_UNIT:
-      load_vram(stun_vrams[index],houndbtl+0x900,0x100);
-      break;
-
-    case AXE_UNIT:
-      load_vram(stun_vrams[index],axebtl+0x900,0x100);
-      break;
-
-    case WITCH_UNIT:
-      load_vram(stun_vrams[index],witchbtl+0x900,0x100);
-      break;
-
-    case PRIEST_UNIT:
-      load_vram(stun_vrams[index],priestbtl+0x900,0x100);
-      break;
-
-    case VIOLET:
-    case BLACK_MAGE_UNIT:
-    case CLERIC_UNIT:
-    case MAGE_UNIT:
-      load_vram(stun_vrams[index],magebtl+0x900,0x100);
-      //	put_string("error mage",5,5);
-      break;
-
-    case BLOB_UNIT:
-      load_vram(stun_vrams[index],blobbattle+0x900,0x100);
-      break;
-
-    case REI:
-    case SWORD_UNIT:
-      load_vram(stun_vrams[index],attack+0x900,0x100);
-      break;
-
-    case KING:
-    case SPEAR_UNIT:
-      load_vram(stun_vrams[index],attack2+0x900,0x100);
-      break;
-
-    case STALKER_UNIT:
-      load_vram(stun_vrams[index],stalkerbtl+0x900,0x100);
-      break;
-
-    case ARCHER_UNIT:
-      load_vram(stun_vrams[index],musketbtl+0x900,0x100);
-      break;
-
-    case SNIPER_UNIT:
-      load_vram(stun_vrams[index],sniperbtl+0x900,0x100);
-      break;
-
-    case DEMON_UNIT:
-      load_vram(stun_vrams[index],demonbtl+0x900,0x100);
-      break;
-
-    case HOUND_UNIT:
-      load_vram(stun_vrams[index],houndbtl+0x900,0x100);
-      break;
-
-    case AXE_UNIT:
-      load_vram(stun_vrams[index],axebtl+0x900,0x100);
-      break;
-
-    case VIOLET:
-    case BLACK_MAGE_UNIT:
-    case CLERIC_UNIT:
-    case MAGE_UNIT:
-      load_vram(stun_vrams[index],magebtl+0x900,0x100);
-      //	put_string("error mage",5,5);
-      break;
-
-    case KNIGHT_UNIT:
-      load_vram(stun_vrams[index],knightbtl+0x900,0x100);
-      break;
-
-    case PALADIN_UNIT:
-      load_vram(stun_vrams[index],paladinbtl+0x900,0x100);
-      break;
-
-    case LANCER_UNIT:
-      load_vram(stun_vrams[index],lancerbtl+0x900,0x100);
-      break;
-
-    case FIGHTER_UNIT:
-      load_vram(stun_vrams[index],fighterbtl+0x900,0x100);
-      break;
-
-    case BRAWLER_UNIT:
-      load_vram(stun_vrams[index],brawlerbtl+0x900,0x100);
-      break;
-
-    case MONK_UNIT:
-      load_vram(stun_vrams[index],monkbtl+0x900,0x100);
-      break;
-
-    case RAIDER_UNIT:
-      load_vram(stun_vrams[index],raiderbtl+0x900,0x100);
-      break;
-
-    default:
-       put_string("error default",5,5);
-       put_number(type,3,19,5);
-      //  print_unit_fullname(type,19,5);
-       break;
-  }
+  load_vram_fptr( setFarOffsetLoadvram(stun_vrams[index], myPointers.bank[2], myPointers.addr[2], 0x100 , 0x1000) );
 }
 
 char find_target_unit(char attacking_unit_position)
@@ -674,7 +330,6 @@ void determine_action_state(char b_id)
     break;
 
     case MOVE_ART_ATTACK:
-    // load_animations_to_vram(battleunits[b_id].unit->unit->id);
     load_animations_to_vram(battleunits[b_id].unit->id);
     set_unit_meter(b_id);
     battleunits[b_id].meter = 0;
@@ -911,6 +566,14 @@ void set_unit_stunned(char b_id)
   animating++;
 }
 
+void set_unit_evade(char b_id)
+{
+  battleunits[b_id].state = STATE_EVADE;
+  battleunits[b_id].frame = 0;
+  battleunits[b_id].target = 0;
+  animating++;
+}
+
 void set_unit_attack(char b_id)
 {
   battleunits[b_id].state = ATTACK;
@@ -933,7 +596,7 @@ void set_unit_heal(char b_id)
 
 void set_unit_waiting(char b_id)
 {
-  spr_set(b_id+5);
+  spr_set(b_id+MAX_EFFECT_COUNT);
   spr_pattern(idle_vrams[b_id]);
   battleunits[b_id].state = WAITING;
   battleunits[b_id].frame = 0;
@@ -1093,16 +756,6 @@ void sea_legs(char b_id)
   sea_legs_art = 1;
 }
 
-// void judgement(char b_id)
-// {
-//   flash_screen();
-//   reset_battle_screen();
-//   // set_unit_waiting(b_id);
-//   battleunits[b_id].attacks--;
-//   hide_art_name();
-//   if(battleunits[b_id].ent_id == atker){ team_one_judgement = 1; } else { team_two_judgement = 1; }
-// }
-
 char frenzy(char b_id)
 {
   int r;
@@ -1136,7 +789,7 @@ void capture(char b_id)
 
 void rapid_thrust(char b_id)
 {
-  spr_set(b_id+5);
+  spr_set(b_id+MAX_EFFECT_COUNT);
   load_art(art_queue_id,spr_get_x()+8,spr_get_y()+16,!unit_direction(b_id));
   animate_art(art_queue_id);
   // apply_art(i);

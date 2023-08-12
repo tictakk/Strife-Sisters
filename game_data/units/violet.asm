@@ -18,3 +18,7 @@ Violet:
 
   ;unit growth
   .db GROWTH_VIOLET
+
+  ;graphic
+  .db bank(_magebtl)
+  .dw _magebtl & $1fff

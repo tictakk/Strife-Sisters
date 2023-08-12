@@ -18,3 +18,7 @@ Black_mage:
 
   ;unit growth
   .db GROWTH_MAGIC_SUPPORT
+
+  ;graphic
+  .db bank(_musketbtl)
+  .dw _musketbtl & $1fff

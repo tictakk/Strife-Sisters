@@ -116,7 +116,7 @@ void arrived(int pos)
   // }
   scroll(0,s_x,288,0, 223, 0xC0);
 	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
-  // put_number(selector_x,4,s_x_relative+10,s_y_relative+3);
+  put_hex(knightbtl,6,s_x_relative+10,s_y_relative+3);
   // put_number(selector_y,4,s_x_relative+10,s_y_relative+4);
 	commander_select_cursor = 0;
 
@@ -342,7 +342,7 @@ void load_overworld_bg()
 	s_y_relative = s_y / 8;
 
 	set_map_data(overworldmap,MAP_WIDTH,32);
-	set_tile_data(overworldtiles,153,overworldtilespal,TILE_WIDTH);
+	set_tile_data(overworldtiles,166,overworldtilespal,TILE_WIDTH);
 
 	load_tile(TILE_VRAM);
 
@@ -1152,6 +1152,11 @@ void overworld_controls(){
 	 }
 	 if(j_2 & JOY_SEL)
 	 {
+    // clear_commander_battle_group(party_commanders);
+    // put_hex(&party_commanders[0],6,s_x_relative,s_y_relative);
+    // put_number(party_commanders[0].bg.units[0].id,4,s_x_relative,s_y_relative);
+    // load_unit_header(SWORD_UNIT,0);
+    // put_number(unit_header[0].atk,6,s_x_relative+10,s_y_relative);
     // read_tile_data(1+g++,17);
     // display_party_commanders_window(0,0,0);
 //     display_player_resources_window(0,0);

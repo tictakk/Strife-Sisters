@@ -18,3 +18,7 @@ Spearman:
 
   ;unit growth
   .db GROWTH_DPS
+
+  ;graphic
+  .db bank(_musketbtl)
+  .dw _musketbtl & $1fff

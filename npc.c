@@ -15,11 +15,11 @@ struct npc{
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
-                                        18,20,21,22,19,
-                                        19,25,24,17,26,
+                                        18,25,21,17,19,
+                                        17,25,17,17,26,
                                         25,19,19,17,17,
-                                        24,23,25,25,25,
-                                        25,25};
+                                        24,23,20,25,25,
+                                        17,20};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -38,13 +38,13 @@ void init_npcs()
 
   load_palette(17,sldpal,1);
   load_palette(18,magepal,1);
-  load_palette(19,monkpal,1);
-  load_palette(20,dmnpal,1);
+  load_palette(19,magepal+16,1);
+  load_palette(20,thfpal,1);
   load_palette(21,blobpal,1);
-  load_palette(22,axebtlpal,1);
+  load_palette(22,monkpal,1);
   load_palette(23,bndpal,1);
   load_palette(24,lancepal,1);
-  load_palette(25,golpal,1);
+  load_palette(25,sniperpal,1);
   // load_palette(26,gol_pal,1);
   // load_palette(31,dark,1);
   // load_palette(31,sldpal,1);
@@ -168,12 +168,20 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],bnd,0x100);
           break;
 
+          case THIEF_UNIT:
+          load_vram(npc_vram[type],thf,0x100);
+          break;
+
           case GOLEM_UNIT:
           load_vram(npc_vram[type],gol,0x100);
           break;
 
           case MONK_UNIT:
           load_vram(npc_vram[type],mnk,0x100);
+          break;
+
+          case BRAWLER_UNIT:
+          load_vram(npc_vram[type],brl,0x100);
           break;
 
           case LANCER_UNIT:

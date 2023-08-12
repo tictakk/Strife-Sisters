@@ -106,7 +106,7 @@ void battlefield_loop(char map_id)
   select_unit(0);
   // play_story();
   display_selector(SELECTOR,sx,sy,16);
-  // psgPlay(3);
+  psgPlay(3);
   // while(exit_battlefield)
   // put_number((char)unit_header[0].hp,3,0,0);
   while(map_result_status == MAP_RESULT_NONE)
@@ -177,7 +177,7 @@ void battle_start()
   // load_map_items();
   sx = (entities[0].pos&15) << 4;
   sy = (entities[0].pos>>4) << 4;
-  load_sprites_();
+  load_sprz();
 }
 
 void check_battle_complete()
@@ -415,7 +415,7 @@ void display_terrain_bonus()
   // put_terrain_atk_stat(t_type,3,2);
 }
 
-void load_sprites_() //load default sprites
+void load_sprz() //load default sprites
 {
   load_palette(12,bluepal,1);
   load_palette(13,redpal,1);
@@ -1102,14 +1102,13 @@ char begin_battle(unsigned char attacker, unsigned char target, unsigned char ra
   {
     destroy_entity(attacker);
   }
-  // load_ents();
   
   load_battlefield_map();
-  load_sprites_();
+  load_sprz();
   update_map();
   load_ents();
   disp_on();
-  // load_ents();
+
   selector_mode = 0;
 
   vsync();

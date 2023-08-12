@@ -18,3 +18,7 @@ Paladin:
 
   ;unit growth
   .db GROWTH_RESIST_MELEE
+
+  ;graphic
+  .db bank(_musketbtl)
+  .dw _musketbtl & $1fff

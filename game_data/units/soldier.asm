@@ -18,3 +18,7 @@ Soldier:
 
   ;unit growth
   .db GROWTH_DPS
+
+  ;graphic
+  .db bank(_attack)
+  .dw _attack & $1fff

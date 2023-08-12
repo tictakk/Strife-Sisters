@@ -95,17 +95,12 @@ void determine_crit()
   int odds;
   
   crit = 0;
-  evade = 0;
   odds = (unit_header[0].spd * 100)/255;
   roll = range(1,100);
-  // put_number(roll,4,10,0);
-  // put_number(odds,4,15,0);
   if(roll < odds)
   {
     crit = 1;
     attacker_effect = WORDING_CRIT;
-    // put_string("crit",20,0);
-    // wait_for_I_input();
   }
   else
   {
@@ -113,7 +108,7 @@ void determine_crit()
   }
 }
 
-void determie_miss()
+void determine_miss(char target_id)
 {
   //algo for miss here...
   //max modifer = +51, -204
@@ -122,12 +117,10 @@ void determie_miss()
   evade = 0;
   if(difference > 51)
   {
-    evade = 0;
     return;
   }
   if(difference < -204)
   {
-    evade = 1;
     misses++;
     return;
   }
@@ -137,10 +130,11 @@ void determie_miss()
 
   if(accuracy < roll)
   {
-    evade = 1;
+    // put_string("miss",10,0);
     // put_number(roll,5,10,0);
     // put_number(accuracy,5,16,0);
     // wait_for_I_input();
+    set_unit_evade(target_id);
     misses++;
   }
   return evade;
@@ -150,6 +144,14 @@ void apply_modifier(char target, char modifier, char amount)
 {
   switch(modifier)
   {
+    case MOD_SPD:
+    battleunits[target].s_bonus += amount;
+    break;
+
+    case MOD_POW:
+    battleunits[target].p_bonus += amount;
+    break;
+
     case MOD_ATK:
     battleunits[target].a_bonus += amount;
     break;
@@ -209,7 +211,7 @@ void animate_one_to_one_art()
   {
     if(battleunits[i].active && battleunits[i].target)
     {
-      spr_set(i+5);
+      spr_set(i+MAX_EFFECT_COUNT);
       load_art(art_queue_id,spr_get_x()+8,spr_get_y()+16,!unit_direction(i));
       animate_art(art_queue_id);
       apply_art(i);
@@ -223,7 +225,7 @@ void animate_one_to_many_art()
 {
   char i;
 
-  spr_set(get_first_target()+5);
+  spr_set(get_first_target()+MAX_EFFECT_COUNT);
   load_art(art_queue_id,spr_get_x(),spr_get_y(),!unit_direction(get_first_target()));
   animate_art(art_queue_id);
   for(i=0; i<18; i++)
@@ -244,7 +246,7 @@ void animate_many_to_many_art()
   {
     if(battleunits[i].active && battleunits[i].target)
     {
-      spr_set(i+5);
+      spr_set(i+MAX_EFFECT_COUNT);
       load_art(art_queue_id,spr_get_x(),spr_get_y(),!unit_direction(i));
       animate_art(art_queue_id);
       apply_art(i);
@@ -346,6 +348,7 @@ void d_battle(char team)
   
   while(battle_clock != -1)
   {
+    // put_number(animating,3,0,0);
     if(joytrg(0) == JOY_RUN)
     {
       battle_ctrls();
@@ -427,6 +430,7 @@ void battle_unit_state(char b_id)
 {
   if(battleunits[b_id].state == ATTACK){ b_u_attack(b_id); return; }
   if(battleunits[b_id].state == STUNNED){ b_u_stun(b_id); return; }
+  if(battleunits[b_id].state == STATE_EVADE){ b_u_evade(b_id); return; }
   if(battleunits[b_id].state == IDLE){ b_u_idle(b_id); return; }
   if(battleunits[b_id].state == WAITING) { b_u_wait(b_id); return; }
   if(battleunits[b_id].state == HEALING) { b_u_heal(b_id); return; }
@@ -435,7 +439,6 @@ void battle_unit_state(char b_id)
 
 void b_u_meter(char b_id)
 {
-  // put_number(battleunits[b_id].frame,3,0,0);
   if(battleunits[b_id].frame == 0)
   {
     display_window_rel(2,8,12,3);
@@ -444,7 +447,7 @@ void b_u_meter(char b_id)
   }
   if(battleunits[b_id].frame < 6)//animating attack
   {
-    spr_set(b_id+5);
+    spr_set(b_id+MAX_EFFECT_COUNT);
     animate_attack(b_id,battleunits[b_id].frame++);
   }
   else if(battleunits[b_id].frame == 7)
@@ -453,7 +456,7 @@ void b_u_meter(char b_id)
   }
   else if(battleunits[b_id].frame < 11)
   {
-    spr_set(b_id+5);
+    spr_set(b_id+MAX_EFFECT_COUNT);
     animate_attack(b_id,battleunits[b_id].frame++);
   }
   else
@@ -500,15 +503,15 @@ void b_u_attack(char b_id)
 {
   if(battleunits[b_id].frame == 0) //check if unit has advantage
   {
-    char i;
-    unsigned char adv;
+    // char i;
+    // unsigned char adv;
 
     // display_window_rel(2,8,12,3);
     // bid_to_unit_header(b_id,0);
     // put_string(arts[unit_header[0].attacks[battleunits[b_id].column]].name,3,9);
-    if(!sea_legs_art)
-    {
-      adv = 0;
+    // if(!sea_legs_art)
+    // {
+      // adv = 0;
       // for(i=0; i<18; i++)
       // {
       //   if(battleunits[i].active && battleunits[i].target)
@@ -520,18 +523,17 @@ void b_u_attack(char b_id)
       //     }
       //   }
       // }
-
-      if(adv)
-      {
-        spr_set(b_id+5);
-        create_effect(EFFECT_ADV,spr_get_x(),spr_get_y(),0);
-        spr_show();
-      }
-    }
+      // if(adv)
+      // {
+      //   spr_set(b_id+MAX_EFFECT_COUNT);
+      //   create_effect(EFFECT_ADV,spr_get_x(),spr_get_y(),0);
+      //   spr_show();
+      // }
+    // }
   }
   if(battleunits[b_id].frame == 6)
   {
-    set_targets_stunned();
+    set_targets_stunned(b_id);
   }
   if(battleunits[b_id].frame < 11)//animating attack
   {
@@ -549,24 +551,17 @@ void b_u_attack(char b_id)
         apply_level_to_header(battleunits[b_id].unit->level,0);
         bid_to_unit_header(i,1);
         apply_level_to_header(battleunits[i].unit->level,1);
-        // if(battleunits[b_id].ent_id == atker)
+        // determine_crit();
+        // determine_miss();
+        // if(!evade)
         // {
-          // calc_hit_damage(b_id,i,a_atk_bonus,0,t_def_bonus);
-        determine_crit();
-        determie_miss();
-        if(!evade)
-        {
-          dmg = calc_damage(b_id,i,battleunits[b_id].unit->level,unit_header[0].atk,unit_header[1].def,10);
+          dmg = calc_damage(b_id,i,battleunits[b_id].unit->level,unit_header[0].atk,unit_header[1].def,arts[unit_header[0].attacks[battleunits[b_id].column]].base_amt);
           calc_hit_damage(i,dmg,0,0);
-          evade = 0;
-        }
+          // evade = 0;
+        // }
         battleunits[i].target = 0;
-        // }
-        // else
-        // {
-          // calc_hit_damage(b_id,i,t_atk_bonus,0,a_def_bonus);
-        // }
       }
+      crit = 0;
     }
     set_unit_waiting(b_id);
     battleunits[b_id].attacks--;
@@ -574,12 +569,29 @@ void b_u_attack(char b_id)
   }
 }
 
-void b_u_stun(char b_id){
-  // put_number(b_id,3,10,0);
-  // wait_for_I_input();
+void b_u_evade(char b_id)
+{
+  if(battleunits[b_id].frame++ == 0)
+  {
+    spr_set(MAX_EFFECT_COUNT+b_id);
+    create_miss_effect(spr_get_x(),spr_get_y());
+  }
+  else if(battleunits[b_id].frame < 11)
+  {
+    animate_effects();
+  }
+  else
+  {
+    set_unit_waiting(b_id);
+    remove_effects();
+  }
+}
+
+void b_u_stun(char b_id)
+{
   if(battleunits[b_id].frame == 0)
   {
-    spr_set(b_id+5);
+    spr_set(b_id+MAX_EFFECT_COUNT);
     spr_pattern(stun_vrams[stun_count++]);
     battleunits[b_id].frame++;
     create_hit_spark(spr_get_x(),spr_get_y(),0);
@@ -630,7 +642,7 @@ void b_u_heal(char b_id)
     {
       if(battleunits[j].target)
       {
-        spr_set(j+5);
+        spr_set(j+MAX_EFFECT_COUNT);
         // create_effect(EFFECT_HEAL,spr_get_x()+8,spr_get_y()+16,0);
         create_healing(spr_get_x()+8,spr_get_y()+16,0);
       }
@@ -661,7 +673,7 @@ void b_u_heal(char b_id)
 
 void animate_attack(char unit_id, char hit_frames)
 {
-	spr_set(unit_id+5);
+	spr_set(unit_id+MAX_EFFECT_COUNT);
 	spr_pattern(attack_vrams[0]+ATTACK_ANIMATIONS[hit_frames]);
 }
 
@@ -690,7 +702,7 @@ void update_healthbar(char b_id)
 void hide_healthbar(char unit_id)
 {
 	int x,y;
-	spr_set(unit_id+5);
+	spr_set(unit_id+MAX_EFFECT_COUNT);
 	y = spr_get_y();
 	x = spr_get_x();
 	put_string("     ",x/8,y/8+4);
@@ -709,7 +721,7 @@ void calc_heal(char healer_id, char target_id, char a_a_bonus, char t_a_bonus, c
     battleunits[target_id].unit->hp = min(battleunits[target_id].unit->hp + heal_amt,unit_header[0].hp);
   }
   battleunits[target_id].target = 0;
-  spr_set(target_id+5);
+  spr_set(target_id+MAX_EFFECT_COUNT);
   update_healthbar(target_id);
 }
 
@@ -741,7 +753,7 @@ int calc_damage(char a_id, char t_id, int a_level, int a_base, int d_base, int m
   dmg /= d_base;
   dmg += 2;
   dmg /= 4;
-  put_number(dmg,4,0,0);
+  // put_number(dmg,4,0,0);
   crit = 0;
   return dmg;
 }
@@ -793,7 +805,7 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
 	attack_range = range;
 	xOffset = -26;
 	atker = i1, trgt = i2;
-  cmdr_count = 30;
+  cmdr_count = 28;
   target_effect = 0;
   attacker_effect = 0;
   crit = 0;
@@ -828,6 +840,9 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
   load_vram(0x4BB0,icons_gfx,0x60);
 	load_vram(0x49A0,icons_gfx+0x60,0x50);
 
+  // load_palette(30,effect_pal,1);
+  // load_palette(31,lightening_effect_pal,1);
+
 	load_healthbars();
   set_infobar();
 
@@ -839,6 +854,9 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
   // set_art_lists();
   load_palette(EFFECTS_WORD_PAL,effect_pal,1);
   // gfx_line(14,0,14,10,3);
+
+  load_palette(0,battlepal,1);
+  
   battle_seq();
 	reset_satb();
 	cleanup_battle(i1,i2);
@@ -1025,9 +1043,9 @@ void print_army_combos(char entity_id, char unit_offset)
 
 void update_info_bar()
 {
-  put_number(calculate_power(entities[atker].id),3,5,4);
+  // put_number(calculate_power(entities[atker].id),3,5,4);
   display_meter_bars(entities[atker].bg->meter,10,4);
-  put_number(calculate_power(entities[trgt].id),3,24,4);
+  // put_number(calculate_power(entities[trgt].id),3,24,4);
   display_meter_bars(entities[trgt].bg->meter,19,4);
 }
 
@@ -1071,7 +1089,7 @@ void init_armies(int player, int cpu)
 
 	for(j=0; j<9; j++)
 	{
-		spr_set(j+9+5);
+		spr_set(j+9+MAX_EFFECT_COUNT);
 		spr_ctrl(FLIP_MAS,FLIP_X);
 	}
 	satb_update();
@@ -1085,103 +1103,41 @@ void hide_art_name()
 void load_pals(char entity_id, int off)
 {
 	char i;
+
+  load_palette(17,soldierpal,1); //sword,knight,lancer,monk,fighger,brawler,archer,spear
+  load_palette(18,magebtlpal,1);
+  load_palette(19,magebtlpal+16,1);
+  load_palette(21,blobbattlepal,1);
+  load_palette(20,golempal,1);
+  load_palette(22,monkbtlpal,1);
+  load_palette(25,houndbtlpal,1);
+  load_palette(27,magebtlpal,1);
+  load_palette(24,magebtlpal+32,1);
+  load_palette(23,sniperbtlpal,1);
+  // load_palette(19,stalkerpal,1);
+
 	for(i=0; i<9; i++)
 	{
 		if(entities[entity_id].bg->units[i].hp)
 		{
 			switch(entities[entity_id].bg->units[i].id)
 			{
-				case BLOB_UNIT:
-          load_palette(battleunits[i+off].pal,blobbattlepal,1);
-          break;
-        
         case REI:
           load_palette(cmdr_count++,rei_battle_pal,1);
-          spr_set(5+(i+off));
+          spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);
           break;
 
         case VIOLET:
           load_palette(cmdr_count++,violet_battle_pal,1);
-          spr_set(5+(i+off));
+          spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);
           break;
         
         case KING:
           load_palette(cmdr_count++,king_battle_pal,1);
-          spr_set(5+(i+off));
+          spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);
-          break;
-
-				case SWORD_UNIT:
-          load_palette(battleunits[i+off].pal,soldierpal,1);
-          break;
-
-        case PALADIN_UNIT:
-          load_palette(battleunits[i+off].pal,paladinpal,1);
-          break;
-
-        case KNIGHT_UNIT:
-        case LANCER_UNIT:
-				case SPEAR_UNIT:
-          load_palette(battleunits[i+off].pal,spearpal,1);
-          break;
-
-        case STALKER_UNIT:
-          load_palette(battleunits[i+off].pal,stalkerpal,1);
-          break;
-
-				case ARCHER_UNIT:
-          load_palette(battleunits[i+off].pal,musketbtlpal,1);
-          break;
-
-        case GOLEM_UNIT:
-          load_palette(battleunits[i+off].pal,golempal,1);
-          break;
-        
-        case BERSERKER_UNIT:
-        case SNIPER_UNIT:
-          load_palette(battleunits[i+off].pal,sniperbtlpal,1);
-          break;
-
-				case DEMON_UNIT:
-          load_palette(battleunits[i+off].pal,demonbtlpal,1);
-          break;
-
-				case HOUND_UNIT:
-          load_palette(battleunits[i+off].pal,houndbtlpal,1);
-          break;
-
-				case AXE_UNIT:
-          load_palette(battleunits[i+off].pal,axebtlpal,1);
-          break;
-
-        case RAIDER_UNIT:
-          load_palette(battleunits[i+off].pal,raiderbtlpal,1);
-          break;
-
-        case PRIEST_UNIT:
-        case WITCH_UNIT:
-          load_palette(battleunits[i+off].pal,witchbtlpal,1);
-          break;
-
-        case MAGE_UNIT:
-          load_palette(battleunits[i+off].pal,magebtlpal,1);
-          break;
-
-        case VIOLET:
-        case CLERIC_UNIT:
-          load_palette(battleunits[i+off].pal,magebtlpal+16,1);
-          break;
-
-        case BLACK_MAGE_UNIT:
-          load_palette(battleunits[i+off].pal,magebtlpal+32,1);
-          break;
-
-        case BRAWLER_UNIT:
-        case FIGHTER_UNIT:
-        case MONK_UNIT:
-          load_palette(battleunits[i+off].pal,monkbtlpal,1);
           break;
 			}
 		}
@@ -1197,6 +1153,8 @@ void kill_unit(char b_id)
   //   entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp = 1;
   //   return;
   // }
+  // bid_to_unit_header(b_id,1);
+
   entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp = 0;
   entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].id = 0;// = &unit_list[NO_UNIT];
   battleunits[b_id].active = 0;
@@ -1210,7 +1168,7 @@ void kill_unit(char b_id)
   {
     units_killed++;
     battle_killed++;
-    battle_exp += 20;
+    battle_exp += (20 * (int)battleunits[b_id].unit->level);
     // battle_exp += battleunits[b_id].unit->unit->exp;
   }
   if(battleunits[b_id].ent_id == atker)
@@ -1231,7 +1189,7 @@ void kill_unit(char b_id)
     team_two_tracked = 0;
     team_two_tracking = 0;
   }
-  spr_hide(5+b_id);
+  spr_hide(MAX_EFFECT_COUNT+b_id);
 }
 
 void blowback(char b_id)
@@ -1271,27 +1229,27 @@ void slide_forward(char b_id, char amt)
 
 void slide_right(char b_id, char amt)
 {
-  spr_set(5+b_id);
+  spr_set(MAX_EFFECT_COUNT+b_id);
   spr_x(spr_get_x()+amt);
 }
 
 void slide_left(char b_id, char amt)
 {
-  spr_set(5+b_id);
+  spr_set(MAX_EFFECT_COUNT+b_id);
   spr_x(spr_get_x()-amt);
 }
 
 void shake_unit(char b_id)
 {
-  spr_set(b_id+5);
+  spr_set(b_id+MAX_EFFECT_COUNT);
     
   if(battleunits[b_id].frame % 2)
   {
-    spr_x(spr_get_x(b_id+5)+1);
+    spr_x(spr_get_x(b_id+MAX_EFFECT_COUNT)+1);
   }
   else
   {
-    spr_x(spr_get_x(b_id+5)-1);
+    spr_x(spr_get_x(b_id+MAX_EFFECT_COUNT)-1);
   }
   battleunits[b_id].frame++;
 }
@@ -1348,20 +1306,36 @@ void load_arts_by_targets(char art_type, char flip)
   {
     if(battleunits[i].target)
     {
-      spr_set(i+5);
+      spr_set(i+MAX_EFFECT_COUNT);
       load_art(art_type,spr_get_x(),spr_get_y(),flip);
     }
   }
 }
 
-void set_targets_stunned()
+void set_targets_stunned(char b_id)
 {
   char i;
   for(i=0; i<18; i++)
   {
     if(battleunits[i].target)
     {
-      set_unit_stunned(i);
+      bid_to_unit_header(b_id,0);
+      apply_level_to_header(battleunits[b_id].unit->level,0);
+      bid_to_unit_header(i,1);
+      apply_level_to_header(battleunits[i].unit->level,1);
+
+      determine_miss(i);
+      if(battleunits[i].state != STATE_EVADE)
+      {
+        determine_crit();
+        set_unit_stunned(i);
+        if(crit)
+        {
+          spr_set(MAX_EFFECT_COUNT+b_id);
+          create_crit_effect(spr_get_x(),spr_get_y());
+          // wait_for_I_input();
+        }
+      }
       battleunits[i].frame = 0;
     }
   }

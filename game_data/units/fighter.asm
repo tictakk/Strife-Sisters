@@ -18,3 +18,7 @@ Fighter:
 
   ;unit growth
   .db GROWTH_DPS
+  
+  ;graphic
+  .db bank(_fighterbtl)
+  .dw _fighterbtl & $1fff

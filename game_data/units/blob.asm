@@ -18,3 +18,7 @@ Blob:
 
   ;unit growth
   .db GROWTH_TANK_MELEE
+
+  ;graphic
+  .db bank(_blobbattle)
+  .dw _blobbattle & $1fff

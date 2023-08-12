@@ -18,3 +18,7 @@ Lancer:
 
   ;unit growth
   .db GROWTH_DPS
+
+  ;graphic
+  .db bank(_lancerbtl)
+  .dw _lancerbtl & $1fff

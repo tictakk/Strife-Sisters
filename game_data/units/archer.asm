@@ -18,3 +18,7 @@ Archer:
 
   ;unit growth
   .db GROWTH_RANGED_DPS
+
+  ;graphic
+  .db bank(_musketbtl)
+  .dw _musketbtl & $1fff

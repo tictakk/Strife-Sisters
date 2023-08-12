@@ -3,6 +3,10 @@
 //squirrel
 #include "sound/psglib.c"
 #include "snginit.c"
+#include "farMemcpy.h"
+#include "farMemcpy.c"
+#include "load_vram_fptr.h"
+
 int VSyncCnt;
 int TimerCnt;
 int MainCnt;
@@ -10,6 +14,13 @@ int SubCnt;
 
 int hits=0;
 int misses=0;
+
+typedef struct {
+    char idx;
+    char bank[10];
+    int  addr[10];
+} Pointers;
+Pointers myPointers;
 
 #asm
 GROWTH_DPS = 0
@@ -25,76 +36,75 @@ GROWTH_TINKER = 9
 GROWTH_SPEED_DPS = 10
 
     .data
-    .bank 3
-_nounit:
+  _nounit:
     .include "game_data/units/no_unit.asm"
-_soldier:
+;  _soldier:
     .include "game_data/units/soldier.asm"
-_spearman: 
+;  _spearman: 
     .include "game_data/units/spearman.asm"
-_archer:
+;   _archer:
     .include "game_data/units/archer.asm"
-_mage:
+;   _mage:
     .include "game_data/units/mage.asm"
-_demon:
+;   _demon:
     .include "game_data/units/demon.asm"
-_hound:
+;   _hound:
     .include "game_data/units/hound.asm"
-_blob:
+;   _blob:
     .include "game_data/units/blob.asm"
-_axeman:
+;  _axeman:
     .include "game_data/units/axeman.asm"
-_paladin:
+;  _paladin:
     .include "game_data/units/paladin.asm"
-_monk:
+;  _monk:
     .include "game_data/units/monk.asm"
-_sniper:
+;  _sniper:
     .include "game_data/units/sniper.asm"
-_lancer:
+;  _lancer:
     .include "game_data/units/lancer.asm"
-_knight:
+;  _knight:
     .include "game_data/units/knight.asm"
-_berserker:
+;  _berserker:
     .include "game_data/units/berserker.asm"
-_stalker:
+;  _stalker:
     .include "game_data/units/stalker.asm"
-_artillery:
+;  _artillery:
     .include "game_data/units/artillery.asm"
-_cleric:
+;  _cleric:
     .include "game_data/units/cleric.asm"
-_priest:
+;  _priest:
     .include "game_data/units/priest.asm"
-_black_mage:
+;  _black_mage:
     .include "game_data/units/blackmage.asm"
-_witch:
+;  _witch:
     .include "game_data/units/witch.asm"
-_raider:
+; _raider:
     .include "game_data/units/raider.asm"
-_thief:
+; _thief:
     .include "game_data/units/thief.asm"
-_captain:
+; _captain:
     .include "game_data/units/captain.asm"
-_fighter:
+; _fighter:
     .include "game_data/units/fighter.asm"
-_brawler:
+; _brawler:
     .include "game_data/units/brawler.asm"
-_golem:
+;_golem:
     .include "game_data/units/golem.asm"
-_holder1:
+;_holder1:
     .include "game_data/units/holder1.asm"
-_holder2:
+;_holder2:
     .include "game_data/units/holder2.asm"
-_rei:
+;_rei:
     .include "game_data/units/rei.asm"
-_violet:
+;_violet:
     .include "game_data/units/violet.asm"
-_king:
+;_king:
     .include "game_data/units/king.asm"
     .code
 #endasm
 
 extern const char nounit[];
-// extern const char soldier[];
+extern const char soldier[];
 // extern const char spearman[];
 // extern const char archer[];
 
@@ -102,6 +112,15 @@ char screen_dimensions = 0;
 // char debug_number = 0;
 // char debug_array[24];
 
+#define FRONT_COLUMN 0
+#define MIDDLE_COLUMN 1
+#define REAR_COLUMN 2
+
+int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
+int g = 0;
+
+#include "map_dimension.h"
+#include "paths.c"
 #define PLAYER 1
 #define CPU 2
 
@@ -117,20 +136,16 @@ char screen_dimensions = 0;
 #define ALL_ALLIES 9
 #define ALL_UNITS 10
 
-#define FRONT_COLUMN 0
-#define MIDDLE_COLUMN 1
-#define REAR_COLUMN 2
-
-int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
-int g = 0;
-
-#include "map_dimension.h"
-#include "paths.c"
 #include "strifesisters.h"
-// #include "item.c"
 #include "effects.c"
 #include "arts.c"
 #include "units.c"
+
+#incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
+#inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
+#inctile(battletiles,"tiles/battletiles.tiles.pcx")
+#incpal(battlepal,"tiles/battletiles.tiles.pcx")
+
 #include "terrain.c"
 #include "commander.c"
 #include "map.c"
@@ -351,15 +366,18 @@ enum Direction{
 #incspr(mag,"map/sprites/mage.pcx",2,2)
 #incspr(blobsmall,"map/sprites/blob.pcx")
 #incspr(bnd,"characters/bandit.pcx")
+#incspr(thf,"characters/thief_small.pcx")
 #incspr(dark,"map/sprites/dark.pcx")
 #incspr(gol,"characters/golem_small.pcx")
 #incspr(mnk,"characters/monk.pcx")
+#incspr(brl,"characters/brawler_small.pcx")
 #incspr(lan,"characters/lance.pcx")
 #incspr(snipersmall,"characters/sniper_small.pcx")
-#incspr(knightsmall,"characters/knight.pcx")
+#incspr(knightsmall,"characters/knight_small.pcx")
 
 #incpal(sldpal, "map/sprites/sldpiece.pcx",0,1)
-#incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
+#incpal(thfpal, "characters/thief_small.pcx")
+// #incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
 #incpal(mskpal,"map/sprites/msktpiece.pcx",0,2)
 #incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
 #incpal(blobpal,"map/sprites/blob.pcx")
@@ -492,10 +510,10 @@ void main()
 	{
     // simulate_battle(SWORD_UNIT,FIGHTER_UNIT);
 		// display_intro();
-    // display_demo();
-		// overworld_loop(demo_select_x,demo_select_y);
-    preload_commanders_map_1();
-    overworld_loop(5,31);
+    display_demo();
+		overworld_loop(demo_select_x,demo_select_y);
+    // preload_commanders_map_1();
+    // overworld_loop(5,31);
 
     // game_result();
 		// battle_loop(0,23,1);
@@ -538,7 +556,7 @@ void display_demo()
   put_string("Demo",14,17);
   put_string("Press Run",12,19);
   put_string("| Laconic Software 2023",4,24);
-  // psgPlay(0);
+  psgPlay(0);
   while(loop)
   {
     if(joytrg(0) & JOY_RUN)
@@ -628,7 +646,13 @@ void select_level(char level)
 
 void load_unit_header(int id, char header_no)
 {
-  memcpy(&unit_header[header_no],nounit+(id*sizeof(Unit)),sizeof(Unit));
+  // memcpy(&unit_header[header_no],nounit+(id*sizeof(Unit)),sizeof(Unit));
+  // memcpy(&unit_header[header_no],soldier,sizeof(Unit));
+
+  myPointers.idx = 0;
+  getFarPointer(nounit, &(myPointers.bank[0]), &(myPointers.addr[0]));
+  addOffsetFarPointer(&(myPointers.bank[0]), &(myPointers.addr[0]), id*sizeof(Unit));
+  farMemcpy( setFarMemcpy(&unit_header[header_no], myPointers.bank[0], myPointers.addr[0], sizeof(Unit)) );
 }
 
 void apply_level_to_header(char level, char header_no)
@@ -650,10 +674,20 @@ void preload_commanders_map_1()
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
 
+  party_commanders[0].bg.units[0].id = 0;
+  party_commanders[0].bg.units[1].id = 0;
+  party_commanders[0].bg.units[2].id = 0;
+  party_commanders[0].bg.units[3].id = 0;
+  party_commanders[0].bg.units[4].id = 0;
+  party_commanders[0].bg.units[5].id = 0;
+  party_commanders[0].bg.units[6].id = 0;
+  party_commanders[0].bg.units[7].id = 0;
+  party_commanders[0].bg.units[8].id = 0;
+
   load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
-  load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
+  // load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
   load_unit_to_cmdr(0,4,ARCHER_UNIT,0,1);
-  load_unit_to_cmdr(0,0,REI,1,1);
+  load_unit_to_cmdr(0,1,REI,1,1);
 
   // party_commanders[0].bg.units[0].exp = 188;
   // level_up_unit(&party_commanders[0].bg.units[0]);
@@ -763,7 +797,7 @@ void display_outro()
   load_palette(0,sisters_logo_pal,1);
   cls();
   disp_on();
-  // psgPlay(2);
+  psgPlay(2);
 	put_string("Thanks for playing!",7,14);
   // vsync(30);
   // sync(2);
@@ -1025,119 +1059,124 @@ void print_unit_fullname(char unit_id, int x, int y)
 
 void draw_32x32_sprite(char type, int x, int y)
 {
+  load_unit_header(type,1);
+  myPointers.bank[2] = unit_header[1].bank;
+  myPointers.addr[2] = unit_header[1].address;
+
+  load_vram_fptr( setFarOffsetLoadvram(0x6E00, myPointers.bank[2], myPointers.addr[2], 0x100, 0) );
   switch(type)
   {
     case SWORD_UNIT:
       load_palette(30,soldierpal,1);
-      load_vram(0x6E00,attack,0x100);
+      // load_vram(0x6E00,attack,0x100);
       break;
 
     case SNIPER_UNIT:
       load_palette(30,sniperbtlpal,1);
-      load_vram(0x6E00,sniperbtl,0x100);
+      // load_vram(0x6E00,sniperbtl,0x100);
     break;
 
     case BERSERKER_UNIT:
       load_palette(30,sniperbtlpal,1);
-      load_vram(0x6E00,berserkerbtl,0x100);
+      // load_vram(0x6E00,berserkerbtl,0x100);
     break;
 
     case KNIGHT_UNIT:
       load_palette(30,spearpal,1);
-      load_vram(0x6E00,knightbtl,0x100);
+      // load_vram(0x6E00,knightbtl,0x100);
       break;
-    
+
     case PALADIN_UNIT:
       load_palette(30,paladinpal,1);
-      load_vram(0x6E00,paladinbtl,0x100);
+      // load_vram(0x6E00,paladinbtl,0x100);
       break;
 
     case SPEAR_UNIT:
       load_palette(30,spearpal,1);
-      load_vram(0x6E00,attack2,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,attack2,0x100);
       break;
 
     case STALKER_UNIT:
       load_palette(30,stalkerpal,1);
-      load_vram(0x6E00,stalkerbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,stalkerbtl,0x100);
       break;
 
     case ARCHER_UNIT:
       load_palette(30,musketbtlpal,1);
-      load_vram(0x6E00,musketbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,musketbtl,0x100);
       break;
 
     case AXE_UNIT:
       load_palette(30,axebtlpal,1);
-      load_vram(0x6E00,axebtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,axebtl,0x100);
       break;
 
     case HOUND_UNIT:
       load_palette(30,houndbtlpal,1);
-      load_vram(0x6E00,houndbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,houndbtl,0x100);
       break;
 
     case CLERIC_UNIT:
       load_palette(30,magebtlpal+16,1);
-      load_vram(0x6E00,magebtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,magebtl,0x100);
       break;
 
     case WITCH_UNIT:
       load_palette(30,witchbtlpal,1);
-      load_vram(0x6E00,witchbtl,0x100);
+      // load_vram(0x6E00,witchbtl,0x100);
       break;
 
     case PRIEST_UNIT:
       load_palette(30,witchbtlpal,1);
-      load_vram(0x6E00,priestbtl,0x100);
+      // load_vram(0x6E00,priestbtl,0x100);
       break;
 
     case MAGE_UNIT:
       load_palette(30,magebtlpal,1);
-      load_vram(0x6E00,magebtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,magebtl,0x100);
       break;
     
     case BLACK_MAGE_UNIT:
       load_palette(30,magebtlpal+32,1);
-      load_vram(0x6E00,magebtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,magebtl,0x100);
       break;
 
     case FIGHTER_UNIT:
       load_palette(30,monkbtlpal,1);
-      load_vram(0x6E00,fighterbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,fighterbtl,0x100);
       break;
 
     case BRAWLER_UNIT:
       load_palette(30,monkbtlpal,1);
-      load_vram(0x6E00,brawlerbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,brawlerbtl,0x100);
       break;
 
     case MONK_UNIT:
       load_palette(30,monkbtlpal,1);
-      load_vram(0x6E00,monkbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,monkbtl,0x100);
       break;
 
     case LANCER_UNIT:
       load_palette(30,spearpal,1);
-      load_vram(0x6E00,lancerbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,lancerbtl,0x100);
       break;
 
     case RAIDER_UNIT:
       load_palette(30,raiderbtlpal,1);
-      load_vram(0x6E00,raiderbtl,0x100);
-      // spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+      // load_vram(0x6E00,raiderbtl,0x100);
+      break;
+
+    case THIEF_UNIT:
+      load_palette(30,thfpal,1);
+      // load_vram(0x6E00,thiefbtl,0x100);
+      break;
+
+    case REI:
+      load_palette(30,rei_battle_pal,1);
+      break;
+    
+    case VIOLET:
+      load_palette(30,violet_battle_pal,1);
       break;
 
     // default:
@@ -2127,6 +2166,8 @@ void list_commander_army(Battlegroup *bg, char x, char y)
     for(j=0; j<3; j++)
     {
       // print_unit_info(&bg->units[(i*3)+j].unit,x+(i*5)+(s_x/8),y+(j*4)+(s_y/8));
+      // put_number(bg->units[(j*3)+i].id,4,0,0);
+      // wait_for_I_input();
       print_unit_info(&bg->units[(j*3)+i],x+(i*5)+(s_x/8),y+(j*4)+(s_y/8));
     }
   }
@@ -2202,12 +2243,6 @@ void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr
   party_commanders[cmdr_id].bg.units[unit_pos].level = level;
 }
 
-// void load_and_level_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr, char level)
-// {
-//   load_unit_to_cmdr(cmdr_id,unit_pos,unit_type,is_cmdr);
-//   level_unit_to(&party_commanders[cmdr_id].bg.units[unit_pos],level);
-// }
-
 void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
 {
   switch(layout_type)
@@ -2225,8 +2260,8 @@ void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
 
     case 24://blobs
       party_commanders[cmdr_id].sprite_type = BLOB_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT,0,map_level_table[level]);
+      // load_unit_to_cmdr(cmdr_id,0,THIEF_UNIT,0,map_level_table[level]);
+      // load_unit_to_cmdr(cmdr_id,2,THIEF_UNIT,0,map_level_table[level]);
       load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT,0,map_level_table[level]);
       load_unit_to_cmdr(cmdr_id,1,BLOB_UNIT,0,map_level_table[level]);
       break;
@@ -2247,16 +2282,12 @@ void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
       party_commanders[cmdr_id].sprite_type = ARCHER_UNIT;
       load_unit_to_cmdr(cmdr_id,0,ARCHER_UNIT,0,map_level_table[level]);
       load_unit_to_cmdr(cmdr_id,2,ARCHER_UNIT,0,map_level_table[level]);
-      // level_enemy_commander(cmdr_id,GENERIC_RANGED_STATS,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],22,14,17);
       break;
 
     case 28://spear
       party_commanders[cmdr_id].sprite_type = SPEAR_UNIT;
       load_unit_to_cmdr(cmdr_id,0,SPEAR_UNIT,0,map_level_table[level]);
       load_unit_to_cmdr(cmdr_id,2,SPEAR_UNIT,0,map_level_table[level]);
-      // set_commander_stats(cmdr_id,map_level_table[level],21,13,19);
-      // level_enemy_commander(cmdr_id,GENERIC_MELEE_STATS,map_level_table[level]);
       break;
     
     case 29://golem
@@ -2270,7 +2301,7 @@ void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
       party_commanders[cmdr_id].sprite_type = MONK_UNIT;
       load_unit_to_cmdr(cmdr_id,4,MONK_UNIT,0,map_level_table[level]);
       break;
-
+  
     case 31://lancer
       party_commanders[cmdr_id].sprite_type = LANCER_UNIT;
       load_unit_to_cmdr(cmdr_id,4,LANCER_UNIT,0,map_level_table[level]);
@@ -2285,7 +2316,25 @@ void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
       party_commanders[cmdr_id].sprite_type = KNIGHT_UNIT;
       load_unit_to_cmdr(cmdr_id,4,KNIGHT_UNIT,0,map_level_table[level]);
       break;
+
+    case 34://brawler
+      party_commanders[cmdr_id].sprite_type = BRAWLER_UNIT;
+      load_unit_to_cmdr(cmdr_id,4,BRAWLER_UNIT,0,map_level_table[level]);
+      break;
   }
+}
+
+void display_popup(char *str)
+{
+  s_y_relative = (s_y/8);
+  scroll(0,0,s_y+32,32,224,0x80);
+  display_window_rel(11,11,10,4);
+  write_text(12,12+s_y_relative,str);
+
+  sync(100);
+  load_map(0,2,0,0,16,29);
+  scroll(0,0,s_y+32,32,224,0xC0);
+  s_y_relative = 0;
 }
 
 void swap_commander_units(char cmdr_id, char first, char second)
