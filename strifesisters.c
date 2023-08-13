@@ -6,6 +6,7 @@
 #include "farMemcpy.h"
 #include "farMemcpy.c"
 #include "load_vram_fptr.h"
+#include "formations.c"
 
 int VSyncCnt;
 int TimerCnt;
@@ -556,7 +557,7 @@ void display_demo()
   put_string("Demo",14,17);
   put_string("Press Run",12,19);
   put_string("| Laconic Software 2023",4,24);
-  psgPlay(0);
+  // psgPlay(0);
   while(loop)
   {
     if(joytrg(0) & JOY_RUN)
@@ -797,7 +798,7 @@ void display_outro()
   load_palette(0,sisters_logo_pal,1);
   cls();
   disp_on();
-  psgPlay(2);
+  // psgPlay(2);
 	put_string("Thanks for playing!",7,14);
   // vsync(30);
   // sync(2);
@@ -2243,84 +2244,26 @@ void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr
   party_commanders[cmdr_id].bg.units[unit_pos].level = level;
 }
 
-void load_predefined_group_layout(char layout_type, char cmdr_id, char level)
+void load_predefined_group_layout(char formation, char r_one, char r_two, char r_three, char cmdr_id, char level)
 {
-  switch(layout_type)
+  int f_pos;
+  char i,j,unit;
+
+  unit = 0;
+  party_commanders[cmdr_id].sprite_type = r_one;
+  f_pos = formation * MAX_ARMY_SIZE;
+  for(i=0; i<MAX_ARMY_SIZE; i++)
   {
-    case 22://double hounds 
-      party_commanders[cmdr_id].sprite_type = HOUND_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,HOUND_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,2,HOUND_UNIT,0,map_level_table[level]);
-      break;
-
-    case 23://hounds
-      party_commanders[cmdr_id].sprite_type = HOUND_UNIT;
-      load_unit_to_cmdr(cmdr_id,1,HOUND_UNIT,0,map_level_table[level]);
-      break;
-
-    case 24://blobs
-      party_commanders[cmdr_id].sprite_type = BLOB_UNIT;
-      // load_unit_to_cmdr(cmdr_id,0,THIEF_UNIT,0,map_level_table[level]);
-      // load_unit_to_cmdr(cmdr_id,2,THIEF_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,4,BLOB_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,1,BLOB_UNIT,0,map_level_table[level]);
-      break;
-
-    case 25://raider
-      party_commanders[cmdr_id].sprite_type = RAIDER_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,RAIDER_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,2,RAIDER_UNIT,0,map_level_table[level]);
-      break;
-
-    case 26://swords
-      party_commanders[cmdr_id].sprite_type = SWORD_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,SWORD_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,2,SWORD_UNIT,0,map_level_table[level]);
-      break;
-
-    case 27://archer
-      party_commanders[cmdr_id].sprite_type = ARCHER_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,ARCHER_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,2,ARCHER_UNIT,0,map_level_table[level]);
-      break;
-
-    case 28://spear
-      party_commanders[cmdr_id].sprite_type = SPEAR_UNIT;
-      load_unit_to_cmdr(cmdr_id,0,SPEAR_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,2,SPEAR_UNIT,0,map_level_table[level]);
-      break;
-    
-    case 29://golem
-      party_commanders[cmdr_id].sprite_type = GOLEM_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,GOLEM_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,0,BLOB_UNIT,0,map_level_table[level]);
-      load_unit_to_cmdr(cmdr_id,2,BLOB_UNIT,0,map_level_table[level]);
-      break;
-
-    case 30://monk
-      party_commanders[cmdr_id].sprite_type = MONK_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,MONK_UNIT,0,map_level_table[level]);
-      break;
-  
-    case 31://lancer
-      party_commanders[cmdr_id].sprite_type = LANCER_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,LANCER_UNIT,0,map_level_table[level]);
-      break;
-
-    case 32://sniper
-      party_commanders[cmdr_id].sprite_type = SNIPER_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,SNIPER_UNIT,0,map_level_table[level]);
-      break;
-
-    case 33://knight
-      party_commanders[cmdr_id].sprite_type = KNIGHT_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,KNIGHT_UNIT,0,map_level_table[level]);
-      break;
-
-    case 34://brawler
-      party_commanders[cmdr_id].sprite_type = BRAWLER_UNIT;
-      load_unit_to_cmdr(cmdr_id,4,BRAWLER_UNIT,0,map_level_table[level]);
-      break;
+    if(f0[f_pos+i] == 1)
+    {
+      switch(i/3)
+      {
+        case 0: unit = r_one; break;
+        case 1: unit = r_two; break;
+        case 2: unit = r_three; break;
+      }
+      load_unit_to_cmdr(cmdr_id,i,unit,0,map_level_table[level]);
+    }
   }
 }
 

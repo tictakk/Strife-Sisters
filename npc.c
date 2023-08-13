@@ -15,7 +15,7 @@ struct npc{
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
 const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
-                                        18,25,21,17,19,
+                                        18,24,21,17,19,
                                         17,25,17,17,26,
                                         25,19,19,17,17,
                                         24,23,20,25,25,
@@ -43,7 +43,7 @@ void init_npcs()
   load_palette(21,blobpal,1);
   load_palette(22,monkpal,1);
   load_palette(23,bndpal,1);
-  load_palette(24,lancepal,1);
+  load_palette(24,dmnpal,1);
   load_palette(25,sniperpal,1);
   // load_palette(26,gol_pal,1);
   // load_palette(31,dark,1);

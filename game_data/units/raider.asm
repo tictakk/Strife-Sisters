@@ -20,5 +20,5 @@ Raider:
   .db GROWTH_SPEED_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_raiderbtl)
+  .dw _raiderbtl & $1fff

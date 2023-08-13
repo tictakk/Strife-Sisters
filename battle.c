@@ -1113,8 +1113,7 @@ void load_pals(char entity_id, int off)
   load_palette(25,houndbtlpal,1);
   load_palette(27,magebtlpal,1);
   load_palette(24,magebtlpal+32,1);
-  load_palette(23,sniperbtlpal,1);
-  // load_palette(19,stalkerpal,1);
+  load_palette(23,raiderbtlpal,1);
 
 	for(i=0; i<9; i++)
 	{

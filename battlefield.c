@@ -106,7 +106,7 @@ void battlefield_loop(char map_id)
   select_unit(0);
   // play_story();
   display_selector(SELECTOR,sx,sy,16);
-  psgPlay(3);
+  // psgPlay(3);
   // while(exit_battlefield)
   // put_number((char)unit_header[0].hp,3,0,0);
   while(map_result_status == MAP_RESULT_NONE)
@@ -269,7 +269,11 @@ void init_units()
 
   for(i=0; i<cpu_cmdr_count; i++)
   {
-    load_predefined_group_layout((char)battle_map_metadata.cpu_commander_ids[i],i+MAX_PARTY_COMMANDERS,(char)map_no);
+    load_predefined_group_layout((char)battle_map_metadata.cpu_commander_ids[i*4], //formation
+    (char)battle_map_metadata.cpu_commander_ids[i*4+1], //row one units
+    (char)battle_map_metadata.cpu_commander_ids[i*4+2], //row two units
+    (char)battle_map_metadata.cpu_commander_ids[i*4+3], //row three units
+    i+MAX_PARTY_COMMANDERS,(char)map_no);
     load_group(i,CPU,battle_map_metadata.cpu_start_pos+i,enemy_commanders);
   }
 }

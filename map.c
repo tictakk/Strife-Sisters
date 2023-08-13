@@ -1,7 +1,7 @@
 #incbin(map_metadata,"maps/mapout")
 
 // #define MAP_METADATA_SIZE 117 //I think
-#define MAP_METADATA_SIZE 135 //I think
+#define MAP_METADATA_SIZE 175 //I think
 
 #define MAP_RESULT_NONE 1
 #define MAP_RESULT_WIN 2
@@ -11,8 +11,8 @@
 //'                        Map meta data structure                           '
 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 // [ @area, map id | map x | map y | map type | p_cmdr_pos | c_cmdr_pos | c_cmdr_ids | event_pos | map_items | item_positions]
-//     1       1       1       1        1           16           40           40          16           6             12
-//                                 141 byte total
+//     1       1       1       1        1           16           40           80          16           6             12
+//                                 181 byte total
 // #define MAP_
 char ai_objective = 0;
 unsigned char map_x = 0;
@@ -23,7 +23,7 @@ char cpu_cmdr_count = 0;
 
 struct battle_map_data{
   int player_start_pos[8], cpu_start_pos[20];
-  int cpu_commander_ids[20];
+  char cpu_commander_ids[80];
   int event_positions[8];
   char map_items[6];
   int item_positions[6];
@@ -43,7 +43,7 @@ int *map_grades;
 void init_map_data(int map_id)
 {
   int offset;
-  int i;
+  int i, j;
 
   cpu_cmdr_count = 0;
   offset = ((int)map_id) * MAP_METADATA_SIZE;
@@ -61,7 +61,7 @@ void init_map_data(int map_id)
 
   for(i=0; i<20; i++)
   {
-    if(battle_map_metadata.cpu_commander_ids[i] != 0)
+    if(battle_map_metadata.cpu_commander_ids[i*4+1] != 0)
     {
       cpu_cmdr_count++;
       // debug_array[debug_number++] = battle_map_metadata.cpu_commander_ids[i];
