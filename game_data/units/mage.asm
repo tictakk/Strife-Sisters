@@ -20,5 +20,5 @@ Mage:
   .db GROWTH_MAGIC_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_magebtl)
+  .dw _magebtl & $1fff

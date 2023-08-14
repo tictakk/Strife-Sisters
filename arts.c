@@ -116,7 +116,7 @@ void init_arts()
   arts[6].stunning = 0;
 
   arts[POWER_WAVE_ART].frame_count = 11;
-  arts[POWER_WAVE_ART].name = "P.Wave   ";
+  arts[POWER_WAVE_ART].name = "P.Wave  ";
   arts[POWER_WAVE_ART].cost = 1;
   arts[POWER_WAVE_ART].target = MULTI_ROW;
   arts[POWER_WAVE_ART].relationship = ONE_TO_MANY;

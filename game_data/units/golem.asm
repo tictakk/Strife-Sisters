@@ -20,5 +20,5 @@ Golem:
   .db GROWTH_TANK_MELEE
 
   ;graphic
-  .db bank(_musketbtl)
+  .db bank(_golembtl)
   .dw _musketbtl & $1fff

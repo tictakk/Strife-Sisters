@@ -20,5 +20,5 @@ Stalker:
   .db GROWTH_RANGED_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_stalkerbtl)
+  .dw _stalkerbtl & $1fff

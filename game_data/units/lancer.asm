@@ -8,8 +8,8 @@ Lancer:
   .db 3   ;mov
   .db 150 ;sta
   .db 2   ;rng
-  .db 2   ;id
-  .db 8   ;a_type
+  .db 12  ;id
+  .db 2   ;a_type
   .db 0   ;art
   .db 3   ;points
   .db 15   ;pow

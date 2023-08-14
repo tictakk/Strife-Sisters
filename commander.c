@@ -1,7 +1,7 @@
 #include "commander.h"
 
 #define MAX_PARTY_COMMANDERS 6
-#define MAX_ENEMY_COMMANDERS 8
+#define MAX_ENEMY_COMMANDERS 15
 #define MAX_ARMY_SIZE 9
 #define MAX_METER 5
 #define TOTAL_COMMANDERS (MAX_PARTY_COMMANDERS + MAX_ENEMY_COMMANDERS)
@@ -32,6 +32,8 @@ void clear_commander_battle_group(struct Commander *cmdr)
   {
     cmdr->bg.units[i].id = 0;//&unit_list[NO_UNIT];
     cmdr->bg.units[i].hp = 0;
+    cmdr->bg.units[i].exp = 0;
+    cmdr->bg.units[i].level = 0;
   }
 }
 
@@ -39,6 +41,8 @@ void remove_unit_from_group(char cmdr_id, char position)
 {
   party_commanders[cmdr_id].bg.units[position].id = 0;// = &unit_list[NO_UNIT];
   party_commanders[cmdr_id].bg.units[position].hp = 0;
+  party_commanders[cmdr_id].bg.units[position].exp = 0;
+  party_commanders[cmdr_id].bg.units[position].level = 0;
 }
 
 void add_commander_to_party(char *name, char st)
@@ -153,7 +157,7 @@ char get_commander_battle_points(char cmdr_id)
 
 void check_add_new_commander(char map_no)
 {
-  if(map_no == 1)
+  if(map_no == 1 && party_size < 3)
   {
     add_commander_to_party(name2,KING);
     // set_commander_stats(2,1,8,8,10);

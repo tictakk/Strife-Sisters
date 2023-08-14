@@ -9,10 +9,10 @@ Axeman:
   .db 150 ;sta
   .db 2   ;rng
   .db 8   ;id
-  .db 8   ;a_type
+  .db 4   ;a_type
   .db 0   ;art
   .db 3   ;points
-  .db 15   ;pow
+  .db 15  ;pow
   .db 0   ;is_cmdr
   .db 24, 7, 0 ;attack positions
 
@@ -20,5 +20,5 @@ Axeman:
   .db GROWTH_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_axebtl)
+  .dw _axebtl & $1fff

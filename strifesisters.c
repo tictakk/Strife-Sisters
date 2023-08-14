@@ -465,40 +465,22 @@ void main()
 	//play music (probably move this to whatever place you want this music to play)
 	//right now you have 1 song, as you get more you can psgPlay( X ) where X is song number :)
 
-  // one_pow_9x9_attacker = 0;
-  // one_pow_6x6_attacker = 0;
-  // one_pow_3x3_attacker = 0;
+  add_unit_to_convoy(SPEAR_UNIT);
+  // add_unit_to_convoy(SPEAR_UNIT);
+  // add_unit_to_convoy(SPEAR_UNIT);
+  // add_unit_to_convoy(SPEAR_UNIT);
+  // add_unit_to_convoy(SPEAR_UNIT);
+  // add_unit_to_convoy(SPEAR_UNIT);
+  // add_unit_to_convoy(SPEAR_UNIT);
+  // add_unit_to_convoy(SPEAR_UNIT);
 
-  // one_pow_9x9_target = 0;
-  // one_pow_6x6_target = 0;
-  // one_pow_3x3_target = 0;
-
-  // two_pow_9x9_target = 0;
-  // two_pow_6x6_target = 0;
-  // two_pow_3x3_target = 0;
-
-  // two_pow_9x9_attacker = 0;
-  // two_pow_6x6_attacker = 0;
-  // two_pow_3x3_attacker = 0;
-	
-	// game_loop = 1;
-
-	// for(in=0; in<MAX_PARTY_UNIT_SIZE; in++)
-	// {
-	// 	party_units[in] = 0;
-	// }
-  party_units[0] = SPEAR_UNIT;
-
-	// initialize_units();
 	initialize_commanders();
-  
   init_arts();
-//	initialize_items();
 
   // add_commander_to_party(name0,REI);
   // add_commander_to_party(name1,VIOLET);
 
-	player_gold = 0;//1000;
+	player_gold = 9999;//1000;
 	no_of_party_items = 0;
 
   // set_commander_stats(0,1,10,8,8);
@@ -509,6 +491,7 @@ void main()
 
 	for(;;)
 	{
+    unlock_all_units();
     // simulate_battle(SWORD_UNIT,FIGHTER_UNIT);
 		// display_intro();
     display_demo();
@@ -685,17 +668,17 @@ void preload_commanders_map_1()
   party_commanders[0].bg.units[7].id = 0;
   party_commanders[0].bg.units[8].id = 0;
 
-  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
+  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,2);
   // load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
-  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,1);
-  load_unit_to_cmdr(0,1,REI,1,1);
+  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,2);
+  load_unit_to_cmdr(0,1,REI,1,2);
 
   // party_commanders[0].bg.units[0].exp = 188;
   // level_up_unit(&party_commanders[0].bg.units[0]);
 
-  load_unit_to_cmdr(1,0,SWORD_UNIT,0,1);
-  load_unit_to_cmdr(1,2,SWORD_UNIT,0,1);
-  load_unit_to_cmdr(1,7,VIOLET,1,1);
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0,2);
+  load_unit_to_cmdr(1,2,SWORD_UNIT,0,2);
+  load_unit_to_cmdr(1,7,VIOLET,1,2);
 }
 
 void preload_commanders_map_2()
@@ -705,16 +688,18 @@ void preload_commanders_map_2()
   add_commander_to_party(name1,VIOLET);
   add_commander_to_party(name2,KING);
 
-  load_unit_to_cmdr(0,4,CLERIC_UNIT,0);
-  load_unit_to_cmdr(0,0,SWORD_UNIT,0);
+  load_unit_to_cmdr(0,4,CLERIC_UNIT,0,3);
+  load_unit_to_cmdr(0,0,SWORD_UNIT,0,3);
+  load_unit_to_cmdr(0,1,REI,1,3);
 
-  load_unit_to_cmdr(1,0,SWORD_UNIT,0);
-  load_unit_to_cmdr(1,2,SWORD_UNIT,0);
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0,3);
+  load_unit_to_cmdr(1,2,SWORD_UNIT,0,3);
+  load_unit_to_cmdr(1,7,VIOLET,1,3);
 
-  load_unit_to_cmdr(2,3,SPEAR_UNIT);
-  load_unit_to_cmdr(2,1,SWORD_UNIT);
-  load_unit_to_cmdr(2,5,SPEAR_UNIT);
-  load_unit_to_cmdr(2,7,CLERIC_UNIT);
+  load_unit_to_cmdr(2,1,SWORD_UNIT,0,3);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
+  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
+  load_unit_to_cmdr(2,3,KING,1,3);
 }
 
 void preload_commanders_map_3()
@@ -724,16 +709,19 @@ void preload_commanders_map_3()
   add_commander_to_party(name1,VIOLET);
   add_commander_to_party(name2,KING);
 
-  load_unit_to_cmdr(0,4,CLERIC_UNIT,0);
-  load_unit_to_cmdr(0,0,SWORD_UNIT,0);
+  load_unit_to_cmdr(0,8,CLERIC_UNIT,0,5);
+  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,5);
+  load_unit_to_cmdr(0,6,ARCHER_UNIT,0,5);
+  load_unit_to_cmdr(0,1,REI,1,5);
 
-  load_unit_to_cmdr(1,0,SWORD_UNIT,0);
-  load_unit_to_cmdr(1,2,SWORD_UNIT,0);
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0,5);
+  load_unit_to_cmdr(1,2,SWORD_UNIT,0,5);
+  load_unit_to_cmdr(1,7,VIOLET,1,5);
 
-  load_unit_to_cmdr(2,3,LANCER_UNIT);
-  load_unit_to_cmdr(2,1,SWORD_UNIT);
-  load_unit_to_cmdr(2,5,LANCER_UNIT);
-  load_unit_to_cmdr(2,7,CLERIC_UNIT);
+  load_unit_to_cmdr(2,1,SWORD_UNIT,0,5);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,5);
+  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,5);
+  load_unit_to_cmdr(2,3,KING,1,5);
 }
 
 void preload_default()
@@ -1322,7 +1310,7 @@ void affirmative_question(char *request, char x, char y)
   response = 0;
   // remove_cursor();
 
-  display_window_rel(22,14,10,14);
+  display_window_rel(x,y,10,14);
   put_string(request,s_x_relative+x+1,s_y_relative+y+1);
   put_string("YES",s_x_relative+x+2,s_y_relative+y+3);
   put_string("NO",s_x_relative+x+6,s_y_relative+y+3);
@@ -1361,6 +1349,16 @@ void affirmative_question(char *request, char x, char y)
   }
   remove_cursor();
   return response;
+}
+
+void affirm_statement(char *line1, char *line2, char x, char y)
+{
+  display_window_rel(x,y,10,14);
+  put_string(line1,s_x_relative+x+1,s_y_relative+y+5);
+  put_string(line2,s_x_relative+x+1,s_y_relative+y+6);
+  load_cursor(x+3,y+8,SLIDER_ONE);
+  put_string("ok",s_x_relative+x+4,s_y_relative+y+8);
+  wait_for_I_input();
 }
 
 initialize_commanders()
@@ -2282,7 +2280,7 @@ void display_popup(char *str)
 
 void swap_commander_units(char cmdr_id, char first, char second)
 {
-  unsigned char tmp_hp, tmp_sta;
+  unsigned char tmp_hp, tmp_sta, tmp_lvl;
   char tmp_id;
   int tmp_exp;
   // Unit *tmp_unit;
@@ -2291,16 +2289,19 @@ void swap_commander_units(char cmdr_id, char first, char second)
   tmp_id = party_commanders[cmdr_id].bg.units[first].id;
   tmp_sta = party_commanders[cmdr_id].bg.units[first].sta;
   tmp_exp = party_commanders[cmdr_id].bg.units[first].exp;
+  tmp_lvl = party_commanders[cmdr_id].bg.units[first].level;
 
   party_commanders[cmdr_id].bg.units[first].hp = party_commanders[cmdr_id].bg.units[second].hp;
   party_commanders[cmdr_id].bg.units[first].id = party_commanders[cmdr_id].bg.units[second].id;
   party_commanders[cmdr_id].bg.units[first].sta = party_commanders[cmdr_id].bg.units[second].sta;
   party_commanders[cmdr_id].bg.units[first].exp = party_commanders[cmdr_id].bg.units[second].exp;
+  party_commanders[cmdr_id].bg.units[first].level = party_commanders[cmdr_id].bg.units[second].level;
 
   party_commanders[cmdr_id].bg.units[second].hp = tmp_hp;
   party_commanders[cmdr_id].bg.units[second].id = tmp_id;
   party_commanders[cmdr_id].bg.units[second].sta = tmp_sta;
   party_commanders[cmdr_id].bg.units[second].exp = tmp_exp;
+  party_commanders[cmdr_id].bg.units[second].level = tmp_lvl;
 }
 
 void swap_convoy_units(char cmdr_id, char unit_id, char convoy_id)
@@ -2313,6 +2314,8 @@ void swap_convoy_units(char cmdr_id, char unit_id, char convoy_id)
 
   party_commanders[cmdr_id].bg.units[unit_id].hp = unit_header[1].hp;//unit_list[party_units[convoy_id]].hp;
   party_commanders[cmdr_id].bg.units[unit_id].id = unit_header[1].id;//&unit_list[party_units[convoy_id]];
+  party_commanders[cmdr_id].bg.units[unit_id].exp = 0;
+  party_commanders[cmdr_id].bg.units[unit_id].level = 1;
 
   party_units[convoy_id] = tmp_id;
 }

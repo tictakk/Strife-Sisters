@@ -20,5 +20,5 @@ Spearman:
   .db GROWTH_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_attack2)
+  .dw _attack2 & $1fff

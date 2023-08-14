@@ -20,5 +20,5 @@ Monk:
   .db GROWTH_SPEED_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_monkbtl)
+  .dw _monkbtl & $1fff

@@ -849,6 +849,8 @@ void ctrls()
   {
     put_number(hits,3,0,0);
     put_number(misses,3,10,0);
+
+    
     // char idee;
     // idee = battle_grid[graph_from_x_y(sx,sy)] - 1;
     // if(selector_mode == SELECT_MODE)

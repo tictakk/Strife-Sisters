@@ -9,7 +9,7 @@ Witch:
   .db 150 ;sta
   .db 2   ;rng
   .db 20   ;id
-  .db 32   ;a_type
+  .db 16   ;a_type
   .db 0   ;art
   .db 3   ;points
   .db 15   ;pow
@@ -20,5 +20,5 @@ Witch:
   .db GROWTH_MAGIC_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_witchbtl)
+  .dw _witchbtl & $1fff

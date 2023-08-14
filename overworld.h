@@ -70,9 +70,9 @@ char last_selected_row = 0;
 //menus
 void display_hire_window(char unit_id)
 {
-  display_window_rel(0,0,22,14);
+  display_window_rel(0,0,32,14);
   display_window_rel(22,14,10,14);
-  put_string("Hire",8+s_x_relative,s_y_relative+1);
+  put_string("Hire",14+s_x_relative,s_y_relative+1);
   put_string("Ore",s_x_relative+1,s_y_relative+11);
   put_string("Gold",s_x_relative+1,s_y_relative+12);
   put_number(player_gold,4,s_x_relative+11,s_y_relative+12);
@@ -80,14 +80,18 @@ void display_hire_window(char unit_id)
 
   display_hire_menu(unit_id);
 
-  print_unit_row_by_type(NORMAL,2,3);
-  print_unit_row_by_type(PIERCE,2,4);
-  print_unit_row_by_type(AXE,2,5);
-  print_unit_row_by_type(MISSILE,2,6);
-  print_unit_row_by_type(MAGIC,2,7);
-  print_unit_row_by_type(UNARMED,2,8);
+  set_font_pal(9);
+  display_unit_types_row(2+s_x_relative,3+s_y_relative);
+  set_font_pal(10);
 
-  load_cursor(1+(cursor_column*4),3+commander_select_cursor,SLIDER_ONE);
+  print_unit_row_by_type(NORMAL,2,4);
+  print_unit_row_by_type(PIERCE,7,4);
+  print_unit_row_by_type(AXE,12,4);
+  print_unit_row_by_type(MISSILE,17,4);
+  print_unit_row_by_type(MAGIC,22,4);
+  print_unit_row_by_type(UNARMED,27,4);
+
+  load_cursor(1+(cursor_column*4),4+commander_select_cursor,SLIDER_ONE);
 
   menu_state = SHOP_MENU;
   menu_rows = TYPE_COUNT;
@@ -96,22 +100,16 @@ void display_hire_window(char unit_id)
 
 void display_hire_menu(char unit)
 {
-  display_convoy_window(HIRE_CONVOY_WINDOW_X,HIRE_CONVOY_WINDOW_Y);
+  display_convoy_window(HIRE_CONVOY_WINDOW_X,HIRE_CONVOY_WINDOW_Y+14);
   display_unit_stats_window(unit,HIRE_STATS_WINDOW_X,HIRE_STATS_WINDOW_Y);
   display_unit_battle_info(unit,HIRE_UNIT_INFO_WINDOW_X,HIRE_UNIT_INFO_WINDOW_Y);
 }
 
 void update_hire_menu(char unit)
 {
-  update_convoy_window(22,0);
-  update_unit_stats_window(unit,0,14);
+  display_convoy_window(HIRE_CONVOY_WINDOW_X,HIRE_CONVOY_WINDOW_Y+14);
+  update_unit_stats_window(unit,0,14,1);
   update_unit_battle_info(unit,10,14);
-  print_unit_row_by_type(NORMAL,2,3);
-  print_unit_row_by_type(PIERCE,2,4);
-  print_unit_row_by_type(AXE,2,5);
-  print_unit_row_by_type(MISSILE,2,6);
-  print_unit_row_by_type(MAGIC,2,7);
-  print_unit_row_by_type(UNARMED,2,8);
   put_number(player_gold,4,s_x_relative+11,s_y_relative+12);
   put_number(materials_count,4,s_x_relative+11,s_y_relative+11);
 }
@@ -119,10 +117,10 @@ void update_hire_menu(char unit)
 void display_unit_stats_window(char unit_id, char x, char y)
 {
   display_window_rel(x,y,10,14);
-  update_unit_stats_window(unit_id,x,y);
+  update_unit_stats_window(unit_id,x,y,1);
 }
 
-void update_unit_stats_window(char unit_id, char x, char y)
+void update_unit_stats_window(char unit_id, char x, char y, char level)
 {
   if(unit_id)
   {
@@ -133,7 +131,7 @@ void update_unit_stats_window(char unit_id, char x, char y)
     spr_hide(1);
   }
   // print_unit_fullname(unit_id,x+3,s_y_relative+y+1);
-  print_unit_stats(unit_id,x+3,s_y_relative+y+7);
+  print_unit_stats(unit_id,x+3,s_y_relative+y+7,level);
 }
 
 void display_convoy_window(char x, char y)
@@ -201,7 +199,7 @@ void display_battle_group_window(char x, char y)
   load_vram(0x68C0,selector,0x40);
   load_palette(28,selectorpal,1);
   
-  update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,x+11,y);
+  update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,x+11,y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
   update_battle_group_window(selected_cmdr,x,y);
 
   display_selector(63,get_iso_x(1,17,commander_select_cursor,cursor_column),get_iso_y(1,17,commander_select_cursor,cursor_column)+14,28);
@@ -233,7 +231,7 @@ void update_battle_group_window(char x, char y)
   put_green_square(1,17);
   // read_tile_data(1,17);
   put_string("Front",s_x_relative+1,s_y_relative+25);
-  put_string("Rear",s_x_relative+8,s_y_relative+15);
+  put_string("Rear",s_x_relative+9,s_y_relative+15);
 
   update_party_commander_window(ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y);
 }
@@ -280,7 +278,7 @@ void display_dismiss_select_menu()
   load_cursor(23,3,SLIDER_ONE);
 
   update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-  update_unit_stats_window(party_units[0],11,14);
+  update_unit_stats_window(party_units[0],11,14,1);
 }
 
 void display_deploy_select_menu()
@@ -290,7 +288,7 @@ void display_deploy_select_menu()
   set_deploy_select_state();
   load_cursor(23,3,SLIDER_ONE);
   update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-  update_unit_stats_window(party_units[0],ARMY_STATS_X,ARMY_STATS_Y);
+  update_unit_stats_window(party_units[0],ARMY_STATS_X,ARMY_STATS_Y,1);
   update_battle_group_window(ARMY_BATTLE_GROUP_WINDOW_X,ARMY_BATTLE_GROUP_WINDOW_Y); 
 }
 
