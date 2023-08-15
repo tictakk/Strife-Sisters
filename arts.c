@@ -21,7 +21,7 @@
 #define CLEAR_EYES_ART 20
 #define SEDUCE_ART 21
 #define SEA_LEGS_ART 22
-#define FRENZY_ART 0
+// #define FRENZY_ART 0
 
 #define PHYSICAL_SINGLE_ATTACK 23
 #define PHYSICAL_COLUMN_ATTACK 24
@@ -375,7 +375,7 @@ char get_modifier_amount(char art_id)
     case POWER_WAVE_ART: return 20;
     case BLOW_BACK_ART: return 10;
     case CLEAVE_ART: return 10;
-    case FRENZY_ART: return 10;
+    // case FRENZY_ART: return 10;
     case RUN_THROUGH_ART: return 15;
     case BOMBARD_ART: return 15;
     case SEDUCE_ART: return 5;
@@ -395,7 +395,7 @@ char get_modifier_type(char art_id)
     case POWER_WAVE_ART: return MOD_HP;
     case BLOW_BACK_ART: return MOD_HP;
     case CLEAVE_ART: return MOD_HP;
-    case FRENZY_ART: return MOD_HP;
+    // case FRENZY_ART: return MOD_HP;
     case RUN_THROUGH_ART: return MOD_HP;
     case BOMBARD_ART: return MOD_HP;
     case SEDUCE_ART: return MOD_DEF;

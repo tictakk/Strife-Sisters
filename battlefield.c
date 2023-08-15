@@ -92,7 +92,6 @@ void battlefield_loop(char map_id)
   units_killed = 0;
   units_lost = 0;
   materials_collected = 0;
-  chests_collected = 0;
   wait = 0;
 
   s_x_relative = 0;//(s_x/8);
@@ -709,7 +708,8 @@ void ctrls()
           {
             remove_cursor();
             scroll(0,0,s_y+32,32,224,0x80);
-            display_abs_info_panel(7+(s_x),32+(s_y/2),18,15); //find a way to remove
+            // display_abs_info_panel(7+(s_x),32+(s_y/2),18,15); //find a way to remove
+            display_window_rel(7,8+(s_y/8),18,15);
             set_font_pal(9);
             put_string("Front",14,9+(s_y/8));
             put_string("Rear ",14,21+(s_y/8));
@@ -847,8 +847,9 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
-    put_number(hits,3,0,0);
-    put_number(misses,3,10,0);
+    map_result_status = MAP_RESULT_WIN;
+    // put_number(hits,3,0,0);
+    // put_number(misses,3,10,0);
 
     
     // char idee;

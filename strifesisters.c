@@ -18,8 +18,8 @@ int misses=0;
 
 typedef struct {
     char idx;
-    char bank[10];
-    int  addr[10];
+    char bank[4];
+    int  addr[4];
 } Pointers;
 Pointers myPointers;
 
@@ -311,7 +311,9 @@ const char map_level_table[18] = {
 const unsigned char selector_frames[5] = {0x00, 0x40, 0x80, 0x40, 0x00};
 
 struct Castle{
-    int pos, map_id;
+  char map_id;
+  int pos;
+  char unlocked[3];
 };
 
 char j_1, j_2;
@@ -320,16 +322,15 @@ struct Castle castles[NO_OF_CASTLES];
 
 int total_sprites = 0;
 char menu_rows = 0;
-char no_of_party_items;
+// char no_of_party_items;
 char num_of_bad_terrains;
 
-char party_items[MAX_INVENTORY];
+// char party_items[MAX_INVENTORY];
 char menu_height;
 // int screen_dimensions = 0;
 
 char selector_frame = 0;
 char button_frame = 0;
-int ptr[32];
 char script_ram[256];
 int map_no = 0;
 
@@ -341,10 +342,6 @@ int map_no = 0;
 #define CONSUMABLE 0
 #define EQUIPABLE 1
 #define ANY_ITEM 2
-
-int current_global_units = 0;
-unsigned char game_state = PREBATTLE;
-
 /*
 	BATTLE STUFF
 */
@@ -412,39 +409,14 @@ char game_over = 0;
 // char game_loop = 0;
 char cursor_x = 0;
 char cursor_y = 0;
-int red_crystal_count = 0; //bp -> beast points
-int blue_crystal_count = 0; //ap -> art points
-int green_crystal_count = 0; //up -> upgrade points
+//int red_crystal_count = 0; //bp -> beast points
+//int blue_crystal_count = 0; //ap -> art points
+//int green_crystal_count = 0; //up -> upgrade points
 int materials_count = 0;
 char party_units_size = 0;
 
-//SIMULATION / DEBUGGIN
-int one_pow_9x9_attacker;
-int one_pow_6x6_attacker;
-int one_pow_3x3_attacker;
-
-int one_pow_9x9_target;
-int one_pow_6x6_target;
-int one_pow_3x3_target;
-
-char round_one = 0;
-char round_two = 0;
-char round_three = 0;
-
-int two_pow_9x9_target;
-int two_pow_6x6_target;
-int two_pow_3x3_target;
-
-int two_pow_9x9_attacker;
-int two_pow_6x6_attacker;
-int two_pow_3x3_attacker;
-
-char round_four = 0;
-char round_five = 0;
-char round_six = 0;
 
 char debug_flag = 0;
-char simulation_mode = 0;
 char prebattle_flag = 99;
 
 char demo_select_x = 5;
@@ -481,7 +453,7 @@ void main()
   // add_commander_to_party(name1,VIOLET);
 
 	player_gold = 9999;//1000;
-	no_of_party_items = 0;
+	// no_of_party_items = 0;
 
   // set_commander_stats(0,1,10,8,8);
   // set_commander_stats(1,1,7,10,8);
@@ -491,7 +463,10 @@ void main()
 
 	for(;;)
 	{
-    unlock_all_units();
+    // unlock_all_units();
+    unlock_unit(SWORD_UNIT);
+    unlock_unit(ARCHER_UNIT);
+    unlock_unit(CLERIC_UNIT);
     // simulate_battle(SWORD_UNIT,FIGHTER_UNIT);
 		// display_intro();
     display_demo();
@@ -689,8 +664,9 @@ void preload_commanders_map_2()
   add_commander_to_party(name2,KING);
 
   load_unit_to_cmdr(0,4,CLERIC_UNIT,0,3);
-  load_unit_to_cmdr(0,0,SWORD_UNIT,0,3);
-  load_unit_to_cmdr(0,1,REI,1,3);
+  load_unit_to_cmdr(0,2,SWORD_UNIT,0,3);
+  load_unit_to_cmdr(0,0,REI,1,3);
+  load_unit_to_cmdr(0,6,BRAWLER_UNIT,0,3);
 
   load_unit_to_cmdr(1,0,SWORD_UNIT,0,3);
   load_unit_to_cmdr(1,2,SWORD_UNIT,0,3);
@@ -931,118 +907,96 @@ void print_unit_type(char id, int x, int y)
 
 void print_unit_fullname(char unit_id, int x, int y)
 {
+  put_string(get_unit_fullname(unit_id),x,y);
+}
+
+char* get_unit_fullname(char unit_id)
+{
   switch(unit_id)
   {
     case NO_UNIT:
-      put_string(" ----  ",x,y);
-      break; 
+      return " ---- ";
+
     case SWORD_UNIT:
-      put_string("Soldier",x,y);
-      break;
+      return "Soldier";
 
     case DEMON_UNIT:
-      put_string("Demon  ",x,y);
-      break;
+      return "Demon  ";
 
     case SPEAR_UNIT:
-      put_string("Pikeman",x,y);
-      break;
+      return "Pikeman";
 
     case STALKER_UNIT:
-      put_string("Stalker",x,y);
-      break;
+      return "Stalker";
 
     case ARCHER_UNIT:
-      put_string("Archer ",x,y);
-      break;
+      return "Archer ";
 
     case SNIPER_UNIT:
-      put_string("Sniper ",x,y);
-      break;
+      return "Sniper ";
 
     case CLERIC_UNIT:
-      put_string("Cleric ",x,y);
-      break;
+      return "Cleric ";
 
     case MAGE_UNIT:
-      put_string("Mage   ",x,y);
-      break;
+      return "Mage   ";
 
     case WITCH_UNIT:
-      put_string("Witch  ",x,y);
-      break;
+      return "Witch  ";
 
     case PRIEST_UNIT:
-      put_string("Priest ",x,y);
-      break;
+      return "Priest ";
 
     case BLACK_MAGE_UNIT:
-      put_string("Cultist",x,y);
-      break;
+      return "Cultist";
 
     case HOUND_UNIT:
-      put_string("Helhound",x,y);
-      break;
+      return "Helhound";
 
     case BLOB_UNIT:
-      put_string("Blob   ",x,y);
-      break;
+      return "Blob   ";
 
     case AXE_UNIT:
-      put_string("Axeman ",x,y);
-      break;
+      return "Axeman ";
 
     case KNIGHT_UNIT:
-      put_string("Knight ",x,y);
-      break;
+      return "Knight ";
 
     case PALADIN_UNIT:
-      put_string("Paladin",x,y);
-      break;
+      return "Paladin";
 
     case MONK_UNIT:
-      put_string("Monk   ",x,y);
-      break;
+      return "Monk   ";
 
     case FIGHTER_UNIT:
-      put_string("Fighter",x,y);
-      break;
+      return "Fighter";
 
     case BRAWLER_UNIT:
-      put_string("Brawler",x,y);
-      break;
+      return "Brawler";
 
     case LANCER_UNIT:
-      put_string("Lancer ",x,y);
-      break;
+      return "Lancer ";
 
     case BERSERKER_UNIT:
-      put_string("Berserkr",x,y);
-      break;
+      return "Berserkr";
 
     case RAIDER_UNIT:
-      put_string("Raider ",x,y);
-      break;
+      return "Raider ";
 
     case REI:
-      put_string("Rei    ",x,y);
-      break;
+      return "Rei    ";
 
     case VIOLET:
-      put_string("Violet ",x,y);
-      break;
+      return "Violet ";
 
     case KING:
-      put_string("King   ",x,y);
-      break;
+      return "King   ";
 
     case TINKER:
-      put_string("Tinker ",x,y);
-      break;
+      return "Tinker ";
 
     default:
-      put_string("        ",x,y);
-      break;
+      return "        ";
   }
 }
 
@@ -1376,6 +1330,9 @@ initialize_commanders()
 		{
 			cmdr->bg.units[j].id = 0;//&unit_list[NO_UNIT];
       cmdr->bg.units[j].hp = 0;
+      cmdr->bg.units[j].exp = 0;
+      cmdr->bg.units[j].level = 0;
+      cmdr->bg.units[j].sta = 0;
     }
     // cmdr->bg.calling_stone = 0;
 	}
@@ -1768,32 +1725,10 @@ void display_window(int x, int y, char row_x, char row_y, int vaddr)
       window_22(vaddr,row_x,row_y);
       break;
 
-    case 24:
-      window_24(vaddr,row_x,row_y);
-      break;
-
     case 32:
       window_32(vaddr,row_x,row_y);
       break;
   }
-}
-
-void display_abs_info_panel(int x, int y, int width, int length)
-{
-	int j, i, z, vaddr, offset, size;
-	size = length * width;
-	offset = y*8+x;
-
-	for(j=0; j<length; j++)
-	{
-		for(i=0; i<width; i++)
-		{
-			// z = (j*width) + i;
-			ptr[i] = (0x6400 >> 4) + ((i+(width-1)) / (width - ((i+(width-2))/(width-1)))) + ((((j+(length-1)) / (length - ((j+(length-2))/(length-1))))) * 3) + 0x9000;
-		}
-		vaddr = vram_addr(0,j);
-		load_vram(vaddr+offset,ptr,width);
-	}
 }
 
 void display_abs_black_panel(int x, int y, int width, int length)
@@ -1928,138 +1863,6 @@ void display_meter_bars(char bar_count, char x, char y)
     put_char('&',x+2,y);
     break;
   }
-}
-
-void simulate_battle(char type_one, char type_two)
-{
-  simulation_mode = 1;
-  s_x_relative = 0;
-  s_y_relative = 0;
-  load_palette(0,overworldpal,8);
-	load_palette(10,fontpal,2);
-	load_palette(9,borderspal,1);
-
-  set_font_pal(10);
-	load_font(font,125,0x4800);
-  disp_on();
-
-  add_entity(PLAYER,0,0,0,&party_commanders[6]);
-  add_entity(CPU,0,0,0,&enemy_commanders[0]);
-
-  add_units_to_cmdr(6,type_one,3);
-  add_units_to_cmdr(MAX_PARTY_COMMANDERS,type_two,3);
-  round_one = run_sim(6,MAX_PARTY_COMMANDERS,&one_pow_3x3_attacker,&two_pow_3x3_target,0,1);
-  clear_commander_battle_group(&party_commanders[6]);
-  clear_commander_battle_group(&enemy_commanders[0]);
-
-  add_units_to_cmdr(6,type_one,6);
-  add_units_to_cmdr(MAX_PARTY_COMMANDERS,type_two,6);
-  round_two = run_sim(6,MAX_PARTY_COMMANDERS,&one_pow_6x6_attacker,&two_pow_6x6_target,0,1);
-  clear_commander_battle_group(&party_commanders[6]);
-  clear_commander_battle_group(&enemy_commanders[0]);
-
-  add_units_to_cmdr(6,type_one,9);
-  add_units_to_cmdr(MAX_PARTY_COMMANDERS,type_two,9);
-  round_three = run_sim(6,MAX_PARTY_COMMANDERS,&one_pow_9x9_attacker,&two_pow_9x9_target,0,1);
-  clear_commander_battle_group(&party_commanders[6]);
-  clear_commander_battle_group(&enemy_commanders[0]);
-
-  add_units_to_cmdr(6,type_one,9);
-  add_units_to_cmdr(MAX_PARTY_COMMANDERS,type_two,9);
-  round_four = run_sim(6,MAX_PARTY_COMMANDERS,&two_pow_3x3_attacker,&one_pow_3x3_target,1,0);
-  clear_commander_battle_group(&party_commanders[6]);
-  clear_commander_battle_group(&enemy_commanders[0]);
-
-  add_units_to_cmdr(6,type_one,6);
-  add_units_to_cmdr(MAX_PARTY_COMMANDERS,type_two,6);
-  round_five = run_sim(6,MAX_PARTY_COMMANDERS,&two_pow_6x6_attacker,&one_pow_6x6_target,1,0);
-  clear_commander_battle_group(&party_commanders[6]);
-  clear_commander_battle_group(&enemy_commanders[0]);
-
-  add_units_to_cmdr(6,type_one,9);
-  add_units_to_cmdr(MAX_PARTY_COMMANDERS,type_two,9);
-  round_six = run_sim(6,MAX_PARTY_COMMANDERS,&two_pow_9x9_attacker,&one_pow_9x9_target,1,0);
-  clear_commander_battle_group(&party_commanders[6]);
-  clear_commander_battle_group(&enemy_commanders[0]);
-
-  // while(calculate_power(6) > 0 && calculate_power(MAX_PARTY_COMMANDERS) > 0)
-  // {
-    // battle_loop(0,1,1,0,0,0,0);
-  // }
-  display_simulation_results(type_one,type_two);
-  for(;;)
-  {
-    // battle_loop(1,0,1,0,0,0,0);
-  }
-}
-
-char run_sim(char cmdr_one, char cmdr_two, int *attacker, int *target, char attacking_entity, char targeted_entity)
-{
-  int starting_pow_one, starting_pow_two;
-  char rounds;
-
-  starting_pow_one = calculate_power(cmdr_one);
-  starting_pow_two = calculate_power(cmdr_two);
-  rounds = 0;
-  while((calculate_power(cmdr_one) > 0 || get_commander_battle_points(cmdr_one) ) && (calculate_power(cmdr_two) > 0 || get_commander_battle_points(cmdr_two)))
-  {
-    rounds++;
-    battle_loop(attacking_entity,targeted_entity,1,0,0,0,0);
-  }
-  *attacker = get_percentage(calculate_power(cmdr_one),starting_pow_one);
-  *target = get_percentage(calculate_power(cmdr_two),starting_pow_two);
-  return rounds;
-}
-
-void display_simulation_results(char type_one, char type_two)
-{
-  // display_window_rel(0,6,32,22);
-  // put_string("SIMULATION RESULTS",6,7);
-  // print_unit_fullname(type_one,5,9);
-  // put_string("vs",14,9);
-  // print_unit_fullname(type_two,18,9);
-  // set_font_pal(9);
-  // put_string("POW",6,10);
-  // put_string("POW",19,10);
-  // put_number(unit_list[type_one].pow,3,9,10);
-  // put_number(unit_list[type_two].pow,3,22,10);
-  // put_string("rds",28,10);
-
-  // set_font_pal(10);
-
-  // put_number(one_pow_9x9_attacker,3,7,11);
-  // put_string("9x9",13,11);
-  // put_number(two_pow_9x9_target,3,18,11);
-  // put_number(round_one,3,28,11);
-
-  // put_number(one_pow_6x6_attacker,3,7,12);
-  // put_string("6x6",13,12);
-  // put_number(two_pow_6x6_target,3,18,12);
-  // put_number(round_two,3,28,12);
-
-  // put_number(one_pow_3x3_attacker,3,7,13);
-  // put_string("3x3",13,13);
-  // put_number(two_pow_3x3_target,3,18,13);
-  // put_number(round_three,3,28,13);
-
-  // print_unit_fullname(type_two,5,15);
-  // put_string("vs",14,15);
-  // print_unit_fullname(type_one,18,15);
-
-  // put_number(one_pow_3x3_target,3,7,17);
-  // put_string("3x3",13,17);
-  // put_number(two_pow_3x3_attacker,3,18,17);
-  // put_number(round_four,3,28,17);
-
-  // put_number(one_pow_6x6_target,3,7,18);
-  // put_string("6x6",13,18);
-  // put_number(two_pow_6x6_attacker,3,18,18);
-  // put_number(round_five,3,28,18);
-
-  // put_number(one_pow_9x9_target,3,7,19);
-  // put_string("9x9",13,19);
-  // put_number(two_pow_9x9_attacker,3,18,19);
-  // put_number(round_six,3,28,19);
 }
 
 void add_units_to_cmdr(char cmdr_id, char unit_type, char count)
@@ -2265,17 +2068,17 @@ void load_predefined_group_layout(char formation, char r_one, char r_two, char r
   }
 }
 
-void display_popup(char *str)
+void display_popup(char *str, char screen)
 {
-  s_y_relative = (s_y/8);
-  scroll(0,0,s_y+32,32,224,0x80);
+  // s_y_relative = (s_y/8);
+  scroll(screen,0,s_y+32,32,224,0x80);
   display_window_rel(11,11,10,4);
   write_text(12,12+s_y_relative,str);
 
   sync(100);
-  load_map(0,2,0,0,16,29);
-  scroll(0,0,s_y+32,32,224,0xC0);
-  s_y_relative = 0;
+  // load_map(0,2,0,0,16,29);
+  scroll(screen,0,s_y+32,32,224,0xC0);
+  // s_y_relative = 0;
 }
 
 void swap_commander_units(char cmdr_id, char first, char second)
@@ -2283,7 +2086,8 @@ void swap_commander_units(char cmdr_id, char first, char second)
   unsigned char tmp_hp, tmp_sta, tmp_lvl;
   char tmp_id;
   int tmp_exp;
-  // Unit *tmp_unit;
+
+  // put_hex(party_commanders,6,s_x_relative,s_y_relative);
 
   tmp_hp = party_commanders[cmdr_id].bg.units[first].hp;
   tmp_id = party_commanders[cmdr_id].bg.units[first].id;
@@ -2326,6 +2130,7 @@ void put_green_square(char x, char y)
   // vaddr = vram_addr(x,y);
 
   // vreg(0x01,vaddr);
+
   // tiledata = peekw(0x02) & 0xFFF;
 
   // vreg(0x00,vaddr);
@@ -2534,6 +2339,10 @@ void display_number_incrementing(char x, char y, int final_number, char num_len)
 {
   int i;
   i=0;
+  // if(final_number <= 6)
+  // {
+    // put_number(final_number,num_len,x,y);
+  // }
   while((i+=6) < final_number)
   {
     put_number(i,num_len,x,y);

@@ -96,7 +96,6 @@ int event_terrains[MAX_EVENT_TERRAIN];
 int map_offset = 0;
 char water_frame = 0;
 char water_trigger = 0;
-char item_trigger = 0;
 unsigned char terrain_item_count = 0;
 
 //CHEST -> Gold, used for units and upgrades?

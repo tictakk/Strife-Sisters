@@ -87,25 +87,26 @@ const char attack_types[] = { 1, 2, 4, 8, 16, 32, 0 };
 
 const char buyable_units[] = { SWORD_UNIT, SPEAR_UNIT, AXE_UNIT, MAGE_UNIT, LANCER_UNIT, ARCHER_UNIT, STALKER_UNIT, KNIGHT_UNIT,
                               PALADIN_UNIT, MONK_UNIT, FIGHTER_UNIT, BRAWLER_UNIT, BERSERKER_UNIT, CLERIC_UNIT, WITCH_UNIT,
-                              BLACK_MAGE_UNIT
+                              BLACK_MAGE_UNIT, GOLEM_UNIT, HOUND_UNIT, RAIDER_UNIT
                               };
 
 // Unit unit_list[MAX_UNIT_COUNT+3];
 Unit unit_header[2];
 char unlocked_units[MAX_UNIT_COUNT];
 unsigned char unit_entity_count = 0;
-char buyable_unit_count = 16;
+char buyable_unit_count = 0;
 int upgrade_cost = 0;
 int unit_cost = 0;
 
 void display_unit_types_row(char x, char y)
 {
-  put_string("SWRD",x,y);
-  put_string("POLE",x+5,y);
-  put_string("AXE ",x+10,y);
-  put_string("MISL",x+15,y);
-  put_string("MAGC",x+20,y);
-  put_string("BARE",x+25,y);
+  put_string("SWD",x,y);
+  put_string("POL",x+4,y);
+  put_string("AXE ",x+8,y);
+  put_string("BOW",x+12,y);
+  put_string("MAG",x+16,y);
+  put_string("FST",x+20,y);
+  put_string("BEA",x+24,y);
 }
 
 //0 = no advantage, 1 = advantage
@@ -160,7 +161,8 @@ void print_unit_info(Unit_Entity *ue, char x, char y)
 
 void print_unit_stats(char unit_id, char x, char y, char level)
 {
-  if(unit_id)
+
+  if(unit_id > 0)
   {
     load_unit_header(unit_id,0);
     if(level > 1)
@@ -271,7 +273,8 @@ void print_target_type_icon(char attack_type, char x, char y)
 
 void unlock_unit(char unit_id)
 {
-  unlocked_units[unit_id] = 1;
+  unlocked_units[buyable_unit_count++] = unit_id;
+  // buyable_unit_count++;
 }
 
 void unlock_all_units()

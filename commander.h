@@ -13,6 +13,9 @@ const char *name5 = "Calien";
 
 const char *name20 = "Generic";
 
+const char *unlock_text = "\nUnlocked";
+const char *unit_name = "Soldier";
+
 //tactics, wisdom, fortitude
 // const char COMMANDER_STATS_DISTRIBUTION_CHART[] = {
 //   3,1,2, //rei

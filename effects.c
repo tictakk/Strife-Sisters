@@ -53,7 +53,7 @@ const char LIGHTENING_MID_2_ANIMATION[] = { 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0 }
 const char LIGHTENING_BOT_ANIMATION[]   = { 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0 };
 const int HEAL_ANIMATION[] = { 0x40, 0x80, 0xC0, 0x100, 0x40, 0x80, 0xC0, 0x100, 0x40, 0x80, 0xC0 };
 const int HIT_ANIMATION[] = { 0x40, 0x80, 0xC0, 0x100, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-const int ICE_ANIMATION[] = { 0x00, 0x00, 0x40, 0x40, 0x80, 0x80, 0xC0, 0xC0, 0x100, 0x100, 0x00 };
+// const int ICE_ANIMATION[] = { 0x00, 0x00, 0x40, 0x40, 0x80, 0x80, 0xC0, 0xC0, 0x100, 0x100, 0x00 };
 
 char effect_count = 0;
 char effects[MAX_EFFECT_COUNT];
@@ -362,16 +362,16 @@ void animate_word_effect(char effect_no)
 
 void animate_ice(char effect_no)
 {
-  spr_set(effect_no);
-  spr_show();
-  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
+//   spr_set(effect_no);
+//   spr_show();
+//   spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
 }
 
 void animate_arrow(char effect_no)
 {
   spr_set(effect_no);
   spr_show();
-  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
+  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+HIT_ANIMATION[effect_frames[effect_no]++]);
 }
 
 void animate_hit_spark(char effect_no)

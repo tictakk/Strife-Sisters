@@ -329,6 +329,7 @@ void determine_action_state(char b_id)
     set_unit_attack(b_id);
     break;
 
+
     case MOVE_ART_ATTACK:
     load_animations_to_vram(battleunits[b_id].unit->id);
     set_unit_meter(b_id);
@@ -639,8 +640,8 @@ char do_art(char b_id)
     // judgement(b_id);
     // return 0;
 
-    case FRENZY_ART:
-    return frenzy(b_id);
+    // case FRENZY_ART:
+    // return frenzy(b_id);
 
     case TRACK_ART:
     tracked(b_id);

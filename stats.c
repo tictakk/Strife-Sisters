@@ -1,5 +1,5 @@
 #define BASE_CRIT_CHANCE 5
-#define BASE_HIT_CHANCE 204
+#define BASE_HIT_CHANCE 232
 // //hp, atk, def, int, res, spd
 // const unsigned char COMMANDER_STATS_DISTRIBUTION_CHART[] = {
 //   5,5,5,5,5,5, //rei

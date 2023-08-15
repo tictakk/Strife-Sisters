@@ -9,7 +9,7 @@ Hellhound:
   .db 120 ;sta
   .db 1   ;rng
   .db 6   ;id
-  .db 64   ;a_type
+  .db 0   ;a_type
   .db 0   ;art
   .db 3   ;points
   .db 13   ;pow

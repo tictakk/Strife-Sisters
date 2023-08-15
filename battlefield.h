@@ -63,7 +63,7 @@ char last_command;
 char menu_mask;
 char current_turn;
 char enemy_count;
-char units_lost, units_killed, chests_collected;
+char units_lost, units_killed;
 int turn_bonus, killed_bonus, lost_bonus, total_bonus, materials_collected;
 char map_result_status;
 
@@ -409,7 +409,7 @@ void post_battle_screen()
   remove_terrain_items();
   satb_update();
 
-  display_window_rel(4,6,24,18);
+  display_window_rel(4,6,22,18);
   if(map_result_status == MAP_RESULT_WIN)
   {
     put_string("Victory",s_x_relative+12,s_y_relative+8);
@@ -621,37 +621,37 @@ int get_valid_map_s_y(int position)
 
 void item_gained_text(char item_no, int amt)
 {
-  clear_text_field();
-  put_string("Gained ",1,1);
-  if(amt < 100){ put_number(amt,2,8,1); } else {put_number(amt,3,8,1);}
-  switch(item_no)
-  {
-    case RED_CRYSTAL:
-      put_string("Battle Points",1,2);
-      // red_crystal_count += amt;
-      break;
+  // clear_text_field();
+  // put_string("Gained ",1,1);
+  // if(amt < 100){ put_number(amt,2,8,1); } else {put_number(amt,3,8,1);}
+  // switch(item_no)
+  // {
+  //   case RED_CRYSTAL:
+  //     put_string("Battle Points",1,2);
+  //     // red_crystal_count += amt;
+  //     break;
 
-    case BLUE_CRYSTAL:
-      put_string("meter bar",1,2);
-      selected_entity->bg->meter = min(selected_entity->bg->meter+1,MAX_METER);
-      break;
+  //   case BLUE_CRYSTAL:
+  //     put_string("meter bar",1,2);
+  //     selected_entity->bg->meter = min(selected_entity->bg->meter+1,MAX_METER);
+  //     break;
 
-    case GREEN_CRYSTAL:
-      put_string("green gems",1,2);
-      green_crystal_count += amt;
-      break;
+  //   case GREEN_CRYSTAL:
+  //     put_string("green gems",1,2);
+  //     green_crystal_count += amt;
+  //     break;
 
-    case CHEST:
-      put_string("material",1,2);
+    // case CHEST:
+      // put_string("material",1,2);
       // player_gold += amt;
       // gold_collected += amt;
       // materials_count += amt;
-      materials_collected += amt;
-      break;
-  }
+      // materials_collected += amt;
+      // break;
+  // }
 
-  sync(160);
-  clear_text_field();
+  // sync(160);
+  // clear_text_field();
 }
 
 void check_end_turn()
@@ -705,8 +705,8 @@ char remaining_unit_turns()
 
 void collect_item(char item_no)
 {
-  switch(terrain_items[item_no].item_no)
-  {
+  // switch(terrain_items[item_no].item_no)
+  // {
     // case RED_CRYSTAL: 
     //   item_gained_text(RED_CRYSTAL,2);
     //   break;
@@ -719,13 +719,13 @@ void collect_item(char item_no)
     //   item_gained_text(GREEN_CRYSTAL,range(10,20));
     //   break;
 
-    case CHEST:
+    // case CHEST:
       // item_gained_text(CHEST,range(100,300));
-      display_popup("200 ore\n gained");
-      chests_collected++;
-      break;
-  }
-  remove_terrain_item(item_no);
+      // display_popup("200 ore\n gained");
+      // chests_collected++;
+      // break;
+  // }
+  // remove_terrain_item(item_no);
 }
 
 void walk_sprite(char entity_id, int location, int distance)

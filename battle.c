@@ -1,4 +1,4 @@
-#include "battle_menu.h"
+// #include "battle_menu.h"
 #include "battle.h"
 
 #define WORDING_NONE 0
@@ -11,40 +11,9 @@
 // #inctile(battletiles,"tiles/battletiles.tiles.pcx")
 // #incpal(battlepal,"tiles/battletiles.tiles.pcx")
 
-int battle_exp = 0, damage_dealt = 0, roll;
+int battle_exp = 0, damage_dealt = 0, roll = 0;
 char battle_killed = 0, battle_lost = 0, player_id;
 char target_effect, attacker_effect, crit, evade;
-
-void countdown(char x, char y, char *str,char len)
-{
-  int time, i, j;
-  if(simulation_mode)
-  {
-    return;
-  }
-  display_window_abs(x,y,len,3);
-  put_string(str,x+1,y+1);
-  j = 150;
-  while(j-- > 0)
-  {
-    cycle_button_press(10,9);
-    if(joytrg(0) == JOY_RUN)
-    {
-      battle_ctrls();
-      display_window_abs(x,y,12,3);
-      put_string(str,x+1,y+1);
-      // put_number(time,3,x+7,y+1);
-    }
-    // if(j==0 && time > 0)
-    // {
-    //   j = 240;
-    //   time--;
-    // }
-    // put_string(" ",x+8,y+1);
-    vsync();
-  }
-  hide_art_name();
-}
 
 void battle_end_screen()
 {
@@ -79,6 +48,7 @@ void battle_seq()
   load_pals(trgt,9);
   satb_update();
   sync(60);
+  // put_hex(&battle_exp,6,0,0);
   // countdown(2,8,"Prepare",12);
   // countdown(2,8," Press Run for arts",22);
   d_battle(atker);
@@ -343,7 +313,7 @@ void d_battle(char team)
 {
   char i = 0;
   int b_ticker = 0;
-  animating = 0;
+  // animating = 0;
   battle_clock = 0;
   
   while(battle_clock != -1)
@@ -541,7 +511,7 @@ void b_u_attack(char b_id)
   }
   else //finish animation, calculate damage
   {
-    int dmg;
+    unsigned char dmg;
     char i;
     for(i=0; i<18; i++)
     {
@@ -726,28 +696,17 @@ void calc_heal(char healer_id, char target_id, char a_a_bonus, char t_a_bonus, c
 }
 
 // void calc_hit_damage(char attacker_id, char target_id, char a_a_bonus, char t_a_bonus, char t_d_bonus)
-void calc_hit_damage(char t_id, int damage, int t_a_bonus, int t_d_bonus)
+void calc_hit_damage(char t_id, unsigned char damage, int t_a_bonus, int t_d_bonus)
 {
-  // int dmg;
-  // dmg = calc_damage(attacker_id,target_id,a_a_bonus,t_d_bonus);
   //apply bonuses here?
   hits++;
   apply_damage(t_id,damage);
   // battleunits[t_id].target = 0;
 }
 
-int calc_damage(char a_id, char t_id, int a_level, int a_base, int d_base, int m_pow)
+unsigned char calc_damage(char a_id, char t_id, int a_level, int a_base, int d_base, int m_pow)
 {
   int dmg;
-  // bid_to_unit_header(a_id,0);
-  // apply_level_to_header(battleunits[a_id].unit->level,0);
-  // bid_to_unit_header(t_id,1);
-  // apply_level_to_header(battleunits[t_id].unit->level,1);
-  
-  // adv = check_advantage(unit_header[0].a_type,unit_header[1].a_type);
-  // a_base_atk = unit_header[0].atk;
-  // t_base_def = unit_header[1].def;
-
   //1 = crit in this case
   dmg = ((((2 * a_level * (2*crit)) / 5) + 2) * m_pow) * a_base;
   dmg /= d_base;
@@ -755,19 +714,26 @@ int calc_damage(char a_id, char t_id, int a_level, int a_base, int d_base, int m
   dmg /= 4;
   // put_number(dmg,4,0,0);
   crit = 0;
-  return dmg;
+  return min(dmg,255);
 }
 
-void apply_damage(char t_id, int damage)
+void apply_damage(char t_id, unsigned char damage)
 {
   if(battleunits[t_id].ent_id != player_id)
   {
     damage_dealt += damage;
-    battle_exp += calc_percentage(25,damage);
+    // battle_exp += calc_percentage(25,damage);
   }
   if(damage)
 	{
-    battleunits[t_id].unit->hp = max(battleunits[t_id].unit->hp-damage,0);
+    if(damage >= battleunits[t_id].unit->hp)
+    {
+      battleunits[t_id].unit->hp = 0;
+    }
+    else
+    {
+      battleunits[t_id].unit->hp = max(battleunits[t_id].unit->hp-damage,0);
+    }
 	}
 }
 
@@ -1269,9 +1235,14 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
     battleunits[i].target = 0;
     battleunits[i].a_bonus = 0;
     battleunits[i].d_bonus = 0;
+    battleunits[i].column = 0;
+    battleunits[i].s_bonus = 0;
+    battleunits[i].ent_id = 0;
+    battleunits[i].p_bonus = 0;
+    battleunits[i].unit = 0;
   }
 
-  picker = 0;
+  // picker = 0;
   clear_eyes_called = 0;
 	total_units = 0;
   animating = 0;
@@ -1345,31 +1316,31 @@ char unit_direction(char b_id)
   return (b_id>8)? 1 : 0;
 }
 
-void set_meter_targets()
-{
-  char i, offset;
-  offset = (picker == PICKER_LEFT)? 0 : 9;
-  for(i=0; i<MAX_ARMY_SIZE; i++)
-  {
-    if(battleunits[offset+i].active && marked_targets[i])
-    {
-      battleunits[offset+i].target = 1;
-    }
-  }
-  unmark_all();
-  picker = 0;
-}
+// void set_meter_targets()
+// {
+//   char i, offset;
+//   offset = (picker == PICKER_LEFT)? 0 : 9;
+//   for(i=0; i<MAX_ARMY_SIZE; i++)
+//   {
+//     if(battleunits[offset+i].active && marked_targets[i])
+//     {
+//       battleunits[offset+i].target = 1;
+//     }
+//   }
+//   unmark_all();
+//   picker = 0;
+// }
 
-char is_valid_meter_targets()
-{
-  char i, offset;
-  offset = (picker == PICKER_LEFT)? 0 : 9;
-  for(i=0; i<MAX_ARMY_SIZE; i++)
-  {
-    if(battleunits[offset+i].active && marked_targets[i])
-    {
-      return 1;
-    }
-  }
-  return 0;
-}
+// char is_valid_meter_targets()
+// {
+//   char i, offset;
+//   offset = (picker == PICKER_LEFT)? 0 : 9;
+//   for(i=0; i<MAX_ARMY_SIZE; i++)
+//   {
+//     if(battleunits[offset+i].active && marked_targets[i])
+//     {
+//       return 1;
+//     }
+//   }
+//   return 0;
+// }

@@ -115,11 +115,17 @@ void start_turn(char team)
   // display_turn(team);
   if(team == PLAYER)
   {
-    display_popup("Player\n  Turn");
+    s_y_relative = (s_y/8);
+    display_popup("Player\n  Turn",0);
+    load_map(0,2,0,0,16,29);
+    s_y_relative = 0;
   }
   else
   {
-    display_popup("Enemy\n  Turn");
+    s_y_relative = (s_y/8);
+    display_popup("Enemy\n  Turn",0);
+    load_map(0,2,0,0,16,29);
+    s_y_relative = 0;
   }
   for(i=0; i<num_of_entities; i++)
   {

@@ -34,6 +34,7 @@ void clear_commander_battle_group(struct Commander *cmdr)
     cmdr->bg.units[i].hp = 0;
     cmdr->bg.units[i].exp = 0;
     cmdr->bg.units[i].level = 0;
+    cmdr->bg.units[i].sta = 0;
   }
 }
 
@@ -43,6 +44,7 @@ void remove_unit_from_group(char cmdr_id, char position)
   party_commanders[cmdr_id].bg.units[position].hp = 0;
   party_commanders[cmdr_id].bg.units[position].exp = 0;
   party_commanders[cmdr_id].bg.units[position].level = 0;
+  party_commanders[cmdr_id].bg.units[position].sta = 0;
 }
 
 void add_commander_to_party(char *name, char st)

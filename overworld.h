@@ -85,11 +85,12 @@ void display_hire_window(char unit_id)
   set_font_pal(10);
 
   print_unit_row_by_type(NORMAL,2,4);
-  print_unit_row_by_type(PIERCE,7,4);
-  print_unit_row_by_type(AXE,12,4);
-  print_unit_row_by_type(MISSILE,17,4);
-  print_unit_row_by_type(MAGIC,22,4);
-  print_unit_row_by_type(UNARMED,27,4);
+  print_unit_row_by_type(PIERCE,6,4);
+  print_unit_row_by_type(AXE,10,4);
+  print_unit_row_by_type(MISSILE,14,4);
+  print_unit_row_by_type(MAGIC,18,4);
+  print_unit_row_by_type(UNARMED,22,4);
+  print_unit_row_by_type(NONE,26,4);
 
   load_cursor(1+(cursor_column*4),4+commander_select_cursor,SLIDER_ONE);
 
@@ -122,16 +123,16 @@ void display_unit_stats_window(char unit_id, char x, char y)
 
 void update_unit_stats_window(char unit_id, char x, char y, char level)
 {
-  if(unit_id)
+  if(unit_id > 0)
   {
-    draw_32x32_sprite(unit_id,(x*8)+32,(y*8)+18);
+    draw_32x32_sprite(unit_id,(x*8)+28,(y*8)+18);
   }
   else
   {
     spr_hide(1);
   }
+  print_unit_stats(unit_id,x+2,s_y_relative+y+7,level);
   // print_unit_fullname(unit_id,x+3,s_y_relative+y+1);
-  print_unit_stats(unit_id,x+3,s_y_relative+y+7,level);
 }
 
 void display_convoy_window(char x, char y)
@@ -157,21 +158,31 @@ void update_unit_battle_info(char unit_id, char x, char y)
   char l_x,l_y;
   l_y = s_y_relative+y;
   l_x = s_x_relative+x;
-  load_unit_header(unit_id,0);
-
-  get_upgrade_cost(unit_id);
-  get_unit_cost(unit_id);
 
   put_string("Price",l_x+1,l_y+1);
-  put_number(unit_cost,3,l_x+2,l_y+2);
-
   put_string("Upgrade",l_x+1,l_y+3);
-  put_number(upgrade_cost,3,l_x+2,l_y+4);
-
   put_string("A.Targets",l_x+1,l_y+6);
-  print_attack_type(unit_header[0].attacks[0],1,l_x+2,l_y+7);
-  print_attack_type(unit_header[0].attacks[1],1,l_x+2,l_y+8);
-  print_attack_type(unit_header[0].attacks[2],1,l_x+2,l_y+9);
+
+  if(unit_id > 0)
+  {
+    load_unit_header(unit_id,0);
+
+    get_upgrade_cost(unit_id);
+    get_unit_cost(unit_id);
+    put_number(unit_cost,3,l_x+2,l_y+2);
+    put_number(upgrade_cost,3,l_x+2,l_y+4);
+    print_attack_type(unit_header[0].attacks[0],1,l_x+2,l_y+7);
+    print_attack_type(unit_header[0].attacks[1],1,l_x+2,l_y+8);
+    print_attack_type(unit_header[0].attacks[2],1,l_x+2,l_y+9);
+  }
+  else
+  {
+    put_string("         ",l_x+2,l_y+2);
+    put_string("         ",l_x+2,l_y+4);
+    put_string("         ",l_x+2,l_y+7);
+    put_string("         ",l_x+2,l_y+8);
+    put_string("         ",l_x+2,l_y+9);
+  }
 }
 
 //thoeretically, this window should never "update" outside of the cursor
