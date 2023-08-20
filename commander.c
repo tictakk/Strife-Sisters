@@ -9,9 +9,8 @@
 #define MAX_COMMANDER_STAT 100
 
 typedef struct {
-  // char units[9];
 	Unit_Entity units[9];
-  char meter;
+  char formation;
 } Battlegroup;
 
 struct Commander{

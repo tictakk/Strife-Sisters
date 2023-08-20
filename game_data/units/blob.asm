@@ -1,7 +1,7 @@
 Blob:
-  .db 45  ;hp
-  .db 24  ;atk
-  .db 8  ;def
+  .db 40  ;hp
+  .db 20  ;atk
+  .db 13  ;def
   .db 11  ;int
   .db 12  ;res
   .db 16  ;spd

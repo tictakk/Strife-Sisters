@@ -197,12 +197,13 @@ char terrain_type(int t_type)
   if(t_type > 44 && t_type < 60) {return FOREST;}
   if(t_type > 88 && t_type < 119) {return WATER;}
   if(t_type > 118 && t_type < 124) {return STRUCTURE;}
-  if(t_type > 123 && t_type < 126){ return WALL;}
-  if(t_type > 0 && t_type < 40) {return MOUNTAIN;}
-  if(t_type == 154) {return RED_CRYSTAL;}
-  if(t_type == 155) {return BLUE_CRYSTAL;}
-  if(t_type == 156) {return GREEN_CRYSTAL;}
-  if(t_type == 157) {return CHEST;}
+  if(t_type > 0 && t_type < 40) {return MOUNTAIN;}  
+  if(t_type > 157) { return WALL; }
+  // if(t_type > 123 && t_type < 126){ return WALL;}
+  // if(t_type == 154) {return RED_CRYSTAL;}
+  // if(t_type == 155) {return BLUE_CRYSTAL;}
+  // if(t_type == 156) {return GREEN_CRYSTAL;}
+  // if(t_type == 157) {return CHEST;}
   // if(t_type > 131) {return ROUTE;}
   return ROUTE;
 }

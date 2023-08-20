@@ -110,39 +110,38 @@ void display_unit_types_row(char x, char y)
 }
 
 //0 = no advantage, 1 = advantage
-unsigned char check_advantage(unsigned char unit_1, unsigned char unit_2)
-{
-  return get_weapon_adv(unit_1) & unit_2;
-}
+// unsigned char check_advantage(unsigned char unit_1, unsigned char unit_2)
+// {
+//   return get_weapon_adv(unit_1) & unit_2;
+// }
 
-char get_weapon_adv(unsigned char weapon_type)
-{
-  switch(weapon_type)
-  {
-    case NORMAL:
-    return MISSILE;
+// char get_weapon_adv(unsigned char weapon_type)
+// {
+//   switch(weapon_type)
+//   {
+//     case NORMAL:
+//     return MISSILE;
 
-    case MISSILE:
-    return PIERCE;
+//     case MISSILE:
+//     return PIERCE;
 
-    case AXE:
-    return MAGIC;
+//     case AXE:
+//     return MAGIC;
 
-    case PIERCE:
-    return UNARMED;
+//     case PIERCE:
+//     return UNARMED;
 
-    case MAGIC:
-    return NORMAL;
+//     case MAGIC:
+//     return NORMAL;
 
-    case UNARMED:
-    return AXE;
-  }
-  return NONE;
-}
+//     case UNARMED:
+//     return AXE;
+//   }
+//   return NONE;
+// }
 
 void print_unit_info(Unit_Entity *ue, char x, char y)
 {
-  int hp;
   if(!ue->hp)
   {
     put_string("    ",x,y);
@@ -150,13 +149,15 @@ void print_unit_info(Unit_Entity *ue, char x, char y)
     put_string("    ",x,y+2);
     return;
   }
-  hp = ue->hp * 100;
+  load_unit_header(ue->id,1);
+  apply_level_to_header(ue->level,1);
+  // hp = ue->hp * 100;
   print_unit_attack_icon(ue->id,x,y);
   print_unit_type(ue->id,x+1,y);
   put_char('M',x,y+1);
   put_number(ue->level,2,x+1,y+1);
   put_char('%',x,y+2);
-  put_number(hp/ue->hp,3,x+1,y+2);
+  put_number(get_percentage(ue->hp,unit_header[1].hp),3,x+1,y+2);
 }
 
 void print_unit_stats(char unit_id, char x, char y, char level)
@@ -169,29 +170,24 @@ void print_unit_stats(char unit_id, char x, char y, char level)
     {
       apply_level_to_header(level,0);
     }
-
+    set_font_pal(GOLD_FONT);
     print_unit_fullname(unit_id,x,y);
-
     put_string("LV",x,y+1);
-    put_number(level,2,x+3,y+1);
+    put_string("HP",x,y+2);
+    put_string("ATK",x,y+3);
+    put_string("DEF",x,y+4);
+    put_string("RES",x,y+5);
+    put_string("SPD",x,y+6);
+    set_font_pal(WHITE_FONT);
+    // put_string("PTS ",x, y+4);
+    // put_number(unit_header[0].points,2,x+2,y+4);
 
-    // put_string("HP ",x,y+2);
-    // put_number(unit_header[0].hp,2,x+3,y+);
-
-    put_string("ATK ",x,y+2);
-    put_number(unit_header[0].atk,2,x+4,y+2);
-
-    put_string("DEF ",x,y+3);
-    put_number(unit_header[0].def,2,x+4,y+3);
-
-    // put_string("SPD ",x,y+3);
-    // put_number(unit_header[0].spd,2,x+4,y+3);
-
-    put_string("PTS ",x, y+4);
-    put_number(unit_header[0].points,2,x+4,y+4);
-
-    put_string("Type ",x, y+5);
-    print_unit_attack_icon(unit_header[0].id,x+5,y+5);
+    put_number(level,2,x+2,y+1);
+    put_number(unit_header[0].hp,3,x+2,y+2);
+    put_number(unit_header[0].atk,2,x+3,y+3);
+    put_number(unit_header[0].def,2,x+3,y+4);
+    put_number(unit_header[0].res,2,x+3,y+5);
+    put_number(unit_header[0].spd,2,x+3,y+6);
   }
   else
   {
@@ -206,6 +202,8 @@ void print_unit_stats(char unit_id, char x, char y, char level)
     put_string("       ",x, y+4);
 
     put_string("       ",x, y+5);
+    
+    put_string("       ",x, y+6);
   }
 }
 

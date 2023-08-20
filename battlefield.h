@@ -67,77 +67,82 @@ char units_lost, units_killed;
 int turn_bonus, killed_bonus, lost_bonus, total_bonus, materials_collected;
 char map_result_status;
 
-const int range_3_coord1[2] = {1,-16};
-const int range_3_coord2[2] = {0,-32};
-const int range_3_coord3[2] = {1,16};
-const int range_3_coord4[2] = {0,32};
-const int range_3_coord5[2] = {-1, -16};
-const int range_3_coord6[2] = {-1, 16};
-const int range_3_coord7[2] = {-2, 0};
-const int range_3_coord8[2] = {2, 0};
-const int range_3_coord9[2] = {0, 16};
-const int range_3_coord10[2] = {1, 0};
-const int range_3_coord11[2] = {-1, 0};
-const int range_3_coord12[2] = {0, -16};
-const int range_3_coord13[2] = {0,-48};
-const int range_3_coord14[2] = {-3,0};
-const int range_3_coord15[2] = {3,0};
-const int range_3_coord16[2] = {0,48};
-const int range_3_coord17[2] = {1, 32};
-const int range_3_coord18[2] = {-1, 32};
-const int range_3_coord19[2] = {1, -32};
-const int range_3_coord20[2] = {-1, -32};
-const int range_3_coord21[2] = {-2,-16};
-const int range_3_coord22[2] = {2,-16};
-const int range_3_coord23[2] = {-2,16};
-const int range_3_coord24[2] = {2,16};
+// const int range_3_coord1[2] = {1,-16};
+// const int range_3_coord2[2] = {0,-32};
+// const int range_3_coord3[2] = {1,16};
+// const int range_3_coord4[2] = {0,32};
+// const int range_3_coord5[2] = {-1, -16};
+// const int range_3_coord6[2] = {-1, 16};
+// const int range_3_coord7[2] = {-2, 0};
+// const int range_3_coord8[2] = {2, 0};
+// const int range_3_coord9[2] = {0, 16};
+// const int range_3_coord10[2] = {1, 0};
+// const int range_3_coord11[2] = {-1, 0};
+// const int range_3_coord12[2] = {0, -16};
+// const int range_3_coord13[2] = {0,-48};
+// const int range_3_coord14[2] = {-3,0};
+// const int range_3_coord15[2] = {3,0};
+// const int range_3_coord16[2] = {0,48};
+// const int range_3_coord17[2] = {1, 32};
+// const int range_3_coord18[2] = {-1, 32};
+// const int range_3_coord19[2] = {1, -32};
+// const int range_3_coord20[2] = {-1, -32};
+// const int range_3_coord21[2] = {-2,-16};
+// const int range_3_coord22[2] = {2,-16};
+// const int range_3_coord23[2] = {-2,16};
+// const int range_3_coord24[2] = {2,16};
 
-const int range_2_coord1[2] = {1,-16};
-const int range_2_coord2[2] = {0,-32};
-const int range_2_coord3[2] = {1,16};
-const int range_2_coord4[2] = {0,32};
-const int range_2_coord5[2] = {-1, -16};
-const int range_2_coord6[2] = {-1, 16};
-const int range_2_coord7[2] = {-2, 0};
-const int range_2_coord8[2] = {2, 0};
-const int range_2_coord9[2] = {0, 16};
-const int range_2_coord10[2] = {1, 0};
-const int range_2_coord11[2] = {-1, 0};
-const int range_2_coord12[2] = {0, -16};
+// const int range_2_coord1[2] = {1,-16};
+// const int range_2_coord2[2] = {0,-32};
+// const int range_2_coord3[2] = {1,16};
+// const int range_2_coord4[2] = {0,32};
+// const int range_2_coord5[2] = {-1, -16};
+// const int range_2_coord6[2] = {-1, 16};
+// const int range_2_coord7[2] = {-2, 0};
+// const int range_2_coord8[2] = {2, 0};
+// const int range_2_coord9[2] = {0, 16};
+// const int range_2_coord10[2] = {1, 0};
+// const int range_2_coord11[2] = {-1, 0};
+// const int range_2_coord12[2] = {0, -16};
 
-const int range_1_coord1[2] = {0, 16};
-const int range_1_coord2[2] = {1, 0};
-const int range_1_coord3[2] = {-1, 0};
-const int range_1_coord4[2] = {0, -16};
+// const int range_1_coord1[2] = {0, 16};
+// const int range_1_coord2[2] = {1, 0};
+// const int range_1_coord3[2] = {-1, 0};
+// const int range_1_coord4[2] = {0, -16};
 
 // struct Coords coords[9];
 int coords[24];
 Entity *selected_entity;
 
-void load_coords(char id)
-{
-  int *coord;
-  int i, len;
-  len = get_pattern_length(id);
-  switch(len)
-  {
-    case 4: coord = range_1_coord1; break;
-    case 12: coord = range_2_coord1; break;
-    case 24: coord = range_3_coord1; break;
-  }
+// void load_coords(char id)
+// {
+//   int *coord;
+//   int i, len;
+//   len = get_pattern_length(id);
+//   switch(len)
+//   {
+//     case 4: coord = range_1_coord1; break;
+//     case 12: coord = range_2_coord1; break;
+//     case 24: coord = range_3_coord1; break;
+//   }
 
-  len*=2;
+//   len*=2;
 
-  for(i=0; i<len; i++)
-  {
-    coords[i] = coord[i];
-  }
-}
+//   for(i=0; i<len; i++)
+//   {
+//     coords[i] = coord[i];
+//   }
+// }
 
-char get_pattern_length(char id)
-{
-  return 24;
-}
+// char get_pattern_length(char id)
+// {
+//   switch(id)
+//   {
+//     case 4;
+//     case 12;
+//     case 24;
+//   }
+// }
 
 char get_army_max_range(char entity_id)
 {
@@ -148,7 +153,8 @@ char get_army_max_range(char entity_id)
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
     load_unit_header(entities[entity_id].bg->units[i].id,0);
-    // put_number(unit_header[0].id,3,0,0);
+    // put_number(unit_header[0].rng,5,0,0);
+    // put_number(i,3,7,0);
     // put_hex(myPointers.addr[0],5,0,1);
     // wait_for_I_input();
     if(entities[entity_id].bg->units[i].hp && unit_header[0].rng > max)
@@ -157,7 +163,6 @@ char get_army_max_range(char entity_id)
     }
   }
   return max;
-  // return 3;
 }
 
 char get_army_min_move(char entity_id)

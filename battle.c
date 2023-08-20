@@ -6,6 +6,14 @@
 #define WORDING_ADV 2
 #define WORDING_CRIT 3
 
+#define PHASE_START 0
+#define PHASE_HEAL 1
+#define PHASE_SUPPORT 2
+#define PHASE_MELEE 3
+#define PHASE_RANGED 4
+#define PHASE_MAGIC 5
+#define PHASE_END 6
+
 // #incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
 // #inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
 // #inctile(battletiles,"tiles/battletiles.tiles.pcx")
@@ -13,7 +21,7 @@
 
 int battle_exp = 0, damage_dealt = 0, roll = 0;
 char battle_killed = 0, battle_lost = 0, player_id;
-char target_effect, attacker_effect, crit, evade;
+char crit, evade, battle_phase, attacker_effect, target_effect;
 
 void battle_end_screen()
 {
@@ -51,21 +59,24 @@ void battle_seq()
   // put_hex(&battle_exp,6,0,0);
   // countdown(2,8,"Prepare",12);
   // countdown(2,8," Press Run for arts",22);
+  battle_phase = PHASE_START;
   d_battle(atker);
-  if(clear_eyes_called == 0)
-  {
-    d_battle(trgt);
-  }
+  // if(clear_eyes_called == 0)
+  // {
+  animating = 0;
+  battle_phase = PHASE_START;
+  d_battle(trgt);
+  // }
   // countdown(3,2,8,"end "); countdown timer at the end for what?
   end_sequence();
 }
 
-void determine_crit()
+void determine_crit(char b_id)
 {
   int odds;
   
   crit = 0;
-  odds = (unit_header[0].spd * 100)/255;
+  odds = ((unit_header[0].spd + battleunits[b_id].s_bonus) * 100)/255;
   roll = range(1,100);
   if(roll < odds)
   {
@@ -78,12 +89,12 @@ void determine_crit()
   }
 }
 
-void determine_miss(char target_id)
+void determine_miss(char b_id, char target_id)
 {
   //algo for miss here...
   //max modifer = +51, -204
   int difference, accuracy;
-  difference = unit_header[0].spd - unit_header[1].spd;
+  difference = (unit_header[0].spd + battleunits[b_id].s_bonus) - (unit_header[1].spd + battleunits[target_id].s_bonus);
   evade = 0;
   if(difference > 51)
   {
@@ -311,18 +322,19 @@ void distribute_exp()
 
 void d_battle(char team)
 {
-  char i = 0;
+  char i = 0, loop_counter;
   int b_ticker = 0;
   // animating = 0;
+  loop_counter = 0;
   battle_clock = 0;
-  
-  while(battle_clock != -1)
+  next_phase();
+  while(battle_phase != PHASE_END)
   {
     // put_number(animating,3,0,0);
-    if(joytrg(0) == JOY_RUN)
-    {
-      battle_ctrls();
-    }
+    // if(joytrg(0) == JOY_RUN)
+    // {
+    //   battle_ctrls();
+    // }
     if(b_ticker++ == 2)
     {
       // put_number(animating,3,0,0);
@@ -340,6 +352,10 @@ void d_battle(char team)
         else
         {
           battle_clock = get_highest_speed(team);
+          if(battle_clock == -1)
+          {
+            next_phase();
+          }
         }
       }
       stun_count = 0;
@@ -386,14 +402,45 @@ char get_highest_speed(char team)
       bid_to_unit_header(i,0);
       apply_level_to_header(battleunits[i].unit->level,0);
 
-      if(unit_header[0].spd > hi_spd)
+      if(get_attack_type_by_phase(battle_phase) == arts[unit_header[0].attacks[battleunits[i].column]].move_type)
       {
-        hi_spd = unit_header[0].spd;
-        highest = i;
+        if(unit_header[0].spd > hi_spd)
+        {
+          hi_spd = unit_header[0].spd;
+          highest = i;
+        }
       }
     }
   }
   return highest;
+}
+
+void next_phase()
+{
+  // switch(battle_phase)
+  // {
+    // case PHASE_START: battle_phase = PHASE_SUPPORT; break;
+    // case PHASE_
+    // case PHASE_SUPPORT: battle_phase = PHASE_ATTACK; break;
+    // case PHASE_ATTACK: battle_phase = PHASE_MAGIC; break;
+    // case PHASE_MAGIC: battle_phase = PHASE_HEAL; break;
+    // case PHASE_HEAL: battle_phase = PHASE_END; break;
+  // }
+  battle_phase++;
+}
+
+char get_attack_type_by_phase(char phase)
+{
+  switch(phase)
+  {
+    case PHASE_START: return MOVE_NONE;
+    case PHASE_SUPPORT: return MOVE_ART_SUPPORT;
+    case PHASE_MELEE: return MOVE_PHYSICAL_ATTACK;
+    case PHASE_RANGED: return MOVE_RANGED_ATTACK;
+    case PHASE_MAGIC: return MOVE_ART_ATTACK;
+    case PHASE_HEAL: return MOVE_HEAL;
+  }
+  return 0;
 }
 
 void battle_unit_state(char b_id)
@@ -446,61 +493,23 @@ void b_u_idle(char b_id)
     // && entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos]->unit.rng >= attack_range
     && animating == 0)
   {
-    if(battleunits[b_id].meter)
+    bid_to_unit_header(b_id,0);
+    if((arts[unit_header[0].attacks[battleunits[b_id].column]].move_type > 19 && arts[unit_header[0].attacks[battleunits[b_id].column]].move_type < 23) 
+        || arts[unit_header[0].attacks[battleunits[b_id].column]].move_type == MOVE_ART_ATTACK)
     {
-      //don't think we'll actually ever get here?
-      // set_meter_targets();
-      // load_animations_to_vram(battleunits[b_id].unit->unit->id);
-      // set_unit_meter(b_id);
-      // battleunits[b_id].meter = 0;
-      // animating++;
-
-      // update_info_bar();
+      determine_targets(b_id,1); //ranged
     }
     else
     {
-      // display_window_rel(2,8,12,3);
-      bid_to_unit_header(b_id,0);
-      // put_string(arts[unit_header[0].attacks[battleunits[b_id].column]].name,3,9);
-      // battleunits[b_id].pos
-      determine_targets(b_id);
-      determine_action_state(b_id);
+      determine_targets(b_id,0);
     }
+    determine_action_state(b_id);
   }
 }
 
 void b_u_attack(char b_id)
 {
-  if(battleunits[b_id].frame == 0) //check if unit has advantage
-  {
-    // char i;
-    // unsigned char adv;
-
-    // display_window_rel(2,8,12,3);
-    // bid_to_unit_header(b_id,0);
-    // put_string(arts[unit_header[0].attacks[battleunits[b_id].column]].name,3,9);
-    // if(!sea_legs_art)
-    // {
-      // adv = 0;
-      // for(i=0; i<18; i++)
-      // {
-      //   if(battleunits[i].active && battleunits[i].target)
-      //   {
-      //     adv = check_advantage(unit_list[battleunits[b_id].unit->unit->id].a_type,battleunits[i].unit->unit->a_type);
-      //     if(adv)
-      //     {
-      //       break;
-      //     }
-      //   }
-      // }
-      // if(adv)
-      // {
-      //   spr_set(b_id+MAX_EFFECT_COUNT);
-      //   create_effect(EFFECT_ADV,spr_get_x(),spr_get_y(),0);
-      //   spr_show();
-      // }
-    // }
-  }
+  if(battleunits[b_id].frame == 0){} //check if unit has advantage
   if(battleunits[b_id].frame == 6)
   {
     set_targets_stunned(b_id);
@@ -701,19 +710,22 @@ void calc_hit_damage(char t_id, unsigned char damage, int t_a_bonus, int t_d_bon
   //apply bonuses here?
   hits++;
   apply_damage(t_id,damage);
-  // battleunits[t_id].target = 0;
 }
 
 unsigned char calc_damage(char a_id, char t_id, int a_level, int a_base, int d_base, int m_pow)
 {
   int dmg;
   //1 = crit in this case
-  dmg = ((((2 * a_level * (2*crit)) / 5) + 2) * m_pow) * a_base;
-  dmg /= d_base;
-  dmg += 2;
-  dmg /= 4;
+  // dmg = ((((2 * a_level * (2*crit)) / 3) + 2) * m_pow) * a_base;
+  // dmg /= d_base;
+  // dmg += 2;
+  // dmg /= 4;
   // put_number(dmg,4,0,0);
-  crit = 0;
+  // crit = 0;
+
+  dmg = (m_pow + a_level) + ( max( (a_base + battleunits[a_id].a_bonus) - (d_base+battleunits[t_id].d_bonus),1) * (1 + crit));
+  dmg /= 2;
+  put_number(dmg,4,0,0);
   return min(dmg,255);
 }
 
@@ -772,9 +784,9 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
 	xOffset = -26;
 	atker = i1, trgt = i2;
   cmdr_count = 28;
-  target_effect = 0;
-  attacker_effect = 0;
   crit = 0;
+  attacker_effect = 0;
+  target_effect = 0;
   // entities[i1].bg->meter = min(entities[i1].bg->meter+1,MAX_METER);
   // entities[i2].bg->meter = min(entities[i2].bg->meter+1,MAX_METER);
   if(entities[atker].team == PLAYER)
@@ -904,7 +916,6 @@ void display_battle_menu()
   cursor_y = 1;
   display_window_abs(10,0,12,12);
   display_cursor();
-  print_army_combos(player_ent,unit_offset);
 }
 
 void battle_ctrls()
@@ -984,35 +995,12 @@ void battle_ctrls()
   // set_infobar();
 }
 
-void print_army_combos(char entity_id, char unit_offset)
-{
-  // char i,j;
-  // j=0;
-  // for(i=0; i<MAX_ARMY_SIZE; i++)
-  // {
-    // if(entities[entity_id].bg->units[i].hp && battleunits[i+unit_offset].active)
-    // {
-      // if(arts[entities[entity_id].bg->units[i].unit->art].cost > entities[entity_id].bg->meter)
-    //   {
-    //     set_font_pal(11);
-    //   }
-    //   put_string(arts[entities[entity_id].bg->units[i].unit->art].name,12,1+j);
-    //   print_target_type_icon(arts[entities[entity_id].bg->units[i].unit->art].target,20,1+j++);
-    //   set_font_pal(10);
-    // }
-    // else
-    // {
-    //   put_string("         ",12,1+j++);
-    // }
-  // }
-}
-
 void update_info_bar()
 {
   // put_number(calculate_power(entities[atker].id),3,5,4);
-  display_meter_bars(entities[atker].bg->meter,10,4);
+  // display_meter_bars(entities[atker].bg->meter,10,4);
   // put_number(calculate_power(entities[trgt].id),3,24,4);
-  display_meter_bars(entities[trgt].bg->meter,19,4);
+  // display_meter_bars(entities[trgt].bg->meter,19,4);
 }
 
 void init_armies(int player, int cpu)
@@ -1243,7 +1231,6 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
   }
 
   // picker = 0;
-  clear_eyes_called = 0;
 	total_units = 0;
   animating = 0;
   a_atk_bonus = 0;
@@ -1260,6 +1247,7 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
   battle_lost = 0;
   battle_exp = 0;
   damage_dealt = 0;
+  battle_phase = PHASE_START;
 
 	spr_set(62);
 	spr_hide();
@@ -1294,10 +1282,10 @@ void set_targets_stunned(char b_id)
       bid_to_unit_header(i,1);
       apply_level_to_header(battleunits[i].unit->level,1);
 
-      determine_miss(i);
+      determine_miss(b_id,i);
       if(battleunits[i].state != STATE_EVADE)
       {
-        determine_crit();
+        determine_crit(b_id);
         set_unit_stunned(i);
         if(crit)
         {

@@ -1,6 +1,6 @@
 Golem:
   .db 80  ;hp
-  .db 19  ;atk
+  .db 20  ;atk
   .db 15  ;def
   .db 5  ;int
   .db 16  ;res
@@ -21,4 +21,4 @@ Golem:
 
   ;graphic
   .db bank(_golembtl)
-  .dw _musketbtl & $1fff
+  .dw _golembtl & $1fff

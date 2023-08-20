@@ -8,13 +8,13 @@ King:
   .db 3   ;mov
   .db 120 ;sta
   .db 2   ;rng
-  .db 31   ;id
+  .db 31  ;id
   .db 2   ;a_type
   .db 0   ;art
   .db 3   ;points
-  .db 15   ;pow
+  .db 15  ;pow
   .db 1   ;is_cmdr
-  .db 23, 24, 23 ;attack positions
+  .db 25, 24, 23 ;attack positions
 
   ;unit growth
   .db GROWTH_KING

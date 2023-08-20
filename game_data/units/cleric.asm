@@ -1,7 +1,7 @@
 Cleric:
   .db 30  ;hp
-  .db 10  ;atk
-  .db 6  ;def
+  .db 16  ;atk
+  .db 12  ;def
   .db 24  ;int
   .db 9  ;res
   .db 16  ;spd

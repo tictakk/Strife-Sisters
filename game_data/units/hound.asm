@@ -1,7 +1,7 @@
 Hellhound:
   .db 45  ;hp
   .db 28  ;atk
-  .db 12  ;def
+  .db 10  ;def
   .db 15  ;int
   .db 11  ;res
   .db 20  ;spd

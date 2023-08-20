@@ -156,6 +156,10 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],bnd,0x100);
           break;
 
+          case STALKER_UNIT:
+          load_vram(npc_vram[type],stlk,0x100);
+          break;
+
           case CLERIC_UNIT:
           // load_vram(npc_vram[type],mag,0x100);
           // break;

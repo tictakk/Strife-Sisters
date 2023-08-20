@@ -2,7 +2,7 @@ Violet:
   .db 35  ;hp
   .db 21  ;atk
   .db 9  ;def
-  .db 35  ;int
+  .db 30  ;int
   .db 12  ;res
   .db 13  ;spd
   .db 3   ;mov

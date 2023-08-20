@@ -12,47 +12,41 @@
 #define PASSING 4
 
 struct Ai_Entity{
-  char state, entity_id, id, target;
+  char state, entity_id, id, target, mv_rng, atk_rng;
   int dest;
 };
-
-char player_units[6];
 char units_in_range[6];
 char num_of_units_in_range;
 char num_of_ai;
-// char num_of_players;
 char target_unit;
-// char action;
 char ai_tracker;
 int hit_radius_size;
 int opp_hit_radius[26];
+// int intersecting_tiles[26];
+// int intersecting_size;
 
-struct Ai_Entity ai_entities[12]; //should be 15 but gave an extra 5 for possible, non-enemy ais
+struct Ai_Entity ai_entities[15]; //should be 15 but gave an extra 5 for possible, non-enemy ais
 
 init_ai()
 {
-    char i,j,m;
-    // num_of_players = 0;
-    num_of_ai = 0;
-    j = 0;
-    m = 0;
-    for(i=0; i<num_of_entities; i++)
+  char i,j,m;
+  num_of_ai = 0;
+  j = 0;
+  m = 0;
+  for(i=0; i<num_of_entities; i++)
+  {
+    if(entities[i].team == CPU)
     {
-      if(entities[i].team == CPU)
-      {
-        ai_entities[j].entity_id = i;
-        ai_entities[j].id = j;
-        ai_entities[j].target = 0;
-        ai_entities[j].dest = 0;
-        ai_entities[j++].state = READY;
-      }
-      else if(entities[i].team == PLAYER)
-      {
-        player_units[m++] = i;
-      }
+      ai_entities[j].entity_id = i;
+      ai_entities[j].id = j;
+      ai_entities[j].target = 0;
+      ai_entities[j].dest = 0;
+      ai_entities[j].state = READY;
+      ai_entities[j].mv_rng = get_army_min_move(i);
+      ai_entities[j++].atk_rng = get_army_max_range(i);
     }
-    num_of_ai = j;
-    // num_of_players = m;
+  }
+  num_of_ai = j;
 }
 
 int find_weakest_opp_in_range(char id, char range)
@@ -153,11 +147,8 @@ void start_turn(char team)
   {
     current_turn++;
   }
-  // reset_calling(team);
   center_camera(camera_pos);
-
   set_cursor_pos(camera_pos);
-  // set_cursor_pos(camera_pos);
   satb_update();
   vsync();
 }
@@ -166,8 +157,9 @@ void get_opps_in_range(char id, char range)
 {
   int i, pos;
   num_of_units_in_range = 0;
-  get_unit_radius(entities[id].pos,range,CPU,1);
-
+  get_unit_radius(entities[id].pos,range,CPU,0);
+  // put_number(tmp,4,0,0);
+  // wait_for_I_input();
   for(i=0; i<map_size+1; i++)
   {
     // pos = map[i].ownX + (map[i].ownY*16);
@@ -185,7 +177,7 @@ void get_opps_in_range(char id, char range)
 char find_weakest_opp()
 {
   char i, weakest_id, id;
-  int army_size, army_atk, army_def, army_total, weakest_total;
+  int army_total, weakest_total;
   weakest_id = units_in_range[0];
   weakest_total = calc_unit_rating(units_in_range[0]);
   for(i=1; i<num_of_units_in_range; i++)
@@ -312,7 +304,7 @@ void do_capture_objective(char ai_id)
 
   mv = get_army_min_move(ai_entities[ai_id].entity_id);
   rng = get_army_max_range(ai_entities[ai_id].entity_id);
-  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
+  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,0);
 
   if(obj_in_range && battle_grid[objective_pos] == 0)
   {
@@ -320,14 +312,20 @@ void do_capture_objective(char ai_id)
     ai_entities[ai_id].dest = objective_pos;
     return;
   }
-  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,mv);
+  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,0);
   if(num_of_units_in_range == 1)
   {
-    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,path,battle_grid,CPU,60,mv);
+    // if(is_adjacent(entities[ai_entities[ai_id].entity_id].pos))
+    // {
+    //   return;
+    // }
+    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,path,battle_grid,CPU,mv,0);
+    // p = find_attackable_position(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,rng,mv);
     if(p == 0)
     {
       ai_entities[ai_id].state = ATTACKING;
       ai_entities[ai_id].target = units_in_range[0];
+      return;
     }
     else
     {
@@ -340,16 +338,14 @@ void do_capture_objective(char ai_id)
           ai_entities[ai_id].target = units_in_range[0];
           return;
         }
-      }
+      } 
     }
   }
-  else
-  {
-    search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
-    p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size+1,map);
-    ai_entities[ai_id].state = MOVING;
-    ai_entities[ai_id].dest = p;
-  }
+
+  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
+  p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size+1,map);
+  ai_entities[ai_id].state = MOVING;
+  ai_entities[ai_id].dest = p;
 }
 
 void do_target_objective(char ai_id)
@@ -406,11 +402,8 @@ void move_ai_unit(char ai_id, int dest)
 
 void ai_do_state(char ai_id)
 {
-  // center_camera(graph_from_x_y(sx,sy));
   center_camera(entities[ai_entities[ai_id].entity_id].pos);
-  // put_number(entities[ai_entities[ai_id].entity_id].pos,3,0,0);
   set_cursor_pos(entities[ai_entities[ai_id].entity_id].pos);
-  // display_position(14,1);
   satb_update();
   sync(60);
   if(ai_entities[ai_id].state == READY){ do_ready(ai_id); }
@@ -432,9 +425,6 @@ void do_ready(char ai_id)
 
 void do_move(char ai_id)
 {
-  // put_number(ai_entities[ai_id].dest,3,0,0);
-  // put_number(ai_entities[ai_id].target,3,0,1);
-  // wait_for_I_input();
   if(ai_entities[ai_id].dest && ai_entities[ai_id].dest != entities[ai_entities[ai_id].entity_id].pos)
   {
     move_ai_unit(ai_id,ai_entities[ai_id].dest);
@@ -475,8 +465,8 @@ void do_attack(char ai_id)
   if(result == 1)
   {
     init_ai();
-    ai_tracker = max(ai_id-1,0);
-    // ai_tracker--;
+    // ai_tracker = max(ai_id-1,0);
+    ai_tracker--;
     // num_of_ai--;
     // return;
   }
@@ -488,6 +478,57 @@ void do_attack(char ai_id)
     }
   }
 }
+
+// int find_attackable_position(int position, int target_position, char attack_range, char move_range)
+// {
+//   char i, j;
+//   intersecting_size = 0;
+//   get_unit_radius(target_position,attack_range,PLAYER,0);
+//   convert_map_to_array();
+//   get_unit_radius(position,move_range,CPU,0);
+//   for(i=0; i<hit_radius_size; i++)
+//   {
+//     for(j=0; j<map_size; j++)
+//     {
+//       if(opp_hit_radius[i] == map[j].ownPos && 
+//          opp_hit_radius[i] != target_position &&
+//          battle_grid[opp_hit_radius[i]] == 0
+//          )
+//       {
+//         intersecting_tiles[intersecting_size++] = opp_hit_radius[i];
+//       }
+//     }
+//   }
+//   if(intersecting_size > 0)
+//   {
+//     return intersecting_tiles[0];
+//   }
+//   else
+//   {
+//     return -1;
+//   }
+// }
+
+// char is_adjacent(int position)
+// {
+//   if(((position&0xF) - 1) > -1 && battle_grid[position-1] == units_in_range[0])
+// 	{
+//     return 1;
+// 	}
+// 	if((position - 16) > -1 && battle_grid[position-16] == units_in_range[0])
+// 	{
+//     return 1;
+// 	}
+// 	if((position + 16) < 352 && battle_grid[position+16] == units_in_range[0])
+// 	{
+//     return 1;
+// 	}
+// 	if(((position&15) + 1) < 16 && battle_grid[position+1] == units_in_range[0])
+// 	{
+//     return 1;
+// 	}
+//   return 0;
+// }
 
 void do_pass(char ai_id)
 {
@@ -519,7 +560,7 @@ int find_nearest_unoccupied_position(int position, int destination, char range, 
   {
     position = grid[i].ownPos;
 
-    if(battle_grid[position] == 0)
+    if(battle_grid[position] == 0 && is_traversable(position))
     {
       pos_x = position & 15;
       pos_y = position / 16;

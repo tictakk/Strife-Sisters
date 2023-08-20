@@ -14,6 +14,7 @@
 #define MENU_TURN_Y 16
 #define WAIT_TIME 8
 
+int position_1 = 0, position_2 = 0, position_len = 0;
 const char dumb_table[9] = {0,3,6,1,4,7,2,5,8};
 int g_abs;
 int id;
@@ -768,6 +769,22 @@ void ctrls()
 
   if(jy & JOY_II)
   {
+    // if(selector_mode == SELECT_MODE)
+    // {
+    //   if(position_1 == 0)
+    //   {
+    //     position_1 = g_abs;
+    //   }
+    //   else
+    //   {
+    //     position_2 = g_abs;
+    //     put_number(find_attackable_position(position_1,position_2,2,3),4,0,0);
+    //     // position_len = get_path(position_1,position_2,path,battle_grid,PLAYER,5,0);
+    //     // put_number(position_len,5,0,0);
+    //     position_1 = 0;
+    //     position_2 = 0;
+    //   }
+    // }
     if(selector_mode == PLACE_MODE)
     {
       set_cursor_pos(selected_entity->pos);
@@ -837,46 +854,20 @@ void ctrls()
 
   if(j & JOY_RUN)
   {
-    last_command = selector_mode;
-    selector_mode = MENU_MODE;
-    selected_entity = 0;
-    menu_mask = MASK_TURN;
-    display_menu(MENU_TURN_X,MENU_TURN_Y);
+    if(selector_mode == SELECT_MODE)
+    {
+      last_command = selector_mode;
+      selector_mode = MENU_MODE;
+      selected_entity = 0;
+      menu_mask = MASK_TURN;
+      display_menu(MENU_TURN_X,MENU_TURN_Y);
+    }
     // win_condition();
   }
 
   if(j & JOY_SEL)
   {
     map_result_status = MAP_RESULT_WIN;
-    // put_number(hits,3,0,0);
-    // put_number(misses,3,10,0);
-
-    
-    // char idee;
-    // idee = battle_grid[graph_from_x_y(sx,sy)] - 1;
-    // if(selector_mode == SELECT_MODE)
-    // {
-    //   if(idee >= 0 && entities[idee].team == CPU)
-    //   {
-    //     if(toggle_enemy_higlight == 0)
-    //     {
-    //       select_unit(idee);
-    //       get_unit_radius(g_abs,get_army_min_move(idee),entities[idee].team,get_army_min_move(idee));
-    //       display_move_range(selected_entity->pos);
-    //       toggle_enemy_higlight = 1;
-    //     }
-    //     else if(toggle_enemy_higlight == 1)
-    //     {
-    //       toggle_enemy_higlight = 0;
-    //       unhighlight();
-    //     }
-    //   }
-    //   else
-    //   {
-    //     toggle_enemy_higlight = 0;
-    //     unhighlight();
-    //   }
-    // }
   }
 }
 
@@ -999,25 +990,6 @@ void highlight(int square, char action_type)
 void get_unit_radius(int square, int depth, char team, char ignore)
 {
   get_path(square,999,path,battle_grid,team,depth,ignore);
-}
-
-char attackable(int attacker, int target, int coords[18])
-{
-  int pos;
-  char j;
-  load_coords(attacker);
-  for(j=0; j<get_pattern_length(attacker); j++)
-  {
-    pos = entities[attacker].pos+coords[j*2]+coords[(j*2)+1];
-    // if(is_traversable(pos)) why does it matter if the pos we're trying to attack is traversable?
-    {
-      if(pos == entities[target].pos)
-      {
-        return 1;
-      }
-    }
-  }
-  return 0;
 }
 
 void display_selector_pos()

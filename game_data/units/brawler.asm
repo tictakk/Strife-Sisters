@@ -1,7 +1,7 @@
 Brawler:
   .db 50  ;hp
-  .db 21  ;atk
-  .db 9  ;def
+  .db 22  ;atk
+  .db 15  ;def
   .db 5  ;int
   .db 13  ;res
   .db 24  ;spd

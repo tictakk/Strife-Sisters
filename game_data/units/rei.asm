@@ -1,10 +1,10 @@
 Rei:
   .db 40  ;hp
   .db 26  ;atk
-  .db 10  ;def
+  .db 18  ;def
   .db 13  ;int
   .db 12  ;res
-  .db 60  ;spd
+  .db 11  ;spd
   .db 3   ;mov
   .db 120 ;sta
   .db 1   ;rng

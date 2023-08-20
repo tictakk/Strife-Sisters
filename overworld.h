@@ -3,7 +3,7 @@
 #define ARMY_CONVOY_WINDOW_Y 0
 #define ARMY_BATTLE_GROUP_WINDOW_X 0
 #define ARMY_BATTLE_GROUP_WINDOW_Y 14
-#define ARMY_STATS_X 11
+#define ARMY_STATS_X 13
 #define ARMY_STATS_Y 14
 #define ARMY_GROUP_UNITS_WINDOW_X 22
 #define ARMY_GROUP_UNITS_WINDOW_Y 14
@@ -125,13 +125,13 @@ void update_unit_stats_window(char unit_id, char x, char y, char level)
 {
   if(unit_id > 0)
   {
-    draw_32x32_sprite(unit_id,(x*8)+28,(y*8)+18);
+    draw_32x32_sprite(unit_id,(x*8)+28,(y*8)+10);
   }
   else
   {
     spr_hide(1);
   }
-  print_unit_stats(unit_id,x+2,s_y_relative+y+7,level);
+  print_unit_stats(unit_id,x+1,s_y_relative+y+6,level);
   // print_unit_fullname(unit_id,x+3,s_y_relative+y+1);
 }
 
@@ -210,7 +210,7 @@ void display_battle_group_window(char x, char y)
   load_vram(0x68C0,selector,0x40);
   load_palette(28,selectorpal,1);
   
-  update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,x+11,y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
+  update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,x+13,y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
   update_battle_group_window(selected_cmdr,x,y);
 
   display_selector(63,get_iso_x(1,17,commander_select_cursor,cursor_column),get_iso_y(1,17,commander_select_cursor,cursor_column)+14,28);
@@ -289,7 +289,7 @@ void display_dismiss_select_menu()
   load_cursor(23,3,SLIDER_ONE);
 
   update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-  update_unit_stats_window(party_units[0],11,14,1);
+  update_unit_stats_window(party_units[0],13,14,1);
 }
 
 void display_deploy_select_menu()

@@ -1,9 +1,9 @@
 Spearman:
   .db 45  ;hp
   .db 23  ;atk
-  .db 8   ;def 
+  .db 13   ;def 
   .db 10  ;int
-  .db 10  ;res
+  .db 11  ;res
   .db 15  ;spd
   .db 3   ;mov
   .db 110 ;sta

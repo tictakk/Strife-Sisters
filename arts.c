@@ -3,7 +3,7 @@
 #define RAIN_ARROW_ART 2
 #define RAPID_THRUST_ART 3
 #define PLUNDER_ART 4
-#define PILLAGE_ART 5
+#define SPD_UP_ART 5
 #define CAPTURE_ART 6
 #define POWER_WAVE_ART 7
 #define BLOW_BACK_ART 8
@@ -18,9 +18,9 @@
 #define RESTORE_ART 17
 #define RED_EYE_ART 18
 #define BLACK_EYE_ART 19
-#define CLEAR_EYES_ART 20
-#define SEDUCE_ART 21
-#define SEA_LEGS_ART 22
+// #define CLEAR_EYES_ART 20
+// #define SEDUCE_ART 21
+// #define SEA_LEGS_ART 22
 // #define FRENZY_ART 0
 
 #define PHYSICAL_SINGLE_ATTACK 23
@@ -28,9 +28,9 @@
 #define PHYSICAL_ROW_ATTACK 25
 #define PHYSICAL_ALL_ATTACK 26
 
-// #define SUPPORT_SINGLE_ATTACK 27
-// #define SUPPORT_COLUMN_ATTACK 28
-// #define SUPPORT_ROW_ATTACK 29
+#define RANGED_SINGLE_ATTACK 20
+#define RANGED_COLUMN_ATTACK 21
+#define RANGED_ROW_ATTACK 22
 // #define SUPPORT_ALL_ATTACK 30
 
 #define NONE_TO_NONE 0
@@ -49,9 +49,8 @@
 #define MOVE_PHYSICAL_ATTACK 1
 #define MOVE_HEAL 2
 #define MOVE_ART_ATTACK 3
-#define MOVE_STAT 4
-
-#define ART_COUNT 23
+#define MOVE_ART_SUPPORT 4
+#define MOVE_RANGED_ATTACK 5
 
 typedef struct{
   char cost, frame_count, target, relationship, stunning, move_type, base_amt;
@@ -98,15 +97,16 @@ void init_arts()
   arts[4].target = ALL_ALLIES;
   arts[4].relationship = MANY_TO_MANY;
   arts[4].stunning = 0;
+  arts[4].move_type = MOVE_ART_SUPPORT; 
 
-  arts[PILLAGE_ART].frame_count = 11;
-  arts[PILLAGE_ART].name = "Fortify ";
-  arts[PILLAGE_ART].cost = 7;
-  arts[PILLAGE_ART].target = ALL_ALLIES;
-  arts[PILLAGE_ART].relationship = MANY_TO_MANY;
-  arts[PILLAGE_ART].stunning = 0;
-  arts[PILLAGE_ART].base_amt = 3;
-  arts[PILLAGE_ART].move_type = MOVE_ART_ATTACK;
+  arts[SPD_UP_ART].frame_count = 11;
+  arts[SPD_UP_ART].name = "Spd up ";
+  arts[SPD_UP_ART].cost = 7;
+  arts[SPD_UP_ART].target = ALL_ALLIES;
+  arts[SPD_UP_ART].relationship = MANY_TO_MANY;
+  arts[SPD_UP_ART].stunning = 0;
+  arts[SPD_UP_ART].base_amt = 3;
+  arts[SPD_UP_ART].move_type = MOVE_ART_SUPPORT;
 
   arts[6].frame_count = 11;
   arts[6].name = "Capture  ";
@@ -210,29 +210,35 @@ void init_arts()
   arts[19].relationship = ONE_TO_ONE;
   arts[19].stunning = 1;
 
-  arts[20].frame_count = 0;
-  arts[20].name = "Clear Eye";
-  arts[20].cost = 1;
-  arts[20].target = NO_TARGET;
-  arts[20].relationship = NONE_TO_NONE;
-  arts[20].stunning = 0;
+  arts[RANGED_SINGLE_ATTACK].frame_count = 0;
+  arts[RANGED_SINGLE_ATTACK].name = "Range S";
+  arts[RANGED_SINGLE_ATTACK].cost = 1;
+  arts[RANGED_SINGLE_ATTACK].target = SINGLE_HIT;
+  arts[RANGED_SINGLE_ATTACK].relationship = NONE_TO_NONE;
+  arts[RANGED_SINGLE_ATTACK].stunning = 1;
+  arts[RANGED_SINGLE_ATTACK].base_amt = 10;
+  arts[RANGED_SINGLE_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
-  arts[21].frame_count = 0;
-  arts[21].name = "Seduce   ";
-  arts[21].cost = 1;
-  arts[21].target = ALL_OPPONENTS;
-  arts[21].relationship = NONE_TO_NONE;
-  arts[21].stunning = 0;
+  arts[RANGED_COLUMN_ATTACK].frame_count = 0;
+  arts[RANGED_COLUMN_ATTACK].name = "Range C";
+  arts[RANGED_COLUMN_ATTACK].cost = 1;
+  arts[RANGED_COLUMN_ATTACK].target = MULTI_COL_3;
+  arts[RANGED_COLUMN_ATTACK].relationship = NONE_TO_NONE;
+  arts[RANGED_COLUMN_ATTACK].stunning = 1;
+  arts[RANGED_COLUMN_ATTACK].base_amt = 7;
+  arts[RANGED_COLUMN_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
-  arts[22].frame_count = 0;
-  arts[22].name = "Sea Legs ";
-  arts[22].cost = 1;
-  arts[22].target = NO_TARGET;
-  arts[22].relationship = NONE_TO_NONE;
-  arts[22].stunning = 0;
+  arts[RANGED_ROW_ATTACK].frame_count = 0;
+  arts[RANGED_ROW_ATTACK].name = "Range R";
+  arts[RANGED_ROW_ATTACK].cost = 1;
+  arts[RANGED_ROW_ATTACK].target = MULTI_ROW;
+  arts[RANGED_ROW_ATTACK].relationship = NONE_TO_NONE;
+  arts[RANGED_ROW_ATTACK].stunning = 1;
+  arts[RANGED_ROW_ATTACK].base_amt = 7;
+  arts[RANGED_ROW_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
   arts[PHYSICAL_SINGLE_ATTACK].frame_count = 0;
-  arts[PHYSICAL_SINGLE_ATTACK].name = "Single  ";
+  arts[PHYSICAL_SINGLE_ATTACK].name = "Melee S";
   arts[PHYSICAL_SINGLE_ATTACK].cost = 0;
   arts[PHYSICAL_SINGLE_ATTACK].target = SINGLE_HIT;
   arts[PHYSICAL_SINGLE_ATTACK].relationship = NONE_TO_NONE;
@@ -241,7 +247,7 @@ void init_arts()
   arts[PHYSICAL_SINGLE_ATTACK].base_amt = 10;
 
   arts[PHYSICAL_COLUMN_ATTACK].frame_count = 0;
-  arts[PHYSICAL_COLUMN_ATTACK].name = "Column  ";
+  arts[PHYSICAL_COLUMN_ATTACK].name = "Melee C";
   arts[PHYSICAL_COLUMN_ATTACK].cost = 0;
   arts[PHYSICAL_COLUMN_ATTACK].target = MULTI_COL_3;
   arts[PHYSICAL_COLUMN_ATTACK].relationship = NONE_TO_NONE;
@@ -250,7 +256,7 @@ void init_arts()
   arts[PHYSICAL_COLUMN_ATTACK].base_amt = 7;
 
   arts[PHYSICAL_ROW_ATTACK].frame_count = 0;
-  arts[PHYSICAL_ROW_ATTACK].name = "Row     ";
+  arts[PHYSICAL_ROW_ATTACK].name = "Melee R";
   arts[PHYSICAL_ROW_ATTACK].cost = 0;
   arts[PHYSICAL_ROW_ATTACK].target = MULTI_ROW;
   arts[PHYSICAL_ROW_ATTACK].relationship = NONE_TO_NONE;
@@ -280,7 +286,7 @@ void load_art(char art_no, int x, int y, char flip)
     create_atk_up(x,y);
     break;
 
-    case PILLAGE_ART:
+    case SPD_UP_ART:
     create_def_up(x,y);
     break;
 
@@ -371,14 +377,14 @@ char get_modifier_amount(char art_id)
     case ZAP_ART: return 20;
     case RAIN_ARROW_ART: return 15;
     case PLUNDER_ART: return 5;
-    case PILLAGE_ART: return 5;
+    case SPD_UP_ART: return 10;
     case POWER_WAVE_ART: return 20;
     case BLOW_BACK_ART: return 10;
     case CLEAVE_ART: return 10;
     // case FRENZY_ART: return 10;
     case RUN_THROUGH_ART: return 15;
     case BOMBARD_ART: return 15;
-    case SEDUCE_ART: return 5;
+    // case SEDUCE_ART: return 5;
     default: return 0;
   }
   return 0;
@@ -391,14 +397,14 @@ char get_modifier_type(char art_id)
     case ZAP_ART: return MOD_HP;
     case RAIN_ARROW_ART: return MOD_HP;
     case PLUNDER_ART: return MOD_ATK;
-    case PILLAGE_ART: return MOD_DEF;
+    case SPD_UP_ART: return MOD_SPD;
     case POWER_WAVE_ART: return MOD_HP;
     case BLOW_BACK_ART: return MOD_HP;
     case CLEAVE_ART: return MOD_HP;
     // case FRENZY_ART: return MOD_HP;
     case RUN_THROUGH_ART: return MOD_HP;
     case BOMBARD_ART: return MOD_HP;
-    case SEDUCE_ART: return MOD_DEF;
+    // case SEDUCE_ART: return MOD_DEF;
   }
   return MOD_NONE;
 }
