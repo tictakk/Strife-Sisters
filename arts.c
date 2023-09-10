@@ -138,7 +138,7 @@ void init_arts()
   arts[9].stunning = 1;
 
   arts[HEAL_ART].frame_count = 11;
-  arts[HEAL_ART].name = "Heal    ";
+  arts[HEAL_ART].name = "Heal   ";
   arts[HEAL_ART].cost = 1;
   arts[HEAL_ART].target = HEAL;
   arts[HEAL_ART].relationship = NONE_TO_NONE;
@@ -147,7 +147,7 @@ void init_arts()
   arts[HEAL_ART].move_type = MOVE_HEAL;
 
   arts[11].frame_count = 0;
-  arts[11].name = "Heal All";
+  arts[11].name = "Heal   ";
   arts[11].cost = 1;
   arts[11].target = HEAL_ALL;
   arts[11].relationship = NONE_TO_NONE;
@@ -211,7 +211,7 @@ void init_arts()
   arts[19].stunning = 1;
 
   arts[RANGED_SINGLE_ATTACK].frame_count = 0;
-  arts[RANGED_SINGLE_ATTACK].name = "Range S";
+  arts[RANGED_SINGLE_ATTACK].name = "Ranged ";
   arts[RANGED_SINGLE_ATTACK].cost = 1;
   arts[RANGED_SINGLE_ATTACK].target = SINGLE_HIT;
   arts[RANGED_SINGLE_ATTACK].relationship = NONE_TO_NONE;
@@ -220,7 +220,7 @@ void init_arts()
   arts[RANGED_SINGLE_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
   arts[RANGED_COLUMN_ATTACK].frame_count = 0;
-  arts[RANGED_COLUMN_ATTACK].name = "Range C";
+  arts[RANGED_COLUMN_ATTACK].name = "Ranged ";
   arts[RANGED_COLUMN_ATTACK].cost = 1;
   arts[RANGED_COLUMN_ATTACK].target = MULTI_COL_3;
   arts[RANGED_COLUMN_ATTACK].relationship = NONE_TO_NONE;
@@ -229,7 +229,7 @@ void init_arts()
   arts[RANGED_COLUMN_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
   arts[RANGED_ROW_ATTACK].frame_count = 0;
-  arts[RANGED_ROW_ATTACK].name = "Range R";
+  arts[RANGED_ROW_ATTACK].name = "Ranged ";
   arts[RANGED_ROW_ATTACK].cost = 1;
   arts[RANGED_ROW_ATTACK].target = MULTI_ROW;
   arts[RANGED_ROW_ATTACK].relationship = NONE_TO_NONE;
@@ -238,7 +238,7 @@ void init_arts()
   arts[RANGED_ROW_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
   arts[PHYSICAL_SINGLE_ATTACK].frame_count = 0;
-  arts[PHYSICAL_SINGLE_ATTACK].name = "Melee S";
+  arts[PHYSICAL_SINGLE_ATTACK].name = "Melee  ";
   arts[PHYSICAL_SINGLE_ATTACK].cost = 0;
   arts[PHYSICAL_SINGLE_ATTACK].target = SINGLE_HIT;
   arts[PHYSICAL_SINGLE_ATTACK].relationship = NONE_TO_NONE;
@@ -247,7 +247,7 @@ void init_arts()
   arts[PHYSICAL_SINGLE_ATTACK].base_amt = 10;
 
   arts[PHYSICAL_COLUMN_ATTACK].frame_count = 0;
-  arts[PHYSICAL_COLUMN_ATTACK].name = "Melee C";
+  arts[PHYSICAL_COLUMN_ATTACK].name = "Melee  ";
   arts[PHYSICAL_COLUMN_ATTACK].cost = 0;
   arts[PHYSICAL_COLUMN_ATTACK].target = MULTI_COL_3;
   arts[PHYSICAL_COLUMN_ATTACK].relationship = NONE_TO_NONE;
@@ -256,7 +256,7 @@ void init_arts()
   arts[PHYSICAL_COLUMN_ATTACK].base_amt = 7;
 
   arts[PHYSICAL_ROW_ATTACK].frame_count = 0;
-  arts[PHYSICAL_ROW_ATTACK].name = "Melee R";
+  arts[PHYSICAL_ROW_ATTACK].name = "Melee  ";
   arts[PHYSICAL_ROW_ATTACK].cost = 0;
   arts[PHYSICAL_ROW_ATTACK].target = MULTI_ROW;
   arts[PHYSICAL_ROW_ATTACK].relationship = NONE_TO_NONE;
@@ -265,7 +265,7 @@ void init_arts()
   arts[PHYSICAL_ROW_ATTACK].base_amt = 7;
   
   arts[PHYSICAL_ALL_ATTACK].frame_count = 0;
-  arts[PHYSICAL_ALL_ATTACK].name = "All      ";
+  arts[PHYSICAL_ALL_ATTACK].name = "Melee  ";
   arts[PHYSICAL_ALL_ATTACK].cost = 0;
   arts[PHYSICAL_ALL_ATTACK].target = ALL_OPPONENTS;
   arts[PHYSICAL_ALL_ATTACK].relationship = NONE_TO_NONE;
@@ -376,7 +376,7 @@ char get_modifier_amount(char art_id)
   {
     case ZAP_ART: return 20;
     case RAIN_ARROW_ART: return 15;
-    case PLUNDER_ART: return 5;
+    case PLUNDER_ART: return 10;
     case SPD_UP_ART: return 10;
     case POWER_WAVE_ART: return 20;
     case BLOW_BACK_ART: return 10;

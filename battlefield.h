@@ -67,82 +67,8 @@ char units_lost, units_killed;
 int turn_bonus, killed_bonus, lost_bonus, total_bonus, materials_collected;
 char map_result_status;
 
-// const int range_3_coord1[2] = {1,-16};
-// const int range_3_coord2[2] = {0,-32};
-// const int range_3_coord3[2] = {1,16};
-// const int range_3_coord4[2] = {0,32};
-// const int range_3_coord5[2] = {-1, -16};
-// const int range_3_coord6[2] = {-1, 16};
-// const int range_3_coord7[2] = {-2, 0};
-// const int range_3_coord8[2] = {2, 0};
-// const int range_3_coord9[2] = {0, 16};
-// const int range_3_coord10[2] = {1, 0};
-// const int range_3_coord11[2] = {-1, 0};
-// const int range_3_coord12[2] = {0, -16};
-// const int range_3_coord13[2] = {0,-48};
-// const int range_3_coord14[2] = {-3,0};
-// const int range_3_coord15[2] = {3,0};
-// const int range_3_coord16[2] = {0,48};
-// const int range_3_coord17[2] = {1, 32};
-// const int range_3_coord18[2] = {-1, 32};
-// const int range_3_coord19[2] = {1, -32};
-// const int range_3_coord20[2] = {-1, -32};
-// const int range_3_coord21[2] = {-2,-16};
-// const int range_3_coord22[2] = {2,-16};
-// const int range_3_coord23[2] = {-2,16};
-// const int range_3_coord24[2] = {2,16};
-
-// const int range_2_coord1[2] = {1,-16};
-// const int range_2_coord2[2] = {0,-32};
-// const int range_2_coord3[2] = {1,16};
-// const int range_2_coord4[2] = {0,32};
-// const int range_2_coord5[2] = {-1, -16};
-// const int range_2_coord6[2] = {-1, 16};
-// const int range_2_coord7[2] = {-2, 0};
-// const int range_2_coord8[2] = {2, 0};
-// const int range_2_coord9[2] = {0, 16};
-// const int range_2_coord10[2] = {1, 0};
-// const int range_2_coord11[2] = {-1, 0};
-// const int range_2_coord12[2] = {0, -16};
-
-// const int range_1_coord1[2] = {0, 16};
-// const int range_1_coord2[2] = {1, 0};
-// const int range_1_coord3[2] = {-1, 0};
-// const int range_1_coord4[2] = {0, -16};
-
-// struct Coords coords[9];
 int coords[24];
 Entity *selected_entity;
-
-// void load_coords(char id)
-// {
-//   int *coord;
-//   int i, len;
-//   len = get_pattern_length(id);
-//   switch(len)
-//   {
-//     case 4: coord = range_1_coord1; break;
-//     case 12: coord = range_2_coord1; break;
-//     case 24: coord = range_3_coord1; break;
-//   }
-
-//   len*=2;
-
-//   for(i=0; i<len; i++)
-//   {
-//     coords[i] = coord[i];
-//   }
-// }
-
-// char get_pattern_length(char id)
-// {
-//   switch(id)
-//   {
-//     case 4;
-//     case 12;
-//     case 24;
-//   }
-// }
 
 char get_army_max_range(char entity_id)
 {
@@ -153,13 +79,9 @@ char get_army_max_range(char entity_id)
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
     load_unit_header(entities[entity_id].bg->units[i].id,0);
-    // put_number(unit_header[0].rng,5,0,0);
-    // put_number(i,3,7,0);
-    // put_hex(myPointers.addr[0],5,0,1);
-    // wait_for_I_input();
     if(entities[entity_id].bg->units[i].hp && unit_header[0].rng > max)
     {
-      max = unit_header[0].rng;//entities[entity_id].bg->units[i].unit->rng;
+      max = unit_header[0].rng;
     }
   }
   return max;
@@ -182,7 +104,7 @@ char get_army_min_move(char entity_id)
   return 3;
 }
 
-void add_entity(char team, char pal, char id, int pos, struct Commander *commanders)
+void add_entity(char team, char id, int pos, struct Commander *commanders)
 {
   if(team == CPU)
   {
@@ -197,11 +119,45 @@ void add_entity(char team, char pal, char id, int pos, struct Commander *command
   entities[num_of_entities].actionable = 1;
   entities[num_of_entities].movable = 1;
   // party_commanders[entities[num_of_entities]].meter = 0;
-  add_npc(pos%16,pos/16,commanders[id].sprite_type,pal);
+  if(team == PLAYER)
+  {
+    add_npc(pos%16,pos/16,commanders[id].sprite_type,CMDR_PALETTE);
+  }
+  else
+  {
+    add_npc(pos%16,pos/16,commanders[id].sprite_type,ENEMY_PALETTE);
+  }
   entities[num_of_entities].bg = commanders[id].bg;
-
-  // entities[num_of_entities].id = num_of_entities;
+  set_bonuses(&commanders[id]);
   num_of_entities++;
+}
+
+void set_bonuses(struct Commander *commander)
+{
+  char i, j, type_counter, type;
+
+  commander->bg.bonuses = 0;
+  for(i=0; i<TYPE_COUNT; i++)
+  {
+    type_counter = 0;
+    type = 1 << i;
+    for(j=0; j<MAX_ARMY_SIZE; j++)
+    {
+      // if(commander->bg.units[j].id)
+      // {
+        load_unit_header(commander->bg.units[j].id,1);
+      
+        if(unit_header[1].a_type == type)
+        {
+          type_counter++;
+        }
+      // }
+    }
+    if(type_counter >= 3)
+    {
+      commander->bg.bonuses |= type;
+    }
+  }
 }
 
 void update_selector_pos(int x, int y)
@@ -352,16 +308,6 @@ void display_move_range(int pos)
   highlight(pos,ACTION_MOVE);
 }
 
-int calc_move_cost(int origin, int dest)
-{
-  int o_x, o_y, d_x, d_y, x, y;
-  o_x = origin % 16;
-  o_y = origin / 16;
-  d_x = dest % 16;
-  d_y = dest / 16;
-  return (char)(abs(o_x - d_x) + abs(o_y - d_y)) * 2;
-}
-
 char attack_unit(int src, int dst, char art)
 {
   char result;
@@ -392,8 +338,8 @@ char attack_unit(int src, int dst, char art)
 char get_range_from_distance(int dist_1, int dist_2)
 {
   char x_1, x_2, y_1, y_2;
-  x_1 = dist_1 & 0xF; y_1 = dist_1 / 16;
-  x_2 = dist_2 & 0xF; y_2 = dist_2 / 16;
+  x_1 = dist_1 & 0xF; y_1 = dist_1 >> 4;
+  x_2 = dist_2 & 0xF; y_2 = dist_2 >> 4;
 
   return abs(x_1 - x_2) + abs(y_1 - y_2);
 }
@@ -406,8 +352,8 @@ void clear_text_field()
 
 void post_battle_screen()
 {
-  s_y_relative = (s_y/8);
-  s_x_relative = (s_x/8);
+  s_y_relative = (s_y>>3);
+  s_x_relative = (s_x>>3);
   // display_abs_black_panel(0,((s_y+32)/8),32,16);
   hide_npcs(5);
   spr_hide(0);
@@ -433,27 +379,27 @@ void post_battle_screen()
   get_turn_bonus();
   get_total_bonus();
 
-  write_text(s_x_relative+6,s_y_relative+12,"Turns           -");
-  put_number(turns_count/2,3,s_x_relative+24,s_y_relative+12);
-  write_text(s_x_relative+6,s_y_relative+13,"Turn bonus      -");
-  display_number_incrementing(s_x_relative+24,s_y_relative+13,turn_bonus,3);
+  write_text(s_x_relative+6,s_y_relative+12,"Turns        -");
+  put_number(turns_count/2,3,s_x_relative+21,s_y_relative+12);
+  write_text(s_x_relative+6,s_y_relative+13,"Turn bonus   -");
+  display_number_incrementing(s_x_relative+21,s_y_relative+13,turn_bonus,3);
 
-  write_text(s_x_relative+6,s_y_relative+14,"Units killed    -");
-  put_number(units_killed,2,s_x_relative+25,s_y_relative+14);
-  write_text(s_x_relative+6,s_y_relative+15,"Killed Bonus    -");
-  display_number_incrementing(s_x_relative+24,s_y_relative+15,killed_bonus,3);
+  write_text(s_x_relative+6,s_y_relative+14,"Units killed -");
+  put_number(units_killed,2,s_x_relative+22,s_y_relative+14);
+  write_text(s_x_relative+6,s_y_relative+15,"Killed Bonus -");
+  display_number_incrementing(s_x_relative+21,s_y_relative+15,killed_bonus,3);
 
-  write_text(s_x_relative+6,s_y_relative+16,"Units lost      -");
-  put_number(units_lost,2,s_x_relative+25,s_y_relative+16);
-  write_text(s_x_relative+6,s_y_relative+17,"Lost bonus      -");
-  display_number_incrementing(s_x_relative+24,s_y_relative+17,lost_bonus,3);
+  write_text(s_x_relative+6,s_y_relative+16,"Units lost   -");
+  put_number(units_lost,2,s_x_relative+22,s_y_relative+16);
+  write_text(s_x_relative+6,s_y_relative+17,"Lost bonus   -");
+  display_number_incrementing(s_x_relative+21,s_y_relative+17,lost_bonus,3);
 
-  put_string("--------------------",s_x_relative+6,s_y_relative+18);
+  put_string("$$$$$$$$$$$$$$$$$$",s_x_relative+6,s_y_relative+18);
 
   write_text(s_x_relative+6,s_y_relative+19,"Total");
-  put_number(total_bonus,4,s_x_relative+23,s_y_relative+19);
-  write_text(s_x_relative+6,s_y_relative+20,"Ore       ");
-  display_number_incrementing(s_x_relative+24,s_y_relative+20,materials_collected,3);
+  put_number(total_bonus,4,s_x_relative+20,s_y_relative+19);
+  // write_text(s_x_relative+6,s_y_relative+20,"Ore       ");
+  // display_number_incrementing(s_x_relative+24,s_y_relative+20,materials_collected,3);
 
   write_text(s_x_relative+12,s_y_relative+22,"Grade");
   set_font_pal(9);
@@ -556,8 +502,8 @@ void mask_menu()
   if(menu_mask & 0x02) { put_string("ATK",20,2); }
   if(menu_mask & 0x04) { put_string("END",24,2); }
   if(menu_mask & 0x08) { put_string("TRN",28,2); }
-  if(menu_mask & 0x10) { put_string("CAL",24,1); }
-  if(menu_mask & 0x20) { put_string("GRP",28,1); }
+  if(menu_mask & 0x10) { put_string("TAC",24,1); }
+  if(menu_mask & 0x20) { put_string("ARM",28,1); }
 }
 
 void print_menu()
@@ -567,8 +513,8 @@ void print_menu()
   put_string("ATK",20,2);
   put_string("END",24,2);
   put_string("TRN",28,2);
-  put_string("CAL",24,1);
-  put_string("GRP",28,1);
+  put_string("TAC",24,1);
+  put_string("ARM",28,1);
   set_font_pal(10);
   mask_menu();
 }
@@ -624,41 +570,6 @@ int get_valid_map_s_y(int position)
   return min(max((((position>>4)<<4) - 128),0),112);
 }
 
-void item_gained_text(char item_no, int amt)
-{
-  // clear_text_field();
-  // put_string("Gained ",1,1);
-  // if(amt < 100){ put_number(amt,2,8,1); } else {put_number(amt,3,8,1);}
-  // switch(item_no)
-  // {
-  //   case RED_CRYSTAL:
-  //     put_string("Battle Points",1,2);
-  //     // red_crystal_count += amt;
-  //     break;
-
-  //   case BLUE_CRYSTAL:
-  //     put_string("meter bar",1,2);
-  //     selected_entity->bg->meter = min(selected_entity->bg->meter+1,MAX_METER);
-  //     break;
-
-  //   case GREEN_CRYSTAL:
-  //     put_string("green gems",1,2);
-  //     green_crystal_count += amt;
-  //     break;
-
-    // case CHEST:
-      // put_string("material",1,2);
-      // player_gold += amt;
-      // gold_collected += amt;
-      // materials_count += amt;
-      // materials_collected += amt;
-      // break;
-  // }
-
-  // sync(160);
-  // clear_text_field();
-}
-
 void check_end_turn()
 {
   if(!remaining_unit_turns())
@@ -672,12 +583,12 @@ void end_player_turn()
   selector_mode = SELECT_MODE;
   menu_option = MENU_ATTACK;
   last_pos = 0;
-  hide_cursor();
+  // hide_cursor();
   check_battle_complete();
   start_turn(CPU);
   menu_mask = 0x00;
   print_menu();
-  hide_cursor();
+  // hide_cursor();
 }
 
 void end_unit_turn(char entity_id)
@@ -690,7 +601,6 @@ void end_unit_turn(char entity_id)
   menu_mask = 0x00;
   print_menu();
   hide_cursor();
-  check_item_pickup();
   check_end_turn();
 }
 
@@ -706,31 +616,6 @@ char remaining_unit_turns()
     }
   }
   return remain;
-}
-
-void collect_item(char item_no)
-{
-  // switch(terrain_items[item_no].item_no)
-  // {
-    // case RED_CRYSTAL: 
-    //   item_gained_text(RED_CRYSTAL,2);
-    //   break;
-
-    // case BLUE_CRYSTAL: 
-    //   item_gained_text(BLUE_CRYSTAL,1);
-    //   break;
-
-    // case GREEN_CRYSTAL: 
-    //   item_gained_text(GREEN_CRYSTAL,range(10,20));
-    //   break;
-
-    // case CHEST:
-      // item_gained_text(CHEST,range(100,300));
-      // display_popup("200 ore\n gained");
-      // chests_collected++;
-      // break;
-  // }
-  // remove_terrain_item(item_no);
 }
 
 void walk_sprite(char entity_id, int location, int distance)

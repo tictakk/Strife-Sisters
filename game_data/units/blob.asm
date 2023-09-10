@@ -9,7 +9,7 @@ Blob:
   .db 110 ;sta
   .db 1   ;rng
   .db 7   ;id
-  .db 0   ;a_type
+  .db 64   ;a_type
   .db 0   ;art
   .db 3   ;points
   .db 10   ;pow

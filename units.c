@@ -26,19 +26,21 @@
 #incspr(magebtl, "map/sprites/magebattle.pcx")
 #incpal(magebtlpal, "map/sprites/magebattle.pcx",0,3)
 #incspr(witchbtl,"characters/witchbattle.pcx")
-#incspr(priestbtl,"characters/priest.pcx")
+// #incspr(priestbtl,"characters/priest.pcx")
 #incpal(witchbtlpal,"characters/witchbattle.pcx")
 #incspr(knightbtl, "map/sprites/knight_battle.pcx")
 #incspr(paladinbtl, "characters/paladin_battle.pcx")
 #incpal(paladinpal, "characters/paladin_battle.pcx")
 #incspr(monkbtl, "map/sprites/monkbtl.pcx") 
 #incpal(monkbtlpal, "map/sprites/monkbtl.pcx")
-#incspr(fighterbtl, "characters/fighter.pcx") 
+#incspr(fighterbtl, "characters/fighter.pcx")
 #incspr(brawlerbtl, "characters/brawler.pcx")
 #incspr(lancerbtl, "map/sprites/lancerbattle.pcx")
 #incspr(raiderbtl,"characters/banditbattle.pcx")
 #incpal(raiderbtlpal,"characters/banditbattle.pcx")
 #incspr(thiefbtl,"characters/thiefbattle.pcx")
+
+#incpal(enemypal,"map/sprites/spear_anim.pcx")
 // #incspr(raiderbtl,"characters/piratebtl.pcx")
 // #incpal(raiderbtlpal,"characters/piratebtl.pcx")
 
@@ -49,6 +51,12 @@
 
 #define MAX_UNIT_COUNT 29
 
+#define ICON_NO_TARGET 0
+#define ICON_SINGLE_TARGET 1
+#define ICON_ROW_TARGET 2
+#define ICON_COLUMN_TARGET 3
+#define ICON_ALL_TARGET 4
+
 //attack types
 #define NORMAL  0b00000001 //sword
 #define PIERCE  0b00000010 //spear
@@ -56,6 +64,7 @@
 #define MISSILE 0b00001000 //bow
 #define MAGIC   0b00010000 //magic
 #define UNARMED 0b00100000 //bare
+#define BEAST   0b01000000
 #define NONE    0b00000000 //none, for beasts?
 
 //advantage types
@@ -69,7 +78,7 @@
 //hp, atk, def, int, res, spd, mov, sta
 typedef struct{
 	unsigned char hp, atk, def, intel, res, spd, mov, sta, rng, id, a_type,
-                art, points, pow, is_cmdr;
+                cmdr_bonus, points, pow, is_cmdr;
   char attacks[3];
   char growth_chart;
   char bank; int address;
@@ -97,6 +106,11 @@ unsigned char unit_entity_count = 0;
 char buyable_unit_count = 0;
 int upgrade_cost = 0;
 int unit_cost = 0;
+char adv_plus_plus, disadv_minus_minus;
+char adv_plus[2], disadv_minus[2];
+
+char adv_plus_flag = 0;
+char adv_plus_plus_flag = 0;
 
 void display_unit_types_row(char x, char y)
 {
@@ -115,30 +129,130 @@ void display_unit_types_row(char x, char y)
 //   return get_weapon_adv(unit_1) & unit_2;
 // }
 
-// char get_weapon_adv(unsigned char weapon_type)
-// {
-//   switch(weapon_type)
-//   {
-//     case NORMAL:
-//     return MISSILE;
+void check_advantage_plus(char target_type)
+{
+  adv_plus_flag = ((adv_plus[0] == target_type) || (adv_plus[1] == target_type));
+}
 
-//     case MISSILE:
-//     return PIERCE;
+void check_advantage_plus_plus(char target_type)
+{
+  adv_plus_plus_flag = (adv_plus_plus == target_type);
+}
 
-//     case AXE:
-//     return MAGIC;
+void get_advantages(unsigned char weapon_type)
+{
+  get_plus_plus_adv(weapon_type);
+  get_plus_adv(weapon_type);
+}
 
-//     case PIERCE:
-//     return UNARMED;
+char get_plus_plus_adv(unsigned char weapon_type)
+{
+  switch(weapon_type)
+  {
+    case NORMAL:
+    adv_plus_plus = BEAST;
+    disadv_minus_minus = PIERCE;
+    break;
 
-//     case MAGIC:
-//     return NORMAL;
+    case PIERCE:
+    adv_plus_plus = NORMAL;
+    disadv_minus_minus = BEAST;
+    break;
 
-//     case UNARMED:
-//     return AXE;
-//   }
-//   return NONE;
-// }
+    case AXE:
+    adv_plus_plus = MISSILE;
+    disadv_minus_minus = UNARMED;
+    break;
+
+    case MISSILE:
+    adv_plus_plus = MAGIC;
+    disadv_minus_minus = AXE;
+    break;
+
+    case MAGIC:
+    adv_plus_plus = UNARMED;
+    disadv_minus_minus = MISSILE;
+    break;
+
+    case UNARMED:
+    adv_plus_plus = AXE;
+    disadv_minus_minus = MAGIC;
+    break;
+
+    case BEAST:
+    adv_plus_plus = PIERCE;
+    disadv_minus_minus = NORMAL;
+    break;
+
+    default:
+    adv_plus_plus = NONE;
+    disadv_minus_minus = NONE;
+    break;
+  }
+}
+
+void get_plus_adv(unsigned char weapon_type)
+{
+  switch(weapon_type)
+  {
+    case NORMAL:
+    adv_plus[0] = MISSILE;
+    adv_plus[1] = UNARMED;
+    disadv_minus[0] = MAGIC;
+    disadv_minus[1] = AXE;
+    break;
+
+    case PIERCE:
+    adv_plus[0] = AXE;
+    adv_plus[1] = MAGIC;
+    disadv_minus[0] = MISSILE;
+    disadv_minus[1] = UNARMED;
+    break;
+
+    case AXE:
+    adv_plus[0] = NORMAL;
+    adv_plus[1] = BEAST;
+    disadv_minus[0] = PIERCE;
+    disadv_minus[1] = MAGIC;
+    break;
+
+    case MISSILE:
+    adv_plus[0] = PIERCE;
+    adv_plus[1] = UNARMED;
+    disadv_minus[0] = NORMAL;
+    disadv_minus[1] = BEAST;
+    break;
+
+    case MAGIC:
+    adv_plus[0] = NORMAL;
+    adv_plus[1] = AXE;
+    disadv_minus[0] = PIERCE;
+    disadv_minus[1] = BEAST;
+    break;
+
+    case UNARMED:
+    adv_plus[0] = PIERCE;
+    adv_plus[1] = BEAST;
+    disadv_minus[0] = NORMAL;
+    disadv_minus[1] = MISSILE;
+    break;
+
+    case BEAST:
+    adv_plus[0] = MISSILE;
+    adv_plus[1] = MAGIC;
+    disadv_minus[0] = AXE;
+    disadv_minus[1] = UNARMED;
+    break;
+
+    default:
+    adv_plus[0] = NONE;
+    adv_plus[1] = NONE;
+    disadv_minus[0] = NONE;
+    disadv_minus[1] = NONE;
+    break;
+  }
+}
+
 
 void print_unit_info(Unit_Entity *ue, char x, char y)
 {
@@ -149,15 +263,15 @@ void print_unit_info(Unit_Entity *ue, char x, char y)
     put_string("    ",x,y+2);
     return;
   }
-  load_unit_header(ue->id,1);
-  apply_level_to_header(ue->level,1);
+  load_unit_header(ue->id,0);
+  apply_level_to_header(ue->level,0);
   // hp = ue->hp * 100;
-  print_unit_attack_icon(ue->id,x,y);
+  print_unit_attack_icon(unit_header[0].a_type,x,y);
   print_unit_type(ue->id,x+1,y);
-  put_char('M',x,y+1);
-  put_number(ue->level,2,x+1,y+1);
+  put_string("LV",x,y+1);
+  put_number(ue->level,2,x+2,y+1);
   put_char('%',x,y+2);
-  put_number(get_percentage(ue->hp,unit_header[1].hp),3,x+1,y+2);
+  put_number(get_percentage(ue->hp,unit_header[0].hp),3,x+1,y+2);
 }
 
 void print_unit_stats(char unit_id, char x, char y, char level)
@@ -214,6 +328,7 @@ void print_attack_type(char attack_no, char row, char x, char y)
 
   switch(arts[attack_no].target)
   {
+    case HEAL:
     case SINGLE_HIT:
       put_char(':',x,y);
       // put_string("Single ",x+1,y);

@@ -9,12 +9,12 @@ Violet:
   .db 100 ;sta
   .db 2   ;rng
   .db 30   ;id
-  .db 32   ;a_type
+  .db 16   ;a_type
   .db 0   ;art
   .db 3   ;points
   .db 15   ;pow
   .db 1   ;is_cmdr
-  .db 23, 23, 1 ;attack positions
+  .db 23, 1, 20  ;attack positions
 
   ;unit growth
   .db GROWTH_VIOLET

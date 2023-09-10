@@ -304,22 +304,22 @@ void do_capture_objective(char ai_id)
 
   mv = get_army_min_move(ai_entities[ai_id].entity_id);
   rng = get_army_max_range(ai_entities[ai_id].entity_id);
-  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,0);
-
+  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
+  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
   if(obj_in_range && battle_grid[objective_pos] == 0)
   {
     ai_entities[ai_id].state = MOVING;
     ai_entities[ai_id].dest = objective_pos;
     return;
   }
-  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,0);
+  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,mv);
   if(num_of_units_in_range == 1)
   {
     // if(is_adjacent(entities[ai_entities[ai_id].entity_id].pos))
     // {
     //   return;
     // }
-    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,path,battle_grid,CPU,mv,0);
+    p = get_path(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,path,battle_grid,CPU,mv,mv);
     // p = find_attackable_position(entities[ai_entities[ai_id].entity_id].pos,entities[units_in_range[0]].pos,rng,mv);
     if(p == 0)
     {
@@ -341,7 +341,7 @@ void do_capture_objective(char ai_id)
       } 
     }
   }
-
+  //doesn't even get here
   search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
   p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size+1,map);
   ai_entities[ai_id].state = MOVING;
@@ -382,14 +382,13 @@ char search_in_radius(int position, char radius_size, char ignore_depth)
 
 void move_ai_unit(char ai_id, int dest)
 {
-  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
+  // highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
   if(battle_grid[dest] != 0)
   {
     sync(60);
     unhighlight();
     return;
   }
-  // highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
   satb_update();
   sync(10);
   move_unit(dest,entities[ai_entities[ai_id].entity_id].pos);
@@ -543,14 +542,14 @@ int find_nearest_unoccupied_position(int position, int destination, char range, 
       closest, diff_x, diff_y, diff_total, pos_x, pos_y;
 
   pos_x = position & 15;
-  pos_y = position / 16;
+  pos_y = position << 4;
 
   closest = position;
   closest_x = pos_x;
   closest_y = pos_y;
 
   dest_x = destination & 15;
-  dest_y = destination / 16;
+  dest_y = destination << 4;
 
   diff_x = abs(closest_x - dest_x);
   diff_y = abs(closest_y - dest_y);
@@ -560,10 +559,12 @@ int find_nearest_unoccupied_position(int position, int destination, char range, 
   {
     position = grid[i].ownPos;
 
+    // put_number(position,5,0,0);
+    // wait_for_I_input();
     if(battle_grid[position] == 0 && is_traversable(position))
     {
       pos_x = position & 15;
-      pos_y = position / 16;
+      pos_y = position << 4;
 
       diff_x = abs(pos_x - dest_x);
       diff_y = abs(pos_y - dest_y);

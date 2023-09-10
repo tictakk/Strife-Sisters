@@ -1,10 +1,10 @@
 Berserker:
-  .db 65  ;hp
-  .db 32  ;atk
-  .db 13  ;def
-  .db 7  ;int
-  .db 15  ;res
-  .db 14  ;spd
+  .db 60  ;hp
+  .db 34  ;atk
+  .db 12  ;def
+  .db 5  ;int
+  .db 11  ;res
+  .db 25  ;spd
   .db 3   ;mov
   .db 160 ;sta
   .db 1   ;rng
@@ -14,7 +14,7 @@ Berserker:
   .db 4   ;points
   .db 20   ;pow
   .db 0   ;is_cmdr
-  .db 24, 7, 0 ;attack positions
+  .db 24, 20, 0 ;attack positions
 
   ;unit growth
   .db GROWTH_DPS

@@ -17,7 +17,7 @@
 int position_1 = 0, position_2 = 0, position_len = 0;
 const char dumb_table[9] = {0,3,6,1,4,7,2,5,8};
 int g_abs;
-int id;
+char id;
 int s_x_holder, s_y_holder, y_off_holder;
 enum Direction cmdr_direction;
 char exit_battlefield;
@@ -85,7 +85,6 @@ void begin_battlefield(char map_id)
 
 void battlefield_loop(char map_id)
 {
-  char id;
   last_command = SELECT_MODE;
   map_result_status = MAP_RESULT_NONE;
   selected_option = -1;
@@ -107,8 +106,6 @@ void battlefield_loop(char map_id)
   // play_story();
   display_selector(SELECTOR,sx,sy,16);
   // psgPlay(3);
-  // while(exit_battlefield)
-  // put_number((char)unit_header[0].hp,3,0,0);
   while(map_result_status == MAP_RESULT_NONE)
   {
     if(turn == CPU)
@@ -118,20 +115,15 @@ void battlefield_loop(char map_id)
     }
     else
     {
-      // put_number(map_result_status,3,0,0);
-      // check_battle_complete();
-      // position = graph_from_x_y(sx,sy);
       g_abs = graph_from_x_y(sx,sy);
       t_type =  terrain_type(battlefieldbat[map_offset+g_abs]);
       id = battle_grid[g_abs];
       display_position(14,1);
-      put_number(map_no,2,14,2);
-      // display_commander_stats(9,1);
-      // display_level(4,1);
-      // display_enemy_remaining(13,1);
+      display_bonuses(4,1);
+      
       display_terrain_bonus();
       swap_water_tiles();
-      // if(selector_mode != ARMY_MODE){ cycle_terrain_items(); }
+
       ctrls();
       cycle_animations();
       check_battle_complete();
@@ -151,15 +143,6 @@ void battlefield_loop(char map_id)
   cleanup_battlefield();
   // return 0;
   //whoops?
-}
-
-char check_item_pickup()
-{
-  char item_no;
-  if((item_no = item_at_position(selected_entity->pos)) > -1)
-  {
-    collect_item(item_no);
-  }
 }
 
 void battle_start()
@@ -282,7 +265,7 @@ void load_group(char id, char team, int positions[7], struct Commander *commande
 {
   // put_number(positions[0],5,0,0);
   // wait_for_I_input();
-  add_entity(team,UNIT_PALS[commanders[id].sprite_type],id,positions[0],commanders);
+  add_entity(team,id,positions[0],commanders);
   battle_grid[positions[0]] = num_of_entities;
 }
 
@@ -296,7 +279,7 @@ void load_ents()
     {
       add_npc(entities[i].pos%16,entities[i].pos/16,
             party_commanders[entities[i].id].sprite_type,
-            0);
+            CMDR_PALETTE);
       // put_number(UNIT_PALS[party_commanders[entities[i].id].sprite_type],3,0,0);
       // wait_for_I_input();
       sync(1);
@@ -309,7 +292,8 @@ void load_ents()
     {
       add_npc(entities[i].pos%16,entities[i].pos/16,
           party_commanders[entities[i].id].sprite_type,
-          UNIT_PALS[party_commanders[entities[i].id].sprite_type]);
+          ENEMY_PALETTE);
+          // UNIT_PALS[party_commanders[entities[i].id].sprite_type]);
     }
   }
 }
@@ -339,36 +323,41 @@ void init_battlefield()
 void load_battlefield_map()
 {
   set_screen_size(SCR_SIZE_32x64);
-  scroll(1,0,0,0,32,0x80);
-  scroll(0,s_x,s_y+32,32,224,0xC0);
-
-  load_palette(0,overworldpal,8);
-  load_palette(10,fontpal,2);
-  set_font_pal(10);
-	load_font(font,125,0x4800);
-	load_vram(0x4BB0,icons_gfx,0x60);
-
-  load_palette(9,borderspal,1);
-  load_palette(12,bluepal,1);
-  load_palette(13,redpal,1);
-  load_palette(31,greypal,1);
   load_terrains();
-
-  // set_screen_size(SCR_SIZE_32x64);
-  screen_dimensions = 32;
-
-  load_vram(0x6400,borders,0x100);
-  load_vram(0x30A0,icons_gfx,0x60);
-  
-  // set_map_data(battlefieldbat+(464*map_no),16,29);
   set_map_data(battlefieldbat+(320*map_no),16,20);
   set_tile_data(overworldtiles,162,overworldtilespal,TILE_WIDTH);
 
   load_tile(TILE_VRAM);
   load_map(0,2,0,0,16,20);
 
-  // display_abs_info_panel(0,0,18,4);
-  // display_abs_info_panel(18,0,14,4);
+  disp_on();
+  scroll(1,0,0,0,32,0x80);
+  scroll(0,s_x,s_y+32,32,224,0xC0);
+  
+  load_palette(0,overworldpal,8);
+  load_palette(10,fontpal,2);
+  set_font_pal(10);
+	// load_font(font,125,0x4800);
+	// load_vram(0x4BB0,icons_gfx,0x60);
+	// load_vram(0x49A0,icons_gfx+0x60,0x50);
+  load_vram(0x4DF0,icons_gfx+0xC0,0x10);
+  
+  load_palette(9,borderspal,1);
+  load_palette(12,bluepal,1);
+  load_palette(13,redpal,1);
+  load_palette(31,greypal,1);
+
+  // set_screen_size(SCR_SIZE_32x64);
+  screen_dimensions = 32;
+  // load_vram(0x6400,borders,0x100);
+  // load_vram(0x30A0,icons_gfx,0x60);
+
+  // set_map_data(battlefieldbat+(320*map_no),16,20);
+  // set_tile_data(overworldtiles,162,overworldtilespal,TILE_WIDTH);
+
+  // load_tile(TILE_VRAM);
+  // load_map(0,2,0,0,16,20);
+  
   display_window_abs(0,0,18,4);
   display_window_abs(18,0,14,4);
   menu_mask = 0x00;
@@ -531,9 +520,14 @@ void ctrls()
         selector_up();
         joy_up_held = 2;
       }
-      else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE || selector_mode == PLAYER_ARMY_MODE)
+      else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
       {
         cursor_up();
+      }
+      else if(selector_mode == PLAYER_ARMY_MODE)
+      {
+        cursor_up();
+        update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));
       }
     }
   }
@@ -549,9 +543,14 @@ void ctrls()
         selector_down();
         joy_down_held = 2;
       }
-      else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE || selector_mode == PLAYER_ARMY_MODE)
+      else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
       {
         cursor_down();
+      }
+      else if(selector_mode == PLAYER_ARMY_MODE)
+      {
+        cursor_down();
+        update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));  
       }
     }
   }else { joy_down_held = 0; }
@@ -577,6 +576,7 @@ void ctrls()
           return;
         }
         menu_option += menu_rows;
+        update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));
         curs_right(5);
       }
     }
@@ -603,6 +603,7 @@ void ctrls()
           return;
         }
         menu_option -= menu_rows;
+        update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));
         curs_left(5);
       }
     }
@@ -657,7 +658,6 @@ void ctrls()
       {
         if(entities[battle_grid[g_abs]-1].team != selected_entity->team)
         {
-          check_item_pickup();
           attack_unit(g_abs,selected_entity->pos,0);
           check_end_turn();
         }
@@ -699,7 +699,7 @@ void ctrls()
         case MENU_TURN:
           if(menu_mask & MASK_TURN)
           {
-            check_item_pickup();
+            hide_cursor();
             end_player_turn();
           }
           break;
@@ -710,15 +710,15 @@ void ctrls()
             remove_cursor();
             scroll(0,0,s_y+32,32,224,0x80);
             // display_abs_info_panel(7+(s_x),32+(s_y/2),18,15); //find a way to remove
-            display_window_rel(7,8+(s_y/8),18,15);
+            display_window_rel(2,8+(s_y/8),18,15);
             set_font_pal(9);
-            put_string("Front",14,9+(s_y/8));
-            put_string("Rear ",14,21+(s_y/8));
+            put_string(" Front ",8,8+(s_y/8));
+            put_string(" Rear  ",8,22+(s_y/8));
             set_font_pal(10);
-            selector_mode = CPU_ARMY_MODE;
-            if(entities[id-1].team == PLAYER)
-            {
-              cursor_x = 8;
+            // selector_mode = CPU_ARMY_MODE;
+            // if(entities[id-1].team == PLAYER)
+            // {
+              cursor_x = 3;
               cursor_y = 11 + (s_y/8);
               display_cursor();
               selector_mode = PLAYER_ARMY_MODE;
@@ -726,45 +726,32 @@ void ctrls()
               menu_rows = 3;
               menu_columns = 3;
               menu_vert_size = 4;
-              // list_commander_army(entities[id-1].bg,9,10);
-            }
-            list_commander_army(entities[id-1].bg,9,10);
+            // }
+            list_commander_army(entities[id-1].bg,4,10);
+            display_unit_battle_info(entities[id-1].bg->units[0],20,9+(s_y/8));
           }
           break;
 
         case MENU_TAKE://calling
-          // if(menu_mask & MASK_CALLING)
-          // {
-            // check_item_pickup();
-            // display_calling_background(0,s_y+32,get_entity_id(selected_entity->pos));
-            // set_calling(selected_entity->bg->calling_stone,selected_entity->team);
-            // animate_calling(calling_stones[selected_entity->bg->calling_stone].effect,PLAYER);
-            // display_selector(0,sx,sy,16);
-            // hide_menu();
-            // selector_mode = SELECT_MODE;
-            // display_selector(SELECTOR,sx,sy,16);
-            // display_turn(turn);
-            // sync(100);
-          // }
           break;
       }
     }
-    else if(selector_mode == PLAYER_ARMY_MODE)
-    {
-      if(selected_option == -1)
-      {
-        set_font_pal(11);
-        selected_option = dumb_table[menu_option];
-        print_unit_info(&entities[id-1].bg->units[selected_option],9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
-        set_font_pal(10);
-      }
-      else
-      {
-        swap_commander_units(entities[id-1].id,selected_option,dumb_table[menu_option]);
-        list_commander_army(entities[id-1].bg,9,10);
-        selected_option = -1;
-      }
-    }
+    // else if(selector_mode == PLAYER_ARMY_MODE)
+    // {
+    //   if(selected_option == -1)
+    //   {
+    //     set_font_pal(11);
+    //     selected_option = dumb_table[menu_option];
+    //     print_unit_info(&entities[id-1].bg->units[selected_option],9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
+    //     set_font_pal(10);
+    //   }
+    //   else
+    //   {
+    //     swap_commander_units(entities[id-1].id,selected_option,dumb_table[menu_option]);
+    //     list_commander_army(entities[id-1].bg,9,10);
+    //     selected_option = -1;
+    //   }
+    // }
   }
 
   if(jy & JOY_II)
@@ -821,34 +808,12 @@ void ctrls()
     }
     else if(selector_mode == PLAYER_ARMY_MODE)
     {
-      if(selected_option == -1) //haven't selected anything yet
-      {
-        remove_cursor();
-        load_map(0,2,0,0,16,29);
-        scroll(0,0,s_y+32,32,224,0xC0);
-        selector_mode = MENU_MODE;
-        set_menu_mask(id-1);
-        display_menu(MENU_GROUP_X,MENU_GROUP_Y);
-        // display_cursor();
-        // menu_mask = 0x00;
-        // print_menu();
-      }
-      else //unselect
-      {
-        print_unit_info(&entities[id-1].bg->units[selected_option],9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
-        selected_option = -1;
-      }
-    }
-    else if(selector_mode == CPU_ARMY_MODE)
-    {
+      remove_cursor();
       load_map(0,2,0,0,16,29);
       scroll(0,0,s_y+32,32,224,0xC0);
       selector_mode = MENU_MODE;
       set_menu_mask(id-1);
-      display_cursor();
-      // menu_mask = 0x00;
-      print_menu();
-      display_move_range(selected_entity->pos);
+      display_menu(MENU_GROUP_X,MENU_GROUP_Y);
     }
   }
 
@@ -867,8 +832,28 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
-    map_result_status = MAP_RESULT_WIN;
+    // map_result_status = MAP_RESULT_WIN;    
+    // put_hex(tiledata[7],5,0,4);
+    // put_hex(tiledata[8],5,0,5);
+    load_healthbars();
+    display_healthbar(5,1,0);
   }
+}
+
+void print_healthbar()
+{
+  load_healthbars();
+  // char bar_data[32];
+  // char i;
+
+  // for(i=0; i<32; i++)
+  // {
+  //   bar_data[i] = font+0x200+i;
+  // }
+  // put_hex(bar_data[0]&0xFF,5,0,4);
+  // put_hex(bar_data[8]&0xFF,5,0,5);
+  // put_hex(bar_data[16]&0xFF,5,0,6);
+  // put_hex(bar_data[24]&0xFF,5,0,7);
 }
 
 void animate_calling(char effect, char target_team)
@@ -1012,39 +997,32 @@ void display_camera_info()
 
 void display_position(int x, int y)
 {
-  put_number(graph_from_x_y(sx,sy),3,x,y);
+  put_number(g_abs,3,x,y);
 }
 
-// void display_commander_stats(char x, char y)
-// {
-//   char id;
-//   id = battle_grid[graph_from_x_y(sx,sy)]-1;
-//   if(id >= 0)
-//   {
-//     put_string("tac",x+2,y);
-//     put_number(party_commanders[entities[id].id].tac,2,x,y);
-
-//     put_string("wis",x+2,y+1);
-//     put_number(party_commanders[entities[id].id].wis,2,x,y+1);
-
-//     put_string("frt",x+2,y+2);
-//     put_number(party_commanders[entities[id].id].fort,2,x,y+2);
-//   }
-// }
-
-void display_level(char x, char y)
+void display_bonuses(char x, char y)
 {
-  // char id;
-  // id = battle_grid[graph_from_x_y(sx,sy)]-1;
-  // if(id >= 0)
-  // {
-  //   put_string("LV",x,y);
-  //   put_number(party_commanders[entities[id].id].level,2,x+2,y);
-  // }
-  // else
-  // {
-  //   put_string("    ",x,y);
-  // }
+  char i, j, bonus, bonuses;
+  
+  if(id>0)
+  {
+    j=0;
+    i=0;
+    bonuses = entities[id-1].bg->bonuses;
+    while(bonuses)
+    {
+      bonus = 1 << i++;
+      if(bonus & bonuses)
+      {
+        print_unit_attack_icon(bonus,x+(j++),y);
+        bonuses ^= bonus;
+      }
+    }
+  }
+  else
+  {
+    put_string("   ",x,y);
+  }
 }
 
 void display_unit_menu_mask(int x, int y)
@@ -1067,8 +1045,10 @@ char begin_battle(unsigned char attacker, unsigned char target, unsigned char ra
   int resolution;
 
   // psgFadeOut(20);
+  fade_screen();
+  disp_off();
   reset_satb();
-  vsync();
+  // vsync();
 
   resolution = battle_loop(attacker,target,range,a_terrain,t_terrain);
     // resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,LIGHTENING_ART,target);
@@ -1082,16 +1062,17 @@ char begin_battle(unsigned char attacker, unsigned char target, unsigned char ra
     destroy_entity(attacker);
   }
   
+  
   load_battlefield_map();
   load_sprz();
   update_map();
+  
   load_ents();
-  disp_on();
-
-  selector_mode = 0;
-
+  // sync(30);
   vsync();
 
+  selector_mode = 0;
+  // vsync();
   return resolution;
 }
 

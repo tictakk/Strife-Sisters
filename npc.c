@@ -8,18 +8,23 @@
 #define MAX_UNIT_TYPES (NO_OF_BASIC_TYPE + TOTAL_COMMANDERS)
 #define UNIT_VRAM_START 0x3A00//0x5200
 
+
+#define ALLY_PALETTE 17
+#define ENEMY_PALETTE 18
+#define CMDR_PALETTE 0
+
 struct npc{
   unsigned char pos_x, pos_y, type, active, frame, pal;
 };
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
-const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,18,
-                                        18,24,21,17,19,
+const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,
+                                        17,17,17,17,19,
                                         17,25,17,17,26,
                                         25,19,19,17,17,
-                                        24,23,20,25,25,
-                                        17,20};
+                                        24,23,17,25,25,
+                                        17,17};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -36,15 +41,12 @@ void init_npcs()
   cmdr_pal_count = 26;
   current_frame = 0;
 
-  load_palette(17,sldpal,1);
-  load_palette(18,magepal,1);
-  load_palette(19,magepal+16,1);
-  load_palette(20,thfpal,1);
-  load_palette(21,blobpal,1);
-  load_palette(22,monkpal,1);
-  load_palette(23,bndpal,1);
-  load_palette(24,dmnpal,1);
-  load_palette(25,sniperpal,1);
+  load_palette(17,soldierpal,1);
+  load_palette(18,enemypal,1);
+  // load_palette(19,magepal,1);
+  // load_palette(19,magepal+16,1);
+  // load_palette(23,bndpal,1);
+  // load_palette(25,sniperpal,1);
   // load_palette(26,gol_pal,1);
   // load_palette(31,dark,1);
   // load_palette(31,sldpal,1);
@@ -180,12 +182,13 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],gol,0x100);
           break;
 
+          case BERSERKER_UNIT:
           case MONK_UNIT:
           load_vram(npc_vram[type],mnk,0x100);
           break;
 
           case BRAWLER_UNIT:
-          load_vram(npc_vram[type],brl,0x100);
+          load_vram(npc_vram[type],mnk,0x100);
           break;
 
           case LANCER_UNIT:
@@ -203,6 +206,8 @@ void add_npc(char x, char y, char type, char pal)
           default:
           load_vram(npc_vram[type],sld,0x100);
           put_string("error default",5,5);
+          // put_number(type,3,5,6);
+          // wait_for_I_input();
           break;
         }
       }

@@ -9,7 +9,7 @@ Demon:
   .db 150 ;sta
   .db 2   ;rng
   .db 5   ;id
-  .db 8   ;a_type
+  .db 64   ;a_type
   .db 0   ;art
   .db 3   ;points
   .db 15   ;pow

@@ -1,5 +1,5 @@
 #define BASE_CRIT_CHANCE 5
-#define BASE_HIT_CHANCE 232
+#define BASE_HIT_CHANCE 230
 
 //hp, atk, def, int, res, spd
 const unsigned char STAT_GROWTH_CHART[] = {

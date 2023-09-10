@@ -7,7 +7,7 @@ Cleric:
   .db 16  ;spd
   .db 3   ;mov
   .db 100 ;sta
-  .db 2   ;rng
+  .db 1   ;rng
   .db 17   ;id
   .db 16   ;a_type
   .db 0   ;art

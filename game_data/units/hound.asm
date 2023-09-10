@@ -1,15 +1,15 @@
 Hellhound:
-  .db 45  ;hp
+  .db 40  ;hp
   .db 28  ;atk
   .db 10  ;def
-  .db 15  ;int
-  .db 11  ;res
+  .db 7  ;int
+  .db 10  ;res
   .db 20  ;spd
   .db 4   ;mov
   .db 120 ;sta
   .db 1   ;rng
   .db 6   ;id
-  .db 0   ;a_type
+  .db 64   ;a_type
   .db 0   ;art
   .db 3   ;points
   .db 13   ;pow

@@ -14,7 +14,7 @@ King:
   .db 3   ;points
   .db 15  ;pow
   .db 1   ;is_cmdr
-  .db 25, 24, 23 ;attack positions
+  .db 25, 23, 23 ;attack positions
 
   ;unit growth
   .db GROWTH_KING

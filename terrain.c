@@ -122,8 +122,8 @@ void load_terrain_icons()
 void load_terrain_items()
 {
   // load_vram(TERRAIN_ITEM_VRAM,buffs,0xC0);
-  load_vram(TERRAIN_ITEM_VRAM+0xC0,chest,0x80);
-  load_palette(30,chest_pal,1);
+  // load_vram(TERRAIN_ITEM_VRAM+0xC0,chest,0x80);
+  // load_palette(30,chest_pal,1);
 }
 
 void put_terrain_effect(int vram, char num, int x, int y, char pal)

@@ -35,8 +35,8 @@
 #define VIOLET 30
 #define KING 31
 #define TINKER 32
-#define CALIEN 33 //Calien, Sunette, Zonja, Taffa, Xelase
-#define TEARLE 34 //Cyran, Danag, Dorlus, Tearle
+#define TEARLE 33 //Cyran, Danag, Dorlus, Tearle
+#define CALIEN 34 //Calien, Sunette, Zonja, Taffa, Xelase
 #define HEIN 35 //Zaladin, Adonis, Zandre, Wikus
 #define ADONIS 36
 #define PHALC 37

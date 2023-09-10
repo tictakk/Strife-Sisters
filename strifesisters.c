@@ -103,6 +103,8 @@ GROWTH_SPEED_DPS = 10
     .include "game_data/units/king.asm"
 ;_tinker:
     .include "game_data/units/tinker.asm"
+;_tearle:
+    .include "game_data/units/tearle.asm"
     .code
 #endasm
 
@@ -186,8 +188,9 @@ int g = 0;
 #define COMMAND_FOCUS 4
 #define COMMAND_STOP 9
 
-#incchr(healthbar,"map/backgrounds/healthbars.pcx");
-#incpal(healthbarpal,"map/backgrounds/healthbars.pcx");
+// #incchr(healthbar,"map/backgrounds/healthbars.pcx");
+// #incpal(healthbarpal,"map/backgrounds/healthbars.pcx");
+#incchr(healthbar,"map/sprites/health.pcx")
 
 #incchr(sisters_logo,"map/backgrounds/sister_logo_small.pcx")
 #incpal(sisters_logo_pal,"map/backgrounds/sister_logo_small.pcx");
@@ -274,8 +277,17 @@ int g = 0;
 #define BL_1_3 0x20E9
 #define BL_0_3 0x20EF
 
-#define MAX_PARTY_UNIT_SIZE 16
+#define BAR_8_8 0xA0E0
+#define BAR_7_8 0xA0E1
+#define BAR_6_8 0xA0E2
+#define BAR_5_8 0xA0E3
+#define BAR_4_8 0xA0E4
+#define BAR_3_8 0xA0E5
+#define BAR_2_8 0xA0E6
+#define BAR_1_8 0xA0E7
+#define BAR_0_8 0xA0E8
 
+#define MAX_PARTY_UNIT_SIZE 16
 
 // const char soldier[] = {
   // 50, 20, 10, 10, 10, 15, 3, 100, 1, 1, 1, 0, 1, 5, 0, 24, 7, 0
@@ -290,22 +302,52 @@ int g = 0;
 //   #asm .db 50, 20, 10, 10, 10, 15, 3, 100, 1, 1, 1, 0, 1, 5, 0, 24, 7, 0 #endasm
 // };
 
-const int health_full[]  = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_3_3 };
-const int health_14_15[] = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_2_3 };
-const int health_13_15[] = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_1_3 };
-const int health_12_15[] = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_0_3 };
-const int health_11_15[] = {BL_3_3, BM_3_3, BM_3_3, BM_2_3, BR_0_3 };
-const int health_10_15[] = {BL_3_3, BM_3_3, BM_3_3, BM_1_3, BR_0_3 };
-const int health_9_15[] = {BL_3_3, BM_3_3, BM_3_3, BM_0_3, BR_0_3 };
-const int health_8_15[] = {BL_3_3, BM_3_3, BM_2_3, BM_0_3, BR_0_3 };
-const int health_7_15[] = {BL_3_3, BM_3_3, BM_1_3, BM_0_3, BR_0_3 };
-const int health_6_15[] = {BL_3_3, BM_3_3, BM_0_3, BM_0_3, BR_0_3 };
-const int health_5_15[] = {BL_3_3, BM_2_3, BM_0_3, BM_0_3, BR_0_3 };
-const int health_4_15[] = {BL_3_3, BM_1_3, BM_0_3, BM_0_3, BR_0_3 };
-const int health_3_15[] = {BL_3_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
-const int health_2_15[] = {BL_2_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
-const int health_1_15[] = {BL_1_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
-const int health_empty[] = {BL_0_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
+// const int health_full[]  = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_3_3 };
+// const int health_14_15[] = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_2_3 };
+// const int health_13_15[] = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_1_3 };
+// const int health_12_15[] = { BL_3_3, BM_3_3, BM_3_3, BM_3_3, BR_0_3 };
+// const int health_11_15[] = {BL_3_3, BM_3_3, BM_3_3, BM_2_3, BR_0_3 };
+// const int health_10_15[] = {BL_3_3, BM_3_3, BM_3_3, BM_1_3, BR_0_3 };
+// const int health_9_15[] = {BL_3_3, BM_3_3, BM_3_3, BM_0_3, BR_0_3 };
+// const int health_8_15[] = {BL_3_3, BM_3_3, BM_2_3, BM_0_3, BR_0_3 };
+// const int health_7_15[] = {BL_3_3, BM_3_3, BM_1_3, BM_0_3, BR_0_3 };
+// const int health_6_15[] = {BL_3_3, BM_3_3, BM_0_3, BM_0_3, BR_0_3 };
+// const int health_5_15[] = {BL_3_3, BM_2_3, BM_0_3, BM_0_3, BR_0_3 };
+// const int health_4_15[] = {BL_3_3, BM_1_3, BM_0_3, BM_0_3, BR_0_3 };
+// const int health_3_15[] = {BL_3_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
+// const int health_2_15[] = {BL_2_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
+// const int health_1_15[] = {BL_1_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
+// const int health_empty[] = {BL_0_3, BM_0_3, BM_0_3, BM_0_3, BR_0_3 };
+
+const health_full[] = {BAR_8_8, BAR_8_8, BAR_8_8};
+
+const health_23_24[] = {BAR_8_8, BAR_8_8, BAR_7_8};
+const health_22_24[] = {BAR_8_8, BAR_8_8, BAR_6_8};
+const health_21_24[] = {BAR_8_8, BAR_8_8, BAR_5_8};
+const health_20_24[] = {BAR_8_8, BAR_8_8, BAR_4_8};
+const health_19_24[] = {BAR_8_8, BAR_8_8, BAR_3_8};
+const health_18_24[] = {BAR_8_8, BAR_8_8, BAR_2_8};
+const health_17_24[] = {BAR_8_8, BAR_8_8, BAR_1_8};
+const health_16_24[] = {BAR_8_8, BAR_8_8, BAR_0_8};
+
+const health_15_24[] = {BAR_8_8, BAR_7_8, BAR_0_8};
+const health_14_24[] = {BAR_8_8, BAR_6_8, BAR_0_8};
+const health_13_24[] = {BAR_8_8, BAR_5_8, BAR_0_8};
+const health_half[] = {BAR_8_8, BAR_4_8, BAR_0_8};
+const health_11_24[] = {BAR_8_8, BAR_3_8, BAR_0_8};
+const health_10_24[] = {BAR_8_8, BAR_2_8, BAR_0_8};
+const health_9_24[] = {BAR_8_8, BAR_1_8, BAR_0_8};
+
+const health_8_24[] = {BAR_8_8, BAR_0_8, BAR_0_8};
+const health_7_24[] = {BAR_7_8, BAR_0_8, BAR_0_8};
+const health_6_24[] = {BAR_6_8, BAR_0_8, BAR_0_8};
+const health_5_24[] = {BAR_5_8, BAR_0_8, BAR_0_8};
+const health_4_24[] = {BAR_4_8, BAR_0_8, BAR_0_8};
+const health_3_24[] = {BAR_3_8, BAR_0_8, BAR_0_8};
+const health_2_24[] = {BAR_2_8, BAR_0_8, BAR_0_8};
+const health_1_24[] = {BAR_1_8, BAR_0_8, BAR_0_8};
+
+const health_none[] = {BAR_0_8, BAR_0_8, BAR_0_8}; 
 
 const char map_level_table[18] = {
   1, 3, 5, 7, 8, 
@@ -385,8 +427,8 @@ enum Direction{
 #incpal(thfpal, "characters/thief_small.pcx")
 // #incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
 #incpal(mskpal,"map/sprites/msktpiece.pcx",0,2)
-#incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
-#incpal(blobpal,"map/sprites/blob.pcx")
+// #incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
+// #incpal(blobpal,"map/sprites/blob.pcx")
 #incpal(magepal,"map/sprites/mage.pcx")
 #incpal(bndpal,"characters/bandit.pcx",0,2)
 #incpal(monkpal,"characters/monk.pcx")
@@ -500,7 +542,7 @@ void heal_commander_bg(char id)
 
 void display_demo()
 {
-  char demo_select = 0, ticky = 0, loop = 0;
+  char ticky = 0, loop = 0;
   loop = 1;
   load_vram(0x4DB0,cursor,0x10);
   set_screen_size(SCR_SIZE_32x32);
@@ -545,7 +587,7 @@ void display_demo()
 
 void select_level_menu()
 {
-  char curs_pos = 0, loop = 0;
+  char curs_pos = 1, loop = 0;
   loop = 1;
   put_string("                 ",8,19);
   put_string("           ",8,20);
@@ -564,11 +606,11 @@ void select_level_menu()
     {
       // case JOY_DOWN: if(curs_pos < 2) {curs_pos++; curs_down();} break;
       // case JOY_UP: if(curs_pos > 0) {curs_pos--; curs_up();} break;
-      case JOY_LEFT: if(curs_pos > 0) { put_number(--curs_pos,2,13,19); } break;
-      case JOY_RIGHT: if(curs_pos < 25) { put_number(++curs_pos,2,13,19); }break;
+      case JOY_LEFT: if(curs_pos > 1) { put_number(--curs_pos,2,13,19); } break;
+      case JOY_RIGHT: if(curs_pos < 3) { put_number(++curs_pos,2,13,19); }break;
       case JOY_RUN:
       case JOY_I:
-      select_level(curs_pos);
+      select_level(curs_pos-1);
       loop = 0;
       break;
       // return;
@@ -606,9 +648,6 @@ void select_level(char level)
 
 void load_unit_header(int id, char header_no)
 {
-  // memcpy(&unit_header[header_no],nounit+(id*sizeof(Unit)),sizeof(Unit));
-  // memcpy(&unit_header[header_no],soldier,sizeof(Unit));
-
   myPointers.idx = 0;
   getFarPointer(nounit, &(myPointers.bank[0]), &(myPointers.addr[0]));
   addOffsetFarPointer(&(myPointers.bank[0]), &(myPointers.addr[0]), id*sizeof(Unit));
@@ -634,18 +673,15 @@ void preload_commanders_map_1()
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
 
-  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
+  // load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
   load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
-  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,1);
-  load_unit_to_cmdr(0,0,REI,1,1);
+  load_unit_to_cmdr(0,0,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(0,1,REI,1,1);
 
-  // party_commanders[0].bg.units[0].exp = 188;
-  // level_up_unit(&party_commanders[0].bg.units[0]);
-
-  load_unit_to_cmdr(1,0,SWORD_UNIT,0,1);
-  load_unit_to_cmdr(1,2,SWORD_UNIT,0,1);
-  load_unit_to_cmdr(1,8,VIOLET,1,1);
-  load_unit_to_cmdr(1,6,ARCHER_UNIT,0,1);
+  load_unit_to_cmdr(1,1,SWORD_UNIT,0,1);
+  load_unit_to_cmdr(1,3,ARCHER_UNIT,0,1);
+  load_unit_to_cmdr(1,4,VIOLET,1,1);
+  load_unit_to_cmdr(1,5,ARCHER_UNIT,0,1);
 }
 
 void preload_commanders_map_2()
@@ -657,16 +693,16 @@ void preload_commanders_map_2()
 
   load_unit_to_cmdr(0,7,CLERIC_UNIT,0,3);
   load_unit_to_cmdr(0,2,SWORD_UNIT,0,3);
-  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,3);
-  load_unit_to_cmdr(0,0,REI,1,3);
+  load_unit_to_cmdr(0,0,SWORD_UNIT,0,3);
+  load_unit_to_cmdr(0,1,REI,1,3);
 
-  load_unit_to_cmdr(1,0,SWORD_UNIT,0,3);
-  load_unit_to_cmdr(1,2,SWORD_UNIT,0,3);
-  load_unit_to_cmdr(1,8,VIOLET,1,3);
   load_unit_to_cmdr(1,6,ARCHER_UNIT,0,3);
+  load_unit_to_cmdr(1,8,ARCHER_UNIT,0,3);
+  load_unit_to_cmdr(1,4,VIOLET,1,3);
+  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,3);
 
-  load_unit_to_cmdr(2,0,SWORD_UNIT,0,3);
-  load_unit_to_cmdr(2,2,SWORD_UNIT,0,3);
+  load_unit_to_cmdr(2,3,SPEAR_UNIT,0,3);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
   load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
   load_unit_to_cmdr(2,1,KING,1,3);
 }
@@ -681,16 +717,19 @@ void preload_commanders_map_3()
   load_unit_to_cmdr(0,6,CLERIC_UNIT,0,5);
   load_unit_to_cmdr(0,8,ARCHER_UNIT,0,5);
   load_unit_to_cmdr(0,2,SWORD_UNIT,0,5);
-  load_unit_to_cmdr(0,0,REI,1,5);
+  load_unit_to_cmdr(0,0,HOUND_UNIT,0,5);
+  load_unit_to_cmdr(0,1,REI,1,5);
 
-  load_unit_to_cmdr(1,1,SPEAR_UNIT,0,5);
+  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,5);
   load_unit_to_cmdr(1,6,ARCHER_UNIT,0,5);
-  load_unit_to_cmdr(1,7,VIOLET,1,5);
+  load_unit_to_cmdr(1,4,VIOLET,1,5);
   load_unit_to_cmdr(1,8,ARCHER_UNIT,0,5);
+  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,5);
 
-  load_unit_to_cmdr(2,2,SWORD_UNIT,0,5);
-  load_unit_to_cmdr(2,0,SPEAR_UNIT,0,5);
-  load_unit_to_cmdr(2,4,CLERIC_UNIT,0,5);
+  load_unit_to_cmdr(2,3,SPEAR_UNIT,0,5);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,5);
+  load_unit_to_cmdr(2,6,HOUND_UNIT,0,5);
+  load_unit_to_cmdr(2,8,CLERIC_UNIT,0,5);
   load_unit_to_cmdr(2,1,KING,1,5);
 }
 
@@ -712,7 +751,7 @@ void preload_default(char level)
   }
   // set_commander_stats(0,5,22,12,16);
   // set_commander_stats(1,5,17,22,12);
-  // set_commander_stats(2,5,15,16,22);
+  // set_commander_stats(2,5,15,16,22); 
   // set_commander_stats(3,5,15,15,15);
 
   load_unit_to_cmdr(0,4,REI,1,level);
@@ -722,10 +761,10 @@ void preload_default(char level)
   load_unit_to_cmdr(0,7,CLERIC_UNIT,0,level);
   load_unit_to_cmdr(0,8,HOUND_UNIT,0,level);
 
-  load_unit_to_cmdr(1,7,VIOLET,1,level);
+  load_unit_to_cmdr(1,4,VIOLET,1,level);
   load_unit_to_cmdr(1,0,GOLEM_UNIT,0,level);
   load_unit_to_cmdr(1,2,GOLEM_UNIT,0,level);
-  load_unit_to_cmdr(1,4,GOLEM_UNIT,0,level);
+  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,level);
   load_unit_to_cmdr(1,6,MAGE_UNIT,0,level);
   load_unit_to_cmdr(1,8,MAGE_UNIT,0,level);
 
@@ -917,7 +956,7 @@ void print_unit_type(char id, int x, int y)
       break;
 
 		default:
-      put_string("---",x,y);
+      put_string("$$$",x,y);
       break;
 	}
 }
@@ -932,7 +971,7 @@ char* get_unit_fullname(char unit_id)
   switch(unit_id)
   {
     case NO_UNIT:
-      return " ---- ";
+      return " $$$$  ";
 
     case SWORD_UNIT:
       return "Soldier";
@@ -1151,10 +1190,10 @@ void draw_32x32_sprite(char type, int x, int y)
   spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
 }
 
-void print_unit_attack_icon(char unit_no, int x, int y)
+void print_unit_attack_icon(char a_type, int x, int y)
 {
-  load_unit_header(unit_no,0);
-	switch(unit_header[0].a_type)
+  // load_unit_header(unit_no,0);
+	switch(a_type)
 	{
 		case NORMAL:
       put_char('[',x,y);//sword
@@ -1179,6 +1218,10 @@ void print_unit_attack_icon(char unit_no, int x, int y)
 		case AXE:
        put_char('`',x,y);
        break;
+
+    case BEAST:
+      put_char(127,x,y);
+      break;
 
 		default:
        put_char('[',x,y);
@@ -1818,14 +1861,9 @@ void change_background_pal_single(int tile, int pal)
   vreg(0x02,tiledata+pal);
 }
 
-// int find_tile_vaddr(int tile)
-// {
-
-// }
-
 load_healthbars()
 {
-	load_palette(2,healthbarpal,1);
+	// load_palette(2,healthbarpal,1);
 //	load_vram(0xe00,healthbar,0xC0);
   load_vram(0xe00,healthbar,0x150);
 }
@@ -1835,22 +1873,46 @@ void display_healthbar(char x, char y, char percent)
   int addr;
   addr = vram_addr(x,y);
 
-  if(percent > 98) { load_vram(addr,health_full,5); return;}
-  if(percent > 93) { load_vram(addr,health_14_15,5); return;}
-  if(percent > 86) { load_vram(addr,health_13_15,5); return;}
-  if(percent > 80) { load_vram(addr,health_12_15,5); return;}
-  if(percent > 73) { load_vram(addr,health_11_15,5); return;}
-  if(percent > 66) { load_vram(addr,health_10_15,5); return;}
-  if(percent > 60) { load_vram(addr,health_9_15,5); return;}
-  if(percent > 53) { load_vram(addr,health_8_15,5); return;}
-  if(percent > 46) { load_vram(addr,health_7_15,5); return;}
-  if(percent > 40) { load_vram(addr,health_6_15,5); return;}
-  if(percent > 33) { load_vram(addr,health_5_15,5); return;}
-  if(percent > 26) { load_vram(addr,health_4_15,5); return;}
-  if(percent > 20) { load_vram(addr,health_3_15,5); return;}
-  if(percent > 13) { load_vram(addr,health_2_15,5); return;}
-  if(percent > 0) { load_vram(addr,health_1_15,5); return;}
-  load_vram(addr,health_empty,5);
+  if(percent > 95) { load_vram(addr,health_full,3); return;}
+  if(percent > 91) { load_vram(addr,health_23_24,3); return;}
+  if(percent > 87) { load_vram(addr,health_22_24,3); return;}
+  if(percent > 83) { load_vram(addr,health_21_24,3); return;}
+  if(percent > 79) { load_vram(addr,health_20_24,3); return;}
+  if(percent > 75) { load_vram(addr,health_19_24,3); return;}
+  if(percent > 70) { load_vram(addr,health_18_24,3); return;}
+  if(percent > 66) { load_vram(addr,health_17_24,3); return;}
+  if(percent > 62) { load_vram(addr,health_16_24,3); return;}
+  if(percent > 58) { load_vram(addr,health_15_24,3); return;}
+  if(percent > 54) { load_vram(addr,health_14_24,3); return;}
+  if(percent > 50) { load_vram(addr,health_13_24,3); return;}
+  if(percent > 45) { load_vram(addr,health_half,3); return;}
+
+  if(percent > 41) { load_vram(addr,health_11_24,3); return;}
+  if(percent > 37) { load_vram(addr,health_10_24,3); return;}
+  if(percent > 33) { load_vram(addr,health_9_24,3); return;}
+  if(percent > 29) { load_vram(addr,health_8_24,3); return;}
+  if(percent > 25) { load_vram(addr,health_7_24,3); return;}
+  if(percent > 21) { load_vram(addr,health_6_24,3); return;}
+  if(percent > 17) { load_vram(addr,health_5_24,3); return;}
+  if(percent > 13) { load_vram(addr,health_4_24,3); return;}
+  if(percent > 9) { load_vram(addr,health_3_24,3); return;}
+  if(percent > 5) { load_vram(addr,health_2_24,3); return;}
+  if(percent > 1) { load_vram(addr,health_1_24,3); return;}
+  load_vram(addr,health_none,3);
+}
+
+void animate_healthbar(char starting_percentage, char ending_percentage, char x, char y)
+{
+  char i;
+  char health_counter;
+  health_counter = starting_percentage;
+  display_healthbar(x,y,starting_percentage);
+  while(health_counter >= ending_percentage)
+  {
+    display_healthbar(x,y,health_counter);
+    health_counter -= 4;
+    sync(1);
+  }
 }
 
 void display_meter_bars(char bar_count, char x, char y)
@@ -1935,6 +1997,10 @@ void load_commanders_gfx(int cmdr_id, int address)
 		load_palette(get_commander_palette(cmdr_id),tinker_pal,1);
 		break;
 
+    case TEARLE:
+    load_vram(address,tearle,0x100);
+    load_palette(get_commander_palette(cmdr_id),tearle_pal,1);
+    break;
 		// default:
 		// load_vram(address,sld,0x100);
     // load_commander_palette()
@@ -1949,6 +2015,7 @@ void load_commanders_palettes()
   load_palette(27,violet_walk_pal,1);
   load_palette(28,cat_walk_pal,1);
   load_palette(29,tinker_pal,1);
+  load_palette(30,tearle_pal,1);
 }
 
 char get_commander_palette(char cmdr_id)
@@ -1972,6 +2039,10 @@ char get_commander_palette(char cmdr_id)
 
 		case TINKER:
     return 29;
+
+    case TEARLE:
+    return 30;
+
 		// load_palette(29,tinker_pal,1);
 		// break;
 
@@ -2073,7 +2144,8 @@ void load_predefined_group_layout(char formation, char r_one, char r_two, char r
   int f_pos;
   char i,j,unit,highest_id;
 
-  highest_id = r_two;
+  highest_id = determine_sprite_type(r_one,r_two,r_three);
+  // highest_id = r_two;
   // highest_id = (r_one > r_two)? r_one : r_two;
   // highest_id = (highest_id > r_three)? highest_id : r_three;
   party_commanders[cmdr_id].sprite_type = highest_id;
@@ -2093,6 +2165,24 @@ void load_predefined_group_layout(char formation, char r_one, char r_two, char r
       load_unit_to_cmdr(cmdr_id,i,unit,0,map_level_table[level]);
     }
   }
+}
+
+char determine_sprite_type(char r_one, char r_two, char r_three)
+{
+  if(r_one > 28)
+  {
+    return r_one;
+  }
+  if(r_two > 28)
+  {
+    return r_two;
+  }
+  if(r_three > 28)
+  {
+    return r_three;
+  }
+
+  return r_two;
 }
 
 void display_popup(char *str, char screen)

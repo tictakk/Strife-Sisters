@@ -1,8 +1,8 @@
 Archer:
   .db 25  ;hp
-  .db 30  ;atk
-  .db 12  ;def
-  .db 12  ;int
+  .db 28  ;atk
+  .db 10  ;def
+  .db 10  ;int
   .db 9  ;res
   .db 17  ;spd
   .db 3   ;mov

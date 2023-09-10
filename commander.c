@@ -11,6 +11,7 @@
 typedef struct {
 	Unit_Entity units[9];
   char formation;
+  char bonuses;
 } Battlegroup;
 
 struct Commander{
@@ -77,7 +78,7 @@ void list_commanders(char x, char y)
   }
   for(i; i<6; i++)
   {
-    put_string("---",x,y+i);
+    put_string("$$$",x,y+i);
   }
 }
 

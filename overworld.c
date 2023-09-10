@@ -26,7 +26,6 @@ void overworld_loop(int x, int y)
   load_overworld_bg();
   for(k=0; k<get_map_id_by_pos(get_absolute_pos()); k++)
   {
-    // put_number(k,4,s_x_relative,s_y_relative);
     unlock_units_by_castle(k);
   }
 //	draw_npcs(5);
@@ -363,6 +362,7 @@ void load_overworld_bg()
   load_terrains();
   load_vram(0x4BB0,icons_gfx,0x60);
 	load_vram(0x49A0,icons_gfx+0x60,0x50);
+  load_vram(0x4DF0,icons_gfx+0xC0,0x10);
 	// load_vram(0x49A0,icons_gfx,0x60);
 	// load_vram(0x4BB0,icons_gfx+0x60,0x50);
 
@@ -372,23 +372,21 @@ void load_overworld_bg()
 	spr_make(0,selector_x,selector_y,0x6A00,FLIP_MAS|SIZE_MAS,SZ_16x32,0,1);
 
 	init_overworld_data();
-
 	disp_on();
 	scroll(0,s_x,288,0, 223, 0xC0);
-
 	satb_update();
 }
 
 void init_overworld_data()
 {
-	load_castle_data(997,0,BRAWLER_UNIT,HOUND_UNIT,0);//formation of 3
-	load_castle_data(867,1,RAIDER_UNIT,SPEAR_UNIT,0);
+	load_castle_data(997,0,BRAWLER_UNIT,0,0);//formation of 3
+	load_castle_data(867,1,RAIDER_UNIT,HOUND_UNIT,0);
 	load_castle_data(737,2,GOLEM_UNIT,0,0);//formation of 4
-  load_castle_data(613,3,THIEF_UNIT,KNIGHT_UNIT,0);
+  load_castle_data(613,3,THIEF_UNIT,SPEAR_UNIT,0);
   load_castle_data(617,4,MAGE_UNIT,0,0);//formation of 5
   load_castle_data(713,5,LANCER_UNIT,STALKER_UNIT, 0);
   load_castle_data(811,6,DEMON_UNIT,0,0);//formation of 6
-  load_castle_data(970,7,BERSERKER_UNIT,WITCH_UNIT,0);
+  load_castle_data(970,7,BERSERKER_UNIT,WITCH_UNIT,0); 
   load_castle_data(946,8,PRIEST_UNIT,0,0);//formation of 7
   load_castle_data(852,9,0,0,0);//dancer
   load_castle_data(888,10,0,0,0);//dancer //formation of 8
@@ -510,8 +508,8 @@ void load_cmdr_army_to_npcs(char cmdr_id, char x, char y)
     {
       if(party_commanders[cmdr_id].bg.units[(j*3)+i].id)
       {
-        add_npc((x+(i%3)),y,party_commanders[cmdr_id].bg.units[(j*3)+i].id,
-                UNIT_PALS[party_commanders[cmdr_id].bg.units[(j*3)+i].id]);
+        add_npc((x+(i%3)),y,party_commanders[cmdr_id].bg.units[(j*3)+i].id,CMDR_PALETTE);
+                // UNIT_PALS[party_commanders[cmdr_id].bg.units[(j*3)+i].id]);
       }
 	 	}
   }
@@ -1007,13 +1005,13 @@ void overworld_controls(){
 				  reset_npcs();
 					init_map_data(get_map_id_by_pos(get_absolute_pos()));
 					begin_battlefield(get_map_id_by_pos(get_absolute_pos()));
-
-					load_overworld_bg();
-					reset_npcs();
-					satb_update();
-					menu_state = OVERWORLD;
-          unlock_units_by_castle(map_no);
-          load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+          game_over = 0;
+					// load_overworld_bg();
+					// reset_npcs();
+					// satb_update();
+					// menu_state = OVERWORLD;
+          // unlock_units_by_castle(map_no);
+          // load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 					break;
 			}
 		}
@@ -1113,7 +1111,7 @@ void overworld_controls(){
 			menu_rows = 6;
 
 			load_cursor(1+(cursor_column*4),3+commander_select_cursor,SLIDER_ONE);
-      check_unit_in_row(0,0);
+      // check_unit_in_row(0,0);
 			print_unit_row_by_type(unit_header[0].a_type,2,cursor_y);
 
 			display_cursor();
@@ -1144,8 +1142,8 @@ void overworld_controls(){
 	if(j_2 & JOY_SEL)
 	{
     // put_number(sizeof(Unit_Entity),5,s_x_relative,s_y_relative);
-    put_number(hits,4,s_x_relative,s_y_relative);
-    put_number(misses,4,s_x_relative,s_y_relative+1);
+    // put_number(hits,4,s_x_relative,s_y_relative);
+    // put_number(misses,4,s_x_relative,s_y_relative+1);
   }
 }
 
@@ -1181,40 +1179,6 @@ void move_selector(char row, char col)
   // spr_make(63,(cursor_column*24)+20,(commander_select_cursor*24)+144-4,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
   spr_make(63,get_iso_x(1,17,commander_select_cursor,cursor_column),get_iso_y(1,17,commander_select_cursor,cursor_column)+14,0x68C0,0,NO_FLIP|SZ_16x16,28,1);
   update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
-}
-
-char check_unit_in_row(char curs_col, char curs_row)
-{
-  unsigned char i, desired_col, desired_row, row_count, unit_type, current_row;
-  row_count = 0;
-
-  desired_col = curs_col + cursor_column;
-  current_row = 1 << (commander_select_cursor * 1);
-  desired_row = current_row;
-
-  if(curs_row > 0)
-  {
-    desired_row = current_row << 1;
-  }
-  if(curs_row < 0)
-  {
-    desired_row = current_row >> 1;
-  }
-
-  if(desired_col < 0 || desired_col > 6){ return -1; }
-
-  for(i=0; i<buyable_unit_count; i++)
-  {
-    load_unit_header(buyable_units[i],0);
-    if(unit_header[0].a_type == desired_row)
-    {
-      if(row_count++ == desired_col)
-      {
-        return buyable_units[i];
-      }
-    }
-  }
-  return -1;
 }
 
 void clear_commander_select()

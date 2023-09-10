@@ -1,6 +1,6 @@
 Soldier:
   .db 35 ;hp
-  .db 25 ;atk
+  .db 24 ;atk
   .db 15 ;def
   .db 6 ;int 
   .db 8 ;res

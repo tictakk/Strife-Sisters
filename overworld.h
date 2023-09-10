@@ -159,29 +159,53 @@ void update_unit_battle_info(char unit_id, char x, char y)
   l_y = s_y_relative+y;
   l_x = s_x_relative+x;
 
-  put_string("Price",l_x+1,l_y+1);
-  put_string("Upgrade",l_x+1,l_y+3);
-  put_string("A.Targets",l_x+1,l_y+6);
+  // put_string("Price",l_x+1,l_y+1);
+  // put_string("Upgrade",l_x+1,l_y+3);
+  set_font_pal(GOLD_FONT);
+  put_string("Targets",l_x+1,l_y+3);
+  put_string("Advantage",l_x+1,l_y+8);
+  put_char('*',l_x+1,l_y+9);
+  put_char('+',l_x+1,l_y+10);
+  put_char('}',l_x+1,l_y+11);
+  put_char('~',l_x+1,l_y+12);
+
+  // set_font_pal(GOLD_FONT);  
+  put_char('F',l_x+1,l_y+4);
+  put_char('M',l_x+1,l_y+5);
+  put_char('R',l_x+1,l_y+6);
+  set_font_pal(WHITE_FONT);
 
   if(unit_id > 0)
   {
     load_unit_header(unit_id,0);
+    // get_plus_adv(unit_header[0].a_type);
+    // get_plus_plus_adv(unit_header[0].a_type);
+    get_advantages(unit_header[0].a_type);
 
-    get_upgrade_cost(unit_id);
-    get_unit_cost(unit_id);
-    put_number(unit_cost,3,l_x+2,l_y+2);
-    put_number(upgrade_cost,3,l_x+2,l_y+4);
-    print_attack_type(unit_header[0].attacks[0],1,l_x+2,l_y+7);
-    print_attack_type(unit_header[0].attacks[1],1,l_x+2,l_y+8);
-    print_attack_type(unit_header[0].attacks[2],1,l_x+2,l_y+9);
+    print_unit_fullname(unit_id,l_x+1,l_y+1);
+    print_attack_type(unit_header[0].attacks[0],1,l_x+2,l_y+4);
+    print_attack_type(unit_header[0].attacks[1],1,l_x+2,l_y+5);
+    print_attack_type(unit_header[0].attacks[2],1,l_x+2,l_y+6);
+    print_unit_attack_icon(adv_plus_plus,l_x+3,l_y+9);
+    print_unit_attack_icon(adv_plus[0],l_x+3,l_y+10);
+    print_unit_attack_icon(adv_plus[1],l_x+4,l_y+10);
+    print_unit_attack_icon(disadv_minus[0],l_x+3,l_y+11);
+    print_unit_attack_icon(disadv_minus[1],l_x+4,l_y+11);
+    print_unit_attack_icon(disadv_minus_minus,l_x+3,l_y+12);
   }
   else
   {
-    put_string("         ",l_x+2,l_y+2);
-    put_string("         ",l_x+2,l_y+4);
-    put_string("         ",l_x+2,l_y+7);
-    put_string("         ",l_x+2,l_y+8);
-    put_string("         ",l_x+2,l_y+9);
+    put_string("         ",l_x+1,l_y+1);
+    put_string("         ",l_x+1,l_y+3);
+    put_string("         ",l_x+1,l_y+4);
+    put_string("         ",l_x+1,l_y+5);
+    put_string("         ",l_x+1,l_y+6);
+
+    put_string("         ",l_x+1,l_y+8);
+    put_string("         ",l_x+1,l_y+9);
+    put_string("         ",l_x+1,l_y+10);
+    put_string("         ",l_x+1,l_y+11);
+    put_string("         ",l_x+1,l_y+12);
   }
 }
 
