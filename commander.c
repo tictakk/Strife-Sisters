@@ -1,3 +1,4 @@
+// #include "tactic.c"
 #include "commander.h"
 
 #define MAX_PARTY_COMMANDERS 6
@@ -18,6 +19,7 @@ struct Commander{
 	char *name;
 	char sprite_type;
   char max_bp;
+  char tactic_id;
 	Battlegroup bg;
 };
 

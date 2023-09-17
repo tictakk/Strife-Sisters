@@ -14,7 +14,7 @@ Soldier:
   .db 1  ;points
   .db 10  ;pow
   .db 0  ;is_cmdr
-  .db 23, 23, 0 ;attacks
+  .db 10, 10, 0 ;attacks
 
   ;unit growth
   .db GROWTH_DPS

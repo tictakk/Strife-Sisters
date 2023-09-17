@@ -14,7 +14,7 @@ Tinker:
   .db 3   ;points
   .db 15   ;pow
   .db 1   ;is_cmdr
-  .db 23, 26, 5 ;attack positions
+  .db 10, 13, 4 ;attack positions
 
   ;unit growth
   .db GROWTH_VIOLET

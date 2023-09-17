@@ -1,4 +1,9 @@
 #incbin(script, "script/out")
+
+#define TARGET_DEFEAT 1
+#define ATTACKER_DEFEAT 2
+#define NO_DEFEAT 3
+
 #define NO_OF_MAPS 25
 
 #define NO_UNIT 0
@@ -53,6 +58,15 @@
 #define ROW_TWO 1
 #define ROW_THREE 2
 #define MAX_UNITS_PER_ROW 3
+
+#define TACTIC_NONE 0
+#define TACTIC_RAGE 1
+#define TACTIC_SCORCH 2
+#define TACTIC_DASH 3
+#define TACTIC_LEAP 4
+
+#define PLAYER 1
+#define CPU 2
 
 char s_y_relative = 0;
 char s_x_relative = 0;

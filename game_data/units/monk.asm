@@ -14,7 +14,7 @@ Monk:
   .db 3   ;points
   .db 20   ;pow
   .db 0   ;is_cmdr
-  .db 24, 7, 0 ;attack positions
+  .db 11, 5, 0 ;attack positions
 
   ;unit growth
   .db GROWTH_SPEED_DPS

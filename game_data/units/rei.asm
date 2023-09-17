@@ -14,7 +14,7 @@ Rei:
   .db 1   ;points
   .db 15   ;pow
   .db 1   ;is_cmdr
-  .db 23, 23, 7 ;attack positions
+  .db 10, 10, 5 ;attack positions
 
   ;unit growth
   .db GROWTH_REI

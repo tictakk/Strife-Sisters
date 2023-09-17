@@ -14,7 +14,7 @@ Hellhound:
   .db 3   ;points
   .db 13   ;pow
   .db 0   ;is_cmdr
-  .db 23, 23, 4 ;melee, melee, atk up 
+  .db 10, 10, 4 ;melee, melee, atk up 
 
   ;unit growth
   .db GROWTH_SPEED_DPS

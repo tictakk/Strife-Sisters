@@ -23,6 +23,11 @@ typedef struct {
 } Pointers;
 Pointers myPointers;
 
+struct Node{
+	int ownPos, fromPos;
+	char checked;
+};
+
 #asm
 GROWTH_DPS = 0
 GROWTH_RANGED_DPS = 1
@@ -129,10 +134,11 @@ char screen_dimensions = 0;
 int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 int g = 0;
 
+struct Node neighbors[4];
+struct Node map[65]; //a unit with a max move of 5 will fill 60 nodes max.
+
 #include "map_dimension.h"
 #include "paths.c"
-#define PLAYER 1
-#define CPU 2
 
 #define NO_TARGET 0
 #define SINGLE_HIT 1
@@ -396,11 +402,6 @@ int map_no = 0;
 */
 #define BATTLE_MAP_HEIGHT 16
 
-struct Node{
-	int ownPos, fromPos;
-	char checked;
-};
-
 enum Direction{
 	NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST
 };
@@ -466,6 +467,7 @@ int materials_count = 0;
 char party_units_size = 0;
 
 
+char no_miss_flag = 0;
 char debug_flag = 0;
 char prebattle_flag = 99;
 
@@ -503,7 +505,9 @@ void main()
 	disp_off();
 	init_satb();
   load_vram(0x4DB0,cursor,0x10);
-
+  // TACTIC_LEAP;
+  party_commanders[0].tactic_id = TACTIC_DASH;//TACTIC_RAGE;
+  party_commanders[1].tactic_id = TACTIC_SCORCH;
 	for(;;)
 	{
     // unlock_all_units();
@@ -1392,6 +1396,7 @@ initialize_commanders()
 		cmdr->max_bp = 50;
 		cmdr->sprite_type = SWORD_UNIT;
 		cmdr->name = name20;
+    cmdr->tactic_id = 0;
 		for(j=0; j<9; j++)
 		{
 			cmdr->bg.units[j].id = 0;//&unit_list[NO_UNIT];
@@ -1447,7 +1452,7 @@ void modify_palette(int pal_num, char modifier)
 
 	for(i=0; i<16; i++)
 	{
-		rgb = get_color((pal_num*16)+i);
+		rgb = get_color((pal_num<<4)+i);
 
 		g = (((rgb >> 6) & 0x7) + modifier);
 		r = (((rgb >> 3) & 0x7) + modifier);
@@ -1491,7 +1496,7 @@ void modify_palette(int pal_num, char modifier)
 		{
 			b = 0;
 		}
-		set_color_rgb((pal_num*16)+i,r,g,b);
+		set_color_rgb((pal_num<<4)+i,r,g,b);
 	}
 }
 
@@ -2016,6 +2021,32 @@ void load_commanders_palettes()
   load_palette(28,cat_walk_pal,1);
   load_palette(29,tinker_pal,1);
   load_palette(30,tearle_pal,1);
+}
+
+void load_commander_palette(char cmdr_id)
+{
+  switch(cmdr_id)
+  {
+    case REI:
+    load_palette(26,rei_walk_pal,1);
+    break;
+
+    case VIOLET:
+    load_palette(27,violet_walk_pal,1);
+    break;
+
+    case KING:
+    load_palette(28,cat_walk_pal,1);
+    break;
+
+    case TINKER:
+    load_palette(29,tinker_pal,1);
+    break;
+
+    case TEARLE:
+    load_palette(30,tearle_pal,1);
+    break;
+  }
 }
 
 char get_commander_palette(char cmdr_id)

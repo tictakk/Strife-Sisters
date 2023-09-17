@@ -14,7 +14,7 @@ Thief:
   .db 3   ;points
   .db 15  ;pow
   .db 0   ;is_cmdr
-  .db 23, 20, 26 ;attack positions
+  .db 10, 7, 13 ;attack positions
 
   ;unit growth
   .db GROWTH_SPEED_DPS

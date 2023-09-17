@@ -116,6 +116,7 @@ void start_turn(char team)
   }
   else
   {
+    tactic_current = 0;
     s_y_relative = (s_y/8);
     display_popup("Enemy\n  Turn",0);
     load_map(0,2,0,0,16,29);
@@ -461,7 +462,7 @@ void do_attack(char ai_id)
   sync(30);
   result = attack_unit(entities[ai_entities[ai_id].target].pos,entities[ai_entities[ai_id].entity_id].pos,0);
   ai_entities[ai_id].target = 0;
-  if(result == 1)
+  if(result == ATTACKER_DEFEAT)//ai died attacking
   {
     init_ai();
     // ai_tracker = max(ai_id-1,0);
@@ -469,7 +470,7 @@ void do_attack(char ai_id)
     // num_of_ai--;
     // return;
   }
-  else if(result == 0)
+  else if(result == TARGET_DEFEAT)//killed target attacking, this should probably just be running init_ai all over again?
   {
     for(i=0; i<num_of_ai; i++)
     {

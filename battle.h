@@ -618,31 +618,30 @@ char find_lowest_hp(char b_id, char team)
 
 char do_art(char b_id)
 {
-  // switch(battleunits[b_id].unit->unit->art)
-  switch(art_queue_id)
-  {
+  // switch(art_queue_id)
+  // {
 
-    case INNVIGORATE_ART:
-    innvigorate(b_id);
-    return 0;
+  //   case INNVIGORATE_ART:
+  //   innvigorate(b_id);
+  //   return 0;
 
-    case RESTORE_ART:
-    restore(b_id);
-    return 0;
+  //   case RESTORE_ART:
+  //   restore(b_id);
+  //   return 0;
 
-    case RED_EYE_ART:
-    red_eye(b_id);
-    return 1;
+  //   case RED_EYE_ART:
+  //   red_eye(b_id);
+  //   return 1;
 
-    case BLACK_EYE_ART:
-    black_eye(b_id);
-    return 1;
+  //   case BLACK_EYE_ART:
+  //   black_eye(b_id);
+  //   return 1;
 
-    case RAPID_THRUST_ART:
-    rapid_thrust(b_id);
-    return 1;
-  }
-  return 1;
+  //   case RAPID_THRUST_ART:
+  //   rapid_thrust(b_id);
+  //   return 1;
+  // }
+  // return 1;
 }
 
 void restore(char b_id)

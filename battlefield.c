@@ -1,4 +1,3 @@
-// #include "battlefield.h"
 #include "battle_ai.c"
 
 #incpal(bluepal,"map/sprites/bluetiles.pcx")
@@ -16,7 +15,7 @@
 
 int position_1 = 0, position_2 = 0, position_len = 0;
 const char dumb_table[9] = {0,3,6,1,4,7,2,5,8};
-int g_abs;
+
 char id;
 int s_x_holder, s_y_holder, y_off_holder;
 enum Direction cmdr_direction;
@@ -529,6 +528,13 @@ void ctrls()
         cursor_up();
         update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));
       }
+      else if(selector_mode == TACTIC_SELECT_MODE)
+      {
+        if(valid_map_square(g_abs-16))
+        {
+          selector_up();
+        }
+      }
     }
   }
   else { joy_up_held = 0;}
@@ -551,6 +557,13 @@ void ctrls()
       {
         cursor_down();
         update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));  
+      }
+      else if(selector_mode == TACTIC_SELECT_MODE)
+      {
+        if(valid_map_square(g_abs+16))
+        {
+          selector_down();
+        }
       }
     }
   }else { joy_down_held = 0; }
@@ -579,6 +592,13 @@ void ctrls()
         update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));
         curs_right(5);
       }
+      else if(selector_mode == TACTIC_SELECT_MODE)
+      {
+        if(valid_map_square(g_abs+1))
+        {
+          selector_right();
+        }
+      }
     }
   } else { joy_right_held = 0; }
 
@@ -605,6 +625,13 @@ void ctrls()
         menu_option -= menu_rows;
         update_unit_battle_info(entities[id-1].bg->units[dumb_table[menu_option]],20,9+(s_y/8));
         curs_left(5);
+      }
+      else if(selector_mode == TACTIC_SELECT_MODE)
+      {
+        if(valid_map_square(g_abs-1))
+        {
+          selector_left();
+        }
       }
     }
   } else { joy_left_held = 0; }
@@ -709,7 +736,6 @@ void ctrls()
           {
             remove_cursor();
             scroll(0,0,s_y+32,32,224,0x80);
-            // display_abs_info_panel(7+(s_x),32+(s_y/2),18,15); //find a way to remove
             display_window_rel(2,8+(s_y/8),18,15);
             set_font_pal(9);
             put_string(" Front ",8,8+(s_y/8));
@@ -733,45 +759,19 @@ void ctrls()
           break;
 
         case MENU_TAKE://calling
+          // current_tactic = TACTIC_LEAP;
+          setup_tactic();
           break;
       }
     }
-    // else if(selector_mode == PLAYER_ARMY_MODE)
-    // {
-    //   if(selected_option == -1)
-    //   {
-    //     set_font_pal(11);
-    //     selected_option = dumb_table[menu_option];
-    //     print_unit_info(&entities[id-1].bg->units[selected_option],9+((selected_option%3)*5)+(s_x/8),10+((selected_option/3)*4)+(s_y/8));
-    //     set_font_pal(10);
-    //   }
-    //   else
-    //   {
-    //     swap_commander_units(entities[id-1].id,selected_option,dumb_table[menu_option]);
-    //     list_commander_army(entities[id-1].bg,9,10);
-    //     selected_option = -1;
-    //   }
-    // }
+    else if(selector_mode == TACTIC_SELECT_MODE)
+    {
+      perform_tactic();
+    }
   }
 
   if(jy & JOY_II)
   {
-    // if(selector_mode == SELECT_MODE)
-    // {
-    //   if(position_1 == 0)
-    //   {
-    //     position_1 = g_abs;
-    //   }
-    //   else
-    //   {
-    //     position_2 = g_abs;
-    //     put_number(find_attackable_position(position_1,position_2,2,3),4,0,0);
-    //     // position_len = get_path(position_1,position_2,path,battle_grid,PLAYER,5,0);
-    //     // put_number(position_len,5,0,0);
-    //     position_1 = 0;
-    //     position_2 = 0;
-    //   }
-    // }
     if(selector_mode == PLACE_MODE)
     {
       set_cursor_pos(selected_entity->pos);
@@ -832,28 +832,183 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
-    // map_result_status = MAP_RESULT_WIN;    
+    // load_commander_palette(REI);
+    // darken_palette(26);
+    // map_result_status = MAP_RESULT_WIN;
     // put_hex(tiledata[7],5,0,4);
     // put_hex(tiledata[8],5,0,5);
-    load_healthbars();
-    display_healthbar(5,1,0);
+    // load_healthbars();
+    // display_healthbar(5,1,0);
   }
 }
 
-void print_healthbar()
+void damage_group(char target_id, char attacker_id)
 {
-  load_healthbars();
-  // char bar_data[32];
-  // char i;
+  unsigned char dmg;
+  char i, level;
 
-  // for(i=0; i<32; i++)
+  load_unit_header(party_commanders[entities[attacker_id].id].sprite_type,0);
+  for(i=0; i<MAX_ARMY_SIZE; i++)
+  {
+    if(party_commanders[entities[attacker_id].id].sprite_type == entities[attacker_id].bg->units[i].id)
+    {
+      level = entities[attacker_id].bg->units[i].level;
+      apply_level_to_header(level,0);
+      break;
+    }
+  }
+
+  for(i=0; i<MAX_ARMY_SIZE; i++)
+  {
+    if(entities[target_id].bg->units[i].hp)
+    {
+      load_unit_header(entities[target_id].bg->units[i].id,1);
+      apply_level_to_header(entities[target_id].bg->units[i].level,1);
+      dmg = calc_damage(0,
+                        0,
+                        level,
+                        unit_header[0].intel,
+                        0,
+                        0,
+                        unit_header[1].res,
+                        20); //TODO: m_power should vary based on move
+      entities[target_id].bg->units[i].hp = max(entities[target_id].bg->units[i].hp - dmg, 1);
+    }
+  } 
+}
+
+void perform_tactic()
+{
+  if(is_valid_tactic_tile())
+  {
+    selector_mode = SELECT_MODE;
+    remove_cursor();
+    unhighlight();
+    
+    switch(tactic_current)
+    {
+      case TACTIC_SCORCH: scorch_tactic(); break;
+    
+      case TACTIC_LEAP: leap_tactic(); break;
+    
+      case TACTIC_RAGE: tactic_rage(); break;
+
+      case TACTIC_DASH: dash_tactic(); break;
+    }
+    sync(30);
+    display_selector(SELECTOR,sx,sy,16);
+  }
+}
+
+void tactic_rage()
+{
+  //rage doesn't really do anything here innit?
+  animate_calling_single(EFFECT_POWER_UP,id-1);
+  animate_calling_single(EFFECT_POWER_UP,id-1);
+  tactic_current = TACTIC_RAGE;
+  remove_effects();
+}
+
+void scorch_tactic()
+{
+  animate_calling_single(EFFECT_FIRE,id-1);
+  damage_group(id-1,tactic_target);
+  shake_entity(id-1);
+  tactic_current = 0;
+}
+
+void dash_tactic()
+{
+  // get_dash_radius();
+  walk_entity(tactic_target,g_abs);
+  display_selector(SELECTOR,sx,sy,16);
+  tactic_current = 0;
+}
+
+void leap_tactic()
+{
+  int end_x, end_y;
+
+  // start_x = (entities[tactic_target].pos&15)<<4;
+  // start_y = ((entities[tactic_target].pos>>4)<<4)-s_y;
+
+  end_x = (g_abs&15)<<4;
+  end_y = ((g_abs>>4)<<4)-s_y;
+
+  // walk_entity(tactic_target,(start_x/16)+32+s_y);
+  // spr_set(get_entity_sprite_no(tactic_target));
+  // spr_hide();
+  // satb_update();
+  // sync(30);
+
+  // move_unit_new(32+(end_x/16)+s_y);
+  // walk_entity(tactic_target,g_abs);
+
+  // sync(30);
+  walk_entity(tactic_target,g_abs);
+  create_art_by_type(EFFECT_POOF,end_x+16,end_y,0);
+  create_art_by_type(EFFECT_POOF,end_x-16,end_y,0);
+  create_art_by_type(EFFECT_POOF,end_x,end_y+16,0);
+  create_art_by_type(EFFECT_POOF,end_x,end_y-16,0);
+
+  animate_calling_effect(0,0);
+  remove_effects();
+
+  determine_map_target(CPU,1);
+  while(tactic_target_count > 0)
+  {
+    damage_group(target_target_ids[--tactic_target_count],tactic_target);
+    shake_entity(target_target_ids[tactic_target_count]);
+  }
+
+  display_selector(SELECTOR,sx,sy,16);
+  tactic_current = 0;
+}
+
+void shake_entity(char ent_id)
+{
+  char i, id;
+  id = get_entity_sprite_no(ent_id);
+  spr_set(id);
+  for(i=0; i<16; i++)
+  {
+    if(i%2 == 0)
+    {
+      spr_x(spr_get_x()+1);
+    }
+    else
+    {
+      spr_x(spr_get_x()-1);
+    }
+    satb_update();
+    vsync();
+  }
+}
+
+void shake_if_team(char entity_id, char team)
+{
+  if(entity_id > 0 && entities[entity_id-1].team == team)
+  {
+    shake_entity(entity_id-1);
+  }
+}
+
+void setup_tactic()
+{
+  set_tactic(id-1,party_commanders[entities[id-1].id].tactic_id);
+  // if(tactic_distance())
   // {
-  //   bar_data[i] = font+0x200+i;
+  if(tactic_current == TACTIC_DASH)
+  {
+    get_dash_radius();
+  }
+  else
+  {
+    get_unit_radius(entities[id-1].pos,tactic_distance(),PLAYER,0);
+  }
+  highlight(entities[id-1].pos,ACTION_ATTACK);
+  selector_mode = TACTIC_SELECT_MODE;
   // }
-  // put_hex(bar_data[0]&0xFF,5,0,4);
-  // put_hex(bar_data[8]&0xFF,5,0,5);
-  // put_hex(bar_data[16]&0xFF,5,0,6);
-  // put_hex(bar_data[24]&0xFF,5,0,7);
 }
 
 void animate_calling(char effect, char target_team)
@@ -868,17 +1023,40 @@ void animate_calling(char effect, char target_team)
       x = (entities[i].pos&15)<<4;
       y = ((entities[i].pos>>4)<<4)-s_y;
       create_art_by_type(effect,x,y,0);
+
       // create_effect(effect,x,y,0);
       animate_calling_effect(x,y);
       remove_effect(0);
+      put_number(effect_count,3,0,0);
     }
   }
+}
+
+void animate_calling_single(char effect, char target)
+{
+  int x, y;
+
+  x = (entities[target].pos&15)<<4;
+  y = ((entities[target].pos>>4)<<4)-s_y;
+  create_art_by_type(effect,x,y,0);
+  // put_number(y,3,0,0);
+  // create_fire(x,y,0);
+  // create_fire(x,y,0);
+  // create_fire(x,y,0);
+  // create_fire(x,y,0);
+
+  // spr_show();
+  // satb_update();
+  // put_number(effect_count,3,0,0);
+  animate_calling_effect(x,y);
+  remove_effect(0);
+  // put_number(effect_count,3,0,0);
 }
 
 void animate_calling_effect(int x, int y)
 {
   char i;
-
+  spr_show();
   for(i=0; i<11; i++)
   {
     animate_effects();
@@ -1040,6 +1218,36 @@ void display_unit_menu_mask(int x, int y)
   }
 }
 
+char attack_unit(int src, int dst, char art)
+{
+  char result;
+  unsigned char attacker, target, range;
+  // int range; //,item_no;//, result;
+  
+  attacker = battle_grid[dst]-1;
+  target = battle_grid[src]-1;
+  range = (unsigned char) get_range_from_distance(dst,src);
+  result = NO_DEFEAT;
+  if(entities[attacker].team != entities[target].team)
+  {
+    last_command = selector_mode;
+    entities[attacker].actionable = 0;
+
+    hide_menu();
+    cursor_x = -32;
+    cursor_y = -32;
+    selector_mode = SELECT_MODE;
+    result = begin_battle(attacker,target,range,battlefieldbat[map_offset+dst],battlefieldbat[map_offset+src]);
+    if(result == TARGET_DEFEAT && tactic_current == TACTIC_RAGE)
+    {
+      entities[attacker].actionable = 1;
+      entities[attacker].movable = 1;
+      load_commander_palette(party_commanders[entities[attacker].id].sprite_type);
+    }
+  }
+  return result;
+}
+
 char begin_battle(unsigned char attacker, unsigned char target, unsigned char range, char a_terrain, char t_terrain)
 {
   int resolution;
@@ -1053,11 +1261,11 @@ char begin_battle(unsigned char attacker, unsigned char target, unsigned char ra
   resolution = battle_loop(attacker,target,range,a_terrain,t_terrain);
     // resolution = battle_loop(attacker,target,range,a_terrain,t_terrain,LIGHTENING_ART,target);
 
-  if(resolution == 0)//attacking team kills army
-  { 
+  if(resolution == TARGET_DEFEAT)//attacking team kills army
+  {
     destroy_entity(target);
   }
-  if(resolution == 1)//targeted team kills army
+  if(resolution == ATTACKER_DEFEAT)//targeted team kills army
   {
     destroy_entity(attacker);
   }

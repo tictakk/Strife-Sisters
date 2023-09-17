@@ -13,11 +13,14 @@
 #incspr(capture_effect,"map/effects/capture_effect.pcx")
 #incspr(miss_effect,"map/effects/miss.pcx")
 #incspr(crit_effect,"map/effects/crit.pcx")
+#incspr(poof_effect,"map/effects/poof.pcx")
+#incspr(power_up_effect,"map/effects/power_up.pcx")
 
 #incpal(effect_pal,"map/effects/adv.pcx")
 #incpal(lightening_effect_pal,"map/effects/lightening.pcx")
 #incpal(fire_effect_pal,"map/effects/fire.pcx")
 #incpal(arrow_effect_pal,"map/effects/arrow_fall.pcx")
+#incpal(poof_effect_pal,"map/effects/poof.pcx")
 
 // #define EFFECTS_VRAM 0x3600
 #define EFFECTS_VRAM 0x6C00
@@ -44,6 +47,8 @@
 #define EFFECT_CAPTURE 16
 #define EFFECT_MISS 17
 #define EFFECT_CRIT 18
+#define EFFECT_POOF 19
+#define EFFECT_POWER_UP 20
 
 #define MAX_EFFECT_COUNT 10
 
@@ -53,7 +58,7 @@ const char LIGHTENING_MID_2_ANIMATION[] = { 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0 }
 const char LIGHTENING_BOT_ANIMATION[]   = { 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0 };
 const int HEAL_ANIMATION[] = { 0x40, 0x80, 0xC0, 0x100, 0x40, 0x80, 0xC0, 0x100, 0x40, 0x80, 0xC0 };
 const int HIT_ANIMATION[] = { 0x40, 0x80, 0xC0, 0x100, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-// const int ICE_ANIMATION[] = { 0x00, 0x00, 0x40, 0x40, 0x80, 0x80, 0xC0, 0xC0, 0x100, 0x100, 0x00 };
+const int ICE_ANIMATION[] = { 0x00, 0x00, 0x40, 0x40, 0x80, 0x80, 0xC0, 0xC0, 0x100, 0x100, 0x00 };
 
 char effect_count = 0;
 char effects[MAX_EFFECT_COUNT];
@@ -78,6 +83,7 @@ char create_effect(char effect_type, int x, int y, char flip)
   effects_flip[effect_count] = (flip)? 8 : 0;
   load_effect(effect_type);
   display_effect(effect_count);
+  
   return effect_count++;
 }
 
@@ -165,6 +171,16 @@ void load_effect(char effect_no)
       effects_pal[effect_count] = EFFECTS_ARTS_PAL;
       break;
 
+    case EFFECT_POOF:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),poof_effect,0x140);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
+
+    case EFFECT_POWER_UP:
+      load_vram(EFFECTS_VRAM+(effect_count*0x200),power_up_effect,0x140);
+      effects_pal[effect_count] = EFFECTS_ARTS_PAL;
+      break;
+
     case EFFECT_ARROW:
       load_vram(EFFECTS_VRAM+(effect_count*0x200),rain_arrow,0x140);
       effects_pal[effect_count] = EFFECTS_ARTS_PAL;
@@ -249,6 +265,14 @@ void create_art_by_type(char effect_no, int x, int y, char flip)
     case EFFECT_FIRE:
     create_fire(x,y,flip);
     break;
+
+    case EFFECT_POOF:
+    create_poof(x,y,flip);
+    break;
+
+    case EFFECT_POWER_UP:
+    create_power_up(x,y,flip);
+    break;
   }
 }
 
@@ -289,7 +313,21 @@ char create_ice(int x, int y, char flip)
 char create_fire(int x, int y, char flip)
 {
   load_palette(31,fire_effect_pal,1);
-  return create_effect(EFFECT_FIRE,x,y,flip);
+  create_effect(EFFECT_FIRE,x,y,flip);
+  return 1;
+}
+
+char create_poof(int x, int y, char flip)
+{
+  load_palette(31,poof_effect_pal,1);
+  create_effect(EFFECT_POOF,x,y,flip);
+  return 1;
+}
+
+char create_power_up(int x, int y, char flip)
+{
+  load_palette(31,fire_effect_pal,1);
+  return create_effect(EFFECT_POWER_UP,x,y,flip);
 }
 
 char create_hit_spark(int x, int y, char flip)
@@ -362,9 +400,9 @@ void animate_word_effect(char effect_no)
 
 void animate_ice(char effect_no)
 {
-//   spr_set(effect_no);
-//   spr_show();
-//   spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
+  spr_set(effect_no);
+  spr_show();
+  spr_pattern(EFFECTS_VRAM+(effect_no*0x200)+ICE_ANIMATION[effect_frames[effect_no]++]);
 }
 
 void animate_arrow(char effect_no)

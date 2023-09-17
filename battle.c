@@ -172,7 +172,14 @@ void apply_modifier(char target, char modifier, char amount)
     bid_to_unit_header(target,1);
     apply_level_to_header(battleunits[target].unit->level,1);
 
-    apply_damage(target,calc_damage(art_unit_id,target,battleunits[art_unit_id].unit->level,unit_header[0].intel,unit_header[1].res,amount));
+    apply_damage(target,calc_damage(art_unit_id,
+                                    target,
+                                    battleunits[art_unit_id].unit->level,
+                                    unit_header[0].intel,
+                                    battleunits[art_unit_id].a_bonus,
+                                    battleunits[target].d_bonus,
+                                    unit_header[1].res,
+                                    amount));
     break;
   }
   update_healthbar(target);
@@ -180,11 +187,6 @@ void apply_modifier(char target, char modifier, char amount)
 
 void perform_art()
 {
-  if(art_queue_id == BLOW_BACK_ART)
-  {
-    position_status = STATUS_BLOWBACK;
-  }
-  
   switch(arts[art_queue_id].relationship)
   {
     case ONE_TO_ONE:
@@ -199,12 +201,12 @@ void perform_art()
     animate_many_to_many_art();
     break;
   }
-  if(do_art(art_unit_id) == 1)
-  {
-    hide_art_name();
-    clear_targets();
-    remove_effects();
-  }
+  // if(do_art(art_unit_id) == 1)
+  // {
+  //   hide_art_name();
+  //   clear_targets();
+  //   remove_effects();
+  // }
   clear_art_queue();
 }
 
@@ -293,13 +295,6 @@ void apply_art(char target)
     set_unit_stunned(target);
   }
   // remove_effects();
-  if(art_queue_id == BLOW_BACK_ART)
-  {
-    if((target%9) + 3 < 9 && battleunits[target+3].active)
-    {
-      modifier = 5;
-    }
-  }
   apply_modifier(target,get_modifier_type(art_queue_id),get_modifier_amount(art_queue_id)-modifier);
 }
 
@@ -571,7 +566,14 @@ void b_u_attack(char b_id)
         // determine_miss();
         // if(!evade)
         // {
-          dmg = calc_damage(b_id,i,battleunits[b_id].unit->level,unit_header[0].atk,unit_header[1].def,arts[unit_header[0].attacks[battleunits[b_id].column]].base_amt);
+          dmg = calc_damage(b_id,
+                            i,
+                            battleunits[b_id].unit->level,
+                            unit_header[0].atk,
+                            battleunits[b_id].a_bonus,
+                            battleunits[i].d_bonus,
+                            unit_header[1].def,
+                            arts[unit_header[0].attacks[battleunits[b_id].column]].base_amt);
           //TODO: if this is a counter hit, 15 instead of 0 in third param here
           if(check_battle_bonus(BONUS_MAGIC,target_bonuses) && attack_side == RIGHT_SIDE)
           {
@@ -801,7 +803,7 @@ void calc_hit_damage(char t_id, unsigned char damage, int bonus)
   }
 }
 
-unsigned char calc_damage(char a_id, char t_id, int a_level, int a_base, int d_base, int m_pow)
+unsigned char calc_damage(char a_id, char t_id, int a_level, int a_base, int a_bonus, int d_bonus, int d_base, int m_pow)
 {
   int dmg = 0, adv_modifier = 0;
   //1 = crit in this case
@@ -812,7 +814,7 @@ unsigned char calc_damage(char a_id, char t_id, int a_level, int a_base, int d_b
   // put_number(dmg,4,0,0);
   // crit = 0;
 
-  dmg = (m_pow + a_level) + ( max( (a_base + battleunits[a_id].a_bonus) - (d_base+battleunits[t_id].d_bonus),1) * (1 + crit));
+  dmg = (m_pow + a_level) + ( max( (a_base + a_bonus) - (d_base+d_bonus),1) * (1 + crit));
   dmg /= 2;
 
   if(adv_plus_plus_flag)
@@ -976,14 +978,17 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
   
 	if(team_one_count <= 0)
 	{
-		return 1;
+    return ATTACKER_DEFEAT;
+		// return 1;
 	}
 
 	if(team_two_count <= 0)
 	{
-		return 0;
+		// return 0;
+    return TARGET_DEFEAT;
 	}
-	return 2;
+	// return 2;
+  return NO_DEFEAT;
 }
 
 void set_portrait(char index, char entity_id)
@@ -1342,7 +1347,11 @@ void set_targets_stunned(char b_id)
       bid_to_unit_header(i,1);
       apply_level_to_header(battleunits[i].unit->level,1);
 
-      determine_miss(b_id,i);
+      if(no_miss_flag == 0)
+      {
+        determine_miss(b_id,i);
+      }
+    
       if(battleunits[i].state != STATE_EVADE)
       {
         determine_crit(b_id);

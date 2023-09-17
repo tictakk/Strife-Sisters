@@ -6,7 +6,7 @@
 #define SPLIT_MODE 3
 #define ATTACK_MODE 4
 #define PLAYER_ARMY_MODE 5
-#define CPU_ARMY_MODE 6
+#define TACTIC_SELECT_MODE 6
 #define ATTACK_WITH_ART 7
 #define EXPLORE_MODE 8
 #define EXPLORE_MENU_MODE 9
@@ -48,7 +48,8 @@ typedef struct{
 } Entity;
 
 // unsigned char battle_grid[464];
-unsigned char battle_grid[352];
+int g_abs;
+char battle_grid[352];
 Entity entities[MAX_ENTITIES];
 char selector_mode;
 int last_pos,squares;
@@ -91,7 +92,6 @@ char get_army_min_move(char entity_id)
 {
   // char i, min;
   // min = MAX_MOVE_RANGE;
-
   // for(i=0; i<MAX_ARMY_SIZE; i++)
   // {
   //   if(entities[entity_id].bg->units[i].hp && entities[entity_id].bg->units[i].unit->mov < min)
@@ -99,7 +99,6 @@ char get_army_min_move(char entity_id)
   //     min = entities[entity_id].bg->units[i].unit->mov;
   //   }
   // }
-
   // return min;
   return 3;
 }
@@ -283,6 +282,10 @@ void move_unit(int to, int from)
 void move_unit_new(int to)
 {
   last_pos = selected_entity->pos;
+  if(to == last_pos)
+  {
+    return;
+  }
   battle_grid[to] = battle_grid[last_pos];
   battle_grid[last_pos] = 0;
   selected_entity->pos = to;
@@ -291,48 +294,13 @@ void move_unit_new(int to)
 
 void select_unit(char entity_id)
 {
-  // put_number(entity_id,4,0,0);
   selected_entity = &entities[entity_id];
-  // selector_mode = PLACE_MODE;
-  // menu_option = MENU_ATTACK;
-  // draw_selector();
-  // highlight(pos,0xC000);
 }
 
 void display_move_range(int pos)
 {
-  // put_number(pos,4,0,0);
-  // selector_mode = PLACE_MODE;
-  // menu_option = MENU_ATTACK;
   draw_selector();
   highlight(pos,ACTION_MOVE);
-}
-
-char attack_unit(int src, int dst, char art)
-{
-  char result;
-  unsigned char attacker, target, range;
-  // int range; //,item_no;//, result;
-
-  attacker = battle_grid[dst]-1;
-  target = battle_grid[src]-1;
-  range = (unsigned char) get_range_from_distance(dst,src);
-  result = 2;
-  if(entities[attacker].team != entities[target].team)
-  {
-    last_command = selector_mode;
-    entities[attacker].actionable = 0;
-    // if(entities[attacker].team == PLAYER)
-    // {
-    //   darken_palette(26+attacker);
-    // }
-    hide_menu();
-    cursor_x = -32;
-    cursor_y = -32;
-    selector_mode = SELECT_MODE;
-    result = begin_battle(attacker,target,range,battlefieldbat[map_offset+dst],battlefieldbat[map_offset+src]);
-  }
-  return result;
 }
 
 char get_range_from_distance(int dist_1, int dist_2)
@@ -442,7 +410,6 @@ void get_turn_bonus()
     return;
   }
   turn_bonus = max(8-(turns_count>>2),0) * 100;
-
   //max == 900 I guess? Not really possible
 }
 
@@ -462,7 +429,7 @@ void print_post_battle_info(char *str, int value)
 void undo()
 {
   set_cursor_pos(last_pos);
-  get_unit_radius(last_pos,get_army_min_move(get_entity_id(selected_entity->pos)),selected_entity->team,0);
+  get_unit_radius(last_pos,get_army_min_move(get_entity_id(selected_entity->pos)),selected_entity->team,3);//should be move range instead of 3
   move_unit(last_pos,selected_entity->pos);
   // move_unit_new(last_pos);
   selected_entity->movable = 1;
@@ -656,7 +623,7 @@ void walk_sprite(char entity_id, int location, int distance)
     {
       spr_y(spr_get_y()-2);
       desired_y-=2;
-    }    
+    }
     satb_update();
     vsync();
   }

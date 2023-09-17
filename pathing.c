@@ -1,7 +1,5 @@
 #include "battlefield.h"
-struct Node neighbors[4];
-struct Node map[65]; //a unit with a max move of 5 will fill 60 nodes max.
-
+#include "tactic.c"
 char visit_grid[352];
 
 // int get_neighbors(unsigned char x, unsigned char y, char size)
@@ -163,18 +161,6 @@ void reset_grid()
   }
 }
 
-char is_zero(char num, char size)
-{
-	if(size)
-	{
-		return 1;
-	}
-	else
-	{
-		return num != 0;
-	}
-}
-
 // int put_visited(int x, int y, int fx, int fy, char checked)
 int put_visited(int pos, int fpos, char checked)
 {
@@ -185,11 +171,11 @@ int put_visited(int pos, int fpos, char checked)
 
   visit_grid[pos] = 1;
 
-	++map_size;
-	map[map_size].ownPos = pos;
-	map[map_size].fromPos = fpos;
-	map[map_size].checked = checked;
-	return 1;
+  ++map_size;
+  map[map_size].ownPos = pos;
+  map[map_size].fromPos = fpos;
+  map[map_size].checked = checked;
+  return 1;
 }
 
 unsigned char get(int pos)

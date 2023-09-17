@@ -14,7 +14,7 @@ Mage:
   .db 2   ;points
   .db 10   ;pow
   .db 0   ;is_cmdr
-  .db 24, 7, 1 ;attack positions
+  .db 11, 7, 1 ;attack positions
 
   ;unit growth
   .db GROWTH_MAGIC_DPS
