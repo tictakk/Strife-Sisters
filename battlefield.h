@@ -68,6 +68,9 @@ char units_lost, units_killed;
 int turn_bonus, killed_bonus, lost_bonus, total_bonus, materials_collected;
 char map_result_status;
 
+int map_boundry_y = 0;
+int map_boundry_x = 0;
+
 int coords[24];
 Entity *selected_entity;
 
@@ -161,7 +164,7 @@ void set_bonuses(struct Commander *commander)
 
 void update_selector_pos(int x, int y)
 {
-  if(sy == 208 && y > 0 && s_y < 116) //scroll down
+  if(sy == 208 && y > 0 && s_y < map_boundry_y) //scroll down
   {
     yOffset -= 16;
     s_y += 16;

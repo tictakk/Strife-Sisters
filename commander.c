@@ -59,17 +59,6 @@ void add_commander_to_party(char *name, char st)
   party_size++;
 }
 
-void clear_enemy_commander_ram()
-{
-  char i;
-  for(i=0; i<MAX_ENEMY_COMMANDERS; i++)
-  {
-    enemy_commanders[i].sprite_type = 0;
-    enemy_commanders[i].name = name20;
-    clear_commander_battle_group(enemy_commanders+i);
-  }
-}
-
 void list_commanders(char x, char y)
 {
   char i;
@@ -81,22 +70,6 @@ void list_commanders(char x, char y)
   for(i; i<6; i++)
   {
     put_string("$$$",x,y+i);
-  }
-}
-
-void heal_commander_army(char cmdr_id)
-{
-  int x,y;
-  char i;
-
-  create_effect(EFFECT_HEAL,x,y,0);
-  for(i=0; i<9; i++)
-  {
-    if(party_commanders[cmdr_id].bg.units[i].id)
-    {
-      load_unit_header(party_commanders[cmdr_id].bg.units[i].id,0);
-      party_commanders[cmdr_id].bg.units[i].hp = unit_header[0].hp;
-    }
   }
 }
 
@@ -115,49 +88,6 @@ char get_commander_battle_points(char cmdr_id)
   }
   return bp;
 }
-
-// void set_commander_stats(char id, char level, char tac, char wis, char fort)
-// {
-//   party_commanders[id].level = level;
-//   party_commanders[id].tac = tac;
-//   party_commanders[id].wis = wis;
-//   party_commanders[id].fort = fort;
-// }
-
-// void level_commander(char cmdr_id)
-// {
-//   party_commanders[cmdr_id].tac += COMMANDER_STATS_DISTRIBUTION_CHART[cmdr_id * 3];
-//   party_commanders[cmdr_id].wis += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+1];
-//   party_commanders[cmdr_id].fort += COMMANDER_STATS_DISTRIBUTION_CHART[(cmdr_id * 3)+2];
-//   party_commanders[cmdr_id].max_bp++;
-//   party_commanders[cmdr_id].level++;
-// }
-
-// void level_up_commander(char cmdr_id)
-// {
-//   while(party_commanders[cmdr_id].exp > next_level((int)party_commanders[cmdr_id].level))
-//   {
-//     level_commander(cmdr_id);
-//   }
-// }
-
-// void level_enemy_commander(char cmdr_id, char base_type, char level)
-// {
-//   char i;
-//   set_commander_stats(cmdr_id,1,
-//                       GENERIC_BASE_STATS[(base_type*3)],
-//                       GENERIC_BASE_STATS[(base_type*3)+1],
-//                       GENERIC_BASE_STATS[(base_type*3)+2]);
-
-//   for(i=1; i<level; i++)
-//   {
-//     party_commanders[cmdr_id].tac += GENERIC_STATS_DISTRIBUTION_CHART[base_type * 3];
-//     party_commanders[cmdr_id].wis += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+1];
-//     party_commanders[cmdr_id].fort += GENERIC_STATS_DISTRIBUTION_CHART[(base_type * 3)+2];
-//   }
-//   party_commanders[cmdr_id].level = level;
-// }
-
 
 void check_add_new_commander(char map_no)
 {

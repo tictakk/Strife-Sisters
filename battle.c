@@ -200,14 +200,15 @@ void perform_art()
     case MANY_TO_MANY:
     animate_many_to_many_art();
     break;
-  }
+  } 
   // if(do_art(art_unit_id) == 1)
   // {
   //   hide_art_name();
-  //   clear_targets();
   //   remove_effects();
   // }
+  clear_targets();
   clear_art_queue();
+  load_map(0,5,0,5,16,9);
 }
 
 void animate_one_to_one_art()
@@ -357,7 +358,7 @@ void d_battle(char team, char side)
   next_phase();
   while(battle_phase != PHASE_END)
   {
-    // put_number(animating,3,0,0);
+    // put_number(target_count,3,0,0);
     // if(joytrg(0) == JOY_RUN)
     // {
     //   battle_ctrls();
@@ -483,6 +484,8 @@ void battle_unit_state(char b_id)
 
 void b_u_meter(char b_id)
 {
+  // put_string("meter",0,0);
+  // wait_for_I_input();
   if(battleunits[b_id].frame == 0)
   {
     display_window_rel(2,10,12,3);

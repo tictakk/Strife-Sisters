@@ -14,7 +14,7 @@ Spearman:
   .db 1   ;points
   .db 5   ;pow
   .db 0   ;is_cmdr
-  .db 23, 25, 23 ;attacks
+  .db 10, 12, 10 ;attacks
 
   ;unit growth
   .db GROWTH_DPS

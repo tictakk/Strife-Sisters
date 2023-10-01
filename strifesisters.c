@@ -421,7 +421,7 @@ enum Direction{
 #incspr(brl,"characters/brawler_small.pcx")
 #incspr(lan,"characters/lance.pcx")
 #incspr(snipersmall,"characters/sniper_small.pcx")
-#incspr(knightsmall,"characters/knight_small.pcx")
+#incspr(knightsmall,"characters/knight.pcx")
 #incspr(stlk,"characters/stalker_small.pcx")
 
 #incpal(sldpal, "map/sprites/sldpiece.pcx",0,1)
@@ -439,7 +439,6 @@ enum Direction{
 
 int menu_size = 0;
 unsigned int player_gold = 0;
-// char buyable_items[4];
 char party_units[MAX_PARTY_UNIT_SIZE];
 
 int map_counter = 0;
@@ -469,6 +468,7 @@ char party_units_size = 0;
 
 char no_miss_flag = 0;
 char debug_flag = 0;
+int debug_value = 0;
 char prebattle_flag = 99;
 
 char demo_select_x = 5;
@@ -490,7 +490,7 @@ void main()
 	//right now you have 1 song, as you get more you can psgPlay( X ) where X is song number :)
 
   add_unit_to_convoy(SPEAR_UNIT);
-
+  
 	initialize_commanders();
   init_arts();
   // init_overworld_data();
@@ -506,8 +506,9 @@ void main()
 	init_satb();
   load_vram(0x4DB0,cursor,0x10);
   // TACTIC_LEAP;
-  party_commanders[0].tactic_id = TACTIC_DASH;//TACTIC_RAGE;
+  party_commanders[0].tactic_id = TACTIC_RAGE;
   party_commanders[1].tactic_id = TACTIC_SCORCH;
+  party_commanders[2].tactic_id = TACTIC_DASH;
 	for(;;)
 	{
     // unlock_all_units();
@@ -611,7 +612,7 @@ void select_level_menu()
       // case JOY_DOWN: if(curs_pos < 2) {curs_pos++; curs_down();} break;
       // case JOY_UP: if(curs_pos > 0) {curs_pos--; curs_up();} break;
       case JOY_LEFT: if(curs_pos > 1) { put_number(--curs_pos,2,13,19); } break;
-      case JOY_RIGHT: if(curs_pos < 3) { put_number(++curs_pos,2,13,19); }break;
+      case JOY_RIGHT: if(curs_pos < 18) { put_number(++curs_pos,2,13,19); }break;
       case JOY_RUN:
       case JOY_I:
       select_level(curs_pos-1);
@@ -677,7 +678,7 @@ void preload_commanders_map_1()
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
 
-  // load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
+  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
   load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
   load_unit_to_cmdr(0,0,SWORD_UNIT,0,1);
   load_unit_to_cmdr(0,1,REI,1,1);
@@ -2416,7 +2417,6 @@ void add_cmdr_from_story(char cmdr_id)
     load_unit_to_cmdr(party_size-1,1,SWORD_UNIT);
     load_unit_to_cmdr(party_size-1,5,SPEAR_UNIT);
     load_unit_to_cmdr(party_size-1,7,CLERIC_UNIT);
-    // set_commander_stats(party_size-1,3,15,15,15);
     break;
 
     case TINKER:
@@ -2425,7 +2425,6 @@ void add_cmdr_from_story(char cmdr_id)
     load_unit_to_cmdr(party_size-1,1,HOUND_UNIT);
     load_unit_to_cmdr(party_size-1,5,AXE_UNIT);
     load_unit_to_cmdr(party_size-1,7,MAGE_UNIT);
-    // set_commander_stats(party_size-1,8,20,20,20);
     break;
   }
 }

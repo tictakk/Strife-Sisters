@@ -14,7 +14,7 @@ Cleric:
   .db 3   ;points
   .db 10   ;pow
   .db 0   ;is_cmdr
-  .db 10, 6, 15 ;attack positions
+  .db 10, 6, 14 ;attack positions
 
   ;unit growth
   .db GROWTH_MAGIC_SUPPORT

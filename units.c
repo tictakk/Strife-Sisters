@@ -82,14 +82,13 @@ typedef struct{
   char attacks[3];
   char growth_chart;
   char bank; int address;
-	// int hp;
 } Unit;
 
 typedef struct{
   char id;
   unsigned char hp, sta;
   int exp;
-  char level;
+  char level; 
 } Unit_Entity;
 
 const char attack_types[] = { 1, 2, 4, 8, 16, 32, 0 };

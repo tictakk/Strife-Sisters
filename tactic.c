@@ -9,9 +9,8 @@
 #define TARGET_TILE_ENEMY 4
 
 char tactic_loop = 0;
-
+ 
 char tactic_current = 0;
-char tactic_target = 0;
 char tactic_caster = 0;
 char tactic_target_count = 0;
 
@@ -19,7 +18,7 @@ char target_target_ids[16];
 
 void set_tactic(char id, char tactic_id)
 {
-  tactic_target = id;
+  tactic_caster = id;
   tactic_current = tactic_id;
 }
 
@@ -85,17 +84,17 @@ char get_target_tile_options(char tile)
 
 char is_self_tile(char tile)
 {
-  return tactic_target == tile-1;
+  return tactic_caster == tile-1;
 }
 
 char is_enemy_tile(char tile)
 {
-  return entities[tactic_target].team != entities[tile-1].team;
+  return entities[tactic_caster].team != entities[tile-1].team;
 }
 
 char is_ally_tile(char tile)
 {
-  return entities[tactic_target].team == entities[tile-1].team;
+  return entities[tactic_caster].team == entities[tile-1].team;
 }
 
 char is_empty_tile(char tile)
@@ -118,7 +117,7 @@ void determine_map_target(char target_team, char radius)
   for(tactic_loop=0, tactic_target_count=0; tactic_loop<map_size+1; tactic_loop++)
   {
     id = battle_grid[map[tactic_loop].ownPos] - 1;
-    if(id >= 0 && entities[id].team == CPU)
+    if(id >= 0 && entities[id].team != entities[tactic_caster].team)
     {
       target_target_ids[tactic_target_count++] = id;
     }

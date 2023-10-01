@@ -11,6 +11,8 @@
 #define MENU_GROUP_Y 8
 #define MENU_TURN_X 216
 #define MENU_TURN_Y 16
+#define MENU_TACTIC_X 184
+#define MENU_TACTIC_Y 8
 #define WAIT_TIME 8
 
 int position_1 = 0, position_2 = 0, position_len = 0;
@@ -59,6 +61,7 @@ void play_story()
 void begin_battlefield(char map_id)
 {
   char i;
+  map_boundry_y = (map_y * 16) - 192; //would be 224 (screen size but 32 px are taken up by menu; 224-32 = 192)
   current_turn = 1;
   menu_mask = 0;
   map_no = map_id;
@@ -68,7 +71,6 @@ void begin_battlefield(char map_id)
 
   yOffset = 0;
   init_battlefield();
-
   selector_mode = 0;
 
   for(i=0; i<8; i++)
@@ -95,14 +97,13 @@ void battlefield_loop(char map_id)
 
   s_x_relative = 0;//(s_x/8);
   s_y_relative = 0;//(s_y/8);
-  // ss = script[1];
 
   disp_on();
   satb_update();
   vsync();
   turn = PLAYER;
   select_unit(0);
-  // play_story();
+  play_story();
   display_selector(SELECTOR,sx,sy,16);
   // psgPlay(3);
   while(map_result_status == MAP_RESULT_NONE)
@@ -316,14 +317,15 @@ void init_battlefield()
   // spr_y(-16);
   load_vram(0x68C0,selector,0x40);
 //  load_vram(0x6900,cursor,0x40);
-  load_battlefield_map();
+  // load_battlefield_map();
 }
 
 void load_battlefield_map()
 {
   set_screen_size(SCR_SIZE_32x64);
   load_terrains();
-  set_map_data(battlefieldbat+(320*map_no),16,20);
+  // set_map_data(battlefieldbat+(320*map_no),16,20);
+  set_map_data(tutorial_1+(320*map_no),16,20);
   set_tile_data(overworldtiles,162,overworldtilespal,TILE_WIDTH);
 
   load_tile(TILE_VRAM);
@@ -348,20 +350,11 @@ void load_battlefield_map()
 
   // set_screen_size(SCR_SIZE_32x64);
   screen_dimensions = 32;
-  // load_vram(0x6400,borders,0x100);
-  // load_vram(0x30A0,icons_gfx,0x60);
-
-  // set_map_data(battlefieldbat+(320*map_no),16,20);
-  // set_tile_data(overworldtiles,162,overworldtilespal,TILE_WIDTH);
-
-  // load_tile(TILE_VRAM);
-  // load_map(0,2,0,0,16,20);
   
   display_window_abs(0,0,18,4);
   display_window_abs(18,0,14,4);
   menu_mask = 0x00;
   print_menu();
-  // load_map_items();
 }
 
 void load_map_items()
@@ -772,7 +765,16 @@ void ctrls()
 
   if(jy & JOY_II)
   {
-    if(selector_mode == PLACE_MODE)
+    if(selector_mode == TACTIC_SELECT_MODE)
+    {
+      selector_mode = MENU_MODE;
+      menu_option = MENU_TAKE;
+      set_cursor_pos(last_pos);
+      display_menu(MENU_TACTIC_X,MENU_TACTIC_Y);
+      unhighlight();
+      get_unit_radius(last_pos,get_army_min_move(tactic_caster),entities[tactic_caster].team,get_army_min_move(tactic_caster));
+    }
+    else if(selector_mode == PLACE_MODE)
     {
       set_cursor_pos(selected_entity->pos);
       selector_mode = last_command;
@@ -832,6 +834,7 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
+    party_commanders[2].tactic_id = TACTIC_DASH;
     // load_commander_palette(REI);
     // darken_palette(26);
     // map_result_status = MAP_RESULT_WIN;
@@ -912,15 +915,28 @@ void tactic_rage()
 void scorch_tactic()
 {
   animate_calling_single(EFFECT_FIRE,id-1);
-  damage_group(id-1,tactic_target);
+  damage_group(id-1,tactic_caster);
   shake_entity(id-1);
   tactic_current = 0;
 }
 
 void dash_tactic()
 {
-  // get_dash_radius();
-  walk_entity(tactic_target,g_abs);
+  char i, size, dashed_id;
+
+  size = get_path(entities[tactic_caster],g_abs,path,battle_grid,PLAYER,999,0);
+  walk_entity(tactic_caster,g_abs);
+
+  for(i=0; i<size+1; i++)
+  {
+    dashed_id = battle_grid[path[i]];
+    if(dashed_id && entities[dashed_id-1].team != entities[tactic_caster].team)
+    { 
+      damage_group(dashed_id-1,tactic_caster);
+      shake_entity(dashed_id-1);
+    }
+  }
+
   display_selector(SELECTOR,sx,sy,16);
   tactic_current = 0;
 }
@@ -945,7 +961,7 @@ void leap_tactic()
   // walk_entity(tactic_target,g_abs);
 
   // sync(30);
-  walk_entity(tactic_target,g_abs);
+  walk_entity(tactic_caster,g_abs);
   create_art_by_type(EFFECT_POOF,end_x+16,end_y,0);
   create_art_by_type(EFFECT_POOF,end_x-16,end_y,0);
   create_art_by_type(EFFECT_POOF,end_x,end_y+16,0);
@@ -957,7 +973,7 @@ void leap_tactic()
   determine_map_target(CPU,1);
   while(tactic_target_count > 0)
   {
-    damage_group(target_target_ids[--tactic_target_count],tactic_target);
+    damage_group(target_target_ids[--tactic_target_count],tactic_caster);
     shake_entity(target_target_ids[tactic_target_count]);
   }
 
@@ -995,6 +1011,7 @@ void shake_if_team(char entity_id, char team)
 
 void setup_tactic()
 {
+  last_pos = g_abs;
   set_tactic(id-1,party_commanders[entities[id-1].id].tactic_id);
   // if(tactic_distance())
   // {

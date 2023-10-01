@@ -14,7 +14,7 @@
 #define CMDR_PALETTE 0
 
 struct npc{
-  unsigned char pos_x, pos_y, type, active, frame, pal;
+  unsigned char pos_x, pos_y, type, frame, pal; //active
 };
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
@@ -43,13 +43,6 @@ void init_npcs()
 
   load_palette(17,soldierpal,1);
   load_palette(18,enemypal,1);
-  // load_palette(19,magepal,1);
-  // load_palette(19,magepal+16,1);
-  // load_palette(23,bndpal,1);
-  // load_palette(25,sniperpal,1);
-  // load_palette(26,gol_pal,1);
-  // load_palette(31,dark,1);
-  // load_palette(31,sldpal,1);
 }
 
 void clear_npcs()
@@ -118,7 +111,7 @@ void add_npc(char x, char y, char type, char pal)
     npcs[npc_count].pos_y = y;
     npcs[npc_count].type = type;
     npcs[npc_count].pal = pal;
-    npcs[npc_count].active = 1;
+    // npcs[npc_count].active = 1;
     npcs[npc_count++].frame = 0;
 
     if(npc_vram[type] == 0)

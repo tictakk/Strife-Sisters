@@ -15,6 +15,7 @@
 #incpal(overworldpal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 #inctile(overworldtiles,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 
+#incbin(tutorial_1,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map001.stm")
 #incbin(battlefieldbat,"map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map001.stm")
 #incbin(m0, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map002.stm")
 #incbin(m1, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map004.stm")

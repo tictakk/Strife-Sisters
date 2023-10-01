@@ -118,7 +118,7 @@ void arrived(int pos)
 {
   // if(prebattle_flag == get_map_id_by_pos(pos))
   // {
-	// story(get_map_id_by_pos(pos),PREBATTLE,0);
+	story(get_map_id_by_pos(pos),PREBATTLE,0);
   // }
   scroll(0,s_x,288,0, 223, 0xC0);
   // display_popup("Brawler \nunlocked",1);
