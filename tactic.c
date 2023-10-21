@@ -8,8 +8,10 @@
 #define TARGET_TILE_ALLY 3
 #define TARGET_TILE_ENEMY 4
 
+#define MAX_TACTIC_METER 50
+
 char tactic_loop = 0;
- 
+
 char tactic_current = 0;
 char tactic_caster = 0;
 char tactic_target_count = 0;
@@ -79,6 +81,18 @@ char get_target_tile_options(char tile)
   }
 
   return 0;
+}
+
+char get_tactic_cost(char t_id)
+{
+  switch(t_id)
+  {
+    case TACTIC_DASH: return 20;
+    case TACTIC_LEAP: return 20;
+    case TACTIC_RAGE: return 20;
+    case TACTIC_SCORCH: return 30;
+    case TACTIC_NONE: return 0;
+  }
 }
 
 

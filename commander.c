@@ -70,7 +70,7 @@ void list_commanders(char x, char y)
   for(i; i<6; i++)
   {
     put_string("$$$",x,y+i);
-  }
+  } 
 }
 
 char get_commander_battle_points(char cmdr_id)
@@ -91,7 +91,12 @@ char get_commander_battle_points(char cmdr_id)
 
 void check_add_new_commander(char map_no)
 {
-  if(map_no == 1 && party_size < 3)
+  if(map_no == 1 && party_size < 2)
+  {
+    add_commander_to_party(name1, VIOLET);
+    load_unit_to_cmdr(1,4,VIOLET,1,1);
+  }
+  if(map_no == 3 && party_size < 3)
   {
     add_commander_to_party(name2,KING);
     // set_commander_stats(2,1,8,8,10);

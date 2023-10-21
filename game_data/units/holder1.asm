@@ -8,7 +8,7 @@ Holder_1:
   .db 1  ;mov
   .db 1  ;sta
   .db 1  ;rng
-  .db 27 ;id
+  .db 28 ;id
   .db 0  ;a_type
   .db 0  ;art
   .db 0  ;points

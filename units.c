@@ -25,10 +25,12 @@
 #incpal(houndbtlpal, "map/sprites/hound_big.pcx")
 #incspr(magebtl, "map/sprites/magebattle.pcx")
 #incpal(magebtlpal, "map/sprites/magebattle.pcx",0,3)
-#incspr(witchbtl,"characters/witchbattle.pcx")
-// #incspr(priestbtl,"characters/priest.pcx")
-#incpal(witchbtlpal,"characters/witchbattle.pcx")
-#incspr(knightbtl, "map/sprites/knight_battle.pcx")
+#incspr(witchbtl,"characters/witch_big.pcx")
+#incspr(dancer_big,"characters/dancer_big.pcx")
+
+#incpal(dancerbigpal,"characters/dancer_big.pcx")
+#incpal(witchbtlpal,"characters/witch_big.pcx")
+#incspr(knightbtl, "characters/knight_big.pcx")
 #incspr(paladinbtl, "characters/paladin_battle.pcx")
 #incpal(paladinpal, "characters/paladin_battle.pcx")
 #incspr(monkbtl, "map/sprites/monkbtl.pcx") 
@@ -72,7 +74,7 @@
 #define ADVANTAGE 1
 #define DISADVANTAGE 2
 
-#define MAX_BUYABLE_UNITS 20
+// #define MAX_BUYABLE_UNITS 20
 #define TYPE_COUNT 6
 
 //hp, atk, def, int, res, spd, mov, sta
@@ -93,10 +95,10 @@ typedef struct{
 
 const char attack_types[] = { 1, 2, 4, 8, 16, 32, 0 };
 
-const char buyable_units[] = { SWORD_UNIT, SPEAR_UNIT, AXE_UNIT, MAGE_UNIT, LANCER_UNIT, ARCHER_UNIT, STALKER_UNIT, KNIGHT_UNIT,
-                              PALADIN_UNIT, MONK_UNIT, FIGHTER_UNIT, BRAWLER_UNIT, BERSERKER_UNIT, CLERIC_UNIT, WITCH_UNIT,
-                              BLACK_MAGE_UNIT, GOLEM_UNIT, HOUND_UNIT, RAIDER_UNIT
-                              };
+// const char buyable_units[] = { SWORD_UNIT, SPEAR_UNIT, AXE_UNIT, MAGE_UNIT, LANCER_UNIT, ARCHER_UNIT, STALKER_UNIT, KNIGHT_UNIT,
+//                               PALADIN_UNIT, MONK_UNIT, FIGHTER_UNIT, BRAWLER_UNIT, BERSERKER_UNIT, CLERIC_UNIT, WITCH_UNIT,
+//                               BLACK_MAGE_UNIT, GOLEM_UNIT, HOUND_UNIT, RAIDER_UNIT
+//                               };
 
 // Unit unit_list[MAX_UNIT_COUNT+3];
 Unit unit_header[2];
@@ -118,7 +120,7 @@ void display_unit_types_row(char x, char y)
   put_string("AXE ",x+8,y);
   put_string("BOW",x+12,y);
   put_string("MAG",x+16,y);
-  put_string("FST",x+20,y);
+  put_string("UNA",x+20,y);
   put_string("BEA",x+24,y);
 }
 
@@ -433,7 +435,7 @@ void get_unit_cost(char unit_id)
     case BERSERKER_UNIT: unit_cost = 600; break;
     case LANCER_UNIT: unit_cost = 600; break;
     case PALADIN_UNIT: unit_cost = 650; break;
-    case ARCHER_UNIT: unit_cost = 150; break;
+    case ARCHER_UNIT: unit_cost = 100; break;
     case SNIPER_UNIT: unit_cost = 300; break;
     case STALKER_UNIT: unit_cost = 600; break;
     case WITCH_UNIT: unit_cost = 450; break;
@@ -443,7 +445,9 @@ void get_unit_cost(char unit_id)
     case MONK_UNIT: unit_cost = 500; break;
     case RAIDER_UNIT: unit_cost = 100; break;
     case THIEF_UNIT: unit_cost = 200; break;
-    default: unit_cost = 100;
+    case DANCER_UNIT: unit_cost = 100; break;
+    case CLERIC_UNIT: unit_cost = 250; break;
+    default: unit_cost = 0;
   }
 }
 

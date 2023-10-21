@@ -16,6 +16,7 @@
 #inctile(overworldtiles,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
 
 #incbin(tutorial_1,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map001.stm")
+#incbin(tutorial_2,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map002.stm")
 #incbin(battlefieldbat,"map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map001.stm")
 #incbin(m0, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map002.stm")
 #incbin(m1, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map004.stm")
@@ -212,7 +213,7 @@ char terrain_type(int t_type)
 char is_traversable(int pos)
 {
 	int terrain_no, t_type;
-	terrain_no = battlefieldbat[map_offset+pos];
+	terrain_no = tutorial_1[map_offset+pos];
   t_type = terrain_type(terrain_no);
 	// if(terrain_no > 88 && terrain_no < 119)
   if(t_type == MOUNTAIN || t_type == WATER || t_type == WALL)

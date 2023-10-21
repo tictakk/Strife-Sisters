@@ -29,12 +29,14 @@
 #define WITCH_UNIT 20
 #define RAIDER_UNIT 21
 #define THIEF_UNIT 22
-#define CAPTAIN 23
+#define DANCER_UNIT 23
 #define FIGHTER_UNIT 24
 #define BRAWLER_UNIT 25
 #define GOLEM_UNIT 26
 #define CREATURE_2 27
 #define CREATURE_3 28
+
+#define COMMANDER_ID_START 29
 
 #define REI 29
 #define VIOLET 30

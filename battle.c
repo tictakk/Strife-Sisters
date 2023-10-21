@@ -324,23 +324,23 @@ void distribute_exp()
     return;
   }
   exp_per = (battle_exp / unit_count);
-  // for(i=0; i<9; i++)
-  // {
-  //   if(entities[player_id].bg->units[i].id)
-  //   {
-  //     char old_level;
-  //     entities[player_id].bg->units[i].exp += exp_per;
-  //     old_level = entities[player_id].bg->units[i].level;
-  //     if(old_level < level_up_unit(&entities[player_id].bg->units[i]))
-  //     {
-  //       write_text(10,6,"new level!");
-  //       print_unit_fullname(entities[player_id].bg->units[i].id,10,7);
-  //       write_text(10,8,"level");
-  //       put_number(entities[player_id].bg->units[i].level,2,16,8);
-  //       sync(60);
-  //     }
-  //   }
-  // }
+  for(i=0; i<9; i++)
+  {
+    if(entities[player_id].bg->units[i].id)
+    {
+      char old_level;
+      entities[player_id].bg->units[i].exp += exp_per;
+      old_level = entities[player_id].bg->units[i].level;
+      if(old_level < level_up_unit(&entities[player_id].bg->units[i]))
+      {
+        write_text(10,6,"new level!");
+        print_unit_fullname(entities[player_id].bg->units[i].id,10,7);
+        write_text(10,8,"level");
+        put_number(entities[player_id].bg->units[i].level,2,16,8);
+        sync(60);
+      }
+    }
+  }
   sync(30);
 }
 
@@ -647,7 +647,7 @@ void b_u_stun(char b_id)
     }
   }
   else
-  { 
+  {
     set_unit_waiting(b_id);
     update_healthbar(b_id);
     position_status = 0;
@@ -1161,6 +1161,18 @@ void load_pals(char entity_id, int off)
           spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);
           break;
+
+        case HEIN:
+          load_palette(cmdr_count++,hein_battle_pal,1);
+          spr_set(MAX_EFFECT_COUNT+(i+off));
+          spr_pal(cmdr_count-1);
+          break;
+
+        case ADONIS:
+          load_palette(cmdr_count++,king_battle_pal,1);
+          spr_set(MAX_EFFECT_COUNT+(i+off));
+          spr_pal(cmdr_count-1);
+          break;
 			}
 		}
 	}
@@ -1168,10 +1180,27 @@ void load_pals(char entity_id, int off)
 
 void kill_unit(char b_id)
 {
+  char i;
+  bid_to_unit_header(b_id,1);
   entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp = 0;
-  entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].id = 0;// = &unit_list[NO_UNIT];
   battleunits[b_id].active = 0;
 
+  if(unit_header[1].is_cmdr)
+  {
+    destroy_entity_flag = 1;
+    for(i=0; i<MAX_ARMY_SIZE; i++)
+    {
+      if(entities[battleunits[b_id].ent_id].bg->units[i].id != unit_header[1].id)
+      {
+        entities[battleunits[b_id].ent_id].bg->units[i].hp = 0;
+        entities[battleunits[b_id].ent_id].bg->units[i].id = 0;
+      }
+    }
+  }
+  else
+  {
+    entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].id = 0;// = &unit_list[NO_UNIT];
+  }
   if(entities[battleunits[b_id].ent_id].team == PLAYER)
   {
     units_lost++;
@@ -1181,16 +1210,31 @@ void kill_unit(char b_id)
   {
     units_killed++;
     battle_killed++;
-    battle_exp += (20 * (int)battleunits[b_id].unit->level);
+    battle_exp += (5 * (int)battleunits[b_id].unit->level);
     // battle_exp += battleunits[b_id].unit->unit->exp;
   }
   if(battleunits[b_id].ent_id == atker)
   {
-    team_one_count--;
+    if(destroy_entity_flag)
+    {
+      team_one_count = 0;
+    }
+    else
+    {
+      team_one_count--;
+    }
   }
   else
   {
-    team_two_count--;
+    if(destroy_entity_flag)
+    {
+      team_two_count = 0;
+    }
+    else
+    {
+      team_two_count--;
+    }
+
   }
   set_bonuses(&party_commanders[entities[battleunits[b_id].ent_id].id]);
   spr_hide(MAX_EFFECT_COUNT+b_id);
@@ -1200,7 +1244,7 @@ void kill_unit(char b_id)
 void set_battle_bonuses()
 {
   attacker_bonuses = entities[atker].bg->bonuses;
-  target_bonuses = entities[trgt].bg->bonuses;
+  target_bonuses = entities[trgt].bg->bonuses;  
   if(attack_side == LEFT_SIDE)
   {
     attacking_bonuses = entities[atker].bg->bonuses;

@@ -97,13 +97,13 @@ void battlefield_loop(char map_id)
 
   s_x_relative = 0;//(s_x/8);
   s_y_relative = 0;//(s_y/8);
-
+  
   disp_on();
   satb_update();
   vsync();
   turn = PLAYER;
   select_unit(0);
-  play_story();
+  // play_story();
   display_selector(SELECTOR,sx,sy,16);
   // psgPlay(3);
   while(map_result_status == MAP_RESULT_NONE)
@@ -115,8 +115,9 @@ void battlefield_loop(char map_id)
     }
     else
     {
+      // put_number(two_total,3,0,0);
       g_abs = graph_from_x_y(sx,sy);
-      t_type =  terrain_type(battlefieldbat[map_offset+g_abs]);
+      t_type =  terrain_type(tutorial_1[map_offset+g_abs]);
       id = battle_grid[g_abs];
       display_position(14,1);
       display_bonuses(4,1);
@@ -243,29 +244,45 @@ void cycle_animations()
 void init_units()
 {
   int i;
+
+  char u_one, u_two, u_three, has_cmdr;
   
   for(i=0; i<party_size; i++)
   {
     heal_commander_bg(i);
-    load_group(i,PLAYER,battle_map_metadata.player_start_pos+i,party_commanders);//commander + max_army_size
+    load_group(i,PLAYER,battle_map_metadata.player_start_pos+i,party_commanders,1);//commander + max_army_size
   }
 
+  //TODO: ADD IS_CMDR CHECK AND ADD A NEW PARAM TO ADD_ENTITY
   for(i=0; i<cpu_cmdr_count; i++)
   {
+    u_one = (char)battle_map_metadata.cpu_commander_ids[i*4+1];
+    u_two = (char)battle_map_metadata.cpu_commander_ids[i*4+2];
+    u_three = (char)battle_map_metadata.cpu_commander_ids[i*4+3];
+    has_cmdr = 0;
+
+    if(u_one >= COMMANDER_ID_START ||
+       u_two >= COMMANDER_ID_START ||
+       u_three >= COMMANDER_ID_START
+      )
+    {
+      has_cmdr = 1;
+    }
+
     load_predefined_group_layout((char)battle_map_metadata.cpu_commander_ids[i*4], //formation
-    (char)battle_map_metadata.cpu_commander_ids[i*4+1], //row one units
-    (char)battle_map_metadata.cpu_commander_ids[i*4+2], //row two units
-    (char)battle_map_metadata.cpu_commander_ids[i*4+3], //row three units
+    u_one, //row one units
+    u_two, //row two units
+    u_three, //row three units
     i+MAX_PARTY_COMMANDERS,(char)map_no);
-    load_group(i,CPU,battle_map_metadata.cpu_start_pos+i,enemy_commanders);
+    load_group(i,CPU,battle_map_metadata.cpu_start_pos+i,enemy_commanders,has_cmdr);
   }
 }
 
-void load_group(char id, char team, int positions[7], struct Commander *commanders)
+void load_group(char id, char team, int positions[7], struct Commander *commanders, char has_cmdr)
 {
   // put_number(positions[0],5,0,0);
   // wait_for_I_input();
-  add_entity(team,id,positions[0],commanders);
+  add_entity(team,id,positions[0],commanders,has_cmdr);
   battle_grid[positions[0]] = num_of_entities;
 }
 
@@ -396,7 +413,18 @@ void display_terrain_bonus()
 {
   // terrain_type =  terrain_type(battlefieldbat[map_offset+id]);
   put_terrain_icon(t_type,1,1);
-  put_terrain_bonus(t_type,3,2);
+  if(id-1 >= 0)
+  {
+    if(entities[id-1].has_cmdr)
+    {
+      put_number(entities[id-1].tactic_meter,3,3,2);
+    }
+  }
+  else
+  {
+    put_string("   ",3,2);
+  }
+  // put_terrain_bonus(t_type,3,2);
   // put_terrain_atk_stat(t_type,3,2);
 }
 
@@ -752,8 +780,10 @@ void ctrls()
           break;
 
         case MENU_TAKE://calling
-          // current_tactic = TACTIC_LEAP;
-          setup_tactic();
+          if(menu_mask & MASK_CALLING)
+          {
+            setup_tactic();
+          }
           break;
       }
     }
@@ -834,10 +864,10 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
-    party_commanders[2].tactic_id = TACTIC_DASH;
+    // party_commanders[2].tactic_id = TACTIC_DASH;
     // load_commander_palette(REI);
     // darken_palette(26);
-    // map_result_status = MAP_RESULT_WIN;
+    map_result_status = MAP_RESULT_WIN;
     // put_hex(tiledata[7],5,0,4);
     // put_hex(tiledata[8],5,0,5);
     // load_healthbars();
@@ -1254,7 +1284,7 @@ char attack_unit(int src, int dst, char art)
     cursor_x = -32;
     cursor_y = -32;
     selector_mode = SELECT_MODE;
-    result = begin_battle(attacker,target,range,battlefieldbat[map_offset+dst],battlefieldbat[map_offset+src]);
+    result = begin_battle(attacker,target,range,tutorial_1[map_offset+dst],tutorial_1[map_offset+src]);
     if(result == TARGET_DEFEAT && tactic_current == TACTIC_RAGE)
     {
       entities[attacker].actionable = 1;

@@ -43,7 +43,7 @@
 
 typedef struct{
   int pos;
-  char team, id, actionable, movable;
+  char team, id, actionable, movable, tactic_meter, has_cmdr;
   Battlegroup *bg;
 } Entity;
 
@@ -67,6 +67,9 @@ char enemy_count;
 char units_lost, units_killed;
 int turn_bonus, killed_bonus, lost_bonus, total_bonus, materials_collected;
 char map_result_status;
+
+char destroy_entity_flag = 0;
+char destroy_entity_id = -1;
 
 int map_boundry_y = 0;
 int map_boundry_x = 0;
@@ -106,7 +109,7 @@ char get_army_min_move(char entity_id)
   return 3;
 }
 
-void add_entity(char team, char id, int pos, struct Commander *commanders)
+void add_entity(char team, char id, int pos, struct Commander *commanders, char has_cmdr)
 {
   if(team == CPU)
   {
@@ -120,6 +123,8 @@ void add_entity(char team, char id, int pos, struct Commander *commanders)
   entities[num_of_entities].pos = pos;
   entities[num_of_entities].actionable = 1;
   entities[num_of_entities].movable = 1;
+  entities[num_of_entities].tactic_meter = 0;
+  entities[num_of_entities].has_cmdr = has_cmdr;
   // party_commanders[entities[num_of_entities]].meter = 0;
   if(team == PLAYER)
   {
@@ -214,6 +219,10 @@ void destroy_entity(char id)
   char entity_id;
   entity_id = id;
   battle_grid[entities[id].pos] = 0;
+
+  destroy_entity_flag = 0;
+  destroy_entity_id = -1;
+
   if(entities[entity_id].team == PLAYER)
   {
     units_lost++;
@@ -323,6 +332,7 @@ void clear_text_field()
 
 void post_battle_screen()
 {
+  int modded = 0;
   s_y_relative = (s_y>>3);
   s_x_relative = (s_x>>3);
   // display_abs_black_panel(0,((s_y+32)/8),32,16);
@@ -378,7 +388,25 @@ void post_battle_screen()
   set_font_pal(10);
   // put_char('S',s_x_relative+18,s_y_relative+22);
   // put_number(map_grades[3],5,0,0);
-  player_gold += total_bonus;
+
+  if(map_no == 0 || map_no == 1)
+  {
+    player_gold += 100;
+  }
+  else
+  {
+    modded = ((total_bonus/3) % 100);
+    player_gold += ((total_bonus / 3) - modded);
+    if(modded >= 75)
+    {
+      player_gold += 75;
+    }
+    else if(modded >= 25)
+    {
+      player_gold += 50;
+    }
+  }
+  
   materials_count += materials_collected;
   wait_for_I_input();
 }
@@ -451,6 +479,10 @@ void set_menu_mask(char entity_id)
   {
     return;
   }
+  if(entities[entity_id].has_cmdr && entities[entity_id].tactic_meter >= get_tactic_cost(party_commanders[entities[entity_id].id].tactic_id))
+  {
+    menu_mask |= MASK_CALLING;
+  }
   menu_mask |= MASK_TURN;
   // if(arts[entities[entity_id].bg->art].cost <= party_commanders[entities[entity_id].id].meter && entities[entity_id].bg->art)
   // {
@@ -473,7 +505,7 @@ void mask_menu()
   if(menu_mask & 0x04) { put_string("END",24,2); }
   if(menu_mask & 0x08) { put_string("TRN",28,2); }
   if(menu_mask & 0x10) { put_string("TAC",24,1); }
-  if(menu_mask & 0x20) { put_string("ARM",28,1); }
+  if(menu_mask & 0x20) { put_string("SQD",28,1); }
 }
 
 void print_menu()
@@ -484,7 +516,7 @@ void print_menu()
   put_string("END",24,2);
   put_string("TRN",28,2);
   put_string("TAC",24,1);
-  put_string("ARM",28,1);
+  put_string("SQD",28,1);
   set_font_pal(10);
   mask_menu();
 }

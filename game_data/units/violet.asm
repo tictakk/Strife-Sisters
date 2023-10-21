@@ -20,5 +20,5 @@ Violet:
   .db GROWTH_VIOLET
 
   ;graphic
-  .db bank(_magebtl)
-  .dw _magebtl & $1fff
+  .db bank(_witchbtl)
+  .dw _witchbtl & $1fff

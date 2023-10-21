@@ -163,6 +163,10 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],mag,0x100);
           break;
 
+          case WITCH_UNIT:
+          load_vram(npc_vram[type],wtc,0x100);
+          break;
+
           case RAIDER_UNIT:
           load_vram(npc_vram[type],bnd,0x100);
           break;
@@ -177,7 +181,7 @@ void add_npc(char x, char y, char type, char pal)
 
           case BERSERKER_UNIT:
           case MONK_UNIT:
-          load_vram(npc_vram[type],mnk,0x100);
+          load_vram(npc_vram[type],mnk,0x100); 
           break;
 
           case BRAWLER_UNIT:
@@ -191,6 +195,10 @@ void add_npc(char x, char y, char type, char pal)
           case SNIPER_UNIT:
           load_vram(npc_vram[type],snipersmall,0x100);
           break;
+
+          case DANCER_UNIT:
+          load_vram(npc_vram[type],dan,0x100);
+          break;  
 
           case KNIGHT_UNIT:
           load_vram(npc_vram[type],knightsmall,0x100);

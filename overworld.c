@@ -24,10 +24,10 @@ void overworld_loop(int x, int y)
 
 	// disp_off();
   load_overworld_bg();
-  for(k=0; k<get_map_id_by_pos(get_absolute_pos()); k++)
-  {
-    unlock_units_by_castle(k);
-  }
+  // for(k=0; k<get_map_id_by_pos(get_absolute_pos())+1; k++)
+  // {
+  //   unlock_units_by_castle(k);
+  // }
 //	draw_npcs(5);
 	satb_update();
 	arrived(get_absolute_pos());
@@ -116,10 +116,11 @@ void overworld_loop(int x, int y)
 
 void arrived(int pos)
 {
-  // if(prebattle_flag == get_map_id_by_pos(pos))
-  // {
-	story(get_map_id_by_pos(pos),PREBATTLE,0);
-  // }
+  if(prebattle_flag == get_map_id_by_pos(pos))
+  {
+	  story(get_map_id_by_pos(pos),PREBATTLE,0);
+  }
+  unlock_units_by_castle(get_map_id_by_pos(pos));
   scroll(0,s_x,288,0, 223, 0xC0);
   // display_popup("Brawler \nunlocked",1);
 	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
@@ -368,6 +369,7 @@ void load_overworld_bg()
 
 	load_vram(0x6A00,rei_walk,0x300);
 	load_palette(16,rei_walk_pal,1);
+  load_palette(17,soldierpal,1);
 
 	spr_make(0,selector_x,selector_y,0x6A00,FLIP_MAS|SIZE_MAS,SZ_16x32,0,1);
 
@@ -379,19 +381,19 @@ void load_overworld_bg()
 
 void init_overworld_data()
 {
-	load_castle_data(997,0,BRAWLER_UNIT,0,0);//formation of 3
-	load_castle_data(867,1,RAIDER_UNIT,HOUND_UNIT,0);
-	load_castle_data(737,2,GOLEM_UNIT,0,0);//formation of 4
-  load_castle_data(613,3,THIEF_UNIT,SPEAR_UNIT,0);
-  load_castle_data(617,4,MAGE_UNIT,0,0);//formation of 5
-  load_castle_data(713,5,LANCER_UNIT,STALKER_UNIT, 0);
-  load_castle_data(811,6,DEMON_UNIT,0,0);//formation of 6
-  load_castle_data(970,7,BERSERKER_UNIT,WITCH_UNIT,0); 
-  load_castle_data(946,8,PRIEST_UNIT,0,0);//formation of 7
-  load_castle_data(852,9,0,0,0);//dancer
-  load_castle_data(888,10,0,0,0);//dancer //formation of 8
-  load_castle_data(891,11,0,0,0);//rogue
-  load_castle_data(796,12,0,0,0);//formation of 9
+	load_castle_data(997,0,0,0,0);//tutorial map 1
+	load_castle_data(867,1,0,0,0);//tutorial map 2
+	load_castle_data(737,2,SWORD_UNIT,ARCHER_UNIT,CLERIC_UNIT);//tutorial map 3
+  load_castle_data(613,3,BRAWLER_UNIT,0,0); //map 4
+  load_castle_data(617,4,SPEAR_UNIT,RAIDER_UNIT,0);//map 5
+  load_castle_data(713,5,GOLEM_UNIT,HOUND_UNIT,MAGE_UNIT);//map 6
+  load_castle_data(811,6,DANCER_UNIT,0,0);//map 7
+  load_castle_data(970,7,0,0,0); 
+  load_castle_data(946,8,0,0,0);//
+  load_castle_data(852,9,0,0,0);//
+  load_castle_data(888,10,0,0,0);//
+  load_castle_data(891,11,0,0,0);//
+  load_castle_data(796,12,0,0,0);//
   load_castle_data(730,13,0,0,0);
   load_castle_data(727,14,0,0,0);
   load_castle_data(692,15,0,0,0);
@@ -483,18 +485,6 @@ void buy_unit()
   add_unit_to_convoy(selected_unit);
 }
 
-void select_buyable_item(char item_index)
-{
-	selected_item = item_index;
-	menu_state = BUY_ITEM_MENU;
-	menu_rows = party_size;
-	commander_select_cursor = 0;
-
-	reset_npcs();
-  remove_cursor();
-  load_cursor(23,2,SLIDER_ONE);
-}
-
 void load_cmdr_army_to_npcs(char cmdr_id, char x, char y)
 {
   char i, j;
@@ -508,7 +498,7 @@ void load_cmdr_army_to_npcs(char cmdr_id, char x, char y)
     {
       if(party_commanders[cmdr_id].bg.units[(j*3)+i].id)
       {
-        add_npc((x+(i%3)),y,party_commanders[cmdr_id].bg.units[(j*3)+i].id,CMDR_PALETTE);
+        add_npc((x+(i%3)),y,party_commanders[cmdr_id].bg.units[(j*3)+i].id,CMDR_PALETTE+1);
                 // UNIT_PALS[party_commanders[cmdr_id].bg.units[(j*3)+i].id]);
       }
 	 	}
@@ -982,7 +972,7 @@ void overworld_controls(){
 		}
 		else if(menu_state == CASTLE_MENU)
 		{
-      spr_hide(0);
+      // spr_hide(0);
 			switch(commander_select_cursor)
 			{
         case 0:
@@ -1005,13 +995,13 @@ void overworld_controls(){
 				  reset_npcs();
 					init_map_data(get_map_id_by_pos(get_absolute_pos()));
 					begin_battlefield(get_map_id_by_pos(get_absolute_pos()));
-          game_over = 0;
-					// load_overworld_bg();
-					// reset_npcs();
-					// satb_update();
-					// menu_state = OVERWORLD;
+          // game_over = 0;
+					load_overworld_bg();
+					reset_npcs();
+					satb_update();
+					menu_state = OVERWORLD;
           // unlock_units_by_castle(map_no);
-          // load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+          load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 					break;
 			}
 		}
@@ -1156,9 +1146,9 @@ void unlock_units_by_castle(char castle_no)
     if(castles[castle_no].unlocked[p])
     {
       unlock_unit(castles[castle_no].unlocked[p]);
-      // strcpy(words,get_unit_fullname(castles[castle_no].unlocked[p]));
-      // strcpy(words+7,unlock_text);
-      // display_popup(words,1);
+      strcpy(words,get_unit_fullname(castles[castle_no].unlocked[p]));
+      strcpy(words+7,unlock_text);
+      display_popup(words,1);
     }
   }
 }

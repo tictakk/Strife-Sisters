@@ -73,8 +73,8 @@ void display_hire_window(char unit_id)
   display_window_rel(0,0,32,14);
   display_window_rel(22,14,10,14);
   put_string("Hire",14+s_x_relative,s_y_relative+1);
-  put_string("Ore",s_x_relative+1,s_y_relative+11);
-  put_string("Gold",s_x_relative+1,s_y_relative+12);
+  // put_string("Ore",s_x_relative+1,s_y_relative+11);
+  put_string("Cost",s_x_relative+1,s_y_relative+12);
   put_number(player_gold,4,s_x_relative+11,s_y_relative+12);
   put_number(materials_count,4,s_x_relative+11,s_y_relative+11);
 
@@ -111,8 +111,8 @@ void update_hire_menu(char unit)
   display_convoy_window(HIRE_CONVOY_WINDOW_X,HIRE_CONVOY_WINDOW_Y+14);
   update_unit_stats_window(unit,0,14,1);
   update_unit_battle_info(unit,10,14);
-  put_number(player_gold,4,s_x_relative+11,s_y_relative+12);
-  put_number(materials_count,4,s_x_relative+11,s_y_relative+11);
+  put_number(get_unit_cost(unit),4,s_x_relative+11,s_y_relative+12);
+  // put_number(materials_count,4,s_x_relative+11,s_y_relative+11);
 }
 
 void display_unit_stats_window(char unit_id, char x, char y)
@@ -139,12 +139,16 @@ void display_convoy_window(char x, char y)
 {
   display_window_rel(x,y,10,14);
   put_string("Convoy",x+2,s_y_relative+y+1);
+  put_string("Gold",x+1,s_y_relative+y+12);
   update_convoy_window(x,y);
 }
 
 void update_convoy_window(char x, char y)
 {
   list_party_units(s_x_relative+x+2,s_y_relative+y+3);
+  set_font_pal(GOLD_FONT);
+  put_number(player_gold,4,s_x_relative+x+5,s_y_relative+y+12);
+  set_font_pal(WHITE_FONT);
 }
 
 void display_unit_battle_info(char unit_id, char x, char y)

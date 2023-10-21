@@ -1,4 +1,4 @@
-Blob:
+Calien:
   .db 20  ;hp
   .db 17  ;atk
   .db 11  ;def
