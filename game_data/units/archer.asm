@@ -1,6 +1,6 @@
 Archer:
   .db 25  ;hp
-  .db 28  ;atk
+  .db 26  ;atk
   .db 10  ;def
   .db 10  ;int
   .db 9   ;res

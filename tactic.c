@@ -95,6 +95,18 @@ char get_tactic_cost(char t_id)
   }
 }
 
+char get_tactic_perform_status()
+{
+  switch(tactic_current)
+  {
+    case TACTIC_DASH: return 1;
+    case TACTIC_LEAP: return 1;
+    case TACTIC_RAGE: return 1;
+    case TACTIC_SCORCH: return 0;
+    case TACTIC_NONE: return 0;
+  }
+}
+
 
 char is_self_tile(char tile)
 {

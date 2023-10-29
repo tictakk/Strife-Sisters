@@ -1,10 +1,10 @@
 Knight:
-  .db 60  ;hp
-  .db 23  ;atk
-  .db 15  ;def
+  .db 50  ;hp
+  .db 24  ;atk
+  .db 16  ;def
   .db 11  ;int
   .db 10  ;res
-  .db 13  ;spd
+  .db 9  ;spd
   .db 3   ;mov
   .db 130 ;sta
   .db 1   ;rng
@@ -14,10 +14,10 @@ Knight:
   .db 3   ;points
   .db 15   ;pow
   .db 0   ;is_cmdr
-  .db 11, 5, 0 ;attack positions
+  .db 10, 11, 10 ;attack positions
 
   ;unit growth
-  .db GROWTH_DPS
+  .db GROWTH_TANK_MELEE
 
   ;graphic
   .db bank(_knightbtl)

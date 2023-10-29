@@ -1,5 +1,5 @@
 Mage:
-  .db 28  ;hp
+  .db 30  ;hp
   .db 17  ;atk
   .db 7  ;def
   .db 27  ;int

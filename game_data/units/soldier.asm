@@ -1,8 +1,8 @@
 Soldier:
   .db 35 ;hp
-  .db 24 ;atk
-  .db 15 ;def
-  .db 6 ;int 
+  .db 21 ;atk
+  .db 13 ;def
+  .db 6 ;int
   .db 8 ;res
   .db 12 ;spd
   .db 3  ;mov

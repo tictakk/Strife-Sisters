@@ -86,6 +86,8 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 
 				if(is_traversable(p) || ignore_depth <= d_level)
 				{
+          // change_background_palette(p,0xC000);
+          // sync(1);
 					id = *(big_map+p);
 		      if(p == desired)
 		      {
@@ -97,8 +99,6 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 		  		}
 					else if(entities[id-1].team != team && id != 0 && !(ignore_depth<=d_level))
 					{
-            // put_number(p,4,0,0);
-            // wait_for_I_input();
 						if(put_visited(p,fp,0))
 						{
 							d_count++;
@@ -122,6 +122,10 @@ int get_path(int pos, int desired, int paths[20], char *big_map, char team, int 
 						}
 					}
 				}
+        // else
+        // {
+        //   change_background_palette(p,0xD000);
+        // }
 				i++;
 			}
 		}

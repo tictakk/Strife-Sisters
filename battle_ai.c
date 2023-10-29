@@ -16,8 +16,10 @@ struct Ai_Entity{
   int dest;
 };
 char units_in_range[6];
+char targetable_units[6];
 char num_of_units_in_range;
 char num_of_ai;
+char num_of_targetable_units;
 char target_unit;
 char ai_tracker;
 int hit_radius_size;
@@ -59,7 +61,7 @@ int find_weakest_opp_in_range(char id, char range)
 
   while(target_pos == -1 && num_of_units_in_range > 0)
   {
-    weakest = find_weakest_opp();
+    weakest = find_weakest_opp(units_in_range,num_of_units_in_range);
 
     target_pos = get_attack_square(weakest,id);
     if(target_pos == -1)
@@ -76,7 +78,7 @@ ai()
   // g=0;
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
-    // put_number(ai_tracker,4,0,0);
+    // put_number(ai_entities[ai_tracker].entity_id,4,0,0);
     // wait_for_I_input();
     ai_do_state(ai_entities[ai_tracker].id);
     check_battle_complete();
@@ -106,6 +108,7 @@ void start_turn(char team)
   init_ai();
   turn = team;
   turns_count++;
+  tactic_current = TACTIC_NONE;
   // display_turn(team);
   if(team == PLAYER)
   {
@@ -174,15 +177,15 @@ void get_opps_in_range(char id, char range)
   }
 }
 
-char find_weakest_opp()
+char find_weakest_opp(char *units, char count)
 {
   char i, weakest_id, id;
   int army_total, weakest_total;
-  weakest_id = units_in_range[0];
-  weakest_total = calc_unit_rating(units_in_range[0]);
-  for(i=1; i<num_of_units_in_range; i++)
+  weakest_id = units[0];
+  weakest_total = calc_unit_rating(units[0]);
+  for(i=1; i<count; i++)
   {
-    id = units_in_range[i];
+    id = units[i];
     army_total = calc_unit_rating(id);
     if(army_total < weakest_total)
     {
@@ -252,39 +255,70 @@ int get_attack_square(char id, char atkr)
 void do_defend_objective(char ai_id)
 {
   char i = 0, j = 0, mv = 0, rng = 0, obj_in_range = 0;
-  int p = 0;
+  int result = 0;
 
+  num_of_targetable_units = 0;
   mv = get_army_min_move(ai_entities[ai_id].entity_id);
   rng = get_army_max_range(ai_entities[ai_id].entity_id);
-  obj_in_range = search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,mv);
+  
+  search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,0);
 
-  if(num_of_units_in_range > 0)
+  for(i=0; i<num_of_units_in_range; i++)
   {
-    ai_entities[ai_id].target = find_weakest_opp();
-
-    get_unit_radius(entities[ai_entities[ai_id].target].pos,rng,PLAYER,0);
-    convert_map_to_array();
-    get_unit_radius(entities[ai_entities[ai_id].entity_id].pos,mv,CPU,0);
-    for(i=0; i<hit_radius_size; i++)
+    if((result = determine_attackable_targets(ai_id,units_in_range[i],mv,rng)))
     {
-      for(j=0; j<map_size; j++)
+      targetable_units[num_of_targetable_units++];
+    }
+  }
+
+  ai_entities[ai_id].target = find_weakest_opp(targetable_units,num_of_targetable_units);
+  result = determine_attackable_targets(ai_id,ai_entities[ai_id].target,mv,rng);
+
+  if(result == 0)
+  {
+    ai_entities[ai_id].state = PASSING;
+    return;
+  }
+  if(result == 2)
+  {
+    ai_entities[ai_id].state = ATTACKING;
+    return;
+  }
+
+  ai_entities[ai_id].state = MOVING;
+  ai_entities[ai_id].dest = result;
+}
+
+char determine_attackable_targets(char ai_id, char target_id, char mv, char rng)
+{
+  char i,j;
+  get_unit_radius(entities[target_id].pos,rng,PLAYER,0);
+  convert_map_to_array();
+  get_unit_radius(entities[ai_entities[ai_id].entity_id].pos,mv,CPU,mv);
+
+  for(i=0; i<hit_radius_size; i++)
+  {
+    for(j=0; j<map_size+1; j++)
+    {
+      if(opp_hit_radius[i] == map[j].ownPos && 
+         opp_hit_radius[i] != entities[ai_entities[ai_id].target].pos &&
+         is_traversable(opp_hit_radius[i])
+         )
       {
-        if(opp_hit_radius[i] == map[j].ownPos && 
-           opp_hit_radius[i] != entities[ai_entities[ai_id].target].pos &&
-           battle_grid[opp_hit_radius[i]] == 0
-           )
+        if(battle_grid[opp_hit_radius[i]]-1 == ai_entities[ai_id].entity_id)
         {
-          ai_entities[ai_id].state = MOVING;
-          ai_entities[ai_id].dest = opp_hit_radius[i];
-          break;
+          return 2;
+        }
+        if(battle_grid[opp_hit_radius[i]] == 0)
+        {
+          // ai_entities[ai_id].state = MOVING;
+          // ai_entities[ai_id].dest = opp_hit_radius[i];
+          return opp_hit_radius[i];
         }
       }
     }
   }
-  else
-  {
-    ai_entities[ai_id].state = PASSING;
-  }
+  return 0;
 }
 
 void convert_map_to_array()
@@ -344,6 +378,9 @@ void do_capture_objective(char ai_id)
   //doesn't even get here
   search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
   p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size+1,map);
+
+  // put_number(p,4,0,0);
+  // wait_for_I_input();
   ai_entities[ai_id].state = MOVING;
   ai_entities[ai_id].dest = p;
 }
@@ -359,7 +396,7 @@ char search_in_radius(int position, char radius_size, char ignore_depth)
   int pos=0, id=0;
   get_unit_radius(position,radius_size,CPU,ignore_depth);
   num_of_units_in_range = 0;
-
+  
   for(i=0; i<map_size+1; i++)
   {
     pos = map[i].ownPos;
@@ -453,6 +490,11 @@ void do_attack(char ai_id)
 {
   char result, i;
 
+  // if(ai_entities[ai_id].entity_id == 4)
+  // {
+    // put_number(69,3,0,0);
+    // wait_for_I_input();
+  // }
   result = -1;
   satb_update();
   sync(30);
@@ -542,19 +584,22 @@ int find_nearest_unoccupied_position(int position, int destination, char range, 
       closest, diff_x, diff_y, diff_total, pos_x, pos_y;
 
   pos_x = position & 15;
-  pos_y = position << 4;
+  pos_y = position >> 4;
 
   closest = position;
   closest_x = pos_x;
   closest_y = pos_y;
 
   dest_x = destination & 15;
-  dest_y = destination << 4;
+  dest_y = destination >> 4;
 
   diff_x = abs(closest_x - dest_x);
   diff_y = abs(closest_y - dest_y);
   closest_total = diff_x + diff_y;
 
+  // put_number(position,5,10,0);
+  // put_number(destination,5,16,0);
+  // wait_for_I_input();
   for(i=0; i<range; i++)
   {
     position = grid[i].ownPos;
@@ -564,7 +609,7 @@ int find_nearest_unoccupied_position(int position, int destination, char range, 
     if(battle_grid[position] == 0 && is_traversable(position))
     {
       pos_x = position & 15;
-      pos_y = position << 4;
+      pos_y = position >> 4;
 
       diff_x = abs(pos_x - dest_x);
       diff_y = abs(pos_y - dest_y);

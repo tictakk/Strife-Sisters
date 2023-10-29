@@ -1,5 +1,5 @@
 Blob:
-  .db 20  ;hp
+  .db 25  ;hp
   .db 17  ;atk
   .db 11  ;def
   .db 11  ;int

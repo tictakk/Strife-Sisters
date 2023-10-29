@@ -116,10 +116,10 @@ void overworld_loop(int x, int y)
 
 void arrived(int pos)
 {
-  if(prebattle_flag == get_map_id_by_pos(pos))
-  {
+//   if(prebattle_flag == get_map_id_by_pos(pos))
+//   {
 	  story(get_map_id_by_pos(pos),PREBATTLE,0);
-  }
+//   }
   unlock_units_by_castle(get_map_id_by_pos(pos));
   scroll(0,s_x,288,0, 223, 0xC0);
   // display_popup("Brawler \nunlocked",1);
@@ -386,8 +386,8 @@ void init_overworld_data()
 	load_castle_data(737,2,SWORD_UNIT,ARCHER_UNIT,CLERIC_UNIT);//tutorial map 3
   load_castle_data(613,3,BRAWLER_UNIT,0,0); //map 4
   load_castle_data(617,4,SPEAR_UNIT,RAIDER_UNIT,0);//map 5
-  load_castle_data(713,5,GOLEM_UNIT,HOUND_UNIT,MAGE_UNIT);//map 6
-  load_castle_data(811,6,DANCER_UNIT,0,0);//map 7
+  load_castle_data(713,5,GOLEM_UNIT,HOUND_UNIT,0);//map 6
+  load_castle_data(811,6,DANCER_UNIT,WITCH_UNIT,0);//map 7
   load_castle_data(970,7,0,0,0); 
   load_castle_data(946,8,0,0,0);//
   load_castle_data(852,9,0,0,0);//
@@ -989,9 +989,10 @@ void overworld_controls(){
           commander_select_cursor = 0;
           cursor_column = 0;
           display_party_commanders_window(0,0);
-          break;
+          break;  
 
 				case 4:
+          copy_commanders(temp_commanders,party_commanders);
 				  reset_npcs();
 					init_map_data(get_map_id_by_pos(get_absolute_pos()));
 					begin_battlefield(get_map_id_by_pos(get_absolute_pos()));
@@ -1002,6 +1003,11 @@ void overworld_controls(){
 					menu_state = OVERWORLD;
           // unlock_units_by_castle(map_no);
           load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
+          if(game_over == 0)
+          {
+            copy_commanders(party_commanders,temp_commanders);
+            game_over = 1;
+          }
 					break;
 			}
 		}
@@ -1146,9 +1152,9 @@ void unlock_units_by_castle(char castle_no)
     if(castles[castle_no].unlocked[p])
     {
       unlock_unit(castles[castle_no].unlocked[p]);
-      strcpy(words,get_unit_fullname(castles[castle_no].unlocked[p]));
-      strcpy(words+7,unlock_text);
-      display_popup(words,1);
+      // strcpy(words,get_unit_fullname(castles[castle_no].unlocked[p]));
+      // strcpy(words+7,unlock_text);
+      // display_popup(words,1);
     }
   }
 }

@@ -119,6 +119,19 @@ GROWTH_SPEED_DPS = 10
     .code
 #endasm
 
+//CYPHER CHECKSUM? 0x4B9A
+// 0100 1011 1001 1010
+// 0000 0010 0000 0000 1
+// 0100 0000 0000 0000 2
+// 0000 0000 0001 0000 3
+// 0000 0000 0000 1000 4
+// 0000 0000 0000 0010 5
+// 0000 0000 1000 0000 6
+// 0000 0001 0000 0000 7
+// 0000 1000 0000 0000 8
+// test 3550
+
+
 extern const char nounit[];
 extern const char soldier[];
 // extern const char spearman[];
@@ -141,7 +154,7 @@ int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 int g = 0;
 
 struct Node neighbors[4];
-struct Node map[65]; //a unit with a max move of 5 will fill 60 nodes max.
+struct Node map[80]; //a unit with a max move of 5 will fill 60 nodes max.
 
 #include "map_dimension.h"
 #include "paths.c"
@@ -249,6 +262,7 @@ struct Node map[65]; //a unit with a max move of 5 will fill 60 nodes max.
 
 #incspr(tinker, "characters/tinker.pcx")
 #incpal(tinker_pal, "characters/tinker.pcx")
+#incpal(tinker_battle_pal,"map/sprites/magebattle.pcx")
 
 #incspr(calien,"characters/messanger.pcx")
 #incpal(calien_pal,"characters/messanger.pcx")
@@ -349,7 +363,7 @@ const health_none[] = {BAR_0_8, BAR_0_8, BAR_0_8};
 
 const char map_level_table[18] = {
   1, 2, 3, 3, 5,
-  7, 8, 10, 11,
+  6, 8, 10, 11,
   12, 18, 18, 18,
   18, 18, 18, 18,
   20
@@ -423,13 +437,13 @@ enum Direction{
 #incpal(thfpal, "characters/thief_small.pcx")
 // #incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
 #incpal(mskpal,"map/sprites/msktpiece.pcx",0,2)
-// #incpal(dmnpal,"map/sprites/demonpiece.pcx",0,2)
+#incpal(dmnpal,"map/sprites/demonpiece.pcx")
 // #incpal(blobpal,"map/sprites/blob.pcx")
 #incpal(magepal,"map/sprites/mage.pcx")
 #incpal(bndpal,"characters/bandit.pcx",0,2)
 #incpal(monkpal,"characters/monk.pcx")
 #incpal(lancepal,"characters/lance.pcx")
-#incpal(sniperpal,"characters/sniper_small.pcx")
+// #incpal(sniperpal,"characters/sniper_small.pcx")
 #incpal(golpal,"characters/golem_small.pcx")
 
 int menu_size = 0;
@@ -438,7 +452,7 @@ char party_units[MAX_PARTY_UNIT_SIZE];
 
 int map_counter = 0;
 int map_size = 0;
-int objective_pos;
+int objective_pos = 0;
 int tic = 0;
 int sx = 0;
 int sy = 0;
@@ -517,7 +531,6 @@ void main()
 		// display_intro();
     display_demo();
 		overworld_loop(demo_select_x,demo_select_y);
-    // preload_commanders_map_1();
     // overworld_loop(5,31);
 
     // game_result();
@@ -631,10 +644,10 @@ void select_level(char level)
     case 2: demo_select_x = 1; demo_select_y = 23; preload_commanders_map_3(); return;
     case 3: demo_select_x = 5; demo_select_y = 19; preload_commanders_map_4(); return;//preload_default(6); return;
     case 4: demo_select_x = 9; demo_select_y = 19; preload_default(8); return;
-    case 5: demo_select_x = 9; demo_select_y = 22; preload_default(10); return;
-    case 6: demo_select_x = 11; demo_select_y = 25; preload_default(12); return;
-    case 7: demo_select_x = 10; demo_select_y = 30; preload_default(13); return;
-    case 8: demo_select_x = 18; demo_select_y = 29; preload_default(14); return;
+    case 5: demo_select_x = 9; demo_select_y = 22; preload_commanders_map_6(); return;
+    case 6: demo_select_x = 11; demo_select_y = 25; preload_commanders_map_7(); return;
+    case 7: demo_select_x = 10; demo_select_y = 30; preload_commanders_map_8(); return;
+    case 8: demo_select_x = 18; demo_select_y = 29; preload_commanders_map_9(); return;
     case 9: demo_select_x = 20; demo_select_y = 26; preload_default(15); return;
     case 10: demo_select_x = 24; demo_select_y = 27; preload_default(16); return;
     case 11: demo_select_x = 27; demo_select_y = 27; preload_default(17); return;
@@ -733,6 +746,164 @@ void preload_commanders_map_4()
   load_unit_to_cmdr(0,7,ARCHER_UNIT,0,4);
   load_unit_to_cmdr(1,4,VIOLET,1,5);
   load_unit_to_cmdr(1,2,SWORD_UNIT,0,4);
+
+  unlock_unit(SWORD_UNIT);
+  unlock_unit(ARCHER_UNIT);
+  unlock_unit(CLERIC_UNIT);
+
+  player_gold = 550;
+}
+
+void preload_commanders_map_6()
+{
+  party_size = 0;
+
+  add_commander_to_party(name0,REI);
+  add_commander_to_party(name1,VIOLET);
+  add_commander_to_party(name2,KING);
+
+  load_unit_to_cmdr(0,0,REI,1,5);
+  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,4);
+  load_unit_to_cmdr(0,7,ARCHER_UNIT,0,4);
+  load_unit_to_cmdr(0,6,CLERIC_UNIT,0,4);
+  load_unit_to_cmdr(0,2,RAIDER_UNIT,0,4);
+
+  load_unit_to_cmdr(1,4,VIOLET,1,5);
+  load_unit_to_cmdr(1,0,BRAWLER_UNIT,0,4);
+  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,4);
+  load_unit_to_cmdr(1,2,BRAWLER_UNIT,0,4);
+  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,4);
+
+  load_unit_to_cmdr(2,3,KING,1,5);
+  load_unit_to_cmdr(2,0,SWORD_UNIT,0,4);
+  load_unit_to_cmdr(2,2,SWORD_UNIT,0,4);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,4);
+  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,4);
+
+  unlock_unit(SWORD_UNIT);
+  unlock_unit(ARCHER_UNIT);
+  unlock_unit(CLERIC_UNIT);
+
+  player_gold = 550;
+}
+
+void preload_commanders_map_7()
+{
+  party_size = 0;
+
+  add_commander_to_party(name0,REI);
+  add_commander_to_party(name1,VIOLET);
+  add_commander_to_party(name2,KING);
+
+  load_unit_to_cmdr(0,0,REI,1,7);
+  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,7);
+  load_unit_to_cmdr(0,7,ARCHER_UNIT,0,7);
+  load_unit_to_cmdr(0,6,CLERIC_UNIT,0,7);
+  load_unit_to_cmdr(0,2,RAIDER_UNIT,0,7);
+
+  load_unit_to_cmdr(1,4,VIOLET,1,7);
+  load_unit_to_cmdr(1,0,BRAWLER_UNIT,0,7);
+  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,7);
+  load_unit_to_cmdr(1,2,BRAWLER_UNIT,0,7);
+  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,7);
+
+  load_unit_to_cmdr(2,3,KING,1,7);
+  load_unit_to_cmdr(2,0,SWORD_UNIT,0,7);
+  load_unit_to_cmdr(2,2,SWORD_UNIT,0,7);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,7);
+  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,7);
+
+  unlock_unit(SWORD_UNIT);
+  unlock_unit(ARCHER_UNIT);
+  unlock_unit(CLERIC_UNIT);
+
+  player_gold = 550;
+}
+
+void preload_commanders_map_8()
+{
+  party_size = 0;
+
+  add_commander_to_party(name0,REI);
+  add_commander_to_party(name1,VIOLET);
+  add_commander_to_party(name2,KING);
+  add_commander_to_party(name3,TINKER);
+
+  load_unit_to_cmdr(0,1,REI,1,9);
+  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,9);
+  load_unit_to_cmdr(0,6,ARCHER_UNIT,0,9);
+  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,9);
+  load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,9);
+  load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,9);
+
+  load_unit_to_cmdr(1,4,VIOLET,1,9);
+  load_unit_to_cmdr(1,0,GOLEM_UNIT,0,9);
+  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,9);
+  load_unit_to_cmdr(1,2,GOLEM_UNIT,0,9);
+  load_unit_to_cmdr(1,6,CLERIC_UNIT,0,9);
+  load_unit_to_cmdr(1,8,WITCH_UNIT,0,9);
+
+  load_unit_to_cmdr(2,4,KING,1,9);
+  load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,9);
+  load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,9);
+  load_unit_to_cmdr(2,3,SPEAR_UNIT,0,9);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,9);
+  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,9);
+
+  load_unit_to_cmdr(3,6,TINKER,1,9);
+  load_unit_to_cmdr(3,3,DANCER_UNIT,0,9);
+  load_unit_to_cmdr(3,5,DANCER_UNIT,0,9);
+  load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,9);
+  load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,9);
+  load_unit_to_cmdr(3,8,CLERIC_UNIT,0,9);
+
+  unlock_unit(SWORD_UNIT);
+  unlock_unit(ARCHER_UNIT);
+  unlock_unit(CLERIC_UNIT);
+
+  player_gold = 550;
+}
+
+void preload_commanders_map_9()
+{
+  party_size = 0;
+
+  add_commander_to_party(name0,REI);
+  add_commander_to_party(name1,VIOLET);
+  add_commander_to_party(name2,KING);
+  add_commander_to_party(name3,TINKER);
+
+  load_unit_to_cmdr(0,1,REI,1,10);
+  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,10);
+  load_unit_to_cmdr(0,6,ARCHER_UNIT,0,10);
+  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,10);
+  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,10);
+  load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,10);
+  load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,10);
+
+  load_unit_to_cmdr(1,4,VIOLET,1,10);
+  load_unit_to_cmdr(1,0,GOLEM_UNIT,0,10);
+  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,10);
+  load_unit_to_cmdr(1,2,GOLEM_UNIT,0,10);
+  load_unit_to_cmdr(1,6,CLERIC_UNIT,0,10);
+  load_unit_to_cmdr(1,8,WITCH_UNIT,0,10);
+  load_unit_to_cmdr(1,7,WITCH_UNIT,0,10);
+
+  load_unit_to_cmdr(2,4,KING,1,10);
+  load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,10);
+  load_unit_to_cmdr(2,1,KNIGHT_UNIT,0,10);
+  load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,10);
+  load_unit_to_cmdr(2,3,SPEAR_UNIT,0,10);
+  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,10);
+  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,10);
+
+  load_unit_to_cmdr(3,6,TINKER,1,10);
+  load_unit_to_cmdr(3,3,DANCER_UNIT,0,10);
+  load_unit_to_cmdr(3,5,DANCER_UNIT,0,10);
+  load_unit_to_cmdr(3,4,DANCER_UNIT,0,10);
+  load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,10);
+  load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,10);
+  load_unit_to_cmdr(3,8,CLERIC_UNIT,0,10);
 
   unlock_unit(SWORD_UNIT);
   unlock_unit(ARCHER_UNIT);
@@ -1149,6 +1320,10 @@ void draw_32x32_sprite(char type, int x, int y)
     
     case VIOLET:
       load_palette(30,violet_battle_pal,1);
+      break;
+
+    case TINKER:
+      load_palette(30,tinker_battle_pal,1);
       break;
     
     case DANCER_UNIT:

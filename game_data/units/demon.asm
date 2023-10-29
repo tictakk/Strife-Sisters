@@ -1,18 +1,18 @@
 Demon:
   .db 55  ;hp
-  .db 25  ;atk
-  .db 11  ;def
-  .db 10  ;int
-  .db 10  ;res
-  .db 14  ;spd
+  .db 27  ;atk
+  .db 14  ;def
+  .db 5   ;int
+  .db 9   ;res
+  .db 16  ;spd
   .db 3   ;mov
   .db 150 ;sta
-  .db 2   ;rng
+  .db 1   ;rng
   .db 5   ;id
-  .db 64   ;a_type
+  .db 64  ;a_type
   .db 0   ;art
   .db 3   ;points
-  .db 15   ;pow
+  .db 15  ;pow
   .db 0   ;is_cmdr
   .db 11, 5, 0 ;attack positions
 
@@ -20,5 +20,5 @@ Demon:
   .db GROWTH_DPS
 
   ;graphic
-  .db bank(_musketbtl)
-  .dw _musketbtl & $1fff
+  .db bank(_demonbtl)
+  .dw _demonbtl & $1fff

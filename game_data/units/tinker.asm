@@ -20,5 +20,5 @@ Tinker:
   .db GROWTH_VIOLET
 
   ;graphic
-  .db bank(_monkbtl)
-  .dw _monkbtl & $1fff
+  .db bank(_magebtl)
+  .dw _magebtl & $1fff

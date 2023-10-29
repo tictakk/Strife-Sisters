@@ -1,11 +1,11 @@
 Dancer:
   .db 30  ;hp
-  .db 22  ;atk
-  .db 13  ;def
-  .db 11  ;int
-  .db 13  ;res
-  .db 25  ;spd
-  .db 3   ;mov
+  .db 20  ;atk
+  .db 10  ;def
+  .db 14  ;int
+  .db 10  ;res
+  .db 23  ;spd
+  .db 4   ;mov
   .db 110 ;sta
   .db 1   ;rng
   .db 23  ;id

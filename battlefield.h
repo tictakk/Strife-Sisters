@@ -132,7 +132,14 @@ void add_entity(char team, char id, int pos, struct Commander *commanders, char 
   }
   else
   {
-    add_npc(pos%16,pos/16,commanders[id].sprite_type,ENEMY_PALETTE);
+    if(commanders[id].sprite_type == DEMON_UNIT)
+    {
+      add_npc(pos%16,pos/16,commanders[id].sprite_type,ENEMY_PALETTE+1);
+    }
+    else
+    {
+      add_npc(pos%16,pos/16,commanders[id].sprite_type,ENEMY_PALETTE);
+    }
   }
   entities[num_of_entities].bg = commanders[id].bg;
   set_bonuses(&commanders[id]);
@@ -419,7 +426,7 @@ void get_units_kill_bonus()
     killed_bonus = 0;
     return;
   }
-  killed_bonus = min(525,units_killed * 35);
+  killed_bonus = units_killed * 100;
 }
 
 void get_units_lost_bonus()

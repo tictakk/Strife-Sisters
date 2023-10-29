@@ -24,8 +24,16 @@ struct Commander{
 };
 
 char party_size = 0;
+
 struct Commander party_commanders[MAX_PARTY_COMMANDERS];
 struct Commander enemy_commanders[MAX_ENEMY_COMMANDERS];
+
+struct Commander temp_commanders[MAX_PARTY_COMMANDERS];
+
+void copy_commanders(struct Commander *cmdr_to, struct Commander *cmdr_from)
+{
+  memcpy(cmdr_to,cmdr_from,(sizeof(struct Commander) * MAX_PARTY_COMMANDERS));
+}
 
 void clear_commander_battle_group(struct Commander *cmdr)
 {
@@ -99,22 +107,16 @@ void check_add_new_commander(char map_no)
   if(map_no == 3 && party_size < 3)
   {
     add_commander_to_party(name2,KING);
-    // set_commander_stats(2,1,8,8,10);
-    // party_commanders[2].exp = 40;
-    // level_up_commander(2);
     load_unit_to_cmdr(2,3,KING,1,3);
-    // load_unit_to_cmdr(2,3,LANCER_UNIT,0);
     load_unit_to_cmdr(2,1,SWORD_UNIT,0,3);
     load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
     load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
     return;
   }
 
-  if(map_no == 5)
+  if(map_no == 7)
   {
     //add tinker
     //return;
   }
-
-  // if(map_no == )
 }

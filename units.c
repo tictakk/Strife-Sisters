@@ -95,11 +95,6 @@ typedef struct{
 
 const char attack_types[] = { 1, 2, 4, 8, 16, 32, 0 };
 
-// const char buyable_units[] = { SWORD_UNIT, SPEAR_UNIT, AXE_UNIT, MAGE_UNIT, LANCER_UNIT, ARCHER_UNIT, STALKER_UNIT, KNIGHT_UNIT,
-//                               PALADIN_UNIT, MONK_UNIT, FIGHTER_UNIT, BRAWLER_UNIT, BERSERKER_UNIT, CLERIC_UNIT, WITCH_UNIT,
-//                               BLACK_MAGE_UNIT, GOLEM_UNIT, HOUND_UNIT, RAIDER_UNIT
-//                               };
-
 // Unit unit_list[MAX_UNIT_COUNT+3];
 Unit unit_header[2];
 char unlocked_units[MAX_UNIT_COUNT];
@@ -273,11 +268,11 @@ void print_unit_info(Unit_Entity *ue, char x, char y)
   put_number(ue->level,2,x+2,y+1);
   put_char('%',x,y+2);
   put_number(get_percentage(ue->hp,unit_header[0].hp),3,x+1,y+2);
+  // put_number(ue->hp,3,x+1,y+2);
 }
 
 void print_unit_stats(char unit_id, char x, char y, char level)
 {
-
   if(unit_id > 0)
   {
     load_unit_header(unit_id,0);
@@ -400,30 +395,6 @@ void unlock_all_units()
   }
 }
 
-void get_upgrade_cost(char unit_id)
-{
-  switch(unit_id)
-  {
-    case SWORD_UNIT: upgrade_cost = 0; break;
-    case SPEAR_UNIT: upgrade_cost = 100; break;
-    case AXE_UNIT: upgrade_cost = 100; break;
-    case KNIGHT_UNIT: upgrade_cost = 100; break;
-    case BERSERKER_UNIT: upgrade_cost = 300; break;
-    case LANCER_UNIT: upgrade_cost = 300; break;
-    case PALADIN_UNIT: upgrade_cost = 350; break;
-    case ARCHER_UNIT: upgrade_cost = 0; break;
-    case SNIPER_UNIT: upgrade_cost = 150; break;
-    case STALKER_UNIT: upgrade_cost = 300; break;
-    case WITCH_UNIT: upgrade_cost = 300; break;
-    case PRIEST_UNIT: upgrade_cost = 300; break;
-    case FIGHTER_UNIT: upgrade_cost = 100; break;
-    case BRAWLER_UNIT: upgrade_cost = 200; break;
-    case MONK_UNIT: upgrade_cost = 400; break;
-    case RAIDER_UNIT: upgrade_cost = 50; break;
-    case THIEF_UNIT: upgrade_cost = 150; break;
-  }
-}
-
 void get_unit_cost(char unit_id)
 {
   switch(unit_id)
@@ -437,7 +408,7 @@ void get_unit_cost(char unit_id)
     case PALADIN_UNIT: unit_cost = 650; break;
     case ARCHER_UNIT: unit_cost = 100; break;
     case SNIPER_UNIT: unit_cost = 300; break;
-    case STALKER_UNIT: unit_cost = 600; break;
+    case STALKER_UNIT: unit_cost = 300; break;
     case WITCH_UNIT: unit_cost = 450; break;
     case PRIEST_UNIT: unit_cost = 450; break;
     case FIGHTER_UNIT: unit_cost = 100; break;

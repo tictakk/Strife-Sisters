@@ -29,7 +29,7 @@ struct battle_map_data{
   int item_positions[6];
 };
 
-unsigned char raw_map_data[MAP_METADATA_SIZE];
+// unsigned char raw_map_data[MAP_METADATA_SIZE];
 struct battle_map_data battle_map_metadata;
 int capture_position;
 //F, D, C, B, A, S
@@ -37,7 +37,6 @@ int capture_position;
 // const int map_2_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
 // const int map_3_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
 const char grades[] = {70,68,67,66,65,83};
-
 int *map_grades;
 
 void init_map_data(int map_id)
@@ -47,31 +46,58 @@ void init_map_data(int map_id)
 
   cpu_cmdr_count = 0;
   offset = ((int)map_id) * MAP_METADATA_SIZE;
-  for(i=0; i<MAP_METADATA_SIZE; i++, offset++)
-  {
-    raw_map_data[i] = (char)map_metadata[offset];
-  }
 
-  ai_objective = raw_map_data[1];
-  map_x = raw_map_data[2];
-  map_y = raw_map_data[3];
-  map_type = raw_map_data[4];
+  // memcpy(&battle_map_metadata,&map_metadata[offset+5],MAP_METADATA_SIZE-5);
+  // for(i=0; i<MAP_METADATA_SIZE; i++, offset++)
+  // {
+  //   raw_map_data[i] = (char)map_metadata[offset];
+  // }
+  ai_objective = map_metadata[offset+1];//raw_map_data[1];
+  map_x = map_metadata[offset+2];//raw_map_data[2];
+  map_y = map_metadata[offset+3];//raw_map_data[3];
+  map_type = map_metadata[offset+4];//raw_map_data[4];
 
-  memcpy(&battle_map_metadata,raw_map_data+5,MAP_METADATA_SIZE-5);
+  // offset+=5;
+  // offset+=1;
+  offset+=5 ;
+
+  load_meta_data_int(battle_map_metadata.player_start_pos,offset,8);
+  load_meta_data_int(battle_map_metadata.cpu_start_pos,offset+16,20);
+  load_meta_data_char(battle_map_metadata.cpu_commander_ids,offset+56,80);
+  load_meta_data_int(battle_map_metadata.event_positions,offset+136,8);
+  load_meta_data_char(battle_map_metadata.map_items,offset+152,6);
+  load_meta_data_int(battle_map_metadata.item_positions,offset+158,6);
+  // memcpy(battle_map_metadata.player_start_pos,)
+  // memcpy(&battle_map_metadata,raw_map_data+5,MAP_METADATA_SIZE-5);
 
   for(i=0; i<20; i++)
   {
     if(battle_map_metadata.cpu_commander_ids[i*4+1] != 0)
     {
       cpu_cmdr_count++;
-      // debug_array[debug_number++] = battle_map_metadata.cpu_commander_ids[i];
-      // debug_number = battle_map_metadata.cpu_commander_ids[i];
     }
   }
-
   // map_grades = map_1_grades + (map_id*6);
   // debug_number = cpu_cmdr_count;
-  // battle_map_metadata.map_obj = raw_map_data[1];
+}
+
+void load_meta_data_int(int *field, int offset, int len)
+{
+  int i;
+  for(i=0; i<len; i++)
+  {
+    field[i] = (map_metadata[offset+(i*2)] & 0xFF);
+    field[i] += (map_metadata[offset+(i*2+1)] << 8);
+  }
+}
+
+void load_meta_data_char(char *field, int offset, int len)
+{
+  int i;
+  for(i=0; i<len; i++)
+  {
+    field[i] = (char)map_metadata[offset+i];
+  }
 }
 
 char get_map_grade_result(char map_no, int score)

@@ -19,12 +19,12 @@ struct npc{
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
 
-const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,
-                                        17,17,17,17,19,
-                                        17,25,17,17,26,
-                                        25,19,19,17,17,
-                                        24,23,17,25,25,
-                                        17,17};
+// const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,
+//                                         17,17,17,17,19,
+//                                         17,25,17,17,26,
+//                                         25,19,19,17,17,
+//                                         24,23,17,25,25,
+//                                         17,17};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -43,6 +43,7 @@ void init_npcs()
 
   load_palette(17,soldierpal,1);
   load_palette(18,enemypal,1);
+  load_palette(19,dmnpal,1);
 }
 
 void clear_npcs()
@@ -181,7 +182,7 @@ void add_npc(char x, char y, char type, char pal)
 
           case BERSERKER_UNIT:
           case MONK_UNIT:
-          load_vram(npc_vram[type],mnk,0x100); 
+          load_vram(npc_vram[type],mnk,0x100);
           break;
 
           case BRAWLER_UNIT:
@@ -214,6 +215,9 @@ void add_npc(char x, char y, char type, char pal)
       }
       else
       {
+        // put_hex(npc_vram[type],5,0,0);
+        // put_number(type,4,7,0);
+        // wait_for_I_input();
         npcs[npc_count-1].pal = get_commander_palette(type);//cmdr_pal_count;
         load_commanders_gfx(type,npc_vram[type]);//,cmdr_pal_count++);
       }

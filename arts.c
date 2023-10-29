@@ -172,7 +172,7 @@ void init_arts()
   arts[PHYSICAL_ALL_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_ALL_ATTACK].stunning = 1;
   arts[PHYSICAL_ALL_ATTACK].move_type = MOVE_PHYSICAL_ATTACK;
-  arts[PHYSICAL_ALL_ATTACK].base_amt = 7;
+  arts[PHYSICAL_ALL_ATTACK].base_amt = 5;
 }
 
 void load_art(char art_no, int x, int y, char flip)

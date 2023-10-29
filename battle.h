@@ -162,7 +162,14 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
 
   if(active)
   {
-	  spr_make(index+MAX_EFFECT_COUNT,((p_x/4)*5)+xOffset,((p_y/4)*5)-16,idle_vrams[index],FLIP_MAS|SIZE_MAS,SZ_32x32,pal,1);
+    if(ue->id == DEMON_UNIT)
+    {
+      spr_make(index+MAX_EFFECT_COUNT,((p_x/4)*5)+xOffset,((p_y/4)*5)-16,idle_vrams[index],FLIP_MAS|SIZE_MAS,SZ_32x32,19,1);
+    }
+    else
+    {
+      spr_make(index+MAX_EFFECT_COUNT,((p_x/4)*5)+xOffset,((p_y/4)*5)-16,idle_vrams[index],FLIP_MAS|SIZE_MAS,SZ_32x32,pal,1);
+    }
   }
   satb_update();
 }
@@ -393,6 +400,7 @@ void determine_targets(char b_id, char ranged)
 
 void determine_action_state(char b_id)
 {
+  // put_number(unit_header[0].attacks[battleunits[b_id].column],4,0,0);
   switch(arts[unit_header[0].attacks[battleunits[b_id].column]].move_type)
   {
     case MOVE_RANGED_ATTACK:
