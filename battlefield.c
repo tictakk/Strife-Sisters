@@ -104,10 +104,8 @@ void battlefield_loop(char map_id)
   turn = PLAYER;
   select_unit(0);
   play_story();
-  display_selector(SELECTOR,sx,sy,16);
   // psgPlay(3);
-  // put_hex(&battle_map_metadata,6,0,0);
-  // put_number(battle_map_metadata.player_start_pos[0],8,0,0);
+  display_selector(SELECTOR,sx,sy,16);
   while(map_result_status == MAP_RESULT_NONE)
   {
     if(turn == CPU)
@@ -875,7 +873,7 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
-    put_hex(&temp_commanders[2],5,0,0);
+    // put_hex(&temp_commanders[2],5,0,0);
     // put_number(id-1,3,0,0);
     // load_unit_header(VIOLET,0);
     // put_number(unit_header[0].attacks[1],4,0,0);

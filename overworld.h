@@ -232,6 +232,7 @@ void display_party_commanders_window(char x, char y)
 
 void display_battle_group_window(char x, char y)
 {
+  load_vram(0x5B00,square,0x600);
   set_menu_state(menu_state,3,2);
   remove_cursor();
 

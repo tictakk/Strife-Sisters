@@ -118,15 +118,15 @@ void arrived(int pos)
 {
 //   if(prebattle_flag == get_map_id_by_pos(pos))
 //   {
-	  story(get_map_id_by_pos(pos),PREBATTLE,0);
+	story(get_map_id_by_pos(pos),PREBATTLE,0);
 //   }
-  unlock_units_by_castle(get_map_id_by_pos(pos));
+  map_no = get_map_id_by_pos(pos);
+  unlock_units_by_castle(map_no);
   scroll(0,s_x,288,0, 223, 0xC0);
-  // display_popup("Brawler \nunlocked",1);
+
 	load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 	commander_select_cursor = 0;
-	display_castle_menu(get_map_id_by_pos(pos));
-  // spr_hide(0);
+	display_castle_menu();
 }
 
 void set_direction(int sprite_no, enum Direction direction)
@@ -321,7 +321,30 @@ int get_next_pos()
 		}
 		break;
 	}
-	switch(direct)
+	
+  if(set_direct(direct))
+  {
+    return 1;
+  }
+	// {
+	// 	case NORTH: set_north(); return 1;
+	// 	case NORTHWEST: set_northwest(); return 1;
+	// 	case NORTHEAST: set_northeast(); return 1;
+	// 	case EAST: set_east(); return 1;
+	// 	case SOUTHEAST: set_southeast(); return 1;
+	// 	case SOUTH: set_south(); return 1;
+	// 	case SOUTHWEST: set_southwest(); return 1;
+	// 	case WEST: set_west(); return 1;
+	// }
+
+	party_moving = 0;
+	party_walk = 0;
+	return 0;
+}
+
+void set_direct(enum Direction direction)
+{
+	switch(direction)
 	{
 		case NORTH: set_north(); return 1;
 		case NORTHWEST: set_northwest(); return 1;
@@ -332,10 +355,7 @@ int get_next_pos()
 		case SOUTHWEST: set_southwest(); return 1;
 		case WEST: set_west(); return 1;
 	}
-
-	party_moving = 0;
-	party_walk = 0;
-	return 0;
+  return 0;
 }
 
 void load_overworld_bg()
@@ -381,36 +401,38 @@ void load_overworld_bg()
 
 void init_overworld_data()
 {
-	load_castle_data(997,0,0,0,0);//tutorial map 1
-	load_castle_data(867,1,0,0,0);//tutorial map 2
-	load_castle_data(737,2,SWORD_UNIT,ARCHER_UNIT,CLERIC_UNIT);//tutorial map 3
-  load_castle_data(613,3,BRAWLER_UNIT,0,0); //map 4
-  load_castle_data(617,4,SPEAR_UNIT,RAIDER_UNIT,0);//map 5
-  load_castle_data(713,5,GOLEM_UNIT,HOUND_UNIT,0);//map 6
-  load_castle_data(811,6,DANCER_UNIT,WITCH_UNIT,0);//map 7
-  load_castle_data(970,7,0,0,0); 
-  load_castle_data(946,8,0,0,0);//
-  load_castle_data(852,9,0,0,0);//
-  load_castle_data(888,10,0,0,0);//
-  load_castle_data(891,11,0,0,0);//
-  load_castle_data(796,12,0,0,0);//
-  load_castle_data(730,13,0,0,0);
-  load_castle_data(727,14,0,0,0);
-  load_castle_data(692,15,0,0,0);
+	load_castle_data(997,0,0,0,0,NORTHWEST);//tutorial map 1
+	load_castle_data(867,1,0,0,0,NORTH);//tutorial map 2
+	load_castle_data(737,2,SWORD_UNIT,ARCHER_UNIT,CLERIC_UNIT,NORTH);//tutorial map 3
+  load_castle_data(613,3,BRAWLER_UNIT,0,0,0); //map 4
+  load_castle_data(617,4,SPEAR_UNIT,RAIDER_UNIT,0,0);//map 5
+  load_castle_data(713,5,GOLEM_UNIT,HOUND_UNIT,0,0);//map 6
+  load_castle_data(811,6,DANCER_UNIT,WITCH_UNIT,0,0);//map 7
+  load_castle_data(970,7,0,0,0,0);
+  load_castle_data(946,8,0,0,0,0);
+  load_castle_data(852,9,0,0,0,0);
+  load_castle_data(888,10,0,0,0,0);
+  load_castle_data(891,11,0,0,0,0);
+  load_castle_data(796,12,0,0,0,0);
+  load_castle_data(730,13,0,0,0,0);
+  load_castle_data(727,14,0,0,0,0);
+  load_castle_data(692,15,0,0,0,0);
 }
 
-void load_castle_data(int pos, int map_id, char unlock_one, char unlock_two, char unlock_three)
+void load_castle_data(int pos, int map_id, char unlock_one, char unlock_two, char unlock_three, enum Direction direction)
 {
 	castles[map_id].pos = pos;
 	castles[map_id].map_id = map_id;
   castles[map_id].unlocked[0] = unlock_one;
   castles[map_id].unlocked[1] = unlock_two;
   castles[map_id].unlocked[2] = unlock_three;
+  castles[map_id].direction = direction;
 }
 
-void display_castle_menu(char castle_no)
+void display_castle_menu()
 {
 	hide_npcs(5);
+  spr_show(0);
   // display_window_rel(0,0,10,7);
   display_window_abs(s_x_relative,s_y_relative,10,7);
   set_font_pal(11);
@@ -418,8 +440,14 @@ void display_castle_menu(char castle_no)
   //Menu for upgrading Gems, "gems"
 
 	put_string("Heroes",2+s_x_relative,1+s_y/8);
+  set_font_pal(10);
+  if(map_no < 2)
+  {
+    set_font_pal(11);
+  }
 	put_string("Hire",2+s_x/8,2+s_y/8);
 	put_string("Army",2+s_x/8,3+s_y/8);
+  set_font_pal(11);
 	put_string("Info",2+s_x/8,4+s_y/8);
   set_font_pal(10);
 	put_string("Begin",2+s_x/8,5+s_y/8);
@@ -427,7 +455,7 @@ void display_castle_menu(char castle_no)
   load_cursor(1,1,SLIDER_ONE);
 	menu_state = CASTLE_MENU;
 	menu_rows = 5;
-	current_selected_castle = castle_no;
+	current_selected_castle = map_no;
 }
 
 void print_unit_row_by_type(char type, char x, char y)
@@ -436,12 +464,10 @@ void print_unit_row_by_type(char type, char x, char y)
   offset = 0;
 
   menu_option = 0;
-  // put_number(type,3,s_x_relative,s_y_relative);
   for(i=0; i<buyable_unit_count; i++)
   {
     load_unit_header(unlocked_units[i],0);
-    // put_number(buyable_unit_count,4,s_x_relative+7,s_y_relative);
-    // wait_for_I_input();
+
     if(unit_header[0].a_type == type)
     {
       set_font_pal(10);
@@ -460,10 +486,6 @@ char get_unit_by_type(char type, char index)
   for(i=0; i<buyable_unit_count; i++)
   {
     load_unit_header(unlocked_units[i],0);
-
-    // put_number(unit_header[0].a_type,3,s_x_relative+5,s_y_relative);
-    // put_number(type,3,s_x_relative,s_y_relative);
-    // wait_for_I_input();
     if(unit_header[0].a_type == type)
     {
       if(j++ == index)
@@ -633,7 +655,7 @@ void overworld_controls(){
       commander_select_cursor = 0;
       print_unit_row_by_type(attack_types[--cursor_column],2+(cursor_column*4),4);
       selected_unit = get_unit_by_type(attack_types[cursor_column],commander_select_cursor);
-      put_number(selected_unit,4,s_x_relative,s_y_relative);
+      // put_number(selected_unit,4,s_x_relative,s_y_relative);
       remove_cursor();
       cursor_x -= 4;
       cursor_y = 4;
@@ -686,7 +708,7 @@ void overworld_controls(){
       commander_select_cursor = 0;
       print_unit_row_by_type(attack_types[++cursor_column],2+(cursor_column*4),4);
       selected_unit = get_unit_by_type(attack_types[cursor_column],commander_select_cursor);
-      put_number(selected_unit,4,s_x_relative,s_y_relative);
+      // put_number(selected_unit,4,s_x_relative,s_y_relative);
       remove_cursor();
       cursor_x += 4;
       cursor_y = 4;
@@ -881,15 +903,29 @@ void overworld_controls(){
     {
       char unit_id;
       unit_id = party_commanders[selected_cmdr].bg.units[selected_unit].id;
+
       if(unit_id)
       {
-        remove_unit_from_group(selected_cmdr,selected_unit);
-        add_unit_to_convoy(unit_id);
-        update_battle_group_window(ARMY_BATTLE_GROUP_WINDOW_X,ARMY_BATTLE_GROUP_WINDOW_Y);
-        update_party_commander_window(ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y);
-        update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-        update_unit_stats_window(NO_UNIT,ARMY_STATS_X,ARMY_STATS_Y,1);
-        spr_show(63);
+        if(unit_id < REI)
+        {
+          remove_unit_from_group(selected_cmdr,selected_unit);
+          add_unit_to_convoy(unit_id);
+          update_battle_group_window(ARMY_BATTLE_GROUP_WINDOW_X,ARMY_BATTLE_GROUP_WINDOW_Y);
+          update_party_commander_window(ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y);
+          update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
+          update_unit_stats_window(NO_UNIT,ARMY_STATS_X,ARMY_STATS_Y,1);
+          spr_show(63);
+        }
+        else
+        {
+          affirm_statement("Cant ret","commndr",22,14);
+          display_commander_window(selected_cmdr,ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y);
+        }
+      }
+      else
+      {
+        affirm_statement("Must sel","a unit",22,14);
+        display_commander_window(selected_cmdr,ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y);
       }
     }
     else if(menu_state == DISMISS_SELECT_MENU)
@@ -929,22 +965,10 @@ void overworld_controls(){
 		}
     else if(menu_state == ORGANIZE_SELECT_MENU)
 		{
-      // char q,r;
-      // r=0;
 			menu_state = SWAP_MENU;
 			swap_unit = (cursor_column % 3)+(commander_select_cursor * 3);
-      // put_number(swap_unit,5,s_x_relative,s_y_relative);
-      // for(q=0; q<9; q++)
-      // {
-      //   if(party_commanders[selected_cmdr].bg.units[q].id)
-      //   {
-      //     if(q==swap_unit)
-      //     {
-      //       highlight_npc(r);
-      //     }
-      //     r++;
-      //   }
-      // }
+      higlight_tile(swap_unit);
+      // put_number(swap_unit,4,s_x_relative,s_y_relative);
 		}
 		else if(menu_state == SWAP_MENU)
 		{
@@ -972,6 +996,7 @@ void overworld_controls(){
 		}
 		else if(menu_state == CASTLE_MENU)
 		{
+      map_no = get_map_id_by_pos(get_absolute_pos());
       // spr_hide(0);
 			switch(commander_select_cursor)
 			{
@@ -980,12 +1005,22 @@ void overworld_controls(){
           break;
 
 				case 1:
+          if(map_no < 2)
+          {
+            return;
+          }
+          spr_hide(0);
           cursor_column = 0;
           commander_select_cursor = 0;
           display_hire_window(SWORD_UNIT);
           break;
 
         case 2:
+          if(map_no < 2)
+          {
+            return;
+          }
+          spr_hide(0);
           commander_select_cursor = 0;
           cursor_column = 0;
           display_party_commanders_window(0,0);
@@ -1007,6 +1042,15 @@ void overworld_controls(){
           {
             copy_commanders(party_commanders,temp_commanders);
             game_over = 1;
+          }
+          
+          if(map_no == 3)
+          {
+            game_over = 0;
+          }
+          if(castles[map_no].direction)
+          {
+            set_direct(castles[map_no].direction);
           }
 					break;
 			}
@@ -1042,7 +1086,7 @@ void overworld_controls(){
 		if(menu_state == RECRUIT_MENU || menu_state == SHOP_MENU)
 		{
 			clear_commander_select();
-			display_castle_menu(get_absolute_pos());
+			display_castle_menu();
 			return;
 		}
 		if(menu_state == CASTLE_MENU)
@@ -1120,7 +1164,7 @@ void overworld_controls(){
     if(menu_state == PARTY_MENU)
     {
       clear_commander_select();
-      display_castle_menu(get_absolute_pos());
+      display_castle_menu();
       return;
     }
     if(menu_state == SWAP_MENU)
@@ -1133,10 +1177,13 @@ void overworld_controls(){
   }
 	if(j_2 & JOY_RUN)
 	{
-
   }
 	if(j_2 & JOY_SEL)
 	{
+    // read_tile_data(0x5C80,bottom_left);
+    // read_tile_data(CENTER_RIGHT_ADDRESS,center_right);
+    // read_tile_data(0x5E40,bottom_right);
+    // read_tile_data(1,17);
     // put_number(sizeof(Unit_Entity),5,s_x_relative,s_y_relative);
     // put_number(hits,4,s_x_relative,s_y_relative);
     // put_number(misses,4,s_x_relative,s_y_relative+1);

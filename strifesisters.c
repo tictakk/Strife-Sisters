@@ -361,6 +361,30 @@ const health_1_24[] = {BAR_1_8, BAR_0_8, BAR_0_8};
 
 const health_none[] = {BAR_0_8, BAR_0_8, BAR_0_8}; 
 
+const int TOP_LEFT_ADDRESS = 0x5B40;
+const int TOP_MIDDLE_ADDRESS = 0x5C20;
+const int TOP_RIGHT_ADDRESS = 0x5D00;
+
+const int CENTER_LEFT_ADDRESS = 0x5BE0;
+const int CENTER_MIDDLE_ADDRESS = 0x5CC0;
+const int CENTER_RIGHT_ADDRESS = 0x5DA0;
+
+const int BOT_LEFT_ADDRESS = 0x5C80;
+const int BOT_MIDDLE_ADDRESS = 0x5D60;
+const int BOT_RIGHT_ADDRESS = 0x5E40;
+
+const int top_left[] = {0x80,0x90,0xA0,0xB0,0xC0,0xD0,0x160,0x170};
+const int top_middle[] = {0x00,0x10,0xA0,0xB0,0xC0,0xD0,0x160,0x170};
+const int top_right[] = {0x00,0x10,0xA0,0xB0,0xC0,0xD0,0x120,0x130};
+
+const int center_left[] = {0x80,0x90,0x20,0x30,0xC0,0xD0,0x160,0x170};
+const int center_middle[] = {0x00,0x10,0x20,0x30,0xC0,0xD0,0x160,0x170};
+const int center_right[] = {0x00,0x10,0x20,0x30,0xC0,0xD0,0x120,0x130};
+
+const int bottom_left[] = {0x80,0x90,0x20,0x30,0x140,0x150,0x160,0x170};
+const int bottom_middle[] = {0x00,0x10,0x20,0x30,0x140,0x150,0x160,0x170};
+const int bottom_right[] = {0x00,0x10,0x20,0x30,0x140,0x150,0x120,0x130};
+
 const char map_level_table[18] = {
   1, 2, 3, 3, 5,
   6, 8, 10, 11,
@@ -371,9 +395,14 @@ const char map_level_table[18] = {
 
 const unsigned char selector_frames[5] = {0x00, 0x40, 0x80, 0x40, 0x00};
 
+enum Direction{
+	NO, NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST
+};
+
 struct Castle{
   char map_id;
   int pos;
+  enum Direction direction;
   char unlocked[3];
 };
 
@@ -407,10 +436,6 @@ int map_no = 0;
 	BATTLE STUFF
 */
 #define BATTLE_MAP_HEIGHT 16
-
-enum Direction{
-	NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST
-};
 
 #incspr(sld,"map/sprites/sldpiece.pcx")
 #incspr(spr,"map/sprites/sprpiece.pcx")
@@ -581,7 +606,6 @@ void display_demo()
     {
       select_level_menu();
       loop = 0;
-      
       // return;
     }
     else if(ticky++ < 50)
@@ -612,9 +636,6 @@ void select_level_menu()
   load_cursor(15,19,SLIDER_ONE);
   put_number(curs_pos,2,13,19);
 
-  // put_string("1)Form a plan.",8,19);
-  // put_string("2)Defend the town!",8,20);
-  // put_string("3)Catching a golem.",8,21);
   clear_joy_events(0x1F);
   while(loop)
   {
@@ -2436,7 +2457,7 @@ void put_green_square(char x, char y)
   int vaddr;
   char i, j;
 
-  addr = 0xF5B0;
+  addr = 0xE5B0;
   vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
 
   for(i=0; i<8; i++)
@@ -2450,19 +2471,106 @@ void put_green_square(char x, char y)
   }
 }
 
-void read_tile_data(int x, int y)
+void higlight_tile(char tile)
 {
+  switch(tile)
+  {
+    case 0: highlight_iso_tile(BOT_LEFT_ADDRESS,bottom_left); break;
+    case 1: highlight_iso_tile(BOT_MIDDLE_ADDRESS,bottom_middle); break;
+    case 2: highlight_iso_tile(BOT_RIGHT_ADDRESS,bottom_right); break;
+    case 3: highlight_iso_tile(CENTER_LEFT_ADDRESS,center_left); break;
+    case 4: highlight_iso_tile(CENTER_MIDDLE_ADDRESS,center_middle); break;
+    case 5: highlight_iso_tile(CENTER_RIGHT_ADDRESS,center_right); break;
+    case 6: highlight_iso_tile(TOP_LEFT_ADDRESS,top_left); break;
+    case 7: highlight_iso_tile(TOP_MIDDLE_ADDRESS,top_middle); break;
+    case 8: highlight_iso_tile(TOP_RIGHT_ADDRESS,top_right); break;
+  }
+}
+
+void highlight_iso_tile(int address, int *highlight_array)
+{
+  int i, num;
+
+  for(i=0; i<4; i++)
+  {
+    num = highlight_array[i];
+    load_vram(address+(i*0x10),square_extra+num,0x10);
+  }
+
+  for(i=0; i<4; i++)
+  {
+    num = highlight_array[i+4];
+    load_vram(address+(0xC0)+(i*0x10),square_extra+num,0x10);
+  }
+}
+
+void read_tile_data(int address, int *highlight_array)
+{
+  int i, num;
+
+  for(i=0; i<4; i++)
+  {
+    num = highlight_array[i];
+    load_vram(address+(i*0x10),square_extra+num,0x10);
+  }
+
+  for(i=0; i<4; i++)
+  {
+    num = highlight_array[i+4];
+    load_vram(address+(0xC0)+(i*0x10),square_extra+num,0x10);
+  }
+
   // int vaddr, tiledata;
   // int tiledata1, tiledata2;
-  // vaddr = vram_addr(x,y+36);
+
+  // int tile_words[16];
+  // int compare_words[16];
+  // int result_words[16];
+
+  // vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
   // vreg(0x01,vaddr);
   // tiledata1 = peek(0x02);
-  // tiledata2 = peek(0x03); 
+  // tiledata2 = peek(0x03);
+  // vreg(0x01,0x5B50);
+  
+  // for(i=0; i<16; i++)
+  // {
+  //   vreg(0x01,0x5B50+i);
+  //   tile_words[i] = peekw(0x02);
+  // }
+
+  // for(i=0; i<16; i++)
+  // {
+  //   vreg(0x01,0x6190+i);
+  //   compare_words[i] = peekw(0x02);
+  // }
+
+  // for(i=0; i<16; i++)
+  // {
+  //   result_words[i] = tile_words[i] ^ compare_words[i];
+  // }
+
+  // load_vram(0x5B50,result_words,0x10);
+
+  // put_hex(compare_words,6,s_x_relative,s_y_relative);
+  // tiledata1 = peekw(0x02);
+  // tiledata2 = peek(0x03);
+  // put_hex(tiledata1,5,s_x_relative,s_y_relative);
+  // put_hex(tiledata2,5,s_x_relative,s_y_relative+1);
   // tiledata = (tiledata2<<8) + tiledata1;
-  // put_hex(vaddr,6,s_x_relative,s_y_relative);
 
   // vreg(0x00,vaddr);
-  // vreg(0x02,tiledata&0xFFF);
+  // vreg(0x02,tiledata&0xFFF);  
+
+  // load_vram(0x5C80,square_extra+0x80,0x10);
+  // load_vram(0x5C90,square_extra+0x90,0x10);
+  // load_vram(0x5CA0,square_extra+0x20,0x10);
+  // load_vram(0x5CB0,square_extra+0x30,0x10);
+
+  // load_vram(0x5D40,square_extra+0x140,0x10);
+  // load_vram(0x5D50,square_extra+0x150,0x10);
+  // load_vram(0x5D60,square_extra+0x160,0x10);
+  // load_vram(0x5D70,square_extra+0x170,0x10);
 }
 
 void put_highlight_square(char position, char x, char y)

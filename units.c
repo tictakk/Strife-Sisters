@@ -382,8 +382,19 @@ void print_target_type_icon(char attack_type, char x, char y)
 
 void unlock_unit(char unit_id)
 {
-  unlocked_units[buyable_unit_count++] = unit_id;
-  // buyable_unit_count++;
+  char i, unlockable;
+  unlockable = 1;
+  for(i=0; i<MAX_UNIT_COUNT; i++)
+  {
+    if(unlocked_units[i] == unit_id)
+    {
+      unlockable = 0;
+    }
+  }
+  if(unlockable)
+  {
+    unlocked_units[buyable_unit_count++] = unit_id;
+  }
 }
 
 void unlock_all_units()
