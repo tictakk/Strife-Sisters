@@ -9,7 +9,7 @@ Tearle:
   .db 150 ;sta
   .db 1   ;rng
   .db 33  ;id
-  .db 8   ;a_type
+  .db 4   ;a_type
   .db 0   ;art    
   .db 3   ;points
   .db 15  ;pow

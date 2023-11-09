@@ -78,7 +78,7 @@ void init_arts()
   arts[ZAP_ART].move_type = MOVE_ART_ATTACK;
 
   arts[SPD_UP_ART].frame_count = 11;
-  arts[SPD_UP_ART].name = "Spd up ";
+  arts[SPD_UP_ART].name = "Def up ";
   arts[SPD_UP_ART].cost = 7;
   arts[SPD_UP_ART].target = ALL_ALLIES;
   arts[SPD_UP_ART].relationship = MANY_TO_MANY;

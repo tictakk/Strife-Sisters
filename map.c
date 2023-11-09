@@ -1,7 +1,7 @@
 #incbin(map_metadata,"maps/mapout")
 
 // #define MAP_METADATA_SIZE 117 //I think
-#define MAP_METADATA_SIZE 175 //I think
+#define MAP_METADATA_SIZE 235 //I think
 
 #define MAP_RESULT_NONE 1
 #define MAP_RESULT_WIN 2
@@ -21,14 +21,21 @@ unsigned char map_tile_count = 0;
 unsigned char map_type = 5;
 char cpu_cmdr_count = 0;
 
+// struct battle_map_data{
+//   int player_start_pos[8], cpu_start_pos[20];
+//   char cpu_commander_ids[80];
+//   int event_positions[8];
+//   char map_items[6];
+//   int item_positions[6];
+// };
+
 struct battle_map_data{
-  int player_start_pos[8], cpu_start_pos[20];
-  char cpu_commander_ids[80];
+  int player_start_pos[8],cpu_start_pos[15];
+  char cpu_commander_ids[150];
   int event_positions[8];
   char map_items[6];
   int item_positions[6];
 };
-
 // unsigned char raw_map_data[MAP_METADATA_SIZE];
 struct battle_map_data battle_map_metadata;
 int capture_position;
@@ -59,20 +66,20 @@ void init_map_data(int map_id)
 
   // offset+=5;
   // offset+=1;
-  offset+=5 ;
+  offset+=5;
 
   load_meta_data_int(battle_map_metadata.player_start_pos,offset,8);
-  load_meta_data_int(battle_map_metadata.cpu_start_pos,offset+16,20);
-  load_meta_data_char(battle_map_metadata.cpu_commander_ids,offset+56,80);
-  load_meta_data_int(battle_map_metadata.event_positions,offset+136,8);
-  load_meta_data_char(battle_map_metadata.map_items,offset+152,6);
-  load_meta_data_int(battle_map_metadata.item_positions,offset+158,6);
+  load_meta_data_int(battle_map_metadata.cpu_start_pos,offset+16,15);
+  load_meta_data_char(battle_map_metadata.cpu_commander_ids,offset+46,150);
+  load_meta_data_int(battle_map_metadata.event_positions,offset+196,8);
+  load_meta_data_char(battle_map_metadata.map_items,offset+212,6);
+  load_meta_data_int(battle_map_metadata.item_positions,offset+218,6);
   // memcpy(battle_map_metadata.player_start_pos,)
   // memcpy(&battle_map_metadata,raw_map_data+5,MAP_METADATA_SIZE-5);
 
-  for(i=0; i<20; i++)
+  for(i=0; i<15; i++)
   {
-    if(battle_map_metadata.cpu_commander_ids[i*4+1] != 0)
+    if(battle_map_metadata.cpu_commander_ids[i*10] != 0)
     {
       cpu_cmdr_count++;
     }

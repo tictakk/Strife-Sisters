@@ -1135,16 +1135,6 @@ void load_pals(char entity_id, int off)
   load_palette(17,soldierpal,1);
   load_palette(18,enemypal,1);
   load_palette(19,demonbtlpal,1);
-  // load_palette(17,soldierpal,1); //sword,knight,lancer,monk,fighger,brawler,archer,spear
-  // load_palette(18,magebtlpal,1);
-  // load_palette(19,magebtlpal+16,1);
-  // load_palette(21,blobbattlepal,1);
-  // load_palette(20,golempal,1);
-  // load_palette(22,monkbtlpal,1);
-  // load_palette(25,houndbtlpal,1);
-  // load_palette(27,magebtlpal,1);
-  // load_palette(24,magebtlpal+32,1);
-  // load_palette(23,raiderbtlpal,1);
 
 	for(i=0; i<9; i++)
 	{
@@ -1187,6 +1177,12 @@ void load_pals(char entity_id, int off)
           spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);    
           break;
+
+        case TEARLE:
+          load_palette(cmdr_count++,tearle_battle_pal,1);
+          spr_set(MAX_EFFECT_COUNT+(i+off));
+          spr_pal(cmdr_count-1);    
+          break;    
 			}
 		}
 	}

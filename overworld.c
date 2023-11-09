@@ -118,7 +118,7 @@ void arrived(int pos)
 {
 //   if(prebattle_flag == get_map_id_by_pos(pos))
 //   {
-	story(get_map_id_by_pos(pos),PREBATTLE,0);
+	// story(get_map_id_by_pos(pos),PREBATTLE,0);
 //   }
   map_no = get_map_id_by_pos(pos);
   unlock_units_by_castle(map_no);
@@ -1024,7 +1024,7 @@ void overworld_controls(){
           commander_select_cursor = 0;
           cursor_column = 0;
           display_party_commanders_window(0,0);
-          break;  
+          break;
 
 				case 4:
           copy_commanders(temp_commanders,party_commanders);
@@ -1044,7 +1044,7 @@ void overworld_controls(){
             game_over = 1;
           }
           
-          if(map_no == 3)
+          if(map_no == 8)
           {
             game_over = 0;
           }

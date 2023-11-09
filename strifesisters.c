@@ -154,7 +154,7 @@ int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 int g = 0;
 
 struct Node neighbors[4];
-struct Node map[80]; //a unit with a max move of 5 will fill 60 nodes max.
+struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 
 #include "map_dimension.h"
 #include "paths.c"
@@ -269,6 +269,7 @@ struct Node map[80]; //a unit with a max move of 5 will fill 60 nodes max.
 
 #incspr(tearle,"characters/tearle.pcx")
 #incpal(tearle_pal,"characters/tearle.pcx")
+#incpal(tearle_battle_pal,"characters/berserker.pcx",1,1)
 
 #incchr(hein_gfx,"characters/hein_portrait.pcx")
 #incpal(hein_portrait_pal,"characters/hein_portrait.pcx")
@@ -449,6 +450,7 @@ int map_no = 0;
 #incspr(dark,"map/sprites/dark.pcx")
 #incspr(gol,"characters/golem_small.pcx")
 #incspr(mnk,"characters/monk.pcx")
+#incspr(brk,"characters/berserker_small.pcx")
 #incspr(brl,"characters/brawler_small.pcx")
 #incspr(lan,"characters/lance.pcx")
 #incspr(snipersmall,"characters/sniper_small.pcx")
@@ -643,8 +645,8 @@ void select_level_menu()
     {
       // case JOY_DOWN: if(curs_pos < 2) {curs_pos++; curs_down();} break;
       // case JOY_UP: if(curs_pos > 0) {curs_pos--; curs_up();} break;
-      case JOY_LEFT: if(curs_pos > 1) { put_number(--curs_pos,2,13,19); } break;
-      case JOY_RIGHT: if(curs_pos < 18) { put_number(++curs_pos,2,13,19); }break;
+      case JOY_LEFT: if(curs_pos > 1) { put_number(--curs_pos,2,13,19);} break;
+      case JOY_RIGHT: if(curs_pos < 17) { put_number(++curs_pos,2,13,19);} break;
       case JOY_RUN:
       case JOY_I:
       select_level(curs_pos-1);
@@ -763,10 +765,15 @@ void preload_commanders_map_4()
   add_commander_to_party(name0,REI);
   add_commander_to_party(name1,VIOLET);
 
-  load_unit_to_cmdr(0,4,REI,1,5);
-  load_unit_to_cmdr(0,7,ARCHER_UNIT,0,4);
-  load_unit_to_cmdr(1,4,VIOLET,1,5);
-  load_unit_to_cmdr(1,2,SWORD_UNIT,0,4);
+  load_unit_to_cmdr(0,0,REI,1,4);
+  load_unit_to_cmdr(0,6,ARCHER_UNIT,0,4);
+  load_unit_to_cmdr(0,8,CLERIC_UNIT,0,4);
+  load_unit_to_cmdr(0,1,SWORD_UNIT,0,4);
+
+  load_unit_to_cmdr(1,4,VIOLET,1,4);
+  load_unit_to_cmdr(1,0,SWORD_UNIT,0,4);
+  load_unit_to_cmdr(1,1,SWORD_UNIT,0,4);
+  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,4);
 
   unlock_unit(SWORD_UNIT);
   unlock_unit(ARCHER_UNIT);
@@ -1048,16 +1055,8 @@ void print_unit_type(char id, int x, int y)
       put_string("ARC",x,y);
       break;
 
-    case SNIPER_UNIT:
-      put_string("SNP",x,y);
-      break;
-
     case CLERIC_UNIT:
       put_string("CLR",x,y);
-      break;
-
-		case MAGE_UNIT:
-      put_string("MAG",x,y);
       break;
 
     case WITCH_UNIT:
@@ -1082,10 +1081,6 @@ void print_unit_type(char id, int x, int y)
 
     case KNIGHT_UNIT:
       put_string("KNT",x,y);
-      break;
-
-    case FIGHTER_UNIT:
-      put_string("FTR",x,y);
       break;
 
     case BRAWLER_UNIT:
@@ -1118,6 +1113,14 @@ void print_unit_type(char id, int x, int y)
 
     case HEIN:
       put_string("HEI",x,y);
+      break;
+
+    case TINKER:
+      put_string("TIN",x,y);
+      break;
+
+    case TEARLE:
+      put_string("TRL",x,y);
       break;
 
 		default:
@@ -1241,7 +1244,7 @@ void draw_32x32_sprite(char type, int x, int y)
     break;
 
     case BERSERKER_UNIT:
-      load_palette(30,sniperbtlpal,1);
+      load_palette(30,berserkerbtl,1);
       // load_vram(0x6E00,berserkerbtl,0x100);
     break;
 
@@ -2338,50 +2341,27 @@ void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr
   party_commanders[cmdr_id].bg.units[unit_pos].level = level;
 }
 
-void load_predefined_group_layout(char formation, char r_one, char r_two, char r_three, char cmdr_id, char level)
+void load_predefined_group_layout(char *units, char cmdr_id, char level)
 {
-  int f_pos;
-  char i,j,unit,highest_id;
+  char i, highest_id;
 
-  highest_id = determine_sprite_type(r_one,r_two,r_three);
-  // highest_id = r_two;
-  // highest_id = (r_one > r_two)? r_one : r_two;
-  // highest_id = (highest_id > r_three)? highest_id : r_three;
+  highest_id = units[0];
   party_commanders[cmdr_id].sprite_type = highest_id;
-  unit = 0;
 
-  f_pos = formation * MAX_ARMY_SIZE;
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
-    if(f0[f_pos+i] == 1)
+    if(units[i+1])
     {
-      switch(i/3)
+      if(units[i+1] >= COMMANDER_ID_START)
       {
-        case 0: unit = r_one; break;
-        case 1: unit = r_two; break;
-        case 2: unit = r_three; break;
+        load_unit_to_cmdr(cmdr_id,i,units[i+1],1,map_level_table[level]);
       }
-      load_unit_to_cmdr(cmdr_id,i,unit,0,map_level_table[level]);
+      else
+      {
+        load_unit_to_cmdr(cmdr_id,i,units[i+1],0,map_level_table[level]);
+      }
     }
   }
-}
-
-char determine_sprite_type(char r_one, char r_two, char r_three)
-{
-  if(r_one > 28)
-  {
-    return r_one;
-  }
-  if(r_two > 28)
-  {
-    return r_two;
-  }
-  if(r_three > 28)
-  {
-    return r_three;
-  }
-
-  return r_two;
 }
 
 void display_popup(char *str, char screen)

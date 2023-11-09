@@ -20,16 +20,16 @@ const char dumb_table[9] = {0,3,6,1,4,7,2,5,8};
 
 char id;
 int s_x_holder, s_y_holder, y_off_holder;
-enum Direction cmdr_direction;
 char exit_battlefield;
 char t = 0;
-char wait = 0;
 
 char toggle_enemy_higlight = 0;
 char joy_left_held = 0;
 char joy_right_held = 0;
 char joy_down_held = 0;
 char joy_up_held = 0;
+
+char debug_info = 0;
 
 //variables for update map routine
 int index, sprite_counter, entity_no;
@@ -67,7 +67,7 @@ void begin_battlefield(char map_id)
   map_no = map_id;
   map_offset = (320*map_no)-32;
   objective_pos = battle_map_metadata.event_positions[0];
-  check_add_new_commander(map_no);
+  // check_add_new_commander(map_no);
 
   yOffset = 0;
   init_battlefield();
@@ -93,7 +93,6 @@ void battlefield_loop(char map_id)
   units_killed = 0;
   units_lost = 0;
   materials_collected = 0;
-  wait = 0;
 
   s_x_relative = 0;//(s_x/8);
   s_y_relative = 0;//(s_y/8);
@@ -103,7 +102,7 @@ void battlefield_loop(char map_id)
   vsync();
   turn = PLAYER;
   select_unit(0);
-  play_story();
+  // play_story();
   // psgPlay(3);
   display_selector(SELECTOR,sx,sy,16);
   while(map_result_status == MAP_RESULT_NONE)
@@ -119,7 +118,7 @@ void battlefield_loop(char map_id)
       g_abs = graph_from_x_y(sx,sy);
       t_type =  terrain_type(tutorial_1[map_offset+g_abs]);
       id = battle_grid[g_abs];
-      display_position(14,1);
+      // display_position(14,1);
       display_bonuses(4,1);
       
       display_terrain_bonus();
@@ -166,6 +165,7 @@ void battle_start()
 
 void check_battle_complete()
 {
+  return;
   if(battle_grid[objective_pos] != 0 && map_type == 2)
   {
     if(entities[battle_grid[objective_pos]-1].team == PLAYER)
@@ -256,23 +256,20 @@ void init_units()
   //TODO: ADD IS_CMDR CHECK AND ADD A NEW PARAM TO ADD_ENTITY
   for(i=0; i<cpu_cmdr_count; i++)
   {
-    u_one = (char)battle_map_metadata.cpu_commander_ids[i*4+1];
-    u_two = (char)battle_map_metadata.cpu_commander_ids[i*4+2];
-    u_three = (char)battle_map_metadata.cpu_commander_ids[i*4+3];
+    // u_one = (char)battle_map_metadata.cpu_commander_ids[i*4+1];
+    // u_two = (char)battle_map_metadata.cpu_commander_ids[i*4+2];
+    // u_three = (char)battle_map_metadata.cpu_commander_ids[i*4+3];
+    // has_cmdr = 0;
+
+    // if(u_one >= COMMANDER_ID_START ||
+    //    u_two >= COMMANDER_ID_START ||
+    //    u_three >= COMMANDER_ID_START
+    //   )
+    // {
+    //   has_cmdr = 1;
+    // }
     has_cmdr = 0;
-
-    if(u_one >= COMMANDER_ID_START ||
-       u_two >= COMMANDER_ID_START ||
-       u_three >= COMMANDER_ID_START
-      )
-    {
-      has_cmdr = 1;
-    }
-
-    load_predefined_group_layout((char)battle_map_metadata.cpu_commander_ids[i*4], //formation
-    u_one, //row one units
-    u_two, //row two units
-    u_three, //row three units
+    load_predefined_group_layout(&battle_map_metadata.cpu_commander_ids[i*10],
     i+MAX_PARTY_COMMANDERS,(char)map_no);
     load_group(i,CPU,battle_map_metadata.cpu_start_pos+i,enemy_commanders,has_cmdr);
   }
@@ -422,17 +419,17 @@ void display_terrain_bonus()
 {
   // terrain_type =  terrain_type(battlefieldbat[map_offset+id]);
   put_terrain_icon(t_type,1,1);
-  if(id-1 >= 0)
-  {
-    if(entities[id-1].has_cmdr)
-    {
-      put_number(entities[id-1].tactic_meter,3,3,2);
-    }
-  }
-  else
-  {
-    put_string("   ",3,2);
-  }
+  // if(id-1 >= 0)
+  // {
+    // if(entities[id-1].has_cmdr)
+    // {
+    //   put_number(entities[id-1].tactic_meter,3,3,2);
+    // }
+  // }
+  // else
+  // {
+  //   put_string("   ",3,2);
+  // }
   // put_terrain_bonus(t_type,3,2);
   // put_terrain_atk_stat(t_type,3,2);
 }
@@ -888,7 +885,7 @@ void ctrls()
     // party_commanders[2].tactic_id = TACTIC_DASH;
     // load_commander_palette(REI);
     // darken_palette(26);
-    // map_result_status = MAP_RESULT_WIN;
+    map_result_status = MAP_RESULT_WIN;
     // put_hex(tiledata[7],5,0,4);
     // put_hex(tiledata[8],5,0,5);
     // load_healthbars();

@@ -148,19 +148,11 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],blobsmall,0x100);
           break;
 
-          case AXE_UNIT:
-          load_vram(npc_vram[type],bnd,0x100);
-          break;
-
           case STALKER_UNIT:
           load_vram(npc_vram[type],stlk,0x100);
           break;
 
           case CLERIC_UNIT:
-          // load_vram(npc_vram[type],mag,0x100);
-          // break;
-          case BLACK_MAGE_UNIT:
-          case MAGE_UNIT:
           load_vram(npc_vram[type],mag,0x100);
           break;
 
@@ -172,17 +164,12 @@ void add_npc(char x, char y, char type, char pal)
           load_vram(npc_vram[type],bnd,0x100);
           break;
 
-          case THIEF_UNIT:
-          load_vram(npc_vram[type],thf,0x100);
-          break;
-
           case GOLEM_UNIT:
           load_vram(npc_vram[type],gol,0x100);
           break;
 
           case BERSERKER_UNIT:
-          case MONK_UNIT:
-          load_vram(npc_vram[type],mnk,0x100);
+          load_vram(npc_vram[type],brk,0x100);
           break;
 
           case BRAWLER_UNIT:
@@ -208,8 +195,8 @@ void add_npc(char x, char y, char type, char pal)
           default:
           load_vram(npc_vram[type],sld,0x100);
           put_string("error default",5,5);
-          // put_number(type,3,5,6);
-          // wait_for_I_input();
+          put_number(type,3,5,6);
+          wait_for_I_input();
           break;
         }
       }
