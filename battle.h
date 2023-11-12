@@ -34,9 +34,7 @@ typedef struct {
   char ent_id, active, frame, pal, state, target_team, pos, attacks, 
        target, meter, column, a_bonus, d_bonus, s_bonus, p_bonus;
   Unit_Entity *unit;
-}BattleUnit;
-
-// const char big_palettes[] = {17,18,};
+} BattleUnit;
 
 const char top_row_attack_chart[9]    = { 
                                           1, 1, 2, 
@@ -72,9 +70,6 @@ const int target_square_tiles[] = {
                                     502,662,922,
                                     507,667,927
                                   };
-
-// char attacker_art_list[MAX_ARMY_SIZE];
-// char target_art_list[MAX_ARMY_SIZE];
 
 char atker, trgt, meter_queued = 0, unit_meter_queued = 0, position_status = 0;//FINISH THIS STUFF
 

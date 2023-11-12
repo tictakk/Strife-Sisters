@@ -61,13 +61,13 @@ void play_story()
 void begin_battlefield(char map_id)
 {
   char i;
-  map_boundry_y = (map_y * 16) - 192; //would be 224 (screen size but 32 px are taken up by menu; 224-32 = 192)
+  map_boundry_y = (map_y << 4) - 192; //would be 224 (screen size but 32 px are taken up by menu; 224-32 = 192)
   current_turn = 1;
   menu_mask = 0;
   map_no = map_id;
   map_offset = (320*map_no)-32;
   objective_pos = battle_map_metadata.event_positions[0];
-  // check_add_new_commander(map_no);
+  check_add_new_commander(map_no);
 
   yOffset = 0;
   init_battlefield();
@@ -102,7 +102,7 @@ void battlefield_loop(char map_id)
   vsync();
   turn = PLAYER;
   select_unit(0);
-  // play_story();
+  play_story();
   // psgPlay(3);
   display_selector(SELECTOR,sx,sy,16);
   while(map_result_status == MAP_RESULT_NONE)
@@ -114,11 +114,11 @@ void battlefield_loop(char map_id)
     }
     else
     {
-      // put_number(two_total,3,0,0);
+      // put_number(map_type,3,0,0);
       g_abs = graph_from_x_y(sx,sy);
       t_type =  terrain_type(tutorial_1[map_offset+g_abs]);
       id = battle_grid[g_abs];
-      // display_position(14,1);
+      display_position(14,1);
       display_bonuses(4,1);
       
       display_terrain_bonus();
@@ -165,7 +165,7 @@ void battle_start()
 
 void check_battle_complete()
 {
-  return;
+  // return;
   if(battle_grid[objective_pos] != 0 && map_type == 2)
   {
     if(entities[battle_grid[objective_pos]-1].team == PLAYER)
@@ -886,6 +886,7 @@ void ctrls()
     // load_commander_palette(REI);
     // darken_palette(26);
     map_result_status = MAP_RESULT_WIN;
+    // map_result_status = MAP_RESULT_LOSE;
     // put_hex(tiledata[7],5,0,4);
     // put_hex(tiledata[8],5,0,5);
     // load_healthbars();
@@ -948,9 +949,12 @@ void perform_tactic()
     }
     if(!get_tactic_perform_status())
     {
-      entities[tactic_caster].actionable = 0;
-      entities[tactic_caster].movable = 0;
+      end_unit_turn(tactic_caster);
+      // entities[tactic_caster].actionable = 0;
+      // entities[tactic_caster].movable = 0;
     }
+    menu_mask = 0x00;
+    print_menu();
     entities[tactic_caster].tactic_meter = 0;
     sync(30);
     display_selector(SELECTOR,sx,sy,16);
@@ -992,7 +996,7 @@ void dash_tactic()
   }
 
   display_selector(SELECTOR,sx,sy,16);
-  tactic_current = 0;
+  // tactic_current = 0;
 }
 
 void leap_tactic()
@@ -1293,7 +1297,6 @@ char attack_unit(int src, int dst, char art)
 {
   char result;
   unsigned char attacker, target, range;
-  // int range; //,item_no;//, result;
   
   attacker = battle_grid[dst]-1;
   target = battle_grid[src]-1;

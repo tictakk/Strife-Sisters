@@ -42,11 +42,11 @@
 #define VIOLET 30
 #define KING 31
 #define TINKER 32
-#define TEARLE 33 //Cyran, Danag, Dorlus, Tearle
+#define TEARLE 33
 #define CALIEN 34 //Calien, Sunette, Zonja, Taffa, Xelase
-#define HEIN 35 //Zaladin, Adonis, Zandre, Wikus
+#define RANNON 35
 #define ADONIS 36
-#define PHALC 37
+#define ZALADIN 37
 #define KURT 38
 #define GEN_ONE 39
 #define SWORD_CMDR 40

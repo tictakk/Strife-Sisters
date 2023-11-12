@@ -48,13 +48,18 @@ void clear_commander_battle_group(struct Commander *cmdr)
   }
 }
 
-void remove_unit_from_group(char cmdr_id, char position)
+char remove_unit_from_group(char cmdr_id, char position)
 {
+  char level;
+  level = party_commanders[cmdr_id].bg.units[position].level;
+  // put_number(level,4,s_x_relative,s_y_relative);
+  // wait_for_I_input();
   party_commanders[cmdr_id].bg.units[position].id = 0;// = &unit_list[NO_UNIT];
   party_commanders[cmdr_id].bg.units[position].hp = 0;
   party_commanders[cmdr_id].bg.units[position].exp = 0;
   party_commanders[cmdr_id].bg.units[position].level = 0;
   party_commanders[cmdr_id].bg.units[position].sta = 0;
+  return level;
 }
 
 void add_commander_to_party(char *name, char st)
@@ -65,6 +70,17 @@ void add_commander_to_party(char *name, char st)
   cmdr->sprite_type = st;
   clear_commander_battle_group(cmdr);
   party_size++;
+}
+
+void remove_party_commander_from_game(char cmdr_id)
+{
+  char i;
+  for(i=cmdr_id; i<MAX_PARTY_COMMANDERS; i++)
+  {
+    // memcpy(&entities[i],&entities[i+1],sizeof(Entity));
+    memcpy(&party_commanders[i],&party_commanders[i+1],sizeof(struct Commander));
+  }
+  party_size--;
 }
 
 void list_commanders(char x, char y)
@@ -114,9 +130,11 @@ void check_add_new_commander(char map_no)
     return;
   }
 
-  if(map_no == 7)
+  if(map_no == 13 && party_size >= 4)
   {
-    //add tinker
-    //return;
+    remove_party_commander_from_game(2);
+    add_commander_to_party(name4,TEARLE);
+    load_unit_to_cmdr(3,4,TEARLE,1,14);
+    return;
   }
 }

@@ -301,7 +301,6 @@ void apply_art(char target)
 
 void end_sequence()
 {
-  update_info_bar();
   battle_end_screen();
   distribute_exp();
   fade_screen();
@@ -967,11 +966,7 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t)
 	init_armies(i1,i2,first_team,second_team);
 	scroll(0, 0, 0, 0, 223, 0xC0);
 
-  // set_infobar();
-  // display_battle_menu();
-  // set_art_lists();
   load_palette(EFFECTS_WORD_PAL,effect_pal,1);
-  // gfx_line(14,0,14,10,3);
 
   load_palette(0,battlepal,1);
   load_palette(14,redpal,1);
@@ -1045,16 +1040,6 @@ void set_infobar()
   
   set_portrait(0,atker);
   set_portrait(1,trgt);
-  // display_item(0,0,1,1);
-  // display_item(1,1,27,1);
-
-  // put_string("Pow",5,3);
-  // put_string("Meter",9,3);
-
-  // put_string("Pow",24,3);
-  // put_string("Meter",18,3);
-
-  // update_info_bar();
 }
 
 void display_battle_menu()
@@ -1066,14 +1051,6 @@ void display_battle_menu()
   cursor_y = 1;
   display_window_abs(10,0,12,12);
   display_cursor();
-}
-
-void update_info_bar()
-{
-  // put_number(calculate_power(entities[atker].id),3,5,4);
-  // display_meter_bars(entities[atker].bg->meter,10,4);
-  // put_number(calculate_power(entities[trgt].id),3,24,4);
-  // display_meter_bars(entities[trgt].bg->meter,19,4);
 }
 
 void init_armies(int player, int cpu, char t_one, char t_two)
@@ -1160,7 +1137,7 @@ void load_pals(char entity_id, int off)
           spr_pal(cmdr_count-1);
           break;
 
-        case HEIN:
+        case RANNON:
           load_palette(cmdr_count++,hein_battle_pal,1);
           spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);
@@ -1353,7 +1330,6 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
   }
 
   // picker = 0;
-	total_units = 0;
   animating = 0;
   a_atk_bonus = 0;
   t_atk_bonus = 0;

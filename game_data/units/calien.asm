@@ -8,17 +8,17 @@ Calien:
   .db 3   ;mov
   .db 110 ;sta
   .db 1   ;rng
-  .db 7   ;id
-  .db 64   ;a_type
+  .db 34   ;id
+  .db 64  ;a_type
   .db 0   ;art
   .db 3   ;points
-  .db 10   ;pow
+  .db 10  ;pow
   .db 0   ;is_cmdr
-  .db 10, 10, 0 ;attack positions
+  .db 10, 10, 10 ;attack positions
 
   ;unit growth
   .db GROWTH_TANK_MELEE
 
   ;graphic
-  .db bank(_blobbattle)
-  .dw _blobbattle & $1fff
+  .db bank(_attack)
+  .dw _attack & $1fff

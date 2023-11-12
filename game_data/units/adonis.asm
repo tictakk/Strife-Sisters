@@ -1,4 +1,4 @@
-Adonis:
+Rannon:
   .db 55  ;hp
   .db 25  ;atk
   .db 11  ;def

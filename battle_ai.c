@@ -24,17 +24,13 @@ char target_unit;
 char ai_tracker;
 int hit_radius_size;
 int opp_hit_radius[26];
-// int intersecting_tiles[26];
-// int intersecting_size;
-
-struct Ai_Entity ai_entities[15]; //should be 15 but gave an extra 5 for possible, non-enemy ais
+struct Ai_Entity ai_entities[15];
 
 init_ai()
 {
-  char i,j,m;
+  char i,j;
   num_of_ai = 0;
   j = 0;
-  m = 0;
   for(i=0; i<num_of_entities; i++)
   {
     if(entities[i].team == CPU)
@@ -262,6 +258,7 @@ void do_defend_objective(char ai_id)
   rng = get_army_max_range(ai_entities[ai_id].entity_id);
   
   search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv+rng,0);
+  highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
 
   for(i=0; i<num_of_units_in_range; i++)
   {
@@ -276,15 +273,17 @@ void do_defend_objective(char ai_id)
 
   if(result == 0)
   {
+    unhighlight();
     ai_entities[ai_id].state = PASSING;
     return;
   }
   if(result == 2)
   {
+    unhighlight();
     ai_entities[ai_id].state = ATTACKING;
     return;
   }
-
+  unhighlight();
   ai_entities[ai_id].state = MOVING;
   ai_entities[ai_id].dest = result;
 }
@@ -379,15 +378,8 @@ void do_capture_objective(char ai_id)
   search_in_radius(entities[ai_entities[ai_id].entity_id].pos,mv,mv);
   p = find_nearest_unoccupied_position(entities[ai_entities[ai_id].entity_id].pos,objective_pos,map_size+1,map);
 
-  // put_number(p,4,0,0);
-  // wait_for_I_input();
   ai_entities[ai_id].state = MOVING;
   ai_entities[ai_id].dest = p;
-}
-
-void do_target_objective(char ai_id)
-{
-  int location = 0;
 }
 
 char search_in_radius(int position, char radius_size, char ignore_depth)

@@ -339,7 +339,6 @@ void clear_text_field()
 
 void post_battle_screen()
 {
-  int modded = 0;
   s_y_relative = (s_y>>3);
   s_x_relative = (s_x>>3);
   // display_abs_black_panel(0,((s_y+32)/8),32,16);
@@ -375,7 +374,7 @@ void post_battle_screen()
   write_text(s_x_relative+6,s_y_relative+14,"Units killed -");
   put_number(units_killed,2,s_x_relative+22,s_y_relative+14);
   write_text(s_x_relative+6,s_y_relative+15,"Killed Bonus -");
-  display_number_incrementing(s_x_relative+21,s_y_relative+15,killed_bonus,3);
+  display_number_incrementing(s_x_relative+20,s_y_relative+15,killed_bonus,4);
 
   write_text(s_x_relative+6,s_y_relative+16,"Units lost   -");
   put_number(units_lost,2,s_x_relative+22,s_y_relative+16);
@@ -389,10 +388,20 @@ void post_battle_screen()
   // write_text(s_x_relative+6,s_y_relative+20,"Ore       ");
   // display_number_incrementing(s_x_relative+24,s_y_relative+20,materials_collected,3);
 
-  write_text(s_x_relative+12,s_y_relative+22,"Grade");
-  set_font_pal(9);
-  put_char(get_map_grade_result(map_no,total_bonus),s_x_relative+18,s_y_relative+22);
-  set_font_pal(10);
+  if(map_result_status == MAP_RESULT_LOSE)
+  {
+    write_text(s_x_relative+12,s_y_relative+22,"Grade");
+    set_font_pal(9);
+    put_char('F',s_x_relative+18,s_y_relative+22);
+    set_font_pal(10);
+  }
+  else
+  {
+    write_text(s_x_relative+12,s_y_relative+22,"Grade");
+    set_font_pal(9);
+    put_char(grades[get_map_grade_result(map_no,total_bonus)],s_x_relative+18,s_y_relative+22);
+    set_font_pal(10);
+  }
   // put_char('S',s_x_relative+18,s_y_relative+22);
   // put_number(map_grades[3],5,0,0);
 
@@ -402,16 +411,7 @@ void post_battle_screen()
   }
   else
   {
-    modded = ((total_bonus/3) % 100);
-    player_gold += ((total_bonus / 3) - modded);
-    if(modded >= 75)
-    {
-      player_gold += 75;
-    }
-    else if(modded >= 25)
-    {
-      player_gold += 50;
-    }
+    player_gold = payouts[get_map_grade_result(map_no,total_bonus)];
   }
   
   materials_count += materials_collected;

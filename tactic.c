@@ -11,7 +11,6 @@
 #define MAX_TACTIC_METER 50
 
 char tactic_loop = 0;
-
 char tactic_current = 0;
 char tactic_caster = 0;
 char tactic_target_count = 0;

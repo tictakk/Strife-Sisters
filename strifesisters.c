@@ -112,30 +112,19 @@ GROWTH_SPEED_DPS = 10
     .include "game_data/units/tearle.asm"
 ;_calien:
     .include "game_data/units/calien.asm"
-;_hein:
+;_rannon:
     .include "game_data/units/hein.asm"
 ;_adonis:
     .include "game_data/units/adonis.asm"
     .code
+;_zaladin:
+    .include "game_data/units/zaladin.asm"
+    .code
 #endasm
-
-//CYPHER CHECKSUM? 0x4B9A
-// 0100 1011 1001 1010
-// 0000 0010 0000 0000 1
-// 0100 0000 0000 0000 2
-// 0000 0000 0001 0000 3
-// 0000 0000 0000 1000 4
-// 0000 0000 0000 0010 5
-// 0000 0000 1000 0000 6
-// 0000 0001 0000 0000 7
-// 0000 1000 0000 0000 8
-// test 3550
 
 
 extern const char nounit[];
 extern const char soldier[];
-// extern const char spearman[];
-// extern const char archer[];
 
 char screen_dimensions = 0;
 // char debug_number = 0;
@@ -210,6 +199,7 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 #define COMMAND_SOUND 1
 #define COMMAND_WALK 2
 #define COMMAND_PAN 3
+#define COMMAND_REMOVE 5
 #define COMMAND_FOCUS 4
 #define COMMAND_STOP 9
 
@@ -220,17 +210,6 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 #incchr(sisters_logo,"map/backgrounds/sister_logo_small.pcx")
 #incpal(sisters_logo_pal,"map/backgrounds/sister_logo_small.pcx");
 #incbat(sisters_bat,"map/backgrounds/sister_logo_small.pcx",0x1000,0,0,32,16)
-
-// #incchr(panel_gfx, "map/sprites/deploy_menu.pcx")
-// #incpal(panel_pal, "map/sprites/deploy_menu.pcx")
-
-// #incchr(info_gfx, "map/sprites/infobox.pcx")
-// #incpal(info_pal, "map/sprites/infobox.pcx")
-// #incbat(info_bat, "map/sprites/infobox.pcx", 0x1500, 0, 0, 32, 4)
-
-// #incchr(dialog_gfx, "map/sprites/dialoguebox.pcx")
-// #incpal(dialog_pal, "map/sprites/dialoguebox.pcx")
-// #incbat(dialog_bat, "map/sprites/dialoguebox.pcx", 0x1500, 0, 0, 32, 4)
 
 #incchr(icons_gfx, "map/sprites/icons.pcx")
 #incpal(icons_pal, "map/sprites/icons.pcx")
@@ -262,12 +241,17 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 
 #incspr(tinker, "characters/tinker.pcx")
 #incpal(tinker_pal, "characters/tinker.pcx")
+#incchr(tinker_gfx, "characters/tinker_portrait.pcx")
+#incpal(tinker_gfx_pal, "characters/tinker_portrait.pcx")
 #incpal(tinker_battle_pal,"map/sprites/magebattle.pcx")
 
-#incspr(calien,"characters/messanger.pcx")
-#incpal(calien_pal,"characters/messanger.pcx")
+#incchr(calien_gfx,"characters/calien_portrait.pcx")
+#incpal(calien_gfx_pal,"characters/calien_portrait.pcx")
+#incpal(calien_battle_pal,"map/sprites/swordy.pcx",4,1)
 
 #incspr(tearle,"characters/tearle.pcx")
+#incchr(tearle_gfx,"characters/tearle_portrait.pcx")
+#incpal(tearle_gfx_pal,"characters/tearle_portrait.pcx")
 #incpal(tearle_pal,"characters/tearle.pcx")
 #incpal(tearle_battle_pal,"characters/berserker.pcx",1,1)
 
@@ -281,6 +265,12 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 #incpal(adonis_portrait_pal,"characters/adonis_portrait.pcx")
 #incspr(adonis,"characters/adonis_walk.pcx")
 #incpal(adonis_pal,"characters/adonis_walk.pcx")
+
+#incspr(zaladin,"characters/zaladin_sprite.pcx")
+#incchr(zaladin_gfx,"characters/zaladin_portrait.pcx")
+#incpal(zaladin_gfx_pal,"characters/zaladin_portrait.pcx")
+#incpal(zaladin_pal,"characters/zaladin_sprite.pcx")
+#incpal(zaladin_battle_pal,"map/sprites/swordy.pcx",3,1)
 
 #define MAP_WIDTH 32
 #define TILE_WIDTH 16
@@ -394,6 +384,8 @@ const char map_level_table[18] = {
   20
 };
 
+const int payouts[5] = {700, 650, 600, 550, 500};
+
 const unsigned char selector_frames[5] = {0x00, 0x40, 0x80, 0x40, 0x00};
 
 enum Direction{
@@ -411,7 +403,6 @@ char j_1, j_2;
 struct Castle castles[NO_OF_CASTLES];
 // struct Commander commanders[TOTAL_COMMANDERS];
 
-int total_sprites = 0;
 char menu_rows = 0;
 // char no_of_party_items;
 char num_of_bad_terrains;
@@ -421,7 +412,6 @@ char menu_height;
 // int screen_dimensions = 0;
 
 char selector_frame = 0;
-char button_frame = 0;
 char script_ram[256];
 int map_no = 0;
 
@@ -473,23 +463,20 @@ int map_no = 0;
 // #incpal(sniperpal,"characters/sniper_small.pcx")
 #incpal(golpal,"characters/golem_small.pcx")
 
-int menu_size = 0;
+
+int final_score_hi = 0;
+int final_score_lo = 0;
 unsigned int player_gold = 0;
-char party_units[MAX_PARTY_UNIT_SIZE];
+int party_units[MAX_PARTY_UNIT_SIZE];
 
 int map_counter = 0;
 int map_size = 0;
 int objective_pos = 0;
-int tic = 0;
 int sx = 0;
 int sy = 0;
 int yOffset = 0;
-char j1 = 0;
-int j2 = 0;
 int xOffset = 0;
-int total_units = 0;
 int n = 0;
-char num_of_buyable_items = 0;
 // char g = 0;
 char game_over = 0;
 // char game_loop = 0;
@@ -500,7 +487,6 @@ char cursor_y = 0;
 //int green_crystal_count = 0; //up -> upgrade points
 int materials_count = 0;
 char party_units_size = 0;
-
 
 char no_miss_flag = 0;
 char debug_flag = 0;
@@ -606,9 +592,9 @@ void display_demo()
   {
     if(joytrg(0) & JOY_RUN)
     {
+      // select_level(0);
       select_level_menu();
       loop = 0;
-      // return;
     }
     else if(ticky++ < 50)
     {
@@ -710,17 +696,8 @@ void preload_commanders_map_1()
 {
   party_size = 0;
   add_commander_to_party(name0,REI);
-  // add_commander_to_party(name1,VIOLET);
 
-  // load_unit_to_cmdr(0,7,CLERIC_UNIT,0,1);
-  // load_unit_to_cmdr(0,2,SWORD_UNIT,0,1);
-  // load_unit_to_cmdr(0,0,SWORD_UNIT,0,1);
   load_unit_to_cmdr(0,4,REI,1,1);
-
-  // load_unit_to_cmdr(1,1,SWORD_UNIT,0,1);
-  // load_unit_to_cmdr(1,3,ARCHER_UNIT,0,1);
-  // load_unit_to_cmdr(1,4,VIOLET,1,1);
-  // load_unit_to_cmdr(1,5,ARCHER_UNIT,0,1);
 }
 
 void preload_commanders_map_2()
@@ -755,7 +732,7 @@ void preload_commanders_map_3()
   load_unit_to_cmdr(0,4,REI,1,3);
   load_unit_to_cmdr(1,4,VIOLET,1,3);
 
-  player_gold = 200;
+  player_gold = 550;
 }
 
 void preload_commanders_map_4()
@@ -767,13 +744,13 @@ void preload_commanders_map_4()
 
   load_unit_to_cmdr(0,0,REI,1,4);
   load_unit_to_cmdr(0,6,ARCHER_UNIT,0,4);
-  load_unit_to_cmdr(0,8,CLERIC_UNIT,0,4);
+  load_unit_to_cmdr(0,8,CLERIC_UNIT,0,1);
   load_unit_to_cmdr(0,1,SWORD_UNIT,0,4);
 
   load_unit_to_cmdr(1,4,VIOLET,1,4);
-  load_unit_to_cmdr(1,0,SWORD_UNIT,0,4);
+  load_unit_to_cmdr(1,0,BRAWLER_UNIT,0,1);
   load_unit_to_cmdr(1,1,SWORD_UNIT,0,4);
-  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,4);
+  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,1);
 
   unlock_unit(SWORD_UNIT);
   unlock_unit(ARCHER_UNIT);
@@ -955,18 +932,9 @@ void preload_default(char level)
   {
     add_commander_to_party(name3,TINKER);
     load_unit_to_cmdr(3,4,TINKER,1,level);
-    // load_unit_to_cmdr(3,3,RAIDER_UNIT,0,level); 
-    // load_unit_to_cmdr(3,5,RAIDER_UNIT,0,level);
-    // load_unit_to_cmdr(3,1,RAIDER_UNIT,0,level);
-    // load_unit_to_cmdr(3,6,THIEF_UNIT,0,level);
-    // load_unit_to_cmdr(3,8,CLERIC_UNIT,0,level);
   }
 
   player_gold = 5000;
-  // set_commander_stats(0,5,22,12,16);
-  // set_commander_stats(1,5,17,22,12);
-  // set_commander_stats(2,5,15,16,22); 
-  // set_commander_stats(3,5,15,15,15);
 }
 
 void display_intro()
@@ -1111,8 +1079,8 @@ void print_unit_type(char id, int x, int y)
       put_string("DAN",x,y);
       break;
 
-    case HEIN:
-      put_string("HEI",x,y);
+    case RANNON:
+      put_string("RAN",x,y);
       break;
 
     case TINKER:
@@ -1121,6 +1089,14 @@ void print_unit_type(char id, int x, int y)
 
     case TEARLE:
       put_string("TRL",x,y);
+      break;
+
+    case CALIEN:
+      put_string("CAL",x,y);
+      break;
+
+    case ZALADIN:
+      put_string("ZAL",x,y);
       break;
 
 		default:
@@ -1216,8 +1192,17 @@ char* get_unit_fullname(char unit_id)
     case TINKER:
       return "Tinker ";
 
-    case HEIN:
-      return "Hein   ";
+    case RANNON:
+      return "Rannon ";
+
+    case CALIEN:
+      return "Calien ";
+
+    case ZALADIN:
+      return "Zaladin";
+
+    case TEARLE:
+      return "Tearle ";
 
     default:
       return "        ";
@@ -1284,7 +1269,7 @@ void draw_32x32_sprite(char type, int x, int y)
       break;
 
     case CLERIC_UNIT:
-      load_palette(30,magebtlpal+16,1);
+      load_palette(30,magebtlpal,1);
       // load_vram(0x6E00,magebtl,0x100);
       break;
 
@@ -1688,7 +1673,7 @@ void load_portrait(char cmdr_id, char index)
 	{
 		case REI:
 		load_vram(PORTRAIT_VRAM+(index*0x100),rei_gfx,0x100);
-		load_palette(12+index,rei_pal,1);
+		load_palette(12+index,rei_pal,1); 
 		break;
 
 		case VIOLET:
@@ -1701,7 +1686,17 @@ void load_portrait(char cmdr_id, char index)
 		load_palette(12+index,king_pal,1);
 		break;
 
-		case HEIN:
+    case TEARLE:
+    load_vram(PORTRAIT_VRAM+(index*0x100),tearle_gfx,0x100);
+		load_palette(12+index,tearle_gfx_pal,1);
+		break;
+
+    case TINKER:
+    load_vram(PORTRAIT_VRAM+(index*0x100),tinker_gfx,0x100);
+		load_palette(12+index,tinker_gfx_pal,1);
+    break;
+
+		case RANNON:
 		load_vram(PORTRAIT_VRAM+(index*0x100),hein_gfx,0x100);
 		load_palette(12+index,hein_portrait_pal,1);
 		break;
@@ -1710,6 +1705,11 @@ void load_portrait(char cmdr_id, char index)
 		load_vram(PORTRAIT_VRAM+(index*0x100),adonis_gfx,0x100);
 		load_palette(12+index,adonis_portrait_pal,1);
 		break;
+
+    case CALIEN:
+		load_vram(PORTRAIT_VRAM+(index*0x100),calien_gfx,0x100);
+		load_palette(12+index,calien_gfx_pal,1);
+    break;
 
 		default:
 		load_vram(PORTRAIT_VRAM+(index*0x100),unknown_gfx,0x100);
@@ -1798,16 +1798,25 @@ int do_command()
     return 3;
 
     case COMMAND_WALK:
-    do_walk();
+    do_walk();  
     return 4;
+
+    case COMMAND_REMOVE:
+    do_remove();
+    return 2;
 
     case COMMAND_STOP: return 0;
   }
 }
 
+void do_remove()
+{
+  remove_party_commander_from_game(script_ram[1]);
+}
+
 void do_walk()
 {
-  walk_entity(1,((script_ram[3]&0xFF)<<8)+((script_ram[2]&0xFF)));
+  walk_entity(script_ram[1],((script_ram[3]&0xFF)<<8)+((script_ram[2]&0xFF)));
   update_map();
   vsync();
 }
@@ -1859,10 +1868,10 @@ int do_story(int x, int y)//, char *str)
 //this may cause some bugs down there line
 int find_area_offset(char area)
 {
-	int offset=0;
+	unsigned int offset=0;
 
 	// offset = current_offset;
-	while(offset < 12000)
+	while(offset < 33000)
 	{
 		if(script[offset++] == 0xFF)
 		{
@@ -1877,9 +1886,9 @@ int find_area_offset(char area)
 
 int find_kv_offset(unsigned char key, unsigned char value, int current_offset)
 {
-	int offset = 0;
+	unsigned int offset = 0;
 	offset = current_offset;
-	while(offset < 12000)//just a large number, need to change this to how long out actually is
+	while(offset < 33000)//just a large number, need to change this to how long out actually is
 	{
 		if(script[offset] == 0xFF)//we've crossed into a new area
 		{
@@ -2160,14 +2169,24 @@ void load_commanders_gfx(int cmdr_id, int address)
     load_palette(get_commander_palette(cmdr_id),tearle_pal,1);
     break;
 
-    case HEIN:
+    case RANNON:
     load_vram(address,hein,0x100);
     load_palette(get_commander_palette(cmdr_id),hein_pal,1);
     break;
 
-    case HEIN:
+    case ADONIS:
     load_vram(address,adonis,0x100);
     load_palette(get_commander_palette(cmdr_id),adonis_pal,1);
+    break;
+
+    case CALIEN:
+    load_vram(address,sld,0x100);
+    load_palette(get_commander_palette(cmdr_id),calien_battle_pal,1);
+    break;
+
+    case ZALADIN:
+    load_vram(address,zaladin,0x100);
+    load_palette(get_commander_palette(cmdr_id),zaladin_pal,1);
     break;
 		// default:
 		// load_vram(address,sld,0x100);
@@ -2210,8 +2229,12 @@ void load_commander_palette(char cmdr_id)
     load_palette(30,tearle_pal,1);
     break;
 
-    case HEIN:
+    case RANNON:
     load_palette(25,hein_pal,1);
+    break;
+
+    case ZALADIN:
+    load_palette(25,zaladin_pal,1);
     break;
   }
 }
@@ -2242,16 +2265,10 @@ char get_commander_palette(char cmdr_id)
     return 30;
 
     case ADONIS:
-    case HEIN:
+    case RANNON:
+    case CALIEN:
+    case ZALADIN:
     return 25;
-
-		// load_palette(29,tinker_pal,1);
-		// break;
-
-		// default:
-		// load_vram(address,sld,0x100);
-		// load_palette(pal,sldpal,1);
-		// break;
 	}
   return 26;
 }
@@ -2296,7 +2313,7 @@ void list_party_units(char x, char y)
   char i;
   for(i=0; i<MAX_PARTY_UNIT_SIZE; i++)
   {
-    print_unit_type(party_units[i],x+(4*(i/8)),y+(i%8));
+    print_unit_type(party_units[i]&0xFF,x+(4*(i/8)),y+(i%8));
   }
 }
 
@@ -2406,32 +2423,23 @@ void swap_commander_units(char cmdr_id, char first, char second)
 
 void swap_convoy_units(char cmdr_id, char unit_id, char convoy_id)
 {
-  char tmp_id;
+  int tmp_id;
 
   load_unit_header(party_commanders[cmdr_id].bg.units[unit_id].id,0);
-  load_unit_header(party_units[convoy_id],1);
+  load_unit_header(party_units[convoy_id]&0xFF,1);
   tmp_id = party_commanders[cmdr_id].bg.units[unit_id].id;
+  tmp_id += party_commanders[cmdr_id].bg.units[unit_id].level << 8;
 
   party_commanders[cmdr_id].bg.units[unit_id].hp = unit_header[1].hp;//unit_list[party_units[convoy_id]].hp;
   party_commanders[cmdr_id].bg.units[unit_id].id = unit_header[1].id;//&unit_list[party_units[convoy_id]];
   party_commanders[cmdr_id].bg.units[unit_id].exp = 0;
-  party_commanders[cmdr_id].bg.units[unit_id].level = 1;
+  party_commanders[cmdr_id].bg.units[unit_id].level = party_units[convoy_id]>>8;
 
   party_units[convoy_id] = tmp_id;
 }
 
 void put_green_square(char x, char y)
 {
-
-  // vaddr = vram_addr(x,y);
-
-  // vreg(0x01,vaddr);
-
-  // tiledata = peekw(0x02) & 0xFFF;
-
-  // vreg(0x00,vaddr);
-  // vreg(0x02,tiledata+pal);
-  // vreg(0x02,tiledata+pal+1);
   int addr;
   int p[12];
   int vaddr;
@@ -2499,58 +2507,6 @@ void read_tile_data(int address, int *highlight_array)
     num = highlight_array[i+4];
     load_vram(address+(0xC0)+(i*0x10),square_extra+num,0x10);
   }
-
-  // int vaddr, tiledata;
-  // int tiledata1, tiledata2;
-
-  // int tile_words[16];
-  // int compare_words[16];
-  // int result_words[16];
-
-  // vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
-  // vreg(0x01,vaddr);
-  // tiledata1 = peek(0x02);
-  // tiledata2 = peek(0x03);
-  // vreg(0x01,0x5B50);
-  
-  // for(i=0; i<16; i++)
-  // {
-  //   vreg(0x01,0x5B50+i);
-  //   tile_words[i] = peekw(0x02);
-  // }
-
-  // for(i=0; i<16; i++)
-  // {
-  //   vreg(0x01,0x6190+i);
-  //   compare_words[i] = peekw(0x02);
-  // }
-
-  // for(i=0; i<16; i++)
-  // {
-  //   result_words[i] = tile_words[i] ^ compare_words[i];
-  // }
-
-  // load_vram(0x5B50,result_words,0x10);
-
-  // put_hex(compare_words,6,s_x_relative,s_y_relative);
-  // tiledata1 = peekw(0x02);
-  // tiledata2 = peek(0x03);
-  // put_hex(tiledata1,5,s_x_relative,s_y_relative);
-  // put_hex(tiledata2,5,s_x_relative,s_y_relative+1);
-  // tiledata = (tiledata2<<8) + tiledata1;
-
-  // vreg(0x00,vaddr);
-  // vreg(0x02,tiledata&0xFFF);  
-
-  // load_vram(0x5C80,square_extra+0x80,0x10);
-  // load_vram(0x5C90,square_extra+0x90,0x10);
-  // load_vram(0x5CA0,square_extra+0x20,0x10);
-  // load_vram(0x5CB0,square_extra+0x30,0x10);
-
-  // load_vram(0x5D40,square_extra+0x140,0x10);
-  // load_vram(0x5D50,square_extra+0x150,0x10);
-  // load_vram(0x5D60,square_extra+0x160,0x10);
-  // load_vram(0x5D70,square_extra+0x170,0x10);
 }
 
 void put_highlight_square(char position, char x, char y)
@@ -2586,35 +2542,12 @@ void put_blue_square(char x, char y)
   load_vram(vaddr+128,p,3);
 }
 
-int calculate_power(char cmdr_id)
-{
-  int i, hp_total, hp_max, power, percent;
-  power = 0;
-  hp_max = 0;
-  hp_total = 0;
-  percent = 0;
-  
-	for(i=0; i<9; i++)
-  {
-    if(party_commanders[cmdr_id].bg.units[i].id)
-    {
-      load_unit_header(party_commanders[cmdr_id].bg.units[i].id,0);
-      power += unit_header[0].pow;//party_commanders[cmdr_id].bg.units[i].unit->pow;
-      hp_max += unit_header[0].hp;//party_commanders[cmdr_id].bg.units[i].unit->hp;
-      hp_total += party_commanders[cmdr_id].bg.units[i].hp;
-    }
-  }
-  //having an issue with multiplying a signed num with the get_percentage fn, so divide by ten I guess?
-  percent = get_percentage(hp_total/10,hp_max/10);
-  return (power * percent)/100;
-}
-
 int roundUp(int num, int div)
 {
 	int whole, remainder;
 	whole = num/div;
   if (div == 0)
-      return 0;
+    return 0;
 
   remainder = num % div; //1
   if (remainder == 0)
@@ -2626,6 +2559,11 @@ int roundUp(int num, int div)
 int next_level(int level)
 {
   return (cube(level)*6/4) + ((level*level) / 2) + (2*level);
+}
+
+int next_level_cost(int level)
+{
+  return level * 50;
 }
 
 // 1) 1 + 0 + 2 = 3 -> 1 blob
@@ -2641,14 +2579,16 @@ int cube(int number)
   number*number*number;
 }
 
-void add_unit_to_convoy(char unit_id)
+void add_unit_to_convoy(char unit_id, char level)
 {
   char i;
+
   for(i=0; i<MAX_PARTY_UNIT_SIZE; i++)
   {
-    if(party_units[i] == 0)
+    if(party_units[i] == NO_UNIT)
     {
       party_units[i] = unit_id;
+      party_units[i] += level << 8;
       party_units_size++;
       return;
     }
@@ -2667,19 +2607,6 @@ void cycle_selector()
   spr_pattern(0x68C0+selector_frames[selector_frame]);
 }
 
-void cycle_button_press(char x, char y)
-{
-  button_frame = (button_frame+1) % 16;
-  if(button_frame == 0)
-  {
-    put_string("}~",x,y);
-  }
-  else if(button_frame == 8)
-  {
-    put_string("*+",x,y);
-  }
-}
-
 void flash_selector(int location_x, int location_y, unsigned char flashes)
 {
   char i;
@@ -2692,16 +2619,10 @@ void flash_selector(int location_x, int location_y, unsigned char flashes)
   }
 }
 
-// char 
-
 void display_number_incrementing(char x, char y, int final_number, char num_len)
 {
   int i;
   i=0;
-  // if(final_number <= 6)
-  // {
-    // put_number(final_number,num_len,x,y);
-  // }
   while((i+=6) < final_number)
   {
     put_number(i,num_len,x,y);

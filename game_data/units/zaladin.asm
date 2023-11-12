@@ -1,4 +1,4 @@
-Adonis:
+Zaladin:
   .db 50  ;hp
   .db 24  ;atk
   .db 14  ;def
@@ -8,7 +8,7 @@ Adonis:
   .db 3   ;mov
   .db 110 ;sta
   .db 1   ;rng
-  .db 35  ;id
+  .db 37  ;id
   .db 4   ;a_type
   .db 0   ;art
   .db 3   ;points
@@ -20,5 +20,5 @@ Adonis:
   .db GROWTH_SPEED_DPS
 
   ;graphic
-  .db bank(_raiderbtl)
-  .dw _raiderbtl & $1fff
+  .db bank(_knightbtl)
+  .dw _knightbtl & $1fff

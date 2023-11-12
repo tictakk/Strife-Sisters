@@ -18,16 +18,8 @@ char ai_objective = 0;
 unsigned char map_x = 0;
 unsigned char map_y = 0;
 unsigned char map_tile_count = 0;
-unsigned char map_type = 5;
+unsigned char map_type = 0;
 char cpu_cmdr_count = 0;
-
-// struct battle_map_data{
-//   int player_start_pos[8], cpu_start_pos[20];
-//   char cpu_commander_ids[80];
-//   int event_positions[8];
-//   char map_items[6];
-//   int item_positions[6];
-// };
 
 struct battle_map_data{
   int player_start_pos[8],cpu_start_pos[15];
@@ -40,10 +32,7 @@ struct battle_map_data{
 struct battle_map_data battle_map_metadata;
 int capture_position;
 //F, D, C, B, A, S
-// const int map_1_grades[] = {600, 800, 1000, 1200, 1400, 1600};
-// const int map_2_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
-// const int map_3_grades[] = {1000, 1100, 1200, 1300, 1400, 1500};
-const char grades[] = {70,68,67,66,65,83};
+const char grades[] = {83,65,66,67,68,70};
 int *map_grades;
 
 void init_map_data(int map_id)
@@ -54,11 +43,6 @@ void init_map_data(int map_id)
   cpu_cmdr_count = 0;
   offset = ((int)map_id) * MAP_METADATA_SIZE;
 
-  // memcpy(&battle_map_metadata,&map_metadata[offset+5],MAP_METADATA_SIZE-5);
-  // for(i=0; i<MAP_METADATA_SIZE; i++, offset++)
-  // {
-  //   raw_map_data[i] = (char)map_metadata[offset];
-  // }
   ai_objective = map_metadata[offset+1];//raw_map_data[1];
   map_x = map_metadata[offset+2];//raw_map_data[2];
   map_y = map_metadata[offset+3];//raw_map_data[3];
@@ -109,15 +93,15 @@ void load_meta_data_char(char *field, int offset, int len)
 
 char get_map_grade_result(char map_no, int score)
 {
-  char i, grade;
-  grade = 70;
-  for(i=0; i<6; i++)
-  {
-    if(score>=map_grades[i])
-    {
-      // return grades[i];
-      grade = grades[i];
-    }
-  }
-  return grade;
+  // char i, grade;
+  // grade = 70;
+  // for(i=0; i<6; i++)
+  // {
+  //   if(score>=map_grades[i])
+  //   {
+  //     grade = grades[i];
+  //   }
+  // }
+  // return grade;
+  return 0;
 }

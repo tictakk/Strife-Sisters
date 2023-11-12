@@ -1,9 +1,9 @@
 Soldier:
-  .db 35 ;hp
-  .db 21 ;atk
+  .db 40 ;hp
+  .db 20 ;atk
   .db 13 ;def
-  .db 6 ;int
-  .db 8 ;res
+  .db 6  ;int
+  .db 8  ;res
   .db 12 ;spd
   .db 3  ;mov
   .db 100;sta
@@ -12,7 +12,7 @@ Soldier:
   .db 1  ;a_type
   .db 0  ;art
   .db 1  ;points
-  .db 10  ;pow
+  .db 10 ;pow
   .db 0  ;is_cmdr
   .db 10, 10, 0 ;attacks
 

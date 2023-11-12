@@ -312,23 +312,25 @@ void display_party_options_window(char x, char y)
 
 void display_dismiss_select_menu()
 {
+  //BUG: I think this is where organize select show the wrong unit when selecting organize, going back and selecting another cmdr, and selecting organize again
   set_dismiss_select_state();
   remove_cursor();
   reset_cursor();
   load_cursor(23,3,SLIDER_ONE);
 
   update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-  update_unit_stats_window(party_units[0],13,14,1);
+  update_unit_stats_window(party_units[0]&0xFF,13,14,1);
 }
 
 void display_deploy_select_menu()
 {
+  //BUG: I think this is where organize select show the wrong unit when selecting organize, going back and selecting another cmdr, and selecting organize again
   remove_cursor();
   reset_cursor();
   set_deploy_select_state();
   load_cursor(23,3,SLIDER_ONE);
   update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-  update_unit_stats_window(party_units[0],ARMY_STATS_X,ARMY_STATS_Y,1);
+  update_unit_stats_window(party_units[0]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,1);
   update_battle_group_window(ARMY_BATTLE_GROUP_WINDOW_X,ARMY_BATTLE_GROUP_WINDOW_Y); 
 }
 
