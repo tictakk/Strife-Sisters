@@ -63,16 +63,15 @@ char no_of_player_cmdrs = 0;
 char last_command;
 char menu_mask;
 char current_turn;
-char enemy_count;
 char units_lost, units_killed;
-int turn_bonus, killed_bonus, lost_bonus, total_bonus, materials_collected;
+int turn_bonus, killed_bonus, lost_bonus, total_bonus;
 char map_result_status;
 
 char destroy_entity_flag = 0;
 char destroy_entity_id = -1;
 
 int map_boundry_y = 0;
-int map_boundry_x = 0;
+// int map_boundry_x = 0;
 
 int coords[24];
 Entity *selected_entity;
@@ -258,30 +257,6 @@ void destroy_entity(char id)
   select_unit(0);
 }
 
-void remove_unit_from_grid(int grid_pos)
-{
-  char entity_id, i;
-  entity_id = battle_grid[grid_pos]-1;
-
-  battle_grid[grid_pos] = 0;
-  for(i=0; i<352; i++)
-  {
-    if(battle_grid[i] > entity_id)
-    {
-      battle_grid[i] -= 1;
-    }
-  }
-
-  for(i=entity_id; i<num_of_entities-1; i++)
-  {
-    memcpy(&entities[i],&entities[i+1],sizeof(Entity));
-  }
-  reset_satb();
-  hide_menu();
-
-  num_of_entities--;
-}
-
 void move_unit(int to, int from)
 {
   char id;
@@ -331,12 +306,6 @@ char get_range_from_distance(int dist_1, int dist_2)
   return abs(x_1 - x_2) + abs(y_1 - y_2);
 }
 
-void clear_text_field()
-{
-  put_string("                ",1,1);
-  put_string("                ",1,2);
-}
-
 void post_battle_screen()
 {
   s_y_relative = (s_y>>3);
@@ -344,7 +313,6 @@ void post_battle_screen()
   // display_abs_black_panel(0,((s_y+32)/8),32,16);
   hide_npcs(5);
   spr_hide(0);
-  remove_terrain_items();
   satb_update();
 
   display_window_rel(4,6,22,18);
@@ -385,8 +353,6 @@ void post_battle_screen()
 
   write_text(s_x_relative+6,s_y_relative+19,"Total");
   put_number(total_bonus,4,s_x_relative+20,s_y_relative+19);
-  // write_text(s_x_relative+6,s_y_relative+20,"Ore       ");
-  // display_number_incrementing(s_x_relative+24,s_y_relative+20,materials_collected,3);
 
   if(map_result_status == MAP_RESULT_LOSE)
   {
@@ -411,10 +377,9 @@ void post_battle_screen()
   }
   else
   {
-    player_gold = payouts[get_map_grade_result(map_no,total_bonus)];
+    player_gold += payouts[get_map_grade_result(map_no,total_bonus)];
   }
   
-  materials_count += materials_collected;
   wait_for_I_input();
 }
 
@@ -454,14 +419,6 @@ void get_turn_bonus()
 void get_total_bonus()
 {
   total_bonus = killed_bonus + lost_bonus + turn_bonus;
-}
-
-void print_post_battle_info(char *str, int value)
-{
-  clear_text_field();
-  write_text(1,1,str);
-  put_number(value,4,1,2);
-  wait_for_I_input();
 }
 
 void undo()
@@ -560,14 +517,12 @@ void pan_camera_y(int position)
       ++yOffset;
       scroll(0,s_x,--s_y+menu_height,menu_height,224,0xC0);
       draw_npcs(6);
-      cycle_terrain_items();
     }
     else
     {
       --yOffset;
       scroll(0,s_x,++s_y+menu_height,menu_height,224,0xC0);
       draw_npcs(6);
-      cycle_terrain_items();
     }
     satb_update();
     vsync();

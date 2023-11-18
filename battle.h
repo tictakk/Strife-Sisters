@@ -30,6 +30,9 @@
 #define LEFT_SIDE 1
 #define RIGHT_SIDE 2
 
+#define TRAIN_MODE 0
+#define STANDARD_MODE 1
+
 typedef struct {
   char ent_id, active, frame, pal, state, target_team, pos, attacks, 
        target, meter, column, a_bonus, d_bonus, s_bonus, p_bonus;
@@ -60,6 +63,7 @@ const char ranged_attack_chart[9] = {
                                       1, 1, 1
                                     };
 // char vram_temp[256];
+char battle_mode = 0;
 char cmdr_count = 28;
 const int target_square_tiles[] = {
                                     492,652,812,
@@ -71,7 +75,7 @@ const int target_square_tiles[] = {
                                     507,667,927
                                   };
 
-char atker, trgt, meter_queued = 0, unit_meter_queued = 0, position_status = 0;//FINISH THIS STUFF
+char atker, trgt, meter_queued = 0, unit_meter_queued = 0;//, position_status = 0;//FINISH THIS STUFF
 
 int team_one_count, team_two_count;
 int a_def_bonus, a_atk_bonus, t_def_bonus, t_atk_bonus;
@@ -82,6 +86,8 @@ char art_queued = 0, art_unit_id = 0, art_queue_id = 0;
 
 char attack_side, attacker_bonuses, target_bonuses;
 char attacking_bonuses, targeted_bonuses;
+
+// char stunned_count = 0;
 
 BattleUnit battleunits[18];
 
@@ -133,7 +139,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].meter = 0;
   battleunits[index].a_bonus = 0;
   battleunits[index].d_bonus = 0;
-  battleunits[index].s_bonus = 0;
+  battleunits[index].s_bonus = 0; 
   battleunits[index].p_bonus = 0;
   battleunits[index].column = position/3;
 
@@ -405,7 +411,8 @@ void determine_action_state(char b_id)
 
     case MOVE_ART_SUPPORT:
     case MOVE_ART_ATTACK:
-    load_animations_to_vram(battleunits[b_id].unit->id);
+    // load_animations_to_vram(battleunits[b_id].unit->id);
+    transfer_units_to_attack_vram(battleunits[b_id].unit->id);
     set_unit_meter(b_id);
     battleunits[b_id].meter = 0;
     animating++;
@@ -421,15 +428,6 @@ void determine_action_state(char b_id)
   }
 }
 
-// void heal_all(char b_id)
-// {
-//   char target;
-//   target = find_lowest_hp(b_id,battleunits[b_id].ent_id);
-
-//   target_aoe(target,battleunits[b_id].ent_id,IDLE,1,0);
-//   load_animations_to_vram(battleunits[b_id].unit->unit->id);
-// }
-
 void heal_single_unit(char b_id)
 {
   char target;
@@ -437,20 +435,24 @@ void heal_single_unit(char b_id)
 
   // set_unit_heal(b_id);
   battleunits[target].target = 1;
-  load_animations_to_vram(battleunits[b_id].unit->id);
+  // load_animations_to_vram(battleunits[b_id].unit->id);
+  transfer_units_to_attack_vram(battleunits[b_id].unit->id);
 }
 
 void target_multi_row(char b_id, char ranged)
 {
   // set_unit_attack(b_id);
+  // put_number(ranged,4,10,0);
   target_row(find_target_unit(b_id,ranged,NONE));
-  load_animations_to_vram(battleunits[b_id].unit->id);
+  // load_animations_to_vram(battleunits[b_id].unit->id);
+  transfer_units_to_attack_vram(battleunits[b_id].unit->id);
 }
 
 void target_multi_col(char b_id, char ranged)
 {
   target_col(find_target_unit(b_id,ranged,NONE)/3);
-  load_animations_to_vram(battleunits[b_id].unit->id);
+  // load_animations_to_vram(battleunits[b_id].unit->id);
+  transfer_units_to_attack_vram(battleunits[b_id].unit->id);
 }
 
 void target_single_unit(char b_id, char ranged)
@@ -466,7 +468,8 @@ void target_single_unit(char b_id, char ranged)
   }
   set_unit_target(target);
   highlight_battle_square(target,0xE000);
-  load_animations_to_vram(battleunits[b_id].unit->id);
+  // load_animations_to_vram(battleunits[b_id].unit->id);
+  transfer_units_to_attack_vram(battleunits[b_id].unit->id);
   // if(debug_flag)
   // {
   //   put_number(b_id,3,0,0);
@@ -487,7 +490,8 @@ void target_opponents(char position)
       highlight_battle_square(i,0xE000);
     }
   }
-  load_animations_to_vram(battleunits[position].unit->id);
+  // load_animations_to_vram(battleunits[position].unit->id);
+  transfer_units_to_attack_vram(battleunits[position].unit->id);
 }
 
 void target_allies(char position)
@@ -503,7 +507,8 @@ void target_allies(char position)
       highlight_battle_square(i,0xE000);
     }
   }
-  load_animations_to_vram(battleunits[position].unit->id);
+  // load_animations_to_vram(battleunits[position].unit->id);
+  transfer_units_to_attack_vram(battleunits[position].unit->id);
 }
 
 void target_col(char position)
@@ -523,13 +528,15 @@ void target_col(char position)
 
 void target_row(char position)
 {
-  char i;
-  for(i=0; i<3 - ((position%9)/3); i++)
+  char i, row;
+  
+  row = position % 3;
+  for(i=0; i<3; i++)
   {
-    if((position+(i*3)) < 18 && battleunits[(position+(i*3))].active)
+    if((((position/9)*9)+row)+(i*3) < 18 && battleunits[(((position/9)*9)+row)+(i*3)].active)
     {
-      set_unit_target(position+(3*i));
-      highlight_battle_square(position+(3*i),0xE000);
+      set_unit_target((((position/9)*9)+row)+(i*3));
+      highlight_battle_square((((position/9)*9)+row)+(i*3),0xE000);
     }
   }
 }
@@ -763,10 +770,5 @@ void highlight_battle_square(int square, int pal)
     }
   }
 } 
-
-char get_bonus_mask_by_target()
-{
-
-}
 
 char unit_direction(char b_id);

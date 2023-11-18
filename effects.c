@@ -218,9 +218,6 @@ void remove_effect(char effect_no)
   }
 }
 
-void remove_ice(char n){}
-void remove_fire(char n){}
-
 void remove_effects()
 {
   char i;
@@ -246,17 +243,10 @@ void create_art_by_type(char effect_no, int x, int y, char flip)
     create_healing(x,y,flip);
     break;
 
-    case EFFECT_ATK_3:
-    create_atk_3(x,y);
-    break;
-
     case EFFECT_ATK_UP:
-    create_atk_up(x,y);
-    break;
-
     case EFFECT_DEF_UP:
-    create_def_up(x,y);
-    break;
+    create_word_effect(effect_no,x,y);
+    return;
 
     case EFFECT_ICE:
     create_ice(x,y,flip);
@@ -290,12 +280,6 @@ char create_healing(int x, int y, char flip)
 {
   load_palette(31,lightening_effect_pal,1);
   return create_effect(EFFECT_HEAL,x,y,flip);
-}
-
-char create_capture(int x, int y, char flip)
-{
-  load_palette(31,lightening_effect_pal,1);
-  return create_effect(EFFECT_CAPTURE,x,y,flip);
 }
 
 char create_arrows(int x, int y, char flip)
@@ -336,37 +320,37 @@ char create_hit_spark(int x, int y, char flip)
   return create_effect(EFFECT_HIT_SPARK,x,y,flip);
 }
 
-char create_def_up(int x, int y)
-{
-  return create_effect(EFFECT_DEF_UP,x,y,0);
-}
+// char create_def_up(int x, int y)
+// {
+  // return create_effect(EFFECT_DEF_UP,x,y,0);
+// }
 
-char create_atk_3(int x, int y)
-{
-  return create_effect(EFFECT_ATK_3,x,y,0);
-}
+// char create_atk_up(int x, int y)
+// {
+//   return create_effect(EFFECT_ATK_UP,x,y,0);
+// }
 
-char create_atk_up(int x, int y)
-{
-  return create_effect(EFFECT_ATK_UP,x,y,0);
-}
+// void create_adv_up(int x, int y)
+// {
+//   load_palette(30,effect_pal,1);
+//   return create_effect(EFFECT_ADV,x,y,0);
+// }
 
-void create_adv_up(int x, int y)
-{
-  load_palette(30,effect_pal,1);
-  return create_effect(EFFECT_ADV,x,y,0);
-}
+// void create_miss_effect(int x, int y)
+// {
+//   load_palette(30,effect_pal,1);
+//   return create_effect(EFFECT_MISS,x,y,0);
+// }
 
-void create_miss_effect(int x, int y)
-{
-  load_palette(30,effect_pal,1);
-  return create_effect(EFFECT_MISS,x,y,0);
-}
+// void create_crit_effect(int x, int y)
+// {
+//   load_palette(30,effect_pal,1);
+//   return create_effect(EFFECT_CRIT,x,y,0);
+// }
 
-void create_crit_effect(int x, int y)
+void create_word_effect(char effect, int x, int y)
 {
-  load_palette(30,effect_pal,1);
-  return create_effect(EFFECT_CRIT,x,y,0);
+  return create_effect(effect,x,y,0);
 }
 
 char create_power_wave(int x, int y, char flip)

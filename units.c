@@ -90,7 +90,7 @@ typedef struct{
   char id;
   unsigned char hp, sta;
   int exp;
-  char level; 
+  char level;
 } Unit_Entity;
 
 const char attack_types[] = { 1, 2, 4, 8, 16, 32, 0 };
@@ -116,7 +116,6 @@ void display_unit_types_row(char x, char y)
   put_string("BOW",x+12,y);
   put_string("MAG",x+16,y);
   put_string("UNA",x+20,y);
-  put_string("BEA",x+24,y);
 }
 
 //0 = no advantage, 1 = advantage
@@ -354,32 +353,6 @@ void print_attack_type(char attack_no, char row, char x, char y)
   set_font_pal(10);
 }
 
-void print_target_type_icon(char attack_type, char x, char y)
-{
-  switch(attack_type)
-  {
-    case SINGLE_HIT:
-      put_char(':',x,y);
-      break;
-
-    case MULTI_ROW:
-      put_char('<',x,y);
-      break;
-
-    case MULTI_COL_3:
-      put_char(';',x,y);
-      break;
-
-    case NO_TARGET:
-      put_char('=',x,y);
-      break;
-
-    default:
-      put_char('>',x,y);
-      break;
-  }
-}
-
 void unlock_unit(char unit_id)
 {
   char i, unlockable;
@@ -440,18 +413,4 @@ char level_up_unit(Unit_Entity *unit)
     unit->level++;
   }
   return unit->level;
-}
-
-void level_unit_to(Unit_Entity *unit, char level)
-{
-  int exp_required;
-  if(level <= 1)
-  {
-    unit->exp = 0;
-    unit->level = 1;
-    return;
-  }
-  exp_required = next_level(level);
-  unit->exp = exp_required;
-  level_up_unit(unit);
 }

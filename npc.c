@@ -8,7 +8,6 @@
 #define MAX_UNIT_TYPES (NO_OF_BASIC_TYPE + TOTAL_COMMANDERS)
 #define UNIT_VRAM_START 0x3A00//0x5200
 
-
 #define ALLY_PALETTE 17
 #define ENEMY_PALETTE 18
 #define CMDR_PALETTE 0
@@ -18,13 +17,6 @@ struct npc{
 };
 
 const int NPC_FRAMES[6] = { 0x00, 0x00, 0x00, 0x40, 0x40, 0x40 };
-
-// const char UNIT_PALS[MAX_UNIT_TYPES] = {17,17,17,17,19,
-//                                         17,17,17,17,19,
-//                                         17,25,17,17,26,
-//                                         25,19,19,17,17,
-//                                         24,23,17,25,25,
-//                                         17,17};
 
 int npc_vram[MAX_UNIT_TYPES];
 struct npc npcs[MAX_NPCS];
@@ -82,32 +74,14 @@ void reset_npcs()
   clear_npcs();
 }
 
-void load_npcs(char *data)
-{
-  int i;
-  char x, y, type, pal;
-  i = 0;
-  for(;;)
-  {
-    x = data[i++];
-    if(x == -1)
-    {
-      break;
-    }
-    else
-    {
-      y = data[i++];
-      type = data[i++];
-      pal  = data[i++];
-      add_npc(x,y,type,pal);
-    }
-  }
-}
-
-void add_npc(char x, char y, char type, char pal)
+void add_npc(unsigned char x, unsigned char y, char type, char pal)
 {
   if(npc_count < MAX_NPCS)
   {
+    // put_string("    ",s_x_relative,s_y_relative);
+    // put_number(npc_count,4,s_x_relative,s_y_relative);
+    // wait_for_I_input();
+
     npcs[npc_count].pos_x = x;
     npcs[npc_count].pos_y = y;
     npcs[npc_count].type = type;
@@ -225,8 +199,6 @@ void draw_npcs(char sprite_offset)
   // for(i=63; i>63-npc_count; i--)
   for(i=0;i<npc_count;i++)
   {
-    // put_number(i,4,0,0);
-    // wait_for_I_input();
     x = npcs[i].pos_x << 4;
     y = npcs[i].pos_y << 4;
     draw_npc(63-i,x,y-16,i);
@@ -236,6 +208,11 @@ void draw_npcs(char sprite_offset)
 void draw_npc(char sprite_no, int x, int y, char index)
 {
   int pattern;
+  // put_number(sprite_no,4,s_x_relative,s_y_relative);
+  // put_number(index,4,s_x_relative+5,s_y_relative);
+  // wait_for_I_input();
+  // npcs[index].pos_x = x;
+  // npcs[index].pos_y = y;
   pattern = npc_vram[npcs[index].type];
   spr_make(sprite_no,x,y+yOffset,pattern+NPC_FRAMES[current_frame],FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
 }
@@ -243,35 +220,11 @@ void draw_npc(char sprite_no, int x, int y, char index)
 void destroy_npc(char index)
 {
   char i;
-
+  // put_number(index,5,s_x_relative+5,s_y_relative);
+  // wait_for_I_input();
   for(i=index; i<npc_count; i++)
   {
     memcpy(&npcs[i],&npcs[i+1],sizeof(struct npc));
   }
   npc_count--;
-}
-
-char check_collision(int x, int y)
-{
-  char i;
-  for(i=0; i<npc_count; i++)
-  {
-    if(npcs[i].pos_x * 16 == x && npcs[i].pos_y * 16 == y)
-    {
-      // return npcs[i].type;
-      return i;
-    }
-  }
-  return -1;
-}
-
-char highlight_npc(char npc_no)
-{
-  load_palette(31,sldpal,1);
-  vsync();
-  npcs[npc_no].pal = 31;
-  spr_set(5);
-  spr_pal(31);
-  darken_palette(31);
-  satb_update();
 }

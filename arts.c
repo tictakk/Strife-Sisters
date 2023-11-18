@@ -188,7 +188,8 @@ void load_art(char art_no, int x, int y, char flip)
     // break;
 
     case SPD_UP_ART:
-    create_def_up(x,y);
+    // create_def_up(SPD_UP_ART,x,y);
+    create_word_effect(EFFECT_DEF_UP,x,y);
     break;
 
     // case RAPID_THRUST_ART:

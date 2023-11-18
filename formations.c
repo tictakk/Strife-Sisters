@@ -13,222 +13,222 @@
 #define R_RIGHT 8
 
 // 1 FORMATIONS
-const f0[] = { //0
+const char f0[] = { //0
     0,0,0,
     0,1,0,
     0,0,0
 };
 
-const f1[] = { //1
+const char f1[] = { //1
     0,0,0,
     0,0,0,
     0,1,0
 };
 
-const f2[] = { //2
+const char f2[] = { //2
     0,1,0,
     0,0,0,
     0,0,0
 };
 
 // 2 FORMATIONS
-const f3[] = { //3
-    0,0,0,
+const char f3[] = { //3
     1,0,1,
+    0,0,0,
     0,0,0
 };
 
-const f4[] = { //4
+const char f4[] = { //4
     0,1,0,
     0,0,0,
     0,1,0
 };
 
-const f5[] = { //5
-    0,1,0,
-    0,1,0,
+const char f5[] = { //5
+    1,0,1,
+    0,0,0,
     0,0,0
 };
 
 // 3 FORMATIONS
-const f6[] = { //6
+const char f6[] = { //6
     0,1,0,
     0,1,0,
     0,1,0
 };
 
-const f7[] = { //7
+const char f7[] = { //7
     1,0,1,
     0,1,0,
     0,0,0
 };
 
-const f8[] = { //8
+const char f8[] = { //8
     0,0,0,
     1,0,1,
     0,1,0
 };
 
-const f9[] = { //9
+const char f9[] = { //9
     0,0,0,
     0,1,0,
     1,0,1
 };
 
-const fa[] = { //10
+const char fa[] = { //10
     0,1,0,
     1,0,1,
     0,0,0
 };
 
 // 4 FORMATIONS
-const fb[] = { //11
+const char fb[] = { //11
     1,0,1,
     0,0,0,
     1,0,1
 };
 
-const fc[] = { //12
+const char fc[] = { //12
     1,0,1,
     1,0,1,
     0,0,0
 };
 
-const fd[] = { //13
+const char fd[] = { //13
     0,1,0,
     0,1,0,
     1,0,1
 };
 
-const fe[] = { //14
+const char fe[] = { //14
   0,1,0,
   0,0,0,  
   1,1,1
 };
 
-const ff[] = { //15
+const char ff[] = { //15
   0,1,0,
   1,0,1,
   0,1,0
 };
 
-const f10[] = {//16
+const char f10[] = {//16
   1,1,1,
   0,0,0,
   0,1,0
 };
 
-const f11[] = {//17
+const char f11[] = {//17
   1,1,1,
   0,1,0,
   0,0,0
 };
 
 // 5 FORMATIONS
-const f12[] = {//18
+const char f12[] = {//18
   1,0,1,
   1,0,1,
   0,1,0
 };
 
-  const f13[] = {//19
+  const char f13[] = {//19
   0,0,0,
   1,0,1,
   1,1,1
 };
 
-const f14[] = {//20
+const char f14[] = {//20
   1,1,1,
   0,0,0,
   1,0,1
 };
 
-const f15[] = {//21
+const char f15[] = {//21
   1,0,1,
   1,1,1,
   0,0,0
 };
 
-const f16[] = {//22
+const char f16[] = {//22
   1,0,1,
   0,1,0,
   1,0,1
 };
 
-const f17[] = {//23
+const char f17[] = {//23
   0,1,0,
   1,0,1,
   1,0,1
 };
 
-const f18[] = {
+const char f18[] = {//24
   0,1,0,
   1,1,1,
   0,1,0
 };
 
-const f19[] = {
+const char f19[] = {//25
   0,0,0,
   1,1,1,
   1,0,1
 };
 
-const f1A[] = {
+const char f1A[] = {//26
   0,1,0,
   0,1,0,
   1,1,1
 };
 
 //6 formations
-const f1B[] = {
+const char f1B[] = {//27
   1,1,1,
   1,1,1,
   0,0,0
 };
 
-const f1C[] = {
+const char f1C[] = {//28
   0,1,0,
   1,1,1,
   1,0,1
 };
 
-const f1D[] = {
+const char f1D[] = {//29
   1,0,1,
   1,1,1,
   0,1,0
 };
 
-const f1E[] = {
+const char f1E[] = {//30
   0,1,0,
   1,0,1,
   1,1,1
 };
 
-const f1F[] = {
+const char f1F[] = {//41
   1,0,1,
   1,0,1,
   1,0,1
 };
 
-const f20[] = {
+const char f20[] = {//32
   1,1,1,
   1,0,1,
   0,1,0
 };
 
-const f21[] = {
+const char f21[] = {//33
   1,1,1,
   0,0,0,
   1,1,1
 };
 
-const f22[] = {
+const char f22[] = {//34
   0,0,0,
   1,1,1,
   1,1,1
 };
 
-const f23[] = {
+const char f23[] = {//35
   1,0,1,
   0,1,0,
   1,1,1

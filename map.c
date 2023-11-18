@@ -38,7 +38,7 @@ int *map_grades;
 void init_map_data(int map_id)
 {
   int offset;
-  int i, j;
+  int i;
 
   cpu_cmdr_count = 0;
   offset = ((int)map_id) * MAP_METADATA_SIZE;

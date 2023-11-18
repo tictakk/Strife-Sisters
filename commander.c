@@ -97,20 +97,18 @@ void list_commanders(char x, char y)
   } 
 }
 
-char get_commander_battle_points(char cmdr_id)
+char get_commander_bg_size(char cmdr_id)
 {
-  char bp, i;
-  bp = 0;
-
-  for(i=0; i<9; i++)
+  char i, count;
+  count = 0;
+  for(i=0; i<MAX_ARMY_SIZE; i++)
   {
     if(party_commanders[cmdr_id].bg.units[i].id)
     {
-      load_unit_header(party_commanders[cmdr_id].bg.units[i].id,0);
-      bp += unit_header[0].points;//party_commanders[cmdr_id].bg.units[i].unit->points;
+      count++;
     }
   }
-  return bp;
+  return count;
 }
 
 void check_add_new_commander(char map_no)

@@ -70,12 +70,9 @@ int find_weakest_opp_in_range(char id, char range)
 
 ai()
 {
-  // char f=0;
-  // g=0;
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
-    // put_number(ai_entities[ai_tracker].entity_id,4,0,0);
-    // wait_for_I_input();
+
     ai_do_state(ai_entities[ai_tracker].id);
     check_battle_complete();
     if(map_result_status != MAP_RESULT_NONE)
@@ -157,8 +154,7 @@ void get_opps_in_range(char id, char range)
   int i, pos;
   num_of_units_in_range = 0;
   get_unit_radius(entities[id].pos,range,CPU,0);
-  // put_number(tmp,4,0,0);
-  // wait_for_I_input();
+
   for(i=0; i<map_size+1; i++)
   {
     // pos = map[i].ownX + (map[i].ownY*16);
@@ -179,7 +175,9 @@ char find_weakest_opp(char *units, char count)
   int army_total, weakest_total;
   weakest_id = units[0];
   weakest_total = calc_unit_rating(units[0]);
-  for(i=1; i<count; i++)
+
+
+  for(i=1; i<count; i++)//why did I put i=1?
   {
     id = units[i];
     army_total = calc_unit_rating(id);
@@ -202,7 +200,6 @@ int calc_unit_rating(char id)
     {
       load_unit_header(entities[id].bg->units->id,0);
       total += unit_header[0].def;
-      // total += (int)entities[id].bg->units[i].unit->def;
     }
   }
   return total;
@@ -262,13 +259,16 @@ void do_defend_objective(char ai_id)
 
   for(i=0; i<num_of_units_in_range; i++)
   {
-    if((result = determine_attackable_targets(ai_id,units_in_range[i],mv,rng)))
+    result = determine_attackable_targets(ai_id,units_in_range[i],mv,rng);
+
+    if(result)
     {
-      targetable_units[num_of_targetable_units++];
+      targetable_units[num_of_targetable_units++] = units_in_range[i];
     }
   }
 
   ai_entities[ai_id].target = find_weakest_opp(targetable_units,num_of_targetable_units);
+
   result = determine_attackable_targets(ai_id,ai_entities[ai_id].target,mv,rng);
 
   if(result == 0)
@@ -482,11 +482,6 @@ void do_attack(char ai_id)
 {
   char result, i;
 
-  // if(ai_entities[ai_id].entity_id == 4)
-  // {
-    // put_number(69,3,0,0);
-    // wait_for_I_input();
-  // }
   result = -1;
   satb_update();
   sync(30);
@@ -512,36 +507,6 @@ void do_attack(char ai_id)
   }
 }
 
-// int find_attackable_position(int position, int target_position, char attack_range, char move_range)
-// {
-//   char i, j;
-//   intersecting_size = 0;
-//   get_unit_radius(target_position,attack_range,PLAYER,0);
-//   convert_map_to_array();
-//   get_unit_radius(position,move_range,CPU,0);
-//   for(i=0; i<hit_radius_size; i++)
-//   {
-//     for(j=0; j<map_size; j++)
-//     {
-//       if(opp_hit_radius[i] == map[j].ownPos && 
-//          opp_hit_radius[i] != target_position &&
-//          battle_grid[opp_hit_radius[i]] == 0
-//          )
-//       {
-//         intersecting_tiles[intersecting_size++] = opp_hit_radius[i];
-//       }
-//     }
-//   }
-//   if(intersecting_size > 0)
-//   {
-//     return intersecting_tiles[0];
-//   }
-//   else
-//   {
-//     return -1;
-//   }
-// }
-
 // char is_adjacent(int position)
 // {
 //   if(((position&0xF) - 1) > -1 && battle_grid[position-1] == units_in_range[0])
@@ -566,6 +531,7 @@ void do_attack(char ai_id)
 void do_pass(char ai_id)
 {
   entities[ai_entities[ai_id].entity_id].actionable = 0;
+  unhighlight();
   // check_battle_complete();
 }
 
@@ -589,15 +555,10 @@ int find_nearest_unoccupied_position(int position, int destination, char range, 
   diff_y = abs(closest_y - dest_y);
   closest_total = diff_x + diff_y;
 
-  // put_number(position,5,10,0);
-  // put_number(destination,5,16,0);
-  // wait_for_I_input();
   for(i=0; i<range; i++)
   {
     position = grid[i].ownPos;
 
-    // put_number(position,5,0,0);
-    // wait_for_I_input();
     if(battle_grid[position] == 0 && is_traversable(position))
     {
       pos_x = position & 15;

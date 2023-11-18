@@ -75,42 +75,16 @@
 #define WATER_VRAM 0x2640
 #define WATER_ANIM_ZERO (overworldtiles + 0x1640)
 
-#define RED_CRYSTAL 0x1
-#define BLUE_CRYSTAL 0x2
-#define GREEN_CRYSTAL 0x3
-#define CHEST 0x4
-#define COIN 0x5
-
-typedef struct{
-  int x, y;
-  char item_no, pal;
-}Terrain_Item;
-
 const char def_bonus[TERRAIN_EFFECT_COUNT] = { 0, 10, -10, 20, 20 };
-const char atk_bonus[TERRAIN_EFFECT_COUNT] = { 0, -3, -3, 0, 0 };
-const char type_effect_map[TERRAIN_TYPE_COUNT] = {
-  NORMAL_TERRAIN, NEGATIVE_TERRAIN, DENSE_TERRAIN,
-  NORMAL_TERRAIN, DENSE_TERRAIN, NORMAL_TERRAIN, BUILDING_TERRAIN;
-};
 const char terrain_animation[] = { 0, 1, 0, 2 };
 
-Terrain_Item terrain_items[MAX_TERRAIN_ITEMS];
-int event_terrains[MAX_EVENT_TERRAIN];
 int map_offset = 0;
 char water_frame = 0;
 char water_trigger = 0;
-unsigned char terrain_item_count = 0;
-
-//CHEST -> Gold, used for units and upgrades?
-//BLUE GEM -> Meter boost
-//RED GEM -> Currency to upgrade units
-//GREEN GEM -> Curreny to upgrade stones
-//GOLD GEM -> Calling stone
 
 void load_terrains()
 {
   load_terrain_icons();
-  load_terrain_items();
   load_vram(0x4DB0,cursor,0x10);
 }
 
@@ -121,13 +95,6 @@ void load_terrain_icons()
   load_vram(0x6100,square_extra,0x200);
   load_palette(TERRAIN_ICON_PAL,t_icon_pal,1);
   load_palette(14,square_pal,2);
-}
-
-void load_terrain_items()
-{
-  // load_vram(TERRAIN_ITEM_VRAM,buffs,0xC0);
-  // load_vram(TERRAIN_ITEM_VRAM+0xC0,chest,0x80);
-  // load_palette(30,chest_pal,1);
 }
 
 void put_terrain_effect(int vram, char num, int x, int y, char pal)
@@ -155,44 +122,11 @@ void put_terrain_icon(char terrain_no, int x, int y)
   }
 }
 
-void put_terrain_item(char item_no, int x, int y, char pal)
-{
-  // put_terrain_effect(TERRAIN_ITEM_VRAM,item_no-1,x<<1,y<<1,pal);
-  spr_make(item_no+1,x<<4,(y<<4)-s_y,TERRAIN_ITEM_VRAM+((terrain_items[item_no].item_no-1)<<6),0,0,30,1);
-  spr_show();
-}
-
-void create_terrain_item(char item_no, int x, int y, char pal)
-{
-  // terrain_items[terrain_item_count].frame = terrain_item_count%4;//range(1,3);
-  terrain_items[terrain_item_count].pal = (item_no>GREEN_CRYSTAL)? 15 : 14;
-  terrain_items[terrain_item_count].item_no = item_no;
-  terrain_items[terrain_item_count].x = x;
-  terrain_items[terrain_item_count++].y = y;
-}
-
-void put_terrain_bonus(char terrain_no, int x, int y)
-{
-  char bonus;
-  bonus = terrain_def_bonus(terrain_effect_by_type(terrain_no));
-  put_number(bonus,2,x,y);
-  put_char('%',x+2,y);
-}
-
 char terrain_def_bonus(char te_type)
 {
   return def_bonus[te_type];
 }
 
-char terrain_atk_bonus(char te_type)
-{
-  return atk_bonus[te_type];
-}
-
-char terrain_effect_by_type(char t_type)
-{
-  return type_effect_map[t_type];
-}
 
 char terrain_type(int t_type)
 {
@@ -241,53 +175,5 @@ void swap_water_tiles()
     }
     water_frame %= 4;
     water_trigger = 0;
-//    cycle_terrain_items();
   }
-}
-
-void cycle_terrain_items()
-{
-  char i;
-  for(i=0; i<terrain_item_count; i++)
-  {
-    put_terrain_item(i,terrain_items[i].x,terrain_items[i].y,terrain_items[i].pal);
-  }
-}
-
-void remove_terrain_item(char item_index)
-{
-  char i;
-  //leaving this here to understand how put_tile and map_get_tile is used properly
-  // put_tile(map_get_tile(terrain_items[item_index].x,terrain_items[item_index].y-2),
-          //  terrain_items[item_index].x,terrain_items[item_index].y);
-
-  for(i=item_index; i<terrain_item_count; i++)
-  {
-    memcpy(&terrain_items[i],&terrain_items[i+1],sizeof(Terrain_Item));
-  }
-  spr_hide(item_index+1);
-  terrain_item_count--;
-}
-
-void remove_terrain_items()
-{
-  char i;
-  for(i=0; i<terrain_item_count; i++)
-  {
-    remove_terrain_item(i);
-  }
-  terrain_item_count = 0;
-}
-
-char item_at_position(int position)
-{
-  char i;
-  for(i=0; i<terrain_item_count; i++)
-  {
-    if(((terrain_items[i].y<<4)+terrain_items[i].x) == position)
-    {
-      return i;
-    }
-  }
-  return -1;
 }

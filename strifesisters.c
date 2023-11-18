@@ -203,6 +203,10 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 #define COMMAND_FOCUS 4
 #define COMMAND_STOP 9
 
+#define TILE_HIGHLIGHT 453
+#define TILE_FORMATION 353
+#define TILE_GRAY 291
+
 // #incchr(healthbar,"map/backgrounds/healthbars.pcx");
 // #incpal(healthbarpal,"map/backgrounds/healthbars.pcx");
 #incchr(healthbar,"map/sprites/health.pcx")
@@ -352,33 +356,47 @@ const health_1_24[] = {BAR_1_8, BAR_0_8, BAR_0_8};
 
 const health_none[] = {BAR_0_8, BAR_0_8, BAR_0_8}; 
 
-const int TOP_LEFT_ADDRESS = 0x5B40;
-const int TOP_MIDDLE_ADDRESS = 0x5C20;
-const int TOP_RIGHT_ADDRESS = 0x5D00;
+// const int TOP_LEFT_HIGHLIGHT = 0x62C;
+// const int TOP_RIGHT_HIGHLIGHT = 0x62E;
+// const int BOT_LEFT_HIGHLIGHT = 0x628;
+// const int BOT_RIGHT_HIGHLIGHT = 0x62A;
 
-const int CENTER_LEFT_ADDRESS = 0x5BE0;
-const int CENTER_MIDDLE_ADDRESS = 0x5CC0;
-const int CENTER_RIGHT_ADDRESS = 0x5DA0;
+// const int TOP_LEFT_ADDRESS_TOP[] = { 0x618, 0x619, 0x61A, 0x61B };
+// const int TOP_LEFT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
+// const int TOP_MIDDLE_ADDRESS_TOP[] = { 0x610,0x611, 0x61A, 0x61B };
+// const int TOP_MIDDLE_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
+// const int TOP_RIGHT_ADDRESS_TOP[] = { 0x610, 0x611, 0x61A, 0x61B };
+// const int TOP_RIGHT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x616, 0x617 };
 
-const int BOT_LEFT_ADDRESS = 0x5C80;
-const int BOT_MIDDLE_ADDRESS = 0x5D60;
-const int BOT_RIGHT_ADDRESS = 0x5E40;
+// const int CENTER_LEFT_ADDRESS_TOP[] = { 0x618, 0x619, 0x612, 0x613 };
+// const int CENTER_LEFT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
+// const int CENTER_MIDDLE_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613};
+// const int CENTER_MIDDLE_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
+// const int CENTER_RIGHT_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613 };
+// const int CENTER_RIGHT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x622, 0x623 };
 
-const int top_left[] = {0x80,0x90,0xA0,0xB0,0xC0,0xD0,0x160,0x170};
-const int top_middle[] = {0x00,0x10,0xA0,0xB0,0xC0,0xD0,0x160,0x170};
-const int top_right[] = {0x00,0x10,0xA0,0xB0,0xC0,0xD0,0x120,0x130};
+// const int BOT_LEFT_ADDRESS_TOP[] = { 0x618, 0x619, 0x612, 0x613 };
+// const int BOT_LEFT_ADDRESS_BOT[] = { 0x620, 0x621, 0x61E, 0x61F };
+// const int BOT_MIDDLE_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613 };
+// const int BOT_MIDDLE_ADDRESS_BOT[] = { 0x620, 0x621, 0x61E, 0x61F };
+// const int BOT_RIGHT_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613  };
+// const int BOT_RIGHT_ADDRESS_BOT[] = { 0x620, 0x621, 0x622, 0x623 };
 
-const int center_left[] = {0x80,0x90,0x20,0x30,0xC0,0xD0,0x160,0x170};
-const int center_middle[] = {0x00,0x10,0x20,0x30,0xC0,0xD0,0x160,0x170};
-const int center_right[] = {0x00,0x10,0x20,0x30,0xC0,0xD0,0x120,0x130};
+// const char top_left[2] = { 5, 17 };
+// const char top_middle[] = { 7, 18 };
+// const char top_right[2] = { 9, 19 };
 
-const int bottom_left[] = {0x80,0x90,0x20,0x30,0x140,0x150,0x160,0x170};
-const int bottom_middle[] = {0x00,0x10,0x20,0x30,0x140,0x150,0x160,0x170};
-const int bottom_right[] = {0x00,0x10,0x20,0x30,0x140,0x150,0x120,0x130};
+// const char center_left[2] = { 3, 18 };
+// const char center_middle[2] = { 5, 19 };
+// const char center_right[2] = { 7, 20 };
+
+// const char bottom_left[2] = { 1, 19 };
+// const char bottom_middle[2] = { 3, 20 };
+// const char bottom_right[2] = { 5, 21 };
 
 const char map_level_table[18] = {
-  1, 2, 3, 3, 5,
-  6, 8, 10, 11,
+  1, 2, 3, 4, 7,
+  9, 8, 10, 11,
   12, 18, 18, 18,
   18, 18, 18, 18,
   20
@@ -387,6 +405,7 @@ const char map_level_table[18] = {
 const int payouts[5] = {700, 650, 600, 550, 500};
 
 const unsigned char selector_frames[5] = {0x00, 0x40, 0x80, 0x40, 0x00};
+const char demons[4] = { BLOB_UNIT, HOUND_UNIT, GOLEM_UNIT, DEMON_UNIT };
 
 enum Direction{
 	NO, NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST
@@ -404,8 +423,6 @@ struct Castle castles[NO_OF_CASTLES];
 // struct Commander commanders[TOTAL_COMMANDERS];
 
 char menu_rows = 0;
-// char no_of_party_items;
-char num_of_bad_terrains;
 
 // char party_items[MAX_INVENTORY];
 char menu_height;
@@ -415,6 +432,13 @@ char selector_frame = 0;
 char script_ram[256];
 int map_no = 0;
 
+char training_enemies[10];
+char training_enemies_count = 0;
+char training_enemies_formation = 0;
+
+char owned_formations[45];
+char owned_formation_count = 1;
+char formation_cursor = 0;
 // extern char *script;
 /*
 	MENU STUFF
@@ -479,13 +503,10 @@ int xOffset = 0;
 int n = 0;
 // char g = 0;
 char game_over = 0;
-// char game_loop = 0;
+
 char cursor_x = 0;
 char cursor_y = 0;
-//int red_crystal_count = 0; //bp -> beast points
-//int blue_crystal_count = 0; //ap -> art points
-//int green_crystal_count = 0; //up -> upgrade points
-int materials_count = 0;
+
 char party_units_size = 0;
 
 char no_miss_flag = 0;
@@ -496,11 +517,32 @@ char prebattle_flag = 99;
 char demo_select_x = 5;
 char demo_select_y = 31;
 
+char demo_flag = 0;
+
+unsigned char current_formation[9];
+
 // char *script;
 
 void main()
 {
   char in;
+  training_enemies[0] = 0;
+  training_enemies[1] = 0;
+  training_enemies[2] = 0;
+  training_enemies[3] = 0;
+  training_enemies[4] = 0;
+  training_enemies[5] = 0;
+  training_enemies[6] = 0;
+  training_enemies[7] = 0;
+  training_enemies[8] = 0;
+  training_enemies[9] = 0;
+
+  owned_formations[0] = 1;
+  owned_formations[5] = 1;
+  owned_formations[8] = 1;
+  owned_formations[13] = 1;
+
+  owned_formation_count = 4;
 	//setup (one time)
   psgInit(5);
   psgOn(0);
@@ -532,14 +574,8 @@ void main()
   party_commanders[2].tactic_id = TACTIC_DASH;
 	for(;;)
 	{
-    // unlock_all_units();
+    unlock_all_units();
     // unlock_unit(SWORD_UNIT);
-    // unlock_unit(ARCHER_UNIT);
-    // unlock_unit(CLERIC_UNIT);
-    // unlock_unit(WITCH_UNIT);
-    // unlock_unit(DANCER_UNIT);
-    // unlock_unit(KNIGHT_UNIT);
-    // unlock_unit(WITCH_UNIT);
     // simulate_battle(SWORD_UNIT,FIGHTER_UNIT);
 		// display_intro();
     display_demo();
@@ -587,13 +623,22 @@ void display_demo()
   put_string("Demo",14,17);
   put_string("Press Run",12,19);
   put_string("| Laconic Software 2023",4,24);
-  // psgPlay(0);
+  if(demo_flag)
+  {
+    psgPlay(0);
+  }
   while(loop)
   {
     if(joytrg(0) & JOY_RUN)
     {
-      // select_level(0);
-      select_level_menu();
+      if(demo_flag)
+      {
+        select_level(0);
+      }
+      else
+      {
+        select_level_menu();
+      }
       loop = 0;
     }
     else if(ticky++ < 50)
@@ -646,24 +691,25 @@ void select_level_menu()
 
 void select_level(char level)
 {
+  preload_commanders_map_1();
   switch(level)
   {
-    case 0: demo_select_x = 5; demo_select_y = 31; preload_commanders_map_1(); return;
-    case 1: demo_select_x = 3; demo_select_y = 27; preload_commanders_map_2(); return;
-    case 2: demo_select_x = 1; demo_select_y = 23; preload_commanders_map_3(); return;
-    case 3: demo_select_x = 5; demo_select_y = 19; preload_commanders_map_4(); return;//preload_default(6); return;
-    case 4: demo_select_x = 9; demo_select_y = 19; preload_default(8); return;
-    case 5: demo_select_x = 9; demo_select_y = 22; preload_commanders_map_6(); return;
-    case 6: demo_select_x = 11; demo_select_y = 25; preload_commanders_map_7(); return;
-    case 7: demo_select_x = 10; demo_select_y = 30; preload_commanders_map_8(); return;
-    case 8: demo_select_x = 18; demo_select_y = 29; preload_commanders_map_9(); return;
-    case 9: demo_select_x = 20; demo_select_y = 26; preload_default(15); return;
-    case 10: demo_select_x = 24; demo_select_y = 27; preload_default(16); return;
-    case 11: demo_select_x = 27; demo_select_y = 27; preload_default(17); return;
-    case 12: demo_select_x = 28; demo_select_y = 24; preload_default(18); return;
-    case 13: demo_select_x = 26; demo_select_y = 22; preload_default(19); return;
-    case 14: demo_select_x = 23; demo_select_y = 22; preload_default(20); return;
-    case 15: demo_select_x = 20; demo_select_y = 21; preload_default(20); return;
+    case 0: demo_select_x = 5; demo_select_y = 31; return; //preload_commanders_map_1(); return;
+    case 1: demo_select_x = 3; demo_select_y = 27; return; //preload_commanders_map_1(); return;
+    case 2: demo_select_x = 1; demo_select_y = 23; return; //preload_commanders_map_1(); return;
+    case 3: demo_select_x = 5; demo_select_y = 19; return; //preload_commanders_map_4(); return;
+    case 4: demo_select_x = 9; demo_select_y = 19; return; //preload_commanders_map_4(); return;
+    case 5: demo_select_x = 9; demo_select_y = 22; return; //preload_commanders_map_4(); return;
+    case 6: demo_select_x = 11; demo_select_y = 25; return; //preload_commanders_map_4(); return;
+    case 7: demo_select_x = 10; demo_select_y = 30; return; //preload_commanders_map_8(); return;
+    case 8: demo_select_x = 18; demo_select_y = 29; return; //preload_commanders_map_9(); return;
+    case 9: demo_select_x = 20; demo_select_y = 26; return; //preload_default(15); return;
+    case 10: demo_select_x = 24; demo_select_y = 27; return; //preload_default(16); return;
+    case 11: demo_select_x = 27; demo_select_y = 27; return; //preload_default(17); return;
+    case 12: demo_select_x = 28; demo_select_y = 24; return; //preload_default(18); return;
+    case 13: demo_select_x = 26; demo_select_y = 22; return; //preload_default(19); return;
+    case 14: demo_select_x = 23; demo_select_y = 22; return; //preload_default(20); return;
+    case 15: demo_select_x = 20; demo_select_y = 21; return; //preload_default(20); return;
     // default: demo_select_x = 10; demo_select_y = 30; preload_default(); return;
     // default: 
     // demo_select_x = 5; demo_select_y = 31; preload_commanders_map_1(); return;
@@ -698,41 +744,8 @@ void preload_commanders_map_1()
   add_commander_to_party(name0,REI);
 
   load_unit_to_cmdr(0,4,REI,1,1);
-}
-
-void preload_commanders_map_2()
-{
-  party_size = 0;
-  add_commander_to_party(name0,REI);
-  add_commander_to_party(name1,VIOLET);
-  // add_commander_to_party(name2,KING);
-
-  // load_unit_to_cmdr(0,7,CLERIC_UNIT,0,3);
-  // load_unit_to_cmdr(0,2,SWORD_UNIT,0,3);
-  // load_unit_to_cmdr(0,0,SWORD_UNIT,0,3);
-  load_unit_to_cmdr(0,4,REI,1,1);
-
-  // load_unit_to_cmdr(1,6,ARCHER_UNIT,0,3);
-  // load_unit_to_cmdr(1,8,ARCHER_UNIT,0,3);
-  load_unit_to_cmdr(1,4,VIOLET,1,1);
-  // load_unit_to_cmdr(1,7,CLERIC_UNIT,0,2);
-
-  // load_unit_to_cmdr(2,3,SPEAR_UNIT,0,3);
-  // load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
-  // load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
-  // load_unit_to_cmdr(2,1,KING,1,3);
-}
-
-void preload_commanders_map_3()
-{
-  party_size = 0;
-  add_commander_to_party(name0,REI);
-  add_commander_to_party(name1,VIOLET);
-
-  load_unit_to_cmdr(0,4,REI,1,3);
-  load_unit_to_cmdr(1,4,VIOLET,1,3);
-
-  player_gold = 550;
+  load_unit_to_cmdr(0,1,SWORD_UNIT,0,1);
+  party_commanders[0].bg.formation = 5;
 }
 
 void preload_commanders_map_4()
@@ -756,166 +769,100 @@ void preload_commanders_map_4()
   unlock_unit(ARCHER_UNIT);
   unlock_unit(CLERIC_UNIT);
 
-  player_gold = 550;
+  player_gold = 0;
 }
 
-void preload_commanders_map_6()
-{
-  party_size = 0;
+// void preload_commanders_map_8()
+// {
+//   party_size = 0;
 
-  add_commander_to_party(name0,REI);
-  add_commander_to_party(name1,VIOLET);
-  add_commander_to_party(name2,KING);
+//   add_commander_to_party(name0,REI);
+//   add_commander_to_party(name1,VIOLET);
+//   add_commander_to_party(name2,KING);
+//   add_commander_to_party(name3,TINKER);
 
-  load_unit_to_cmdr(0,0,REI,1,5);
-  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,4);
-  load_unit_to_cmdr(0,7,ARCHER_UNIT,0,4);
-  load_unit_to_cmdr(0,6,CLERIC_UNIT,0,4);
-  load_unit_to_cmdr(0,2,RAIDER_UNIT,0,4);
+//   load_unit_to_cmdr(0,1,REI,1,9);
+//   load_unit_to_cmdr(0,8,ARCHER_UNIT,0,9);
+//   load_unit_to_cmdr(0,6,ARCHER_UNIT,0,9);
+//   load_unit_to_cmdr(0,7,CLERIC_UNIT,0,9);
+//   load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,9);
+//   load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,9);
 
-  load_unit_to_cmdr(1,4,VIOLET,1,5);
-  load_unit_to_cmdr(1,0,BRAWLER_UNIT,0,4);
-  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,4);
-  load_unit_to_cmdr(1,2,BRAWLER_UNIT,0,4);
-  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,4);
+//   load_unit_to_cmdr(1,4,VIOLET,1,9);
+//   load_unit_to_cmdr(1,0,GOLEM_UNIT,0,9);
+//   load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,9);
+//   load_unit_to_cmdr(1,2,GOLEM_UNIT,0,9);
+//   load_unit_to_cmdr(1,6,CLERIC_UNIT,0,9);
+//   load_unit_to_cmdr(1,8,WITCH_UNIT,0,9);
 
-  load_unit_to_cmdr(2,3,KING,1,5);
-  load_unit_to_cmdr(2,0,SWORD_UNIT,0,4);
-  load_unit_to_cmdr(2,2,SWORD_UNIT,0,4);
-  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,4);
-  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,4);
+//   load_unit_to_cmdr(2,4,KING,1,9);
+//   load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,9);
+//   load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,9);
+//   load_unit_to_cmdr(2,3,SPEAR_UNIT,0,9);
+//   load_unit_to_cmdr(2,5,SPEAR_UNIT,0,9);
+//   load_unit_to_cmdr(2,7,CLERIC_UNIT,0,9);
 
-  unlock_unit(SWORD_UNIT);
-  unlock_unit(ARCHER_UNIT);
-  unlock_unit(CLERIC_UNIT);
+//   load_unit_to_cmdr(3,6,TINKER,1,9);
+//   load_unit_to_cmdr(3,3,DANCER_UNIT,0,9);
+//   load_unit_to_cmdr(3,5,DANCER_UNIT,0,9);
+//   load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,9);
+//   load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,9);
+//   load_unit_to_cmdr(3,8,CLERIC_UNIT,0,9);
 
-  player_gold = 550;
-}
+//   unlock_unit(SWORD_UNIT);
+//   unlock_unit(ARCHER_UNIT);
+//   unlock_unit(CLERIC_UNIT);
 
-void preload_commanders_map_7()
-{
-  party_size = 0;
+//   player_gold = 550;
+// }
 
-  add_commander_to_party(name0,REI);
-  add_commander_to_party(name1,VIOLET);
-  add_commander_to_party(name2,KING);
+// void preload_commanders_map_9()
+// {
+//   party_size = 0;
 
-  load_unit_to_cmdr(0,0,REI,1,7);
-  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,7);
-  load_unit_to_cmdr(0,7,ARCHER_UNIT,0,7);
-  load_unit_to_cmdr(0,6,CLERIC_UNIT,0,7);
-  load_unit_to_cmdr(0,2,RAIDER_UNIT,0,7);
+//   add_commander_to_party(name0,REI);
+//   add_commander_to_party(name1,VIOLET);
+//   add_commander_to_party(name2,KING);
+//   add_commander_to_party(name3,TINKER);
 
-  load_unit_to_cmdr(1,4,VIOLET,1,7);
-  load_unit_to_cmdr(1,0,BRAWLER_UNIT,0,7);
-  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,7);
-  load_unit_to_cmdr(1,2,BRAWLER_UNIT,0,7);
-  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,7);
+//   load_unit_to_cmdr(0,1,REI,1,10);
+//   load_unit_to_cmdr(0,8,ARCHER_UNIT,0,10);
+//   load_unit_to_cmdr(0,6,ARCHER_UNIT,0,10);
+//   load_unit_to_cmdr(0,4,ARCHER_UNIT,0,10);
+//   load_unit_to_cmdr(0,7,CLERIC_UNIT,0,10);
+//   load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,10);
+//   load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,10);
 
-  load_unit_to_cmdr(2,3,KING,1,7);
-  load_unit_to_cmdr(2,0,SWORD_UNIT,0,7);
-  load_unit_to_cmdr(2,2,SWORD_UNIT,0,7);
-  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,7);
-  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,7);
+//   load_unit_to_cmdr(1,4,VIOLET,1,10);
+//   load_unit_to_cmdr(1,0,GOLEM_UNIT,0,10);
+//   load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,10);
+//   load_unit_to_cmdr(1,2,GOLEM_UNIT,0,10);
+//   load_unit_to_cmdr(1,6,CLERIC_UNIT,0,10);
+//   load_unit_to_cmdr(1,8,WITCH_UNIT,0,10);
+//   load_unit_to_cmdr(1,7,WITCH_UNIT,0,10);
 
-  unlock_unit(SWORD_UNIT);
-  unlock_unit(ARCHER_UNIT);
-  unlock_unit(CLERIC_UNIT);
+//   load_unit_to_cmdr(2,4,KING,1,10);
+//   load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,10);
+//   load_unit_to_cmdr(2,1,KNIGHT_UNIT,0,10);
+//   load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,10);
+//   load_unit_to_cmdr(2,3,SPEAR_UNIT,0,10);
+//   load_unit_to_cmdr(2,5,SPEAR_UNIT,0,10);
+//   load_unit_to_cmdr(2,7,CLERIC_UNIT,0,10);
 
-  player_gold = 550;
-}
+//   load_unit_to_cmdr(3,6,TINKER,1,10);
+//   load_unit_to_cmdr(3,3,DANCER_UNIT,0,10);
+//   load_unit_to_cmdr(3,5,DANCER_UNIT,0,10);
+//   load_unit_to_cmdr(3,4,DANCER_UNIT,0,10);
+//   load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,10);
+//   load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,10);
+//   load_unit_to_cmdr(3,8,CLERIC_UNIT,0,10);
 
-void preload_commanders_map_8()
-{
-  party_size = 0;
+//   unlock_unit(SWORD_UNIT);
+//   unlock_unit(ARCHER_UNIT);
+//   unlock_unit(CLERIC_UNIT);
 
-  add_commander_to_party(name0,REI);
-  add_commander_to_party(name1,VIOLET);
-  add_commander_to_party(name2,KING);
-  add_commander_to_party(name3,TINKER);
-
-  load_unit_to_cmdr(0,1,REI,1,9);
-  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,9);
-  load_unit_to_cmdr(0,6,ARCHER_UNIT,0,9);
-  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,9);
-  load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,9);
-  load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,9);
-
-  load_unit_to_cmdr(1,4,VIOLET,1,9);
-  load_unit_to_cmdr(1,0,GOLEM_UNIT,0,9);
-  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,9);
-  load_unit_to_cmdr(1,2,GOLEM_UNIT,0,9);
-  load_unit_to_cmdr(1,6,CLERIC_UNIT,0,9);
-  load_unit_to_cmdr(1,8,WITCH_UNIT,0,9);
-
-  load_unit_to_cmdr(2,4,KING,1,9);
-  load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,9);
-  load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,9);
-  load_unit_to_cmdr(2,3,SPEAR_UNIT,0,9);
-  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,9);
-  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,9);
-
-  load_unit_to_cmdr(3,6,TINKER,1,9);
-  load_unit_to_cmdr(3,3,DANCER_UNIT,0,9);
-  load_unit_to_cmdr(3,5,DANCER_UNIT,0,9);
-  load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,9);
-  load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,9);
-  load_unit_to_cmdr(3,8,CLERIC_UNIT,0,9);
-
-  unlock_unit(SWORD_UNIT);
-  unlock_unit(ARCHER_UNIT);
-  unlock_unit(CLERIC_UNIT);
-
-  player_gold = 550;
-}
-
-void preload_commanders_map_9()
-{
-  party_size = 0;
-
-  add_commander_to_party(name0,REI);
-  add_commander_to_party(name1,VIOLET);
-  add_commander_to_party(name2,KING);
-  add_commander_to_party(name3,TINKER);
-
-  load_unit_to_cmdr(0,1,REI,1,10);
-  load_unit_to_cmdr(0,8,ARCHER_UNIT,0,10);
-  load_unit_to_cmdr(0,6,ARCHER_UNIT,0,10);
-  load_unit_to_cmdr(0,4,ARCHER_UNIT,0,10);
-  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,10);
-  load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,10);
-  load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,10);
-
-  load_unit_to_cmdr(1,4,VIOLET,1,10);
-  load_unit_to_cmdr(1,0,GOLEM_UNIT,0,10);
-  load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,10);
-  load_unit_to_cmdr(1,2,GOLEM_UNIT,0,10);
-  load_unit_to_cmdr(1,6,CLERIC_UNIT,0,10);
-  load_unit_to_cmdr(1,8,WITCH_UNIT,0,10);
-  load_unit_to_cmdr(1,7,WITCH_UNIT,0,10);
-
-  load_unit_to_cmdr(2,4,KING,1,10);
-  load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,10);
-  load_unit_to_cmdr(2,1,KNIGHT_UNIT,0,10);
-  load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,10);
-  load_unit_to_cmdr(2,3,SPEAR_UNIT,0,10);
-  load_unit_to_cmdr(2,5,SPEAR_UNIT,0,10);
-  load_unit_to_cmdr(2,7,CLERIC_UNIT,0,10);
-
-  load_unit_to_cmdr(3,6,TINKER,1,10);
-  load_unit_to_cmdr(3,3,DANCER_UNIT,0,10);
-  load_unit_to_cmdr(3,5,DANCER_UNIT,0,10);
-  load_unit_to_cmdr(3,4,DANCER_UNIT,0,10);
-  load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,10);
-  load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,10);
-  load_unit_to_cmdr(3,8,CLERIC_UNIT,0,10);
-
-  unlock_unit(SWORD_UNIT);
-  unlock_unit(ARCHER_UNIT);
-  unlock_unit(CLERIC_UNIT);
-
-  player_gold = 550;
-}
+//   player_gold = 550;
+// }
 
 void preload_default(char level)
 {
@@ -966,7 +913,10 @@ void display_outro()
   load_palette(0,sisters_logo_pal,1);
   cls();
   disp_on();
-  // psgPlay(2);
+  if(demo_flag)
+  {
+    psgPlay(2);
+  }
 	put_string("Thanks for playing!",7,14);
   // vsync(30);
   // sync(2);
@@ -1219,42 +1169,42 @@ void draw_32x32_sprite(char type, int x, int y)
   switch(type)
   {
     case SWORD_UNIT:
-      load_palette(30,soldierpal,1);
+      load_palette(20,soldierpal,1);
       // load_vram(0x6E00,attack,0x100);
       break;
 
     case SNIPER_UNIT:
-      load_palette(30,sniperbtlpal,1);
+      load_palette(20,sniperbtlpal,1);
       // load_vram(0x6E00,sniperbtl,0x100);
     break;
 
     case BERSERKER_UNIT:
-      load_palette(30,berserkerbtl,1);
+      load_palette(20,berserkerbtl,1);
       // load_vram(0x6E00,berserkerbtl,0x100);
     break;
 
     case KNIGHT_UNIT:
-      load_palette(30,spearpal,1);
+      load_palette(20,soldierpal,1);
       // load_vram(0x6E00,knightbtl,0x100);
       break;
 
     case PALADIN_UNIT:
-      load_palette(30,paladinpal,1);
+      load_palette(20,paladinpal,1);
       // load_vram(0x6E00,paladinbtl,0x100);
       break;
 
     case SPEAR_UNIT:
-      load_palette(30,spearpal,1);
+      load_palette(20,soldierpal,1);
       // load_vram(0x6E00,attack2,0x100);
       break;
 
     case STALKER_UNIT:
-      load_palette(30,stalkerpal,1);
+      load_palette(20,stalkerpal,1);
       // load_vram(0x6E00,stalkerbtl,0x100);
       break;
 
     case ARCHER_UNIT:
-      load_palette(30,musketbtlpal,1);
+      load_palette(20,musketbtlpal,1);
       // load_vram(0x6E00,musketbtl,0x100);
       break;
 
@@ -1264,85 +1214,74 @@ void draw_32x32_sprite(char type, int x, int y)
       break;
 
     case HOUND_UNIT:
-      load_palette(30,houndbtlpal,1);
+      load_palette(20,houndbtlpal,1);
       // load_vram(0x6E00,houndbtl,0x100);
       break;
 
     case CLERIC_UNIT:
-      load_palette(30,magebtlpal,1);
+      load_palette(20,magebtlpal,1);
       // load_vram(0x6E00,magebtl,0x100);
       break;
 
     case WITCH_UNIT:
-      load_palette(30,witchbtlpal,1);
+      load_palette(20,witchbtlpal,1);
       // load_vram(0x6E00,witchbtl,0x100);
       break;
 
     case PRIEST_UNIT:
-      load_palette(30,witchbtlpal,1);
+      load_palette(20,witchbtlpal,1);
       // load_vram(0x6E00,priestbtl,0x100);
       break;
 
     case MAGE_UNIT:
-      load_palette(30,magebtlpal,1);
+      load_palette(20,magebtlpal,1);
       // load_vram(0x6E00,magebtl,0x100);
       break;
     
     case BLACK_MAGE_UNIT:
-      load_palette(30,magebtlpal+32,1);
+      load_palette(20,magebtlpal+32,1);
       // load_vram(0x6E00,magebtl,0x100);
       break;
 
-    case FIGHTER_UNIT:
-      load_palette(30,monkbtlpal,1);
-      // load_vram(0x6E00,fighterbtl,0x100);
-      break;
-
     case BRAWLER_UNIT:
-      load_palette(30,monkbtlpal,1);
+      load_palette(20,monkbtlpal,1);
       // load_vram(0x6E00,brawlerbtl,0x100);
       break;
 
-    case MONK_UNIT:
-      load_palette(30,monkbtlpal,1);
-      // load_vram(0x6E00,monkbtl,0x100);
-      break;
-
     case LANCER_UNIT:
-      load_palette(30,spearpal,1);
+      load_palette(20,soldierpal,1);
       // load_vram(0x6E00,lancerbtl,0x100);
       break;
 
     case RAIDER_UNIT:
-      load_palette(30,raiderbtlpal,1);
+      load_palette(20,raiderbtlpal,1);
       // load_vram(0x6E00,raiderbtl,0x100);
       break;
 
-    case THIEF_UNIT:
-      load_palette(30,thfpal,1);
-      // load_vram(0x6E00,thiefbtl,0x100);
+    case BLOB_UNIT:
+      load_palette(20,blobbattlepal,1);
       break;
 
     case REI:
-      load_palette(30,rei_battle_pal,1);
+      load_palette(20,rei_battle_pal,1);
       break;
     
     case VIOLET:
-      load_palette(30,violet_battle_pal,1);
+      load_palette(20,violet_battle_pal,1);
       break;
 
     case TINKER:
-      load_palette(30,tinker_battle_pal,1);
+      load_palette(20,tinker_battle_pal,1);
       break;
     
     case DANCER_UNIT:
-      load_palette(30,dancerbigpal,1);
+      load_palette(20,dancerbigpal,1);
       break;
 
     // default:
       // spr_hide(1);
   }
-  spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,30,1);
+  spr_make(1,x,y,0x6E00,FLIP_MAS|SIZE_MAS,SZ_32x32,20,1);
 }
 
 void print_unit_attack_icon(char a_type, int x, int y)
@@ -1528,12 +1467,17 @@ void affirmative_question(char *request, char x, char y)
 
 void affirm_statement(char *line1, char *line2, char x, char y)
 {
+  char cur_x_holder, cur_y_holder;
+  cur_x_holder = cursor_x;
+  cur_y_holder = cursor_y;
   display_window_rel(x,y,10,14);
   put_string(line1,s_x_relative+x+1,s_y_relative+y+5);
   put_string(line2,s_x_relative+x+1,s_y_relative+y+6);
   load_cursor(x+3,y+8,SLIDER_ONE);
   put_string("ok",s_x_relative+x+4,s_y_relative+y+8);
   wait_for_I_input();
+  cursor_x = cur_x_holder;
+  cursor_y = cur_y_holder;
 }
 
 initialize_commanders()
@@ -1555,6 +1499,7 @@ initialize_commanders()
       cmdr->bg.units[j].exp = 0;
       cmdr->bg.units[j].level = 0;
       cmdr->bg.units[j].sta = 0;
+      cmdr->bg.formation = 0;
     }
     // cmdr->bg.calling_stone = 0;
 	}
@@ -1651,6 +1596,11 @@ void modify_palette(int pal_num, char modifier)
 	}
 }
 
+void tile_highlight(int pal_num, char pal_index, int rgb)
+{
+  set_color((pal_num<<4)+(pal_index+5),rgb);
+} 
+
 void display_item(char cmdr_id, int index, int x, int y)
 {
 	int bat[16];
@@ -1716,28 +1666,6 @@ void load_portrait(char cmdr_id, char index)
 		load_palette(12+index,unknown_pal,1);
 		break;
 	}
-}
-
-void display_cmdr_info(char cmdr_id, int x, int y)
-{
-	int _sx, _sy;
-	_sx = s_x / 8 + x;
-	_sy = s_y / 8 + y + 2;
-
-	put_string("      ",_sx,_sy+1);
-	put_string("   ",_sx,_sy+2);
-	put_string("   ",_sx+3,_sy+2);
-	put_string("   ",_sx,_sy+3);
-	put_string("   ",_sx+3,_sy+3);
-
-	put_string("AT",_sx,_sy+1);
-	// put_number(commanders[cmdr_id].unit->atk+1,2,_sx+2,_sy+1);
-	put_string("DF",_sx,_sy+2);
-	put_string("SP",_sx,_sy+3);
-
-	put_string("Lv",_sx+5,_sy-4);
-	put_string("HP",_sx+5,_sy-3);
-	put_string("AP",_sx+5,_sy-2);
 }
 
 int script_offset_lookup(unsigned char area, unsigned char state, char id)
@@ -1964,25 +1892,6 @@ void display_window(int x, int y, char row_x, char row_y, int vaddr)
   }
 }
 
-void display_abs_black_panel(int x, int y, int width, int length)
-{
-	int j, i, z, vaddr, offset, size;
-	size = length * width;
-	offset = y*8+x;
-  vaddr = vram_addr(x,y);
-  
-  vreg(0x00,vaddr);
-
-	for(j=0; j<length; j++)
-	{
-		for(i=0; i<width; i++)
-		{
-      vreg(0x02,0xA4A0);
-		}
-    sync(2);
-	}
-}
-
 void change_background_palette(int tile, int pal)
 {
 	int vaddr, x, y;
@@ -2082,50 +1991,6 @@ void animate_healthbar(char starting_percentage, char ending_percentage, char x,
   }
 }
 
-void display_meter_bars(char bar_count, char x, char y)
-{
-  switch(bar_count)
-  {
-    case 0: put_string("   ",x,y);break;
-    case 1: 
-    put_char('&',x,y);
-    put_string("  ",x+1,y);
-    break;
-
-    case 2:
-    put_char('$',x,y);
-    put_string("  ",x+1,y);
-    break;
-
-    case 3:
-    put_char('$',x,y);
-    put_char('&',x+1,y);
-    put_string(" ",x+2,y);
-    break;
-
-    case 4:
-    put_char('$',x,y);
-    put_char('$',x+1,y);
-    put_string(" ",x+2,y);
-    break;
-
-    case 5:
-    put_char('$',x,y);
-    put_char('$',x+1,y);
-    put_char('&',x+2,y);
-    break;
-  }
-}
-
-void add_units_to_cmdr(char cmdr_id, char unit_type, char count)
-{
-  char i;
-  for(i=0; i<count; i++)
-  {
-    load_unit_to_cmdr(cmdr_id,i,unit_type,0);
-  }
-}
-
 int min(int a, int b)
 {
 	(a<b)? a : b;
@@ -2188,12 +2053,7 @@ void load_commanders_gfx(int cmdr_id, int address)
     load_vram(address,zaladin,0x100);
     load_palette(get_commander_palette(cmdr_id),zaladin_pal,1);
     break;
-		// default:
-		// load_vram(address,sld,0x100);
-    // load_commander_palette()
-		// load_palette(get_commander_palette(cmdr_id),sldpal,1);
-		// break;
-	}
+  }
 }
 
 void load_commanders_palettes()
@@ -2290,21 +2150,23 @@ void list_commander_army(Battlegroup *bg, char x, char y)
 
 int get_iso_x(int iso_x, int iso_y, int sprite_x, int sprite_y)
 {
-  int x_start, x; 
+  int x_start, x;
   
   x_start = (iso_x * 16);
 
   x = (sprite_x * 16) + (sprite_y * 16);
+  // put_number(x_start+x,5,s_x_relative,s_y_relative);
   return x_start+x;
 }
 
 int get_iso_y(int iso_x, int iso_y, int sprite_x, int sprite_y)
 {
-  int y_start, y; 
+  int y_start, y;
   
   y_start = (iso_y * 8);
 
   y = (sprite_y * 8) - (sprite_x * 8);
+  // put_number(y_start+y,5,s_x_relative+6,s_y_relative);
   return y_start+y;
 }
 
@@ -2349,6 +2211,8 @@ int calc_percentage(int num, int denom)
 
 void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr, char level)
 {
+  // put_number(unit_type,5,s_x_relative,s_y_relative);
+  // wait_for_I_input();
   load_unit_header(unit_type,0);
   apply_level_to_header(level,0);
   party_commanders[cmdr_id].bg.units[unit_pos].id = unit_type;//&unit_list[unit_type];
@@ -2364,6 +2228,8 @@ void load_predefined_group_layout(char *units, char cmdr_id, char level)
 
   highest_id = units[0];
   party_commanders[cmdr_id].sprite_type = highest_id;
+
+  // put_string("       ",s_x_relative,s_y_relative);
 
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
@@ -2383,15 +2249,12 @@ void load_predefined_group_layout(char *units, char cmdr_id, char level)
 
 void display_popup(char *str, char screen)
 {
-  // s_y_relative = (s_y/8);
   scroll(screen,0,s_y+32,32,224,0x80);
   display_window_rel(11,11,10,4);
   write_text(12,12+s_y_relative,str);
 
   sync(100);
-  // load_map(0,2,0,0,16,29);
   scroll(screen,0,s_y+32,32,224,0xC0);
-  // s_y_relative = 0;
 }
 
 void swap_commander_units(char cmdr_id, char first, char second)
@@ -2423,10 +2286,11 @@ void swap_commander_units(char cmdr_id, char first, char second)
 
 void swap_convoy_units(char cmdr_id, char unit_id, char convoy_id)
 {
-  int tmp_id;
+  int tmp_id;//0x3765 == party_units ram address (convoy)
 
   load_unit_header(party_commanders[cmdr_id].bg.units[unit_id].id,0);
   load_unit_header(party_units[convoy_id]&0xFF,1);
+
   tmp_id = party_commanders[cmdr_id].bg.units[unit_id].id;
   tmp_id += party_commanders[cmdr_id].bg.units[unit_id].level << 8;
 
@@ -2459,88 +2323,106 @@ void put_green_square(char x, char y)
   }
 }
 
-void higlight_tile(char tile)
-{
-  switch(tile)
-  {
-    case 0: highlight_iso_tile(BOT_LEFT_ADDRESS,bottom_left); break;
-    case 1: highlight_iso_tile(BOT_MIDDLE_ADDRESS,bottom_middle); break;
-    case 2: highlight_iso_tile(BOT_RIGHT_ADDRESS,bottom_right); break;
-    case 3: highlight_iso_tile(CENTER_LEFT_ADDRESS,center_left); break;
-    case 4: highlight_iso_tile(CENTER_MIDDLE_ADDRESS,center_middle); break;
-    case 5: highlight_iso_tile(CENTER_RIGHT_ADDRESS,center_right); break;
-    case 6: highlight_iso_tile(TOP_LEFT_ADDRESS,top_left); break;
-    case 7: highlight_iso_tile(TOP_MIDDLE_ADDRESS,top_middle); break;
-    case 8: highlight_iso_tile(TOP_RIGHT_ADDRESS,top_right); break;
-  }
-}
+// void highlight_tile(char tile, int pal)
+// {
+//   switch(tile)
+//   {
+//     case 0: highlight_iso_tile(tile,BOT_LEFT_ADDRESS_TOP,BOT_LEFT_ADDRESS_BOT,bottom_left,pal); break;
+//     case 1: highlight_iso_tile(tile,BOT_MIDDLE_ADDRESS_TOP,BOT_MIDDLE_ADDRESS_BOT,bottom_middle,pal); break;
+//     case 2: highlight_iso_tile(tile,BOT_RIGHT_ADDRESS_TOP,BOT_RIGHT_ADDRESS_BOT,bottom_right,pal); break;
+//     case 3: highlight_iso_tile(tile,CENTER_LEFT_ADDRESS_TOP,CENTER_LEFT_ADDRESS_BOT,center_left,pal); break;
+//     case 4: highlight_iso_tile(tile,CENTER_MIDDLE_ADDRESS_TOP,CENTER_MIDDLE_ADDRESS_BOT,center_middle,pal); break;
+//     case 5: highlight_iso_tile(tile,CENTER_RIGHT_ADDRESS_TOP,CENTER_RIGHT_ADDRESS_BOT,center_right,pal); break;
+//     case 6: highlight_iso_tile(tile,TOP_LEFT_ADDRESS_TOP,TOP_LEFT_ADDRESS_BOT,top_left,pal); break;
+//     case 7: highlight_iso_tile(tile,TOP_MIDDLE_ADDRESS_TOP,TOP_MIDDLE_ADDRESS_BOT,top_middle,pal); break;
+//     case 8: highlight_iso_tile(tile,TOP_RIGHT_ADDRESS_TOP,TOP_RIGHT_ADDRESS_BOT,top_right,pal); break;
+//   }
+// }
 
-void highlight_iso_tile(int address, int *highlight_array)
-{
-  int i, num;
+// void highlight_iso_tile(char tile_index, int address_hi[4], int address_lo[4], char pts[2], int pal)
+// {
+//   int data[4];
+//   int addr_1, addr_2, i;
 
-  for(i=0; i<4; i++)
-  {
-    num = highlight_array[i];
-    load_vram(address+(i*0x10),square_extra+num,0x10);
-  }
+//   addr_1 = vram_addr(pts[0]+s_x_relative,pts[1]+s_y_relative);
+//   addr_2 = addr_1+64;
 
-  for(i=0; i<4; i++)
-  {
-    num = highlight_array[i+4];
-    load_vram(address+(0xC0)+(i*0x10),square_extra+num,0x10);
-  }
-}
+//   for(i=0; i<4; i++)
+//   {
+//     data[i] = pal + address_hi[i];
+//   }
+//   if(check_top_left_highlight(tile_index))
+//   {
+//     data[0] = (check_top_left_highlight(tile_index) << 12) + TOP_LEFT_HIGHLIGHT;
+//     data[1] = (check_top_left_highlight(tile_index) << 12) + TOP_LEFT_HIGHLIGHT+1;
+//   }
+//   if(check_top_right_highlight(tile_index))
+//   {
+//     data[2] = (check_top_right_highlight(tile_index) << 12) + TOP_RIGHT_HIGHLIGHT;
+//     data[3] = (check_top_right_highlight(tile_index) << 12) + TOP_RIGHT_HIGHLIGHT + 1;
+//   }
 
-void read_tile_data(int address, int *highlight_array)
-{
-  int i, num;
+//   load_vram(addr_1,data,4);
 
-  for(i=0; i<4; i++)
-  {
-    num = highlight_array[i];
-    load_vram(address+(i*0x10),square_extra+num,0x10);
-  }
+//   for(i=0; i<4; i++)
+//   {
+//     data[i] = pal + address_lo[i];
+//   }
 
-  for(i=0; i<4; i++)
-  {
-    num = highlight_array[i+4];
-    load_vram(address+(0xC0)+(i*0x10),square_extra+num,0x10);
-  }
-}
+//   if(check_bot_left_highlight(tile_index))
+//   {
+//     data[0] = (check_bot_left_highlight(tile_index) << 12) + BOT_LEFT_HIGHLIGHT;
+//     data[1] = (check_bot_left_highlight(tile_index) << 12) + BOT_LEFT_HIGHLIGHT + 1;
+//   }
 
-void put_highlight_square(char position, char x, char y)
-{
-  int p[3];
-  int vaddr, highlight_addr;
+//   if(check_bot_right_highlight(tile_index))
+//   {
+//     data[2] = (check_bot_right_highlight(tile_index) << 12) + BOT_RIGHT_HIGHLIGHT;
+//     data[3] = (check_bot_right_highlight(tile_index) << 12) + BOT_RIGHT_HIGHLIGHT + 1;
+//   }
 
-  highlight_addr = (position%2 == 0)? 0x54F4 : 0x44F4;
-  vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
+//   load_vram(addr_2,data,4);
+// }
 
-  p[0] = highlight_addr;
-  p[1] = highlight_addr;
-  p[2] = highlight_addr;
+// char check_top_left_highlight(char tile_index)
+// {
+//   if(debug_flag)
+//   {
+//     put_hex(iso_map_highlight[tile_index-1],4,s_x_relative,s_y_relative);
+//   }
+//   if(tile_index%3 && iso_map_highlight[tile_index-1])
+//   {
+//     return iso_map_highlight[tile_index-1];
+//   }
+//   return 0;
+// }
 
-  load_vram(vaddr,p,3);
-  load_vram(vaddr+64,p,3);
-  load_vram(vaddr+128,p,3);
-}
+// char check_top_right_highlight(char tile_index)
+// {
+//   if(tile_index > 5 && iso_map_highlight[tile_index+3])
+//   {
+//     return iso_map_highlight[tile_index+3];
+//   }
+//   return 0;
+// }
 
-void put_blue_square(char x, char y)
-{
-  int p[3];
-  int vaddr;
+// char check_bot_left_highlight(char tile_index)
+// {
+//   if(tile_index > 2 && iso_map_highlight[tile_index-3])
+//   {
+//     return iso_map_highlight[tile_index-3];
+//   }
+//   return 0;
+// }
 
-  vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
-
-  p[0] = 0x94F4;
-  p[1] = 0x94F4;
-  p[2] = 0x94F4;
-
-  load_vram(vaddr,p,3);
-  load_vram(vaddr+64,p,3);
-  load_vram(vaddr+128,p,3);
-}
+// char check_bot_right_highlight(char tile_index)
+// {
+//   if((tile_index != 2 && tile_index  != 5 && tile_index != 8) && iso_map_highlight[tile_index+1])
+//   { 
+//     return iso_map_highlight[tile_index+1];
+//   }
+//   return 0;
+// }
 
 int roundUp(int num, int div)
 {
@@ -2559,11 +2441,6 @@ int roundUp(int num, int div)
 int next_level(int level)
 {
   return (cube(level)*6/4) + ((level*level) / 2) + (2*level);
-}
-
-int next_level_cost(int level)
-{
-  return level * 50;
 }
 
 // 1) 1 + 0 + 2 = 3 -> 1 blob
@@ -2595,6 +2472,12 @@ void add_unit_to_convoy(char unit_id, char level)
   }
 }
 
+void load_selector(int address,char pal)
+{
+  load_vram(address,selector,0x40);
+  load_palette(pal,selectorpal,1);
+}
+
 void display_selector(char spr_num, int x, int y, char pal) //info sprites
 {
   spr_make(spr_num,x,y,0x68C0,0,NO_FLIP|SZ_16x16,pal,1);
@@ -2609,14 +2492,119 @@ void cycle_selector()
 
 void flash_selector(int location_x, int location_y, unsigned char flashes)
 {
+  //TODO: I think this cycles too long
   char i;
   display_selector(0,location_x,location_y,16);
   for(i=0; i<(flashes*5); i++)
   {
-    cycle_selector();    
+    cycle_selector();
     satb_update();
     sync(6);
   }
+}
+
+void start_training_battle(char cmdr_id)
+{
+  fade_screen();
+  disp_off();
+  reset_satb();
+  heal_commander_bg(cmdr_id);
+
+  // load_predefined_group_layout(training_enemies,MAX_PARTY_COMMANDERS,0);
+
+  add_entity(PLAYER,cmdr_id,0,party_commanders,1);
+  add_entity(CPU,0,1,enemy_commanders,0);
+
+  battle_loop(0,1,1,0,0,0);
+
+  cleanup_entities();
+}
+
+void randomize_enemy_team()
+{
+  char i;
+  char random_demon;
+  char *formation;
+
+  for(i=0; i<10; i++)
+  {
+    training_enemies[i] = 0;
+  }
+
+  srand(clock_tt());
+  random_demon = get_random_demon();
+  formation = get_random_formation();
+
+  training_enemies[0] = random_demon;
+  training_enemies_count = 0;
+
+  for(i=0; i<9; i++)
+  {
+    if(formation[i])
+    {
+      training_enemies[i+1] = random_demon;
+      training_enemies_count++;
+    }
+  }
+}
+
+char get_next_formation(char cursor)
+{
+  char i, form_counter;
+  form_counter = 0;
+  for(i=0; i<45; i++)
+  {
+    if(owned_formations[i])
+    {
+      if(form_counter++ == cursor)
+      {
+        return i;
+      }
+    }
+  }
+  return 0;
+}
+
+void draw_formation(char f_id)
+{
+  char i;
+  char *formation;
+
+  formation = get_formation(f_id);
+  for(i=0; i<9; i++)
+  {
+    if(formation[i])
+    {
+      tile_highlight(0xE,i,TILE_FORMATION);
+      current_formation[i] = 1;
+    }
+    else
+    {
+      tile_highlight(0xE,i,TILE_GRAY);
+      current_formation[i] = 0;
+    }
+  }
+}
+
+char valid_formation_placement(char index)
+{
+  return current_formation[index];
+}
+
+char get_random_demon()
+{                     
+  return BLOB_UNIT;
+}
+
+char *get_random_formation()
+{
+  training_enemies_formation = range(0,2);
+  return get_formation(training_enemies_formation);//f0+(range(0,2) * 9);
+}
+
+char *get_formation(char f_num)
+{
+  return f0 + (f_num*9);
 }
 
 void display_number_incrementing(char x, char y, int final_number, char num_len)
