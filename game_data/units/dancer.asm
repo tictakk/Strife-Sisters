@@ -1,7 +1,7 @@
 Dancer:
   .db 30  ;hp
   .db 20  ;atk
-  .db 10  ;def
+  .db 11  ;def
   .db 14  ;int
   .db 10  ;res
   .db 23  ;spd

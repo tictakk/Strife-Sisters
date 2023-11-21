@@ -7,7 +7,7 @@
 #define ATTACK_MODE 4
 #define PLAYER_ARMY_MODE 5
 #define TACTIC_SELECT_MODE 6
-#define ATTACK_WITH_ART 7
+#define RUN_MENU_MODE 7
 #define EXPLORE_MODE 8
 #define EXPLORE_MENU_MODE 9
 #define ACTION_MODE 10
@@ -17,9 +17,9 @@
 #define MENU_ATTACK 1
 #define MENU_MOVE 0
 #define MENU_TAKE 2
-#define MENU_END 3
-#define MENU_GRP 4
-#define MENU_TURN 5
+#define MENU_END 5
+#define MENU_SQUAD 4
+#define MENU_DEFEND 3
 #define MENU_SPLIT 2
 #define MENU_MERGE 99
 #define MENU_BACK 4
@@ -37,13 +37,13 @@
 #define MASK_MOVE 0x01
 #define MASK_ATTACK 0x02
 #define MASK_END 0x04
-#define MASK_TURN 0x08
+#define MASK_DEFEND 0x08
 #define MASK_CALLING 0x10
-#define MASK_GROUP 0x20
+#define MASK_SQUAD 0x20
 
 typedef struct{
   int pos;
-  char team, id, actionable, movable, tactic_meter, has_cmdr;
+  char team, id, actionable, movable, tactic_meter, has_cmdr, defend;
   Battlegroup *bg;
 } Entity;
 
@@ -123,6 +123,7 @@ void add_entity(char team, char id, int pos, struct Commander *commanders, char 
   entities[num_of_entities].actionable = 1;
   entities[num_of_entities].movable = 1;
   entities[num_of_entities].tactic_meter = 0;
+  entities[num_of_entities].defend = 0;
   entities[num_of_entities].has_cmdr = has_cmdr;
   // party_commanders[entities[num_of_entities]].meter = 0;
   if(team == PLAYER)
@@ -373,7 +374,7 @@ void post_battle_screen()
 
   if(map_no == 0 || map_no == 1)
   {
-    player_gold += 100;
+    player_gold += 500;
   }
   else
   {
@@ -438,7 +439,7 @@ void undo()
 
 void set_menu_mask(char entity_id)
 {
-  menu_mask = MASK_GROUP;
+  menu_mask = MASK_SQUAD;
   if(entities[entity_id].team == CPU)
   {
     return;
@@ -447,7 +448,8 @@ void set_menu_mask(char entity_id)
   {
     menu_mask |= MASK_CALLING;
   }
-  menu_mask |= MASK_TURN;
+
+  // menu_mask |= MASK_TURN;
   // if(arts[entities[entity_id].bg->art].cost <= party_commanders[entities[entity_id].id].meter && entities[entity_id].bg->art)
   // {
   //   menu_mask |= 0x10;
@@ -455,6 +457,7 @@ void set_menu_mask(char entity_id)
   if(entities[entity_id].actionable)
   {
     menu_mask |= 0x0E;
+    menu_mask |= MASK_DEFEND;
     if(entities[entity_id].movable)
     {
       menu_mask |= 0x1;
@@ -466,8 +469,8 @@ void mask_menu()
 {
   if(menu_mask & 0x01) { put_string("MOV",20,1); }
   if(menu_mask & 0x02) { put_string("ATK",20,2); }
-  if(menu_mask & 0x04) { put_string("END",24,2); }
-  if(menu_mask & 0x08) { put_string("TRN",28,2); }
+  if(menu_mask & 0x04) { put_string("DEF",24,2); }
+  if(menu_mask & 0x08) { put_string("END",28,2); }
   if(menu_mask & 0x10) { put_string("TAC",24,1); }
   if(menu_mask & 0x20) { put_string("SQD",28,1); }
 }
@@ -475,14 +478,21 @@ void mask_menu()
 void print_menu()
 {
   set_font_pal(11);
-  put_string("MOV",20,1);
-  put_string("ATK",20,2);
-  put_string("END",24,2);
-  put_string("TRN",28,2);
-  put_string("TAC",24,1);
-  put_string("SQD",28,1);
+  put_string("MOV ",20,1);
+  put_string("ATK ",20,2);
+  put_string("DEF ",24,2);
+  put_string("END ",28,2);
+  put_string("TAC ",24,1);
+  put_string("SQD ",28,1);
   set_font_pal(10);
   mask_menu();
+}
+
+void print_run_menu()
+{
+  put_string("TURN",20,1);
+  menu_mask = MASK_SQUAD;
+  menu_mask |= 0x1;
 }
 
 void center_camera(int position)

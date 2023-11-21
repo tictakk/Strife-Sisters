@@ -58,7 +58,7 @@ int party_last_pos = 0;
 char swap_unit = 0;
 char selected_unit = 0;
 char selected_cmdr = 0;
-char selected_formation = 0;
+// char selected_formation = 0;
 char commander_select_cursor = 0;
 char cursor_column = 0;
 char last_selected_cursor = 0;
@@ -130,7 +130,7 @@ void update_unit_stats_window(char unit_id, char x, char y, char level)
   {
     spr_hide(1);
   }
-  print_unit_stats(unit_id,x+1,s_y_relative+y+6,level);
+  print_unit_stats(unit_id,x+1,s_y_relative+y+6,party_commanders[selected_cmdr].bg.units[selected_unit].level);
   // print_unit_fullname(unit_id,x+3,s_y_relative+y+1);
 }
 
@@ -251,18 +251,21 @@ void update_battle_group_window(char cmdr, char x, char y, char offset, char end
 {
   char i;
 
+  // put_number(i+5,4,s_x_relative,s_y_relative);
+  // wait_for_I_input();
   for(i=offset; i<(npc_count-endset); i++)
   {
     // put_string("   ",s_x_relative,s_y_relative);
     // put_number(i,3,s_x_relative,s_y_relative);
     // wait_for_I_input();
     draw_iso_npc(5+i,x,y,npcs[i].pos_x,npcs[i].pos_y,i);
+    // spr_show(5+i);
   }
 }
 
 void draw_iso_npc(char sprite_no, int iso_x, int iso_y, int sprite_x, int sprite_y, char spr_index)
 {
-  int x_start, y_start, x, y; 
+  int x_start, y_start, x, y;
   
   y_start = (iso_y * 8)-6;
   x_start = (iso_x * 8)+8;
@@ -270,6 +273,7 @@ void draw_iso_npc(char sprite_no, int iso_x, int iso_y, int sprite_x, int sprite
   x = (sprite_x * 16) + (sprite_y * 16); //this works because it's starting from bottom left, ending top right.
   y = (sprite_y * 8) - (sprite_x * 8); //won't work same if going another direction.
   draw_npc(sprite_no+5,x_start+x,y_start+y,spr_index);
+  spr_show(sprite_no+5);
 }
 
 void display_return_select_menu()
@@ -352,7 +356,7 @@ void display_training_enemy_window()
     put_string("Cost",s_x_relative+23,s_y_relative+12);
     set_font_pal(GOLD_FONT);
     put_number(25*training_enemies_count,3,s_x_relative+28,s_y_relative+12);
-    if(!owned_formations[training_enemies_formation])
+    if(owned_formations[training_enemies_formation] == 0)
     {
       put_string("new form",s_x_relative+23,s_y_relative+9);
     }
@@ -376,7 +380,7 @@ void display_formation_menu()
   reset_npcs();
   formation_cursor = 0;
   set_menu_state(FORMATION_MENU,owned_formation_count,45);
-  draw_formation(owned_formations[0]);
+  draw_formation(0);
   put_string("Form.",s_x_relative+15,s_y_relative+15);
   put_number(formation_cursor+1,2,s_x_relative+14,s_y_relative+16);
   put_char('/',s_x_relative+16,s_y_relative+16);
@@ -426,7 +430,8 @@ void display_train_options_window()
   display_window_rel(10,0,12,14);
   put_string("Generate",s_x_relative+12,s_y_relative+2);
   put_string("Organize",s_x_relative+12,s_y_relative+3);
-  put_string("Begin",s_x_relative+12,s_y_relative+4);
+  put_string("Train",s_x_relative+12,s_y_relative+4);
+  put_string("Challenge",s_x_relative+12,s_y_relative+5);
 }
 
 void set_train_options_menu()
@@ -436,7 +441,7 @@ void set_train_options_menu()
   load_cmdr_army_to_npcs(selected_cmdr);
   load_cmdr_army_to_npcs(MAX_PARTY_COMMANDERS);
 
-  set_menu_state(TRAIN_OPTIONS_MENU,3,0);
+  set_menu_state(TRAIN_OPTIONS_MENU,4,0);
   remove_cursor();
   reset_cursor();
   
@@ -467,45 +472,74 @@ void option_select_menu_buttons()
     // hide_npcs(5);
     reset_npcs();
     randomize_enemy_team();
-    load_predefined_group_layout(training_enemies,MAX_PARTY_COMMANDERS,0);
+    load_predefined_group_layout(training_enemies,MAX_PARTY_COMMANDERS,map_no);
 
     load_cmdr_army_to_npcs(selected_cmdr);
     load_cmdr_army_to_npcs(MAX_PARTY_COMMANDERS);
 
     refresh_battle_units();
     display_training_enemy_window();
-    // update_battle_group_window(selected_cmdr,1,17,0,training_enemies_count);
-    // update_battle_group_window(MAX_PARTY_COMMANDERS,19,17,npc_count-training_enemies_count,0);
   }
 
   if(commander_select_cursor == 1)//organize
   {
+    display_window_rel(22,0,10,14);
     display_oraganize_select_menu(1,17);
     return;
   }
 
   if(commander_select_cursor == 2)//begin
   {
-    if(training_enemies_count)
-    {
-      start_training_battle(selected_cmdr);
-      reload_overworld();
-      display_train_select_menu();
-      training_enemies_count = 0;
-      set_menu_state(TRAIN_OPTIONS_MENU,3,0);
-      remove_cursor();
-      load_cursor(11,2,SLIDER_ONE);
-      commander_select_cursor = 0;
-      draw_formation(selected_formation);
-      load_cmdr_army_to_npcs(selected_cmdr);
-      // update_battle_group_window(selected_cmdr,1,17,0,training_enemies_count);
-      refresh_battle_units();
-    }
+    start_training();
+    return;
+  }
+
+  if(commander_select_cursor == 3)
+  {
+    start_challenge_battle();
+    return;
   }
 }
 
-void   refresh_battle_units()
+void start_training()
 {
+  if(training_enemies_count && (training_enemies_count * 25) <= player_gold)
+  {
+    player_gold -= (training_enemies_count * 25);
+    start_battle(selected_cmdr,TRAIN_MODE);
+    reload_overworld();
+    display_train_select_menu();
+    training_enemies_count = 0;
+    set_menu_state(TRAIN_OPTIONS_MENU,4,0);
+    remove_cursor();
+    load_cursor(11,2,SLIDER_ONE);
+    commander_select_cursor = 0;
+    training_enemies[0] = NO_UNIT;
+    draw_formation(selected_formation);
+    load_cmdr_army_to_npcs(selected_cmdr);
+    refresh_battle_units();
+  }
+}
+
+void start_challenge_battle()
+{
+  start_battle(selected_cmdr,CHALLENGE_MODE);
+  reload_overworld();
+  display_train_select_menu();
+  training_enemies_count = 0;
+  set_menu_state(TRAIN_OPTIONS_MENU,4,0);
+  remove_cursor();
+  load_cursor(11,2,SLIDER_ONE);
+  commander_select_cursor = 0;
+  training_enemies[0] = NO_UNIT;
+  draw_formation(selected_formation);
+  load_cmdr_army_to_npcs(selected_cmdr);
+  refresh_battle_units();
+}
+
+void  refresh_battle_units()
+{
+  hide_npcs(5);
   update_battle_group_window(selected_cmdr,1,17,0,training_enemies_count);
 
   if(primary_menu == TRAIN_MENU)
@@ -545,6 +579,7 @@ void menu_back_button()
     if(primary_menu == TRAIN_MENU)
     {
       update_unit_stats_window(NO_UNIT,23,0,1);
+      display_training_enemy_window();
       set_train_options_menu();
     }
     else
@@ -615,16 +650,19 @@ void menu_back_button()
   {
     hide_npcs(5);
     reset_npcs();
+    spr_hide(1);
     display_train_select_menu();
     return;
   }
-
   if(menu_state == FORMATION_MENU)
   {
     draw_formation(party_commanders[selected_cmdr].bg.formation);
     display_party_options_window(10,0);
+
     load_cmdr_army_to_npcs(selected_cmdr);
+    load_cmdr_army_to_npcs(MAX_PARTY_COMMANDERS);
     refresh_battle_units();
+
     put_string("        ",s_x_relative+13,s_y_relative+15);
     put_string("        ",s_x_relative+13,s_y_relative+16);
     formation_cursor = 0;

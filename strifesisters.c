@@ -207,6 +207,10 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 #define TILE_FORMATION 353
 #define TILE_GRAY 291
 
+#incchr(laconic,"assets/laconic.pcx")
+#incpal(laconic_pal,"assets/laconic.pcx")
+#incbat(laconic_bat,"assets/laconic.pcx",0x1000,0,0,32,24)
+
 // #incchr(healthbar,"map/backgrounds/healthbars.pcx");
 // #incpal(healthbarpal,"map/backgrounds/healthbars.pcx");
 #incchr(healthbar,"map/sprites/health.pcx")
@@ -321,10 +325,11 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 
 #define MAX_PARTY_UNIT_SIZE 16
 
-const char *objective0 = "Defeat all enemies";
-const char *objective1 = "Defend the objective";
-const char *objective2 = "Secure the objective";
-const char *objective3 = "Kill the target";
+// const char *objective0 = "Defeat all enemies";
+// const char *objective1 = "Defend the objective";
+// const char *objective2 = "Secure the objective";
+// const char *objective3 = "Kill the target";
+
 
 const health_full[] = {BAR_8_8, BAR_8_8, BAR_8_8};
 
@@ -356,44 +361,6 @@ const health_1_24[] = {BAR_1_8, BAR_0_8, BAR_0_8};
 
 const health_none[] = {BAR_0_8, BAR_0_8, BAR_0_8}; 
 
-// const int TOP_LEFT_HIGHLIGHT = 0x62C;
-// const int TOP_RIGHT_HIGHLIGHT = 0x62E;
-// const int BOT_LEFT_HIGHLIGHT = 0x628;
-// const int BOT_RIGHT_HIGHLIGHT = 0x62A;
-
-// const int TOP_LEFT_ADDRESS_TOP[] = { 0x618, 0x619, 0x61A, 0x61B };
-// const int TOP_LEFT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
-// const int TOP_MIDDLE_ADDRESS_TOP[] = { 0x610,0x611, 0x61A, 0x61B };
-// const int TOP_MIDDLE_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
-// const int TOP_RIGHT_ADDRESS_TOP[] = { 0x610, 0x611, 0x61A, 0x61B };
-// const int TOP_RIGHT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x616, 0x617 };
-
-// const int CENTER_LEFT_ADDRESS_TOP[] = { 0x618, 0x619, 0x612, 0x613 };
-// const int CENTER_LEFT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
-// const int CENTER_MIDDLE_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613};
-// const int CENTER_MIDDLE_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x61E, 0x61F };
-// const int CENTER_RIGHT_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613 };
-// const int CENTER_RIGHT_ADDRESS_BOT[] = { 0x61C, 0x61D, 0x622, 0x623 };
-
-// const int BOT_LEFT_ADDRESS_TOP[] = { 0x618, 0x619, 0x612, 0x613 };
-// const int BOT_LEFT_ADDRESS_BOT[] = { 0x620, 0x621, 0x61E, 0x61F };
-// const int BOT_MIDDLE_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613 };
-// const int BOT_MIDDLE_ADDRESS_BOT[] = { 0x620, 0x621, 0x61E, 0x61F };
-// const int BOT_RIGHT_ADDRESS_TOP[] = { 0x610, 0x611, 0x612, 0x613  };
-// const int BOT_RIGHT_ADDRESS_BOT[] = { 0x620, 0x621, 0x622, 0x623 };
-
-// const char top_left[2] = { 5, 17 };
-// const char top_middle[] = { 7, 18 };
-// const char top_right[2] = { 9, 19 };
-
-// const char center_left[2] = { 3, 18 };
-// const char center_middle[2] = { 5, 19 };
-// const char center_right[2] = { 7, 20 };
-
-// const char bottom_left[2] = { 1, 19 };
-// const char bottom_middle[2] = { 3, 20 };
-// const char bottom_right[2] = { 5, 21 };
-
 const char map_level_table[18] = {
   1, 2, 3, 4, 7,
   9, 8, 10, 11,
@@ -415,13 +382,14 @@ struct Castle{
   char map_id;
   int pos;
   enum Direction direction;
-  char unlocked[3];
+  char unlocked;
+  char range_lo, range_hi;
 };
 
 char j_1, j_2;
 struct Castle castles[NO_OF_CASTLES];
 // struct Commander commanders[TOTAL_COMMANDERS];
-
+char selected_formation = 0;
 char menu_rows = 0;
 
 // char party_items[MAX_INVENTORY];
@@ -437,16 +405,10 @@ char training_enemies_count = 0;
 char training_enemies_formation = 0;
 
 char owned_formations[45];
-char owned_formation_count = 1;
+char owned_formation_count = 0;
 char formation_cursor = 0;
 // extern char *script;
-/*
-	MENU STUFF
-*/
 
-#define CONSUMABLE 0
-#define EQUIPABLE 1
-#define ANY_ITEM 2
 /*
 	BATTLE STUFF
 */
@@ -460,7 +422,6 @@ char formation_cursor = 0;
 #incspr(mag,"map/sprites/mage.pcx",2,2)
 #incspr(blobsmall,"map/sprites/blob.pcx")
 #incspr(bnd,"characters/bandit.pcx")
-#incspr(thf,"characters/thief_small.pcx")
 #incspr(dark,"map/sprites/dark.pcx")
 #incspr(gol,"characters/golem_small.pcx")
 #incspr(mnk,"characters/monk.pcx")
@@ -475,7 +436,6 @@ char formation_cursor = 0;
 
 #incpal(danpal,"characters/dancer_small.pcx")
 #incpal(sldpal, "map/sprites/sldpiece.pcx",0,1)
-#incpal(thfpal, "characters/thief_small.pcx")
 // #incpal(cmdrpal, "map/sprites/sprpiece.pcx",2,3)
 #incpal(mskpal,"map/sprites/msktpiece.pcx",0,2)
 #incpal(dmnpal,"map/sprites/demonpiece.pcx")
@@ -500,10 +460,8 @@ int sx = 0;
 int sy = 0;
 int yOffset = 0;
 int xOffset = 0;
-int n = 0;
-// char g = 0;
-char game_over = 0;
 
+char game_over = 0;
 char cursor_x = 0;
 char cursor_y = 0;
 
@@ -525,24 +483,24 @@ unsigned char current_formation[9];
 
 void main()
 {
-  char in;
-  training_enemies[0] = 0;
-  training_enemies[1] = 0;
-  training_enemies[2] = 0;
-  training_enemies[3] = 0;
-  training_enemies[4] = 0;
-  training_enemies[5] = 0;
-  training_enemies[6] = 0;
-  training_enemies[7] = 0;
-  training_enemies[8] = 0;
-  training_enemies[9] = 0;
+  // char in;
+  // training_enemies[0] = 0;
+  // training_enemies[1] = 0;
+  // training_enemies[2] = 0;
+  // training_enemies[3] = 0;
+  // training_enemies[4] = 0;
+  // training_enemies[5] = 0;
+  // training_enemies[6] = 0;
+  // training_enemies[7] = 0;
+  // training_enemies[8] = 0;
+  // training_enemies[9] = 0;
 
   owned_formations[0] = 1;
-  owned_formations[5] = 1;
-  owned_formations[8] = 1;
-  owned_formations[13] = 1;
+  // owned_formations[5] = 1;
+  // owned_formations[8] = 1;
+  // owned_formations[13] = 1;
 
-  owned_formation_count = 4;
+  owned_formation_count = 1;
 	//setup (one time)
   psgInit(5);
   psgOn(0);
@@ -574,8 +532,8 @@ void main()
   party_commanders[2].tactic_id = TACTIC_DASH;
 	for(;;)
 	{
-    unlock_all_units();
-    // unlock_unit(SWORD_UNIT);
+    // unlock_all_units();
+    unlock_unit(SWORD_UNIT);
     // simulate_battle(SWORD_UNIT,FIGHTER_UNIT);
 		// display_intro();
     display_demo();
@@ -615,6 +573,7 @@ void display_demo()
   // load_default_font();
   cls();
   load_background(sisters_logo,sisters_logo_pal,sisters_bat,32,16);
+  // load_background(laconic,laconic_pal,laconic_bat,32,24);
   load_font(font,125,0x4800);
   load_vram(0x4DB0,cursor,0x10);
   load_palette(10,fontpal,3);
@@ -742,10 +701,15 @@ void preload_commanders_map_1()
 {
   party_size = 0;
   add_commander_to_party(name0,REI);
+  // add_commander_to_party(name1,VIOLET);
 
+  party_commanders[0].bg.formation = 0;
   load_unit_to_cmdr(0,4,REI,1,1);
-  load_unit_to_cmdr(0,1,SWORD_UNIT,0,1);
-  party_commanders[0].bg.formation = 5;
+  // load_unit_to_cmdr(0,0,REI,1,4);
+  // load_unit_to_cmdr(0,2,SWORD_UNIT,0,3);
+
+  // load_unit_to_cmdr(1,4,VIOLET,1,3);
+  player_gold = 250;
 }
 
 void preload_commanders_map_4()
@@ -771,50 +735,6 @@ void preload_commanders_map_4()
 
   player_gold = 0;
 }
-
-// void preload_commanders_map_8()
-// {
-//   party_size = 0;
-
-//   add_commander_to_party(name0,REI);
-//   add_commander_to_party(name1,VIOLET);
-//   add_commander_to_party(name2,KING);
-//   add_commander_to_party(name3,TINKER);
-
-//   load_unit_to_cmdr(0,1,REI,1,9);
-//   load_unit_to_cmdr(0,8,ARCHER_UNIT,0,9);
-//   load_unit_to_cmdr(0,6,ARCHER_UNIT,0,9);
-//   load_unit_to_cmdr(0,7,CLERIC_UNIT,0,9);
-//   load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,9);
-//   load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,9);
-
-//   load_unit_to_cmdr(1,4,VIOLET,1,9);
-//   load_unit_to_cmdr(1,0,GOLEM_UNIT,0,9);
-//   load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,9);
-//   load_unit_to_cmdr(1,2,GOLEM_UNIT,0,9);
-//   load_unit_to_cmdr(1,6,CLERIC_UNIT,0,9);
-//   load_unit_to_cmdr(1,8,WITCH_UNIT,0,9);
-
-//   load_unit_to_cmdr(2,4,KING,1,9);
-//   load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,9);
-//   load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,9);
-//   load_unit_to_cmdr(2,3,SPEAR_UNIT,0,9);
-//   load_unit_to_cmdr(2,5,SPEAR_UNIT,0,9);
-//   load_unit_to_cmdr(2,7,CLERIC_UNIT,0,9);
-
-//   load_unit_to_cmdr(3,6,TINKER,1,9);
-//   load_unit_to_cmdr(3,3,DANCER_UNIT,0,9);
-//   load_unit_to_cmdr(3,5,DANCER_UNIT,0,9);
-//   load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,9);
-//   load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,9);
-//   load_unit_to_cmdr(3,8,CLERIC_UNIT,0,9);
-
-//   unlock_unit(SWORD_UNIT);
-//   unlock_unit(ARCHER_UNIT);
-//   unlock_unit(CLERIC_UNIT);
-
-//   player_gold = 550;
-// }
 
 // void preload_commanders_map_9()
 // {
@@ -1137,7 +1057,7 @@ char* get_unit_fullname(char unit_id)
       return "Violet ";
 
     case KING:
-      return "King   ";
+      return "Kingsly ";
 
     case TINKER:
       return "Tinker ";
@@ -1478,6 +1398,38 @@ void affirm_statement(char *line1, char *line2, char x, char y)
   wait_for_I_input();
   cursor_x = cur_x_holder;
   cursor_y = cur_y_holder;
+}
+
+void check_add_new_commander(char map_no)
+{
+  if(map_no == 1 && party_size < 2)
+  {
+    add_commander_to_party(name1, VIOLET);
+    load_unit_to_cmdr(1,4,VIOLET,1,2);
+  }
+  if(map_no == 3 && party_size < 3)
+  {
+    add_commander_to_party(name2,KING);
+    party_commanders[2].bg.formation = 15;
+    if(owned_formations[15] == 0)
+    {
+      owned_formations[15] = 1;
+      owned_formation_count++;
+    }
+    load_unit_to_cmdr(2,3,KING,1,3);
+    load_unit_to_cmdr(2,1,SWORD_UNIT,0,3);
+    load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
+    load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
+    return;
+  }
+
+  if(map_no == 13 && party_size >= 4)
+  {
+    remove_party_commander_from_game(2);
+    add_commander_to_party(name4,TEARLE);
+    load_unit_to_cmdr(3,4,TEARLE,1,14);
+    return;
+  }
 }
 
 initialize_commanders()
@@ -2229,8 +2181,6 @@ void load_predefined_group_layout(char *units, char cmdr_id, char level)
   highest_id = units[0];
   party_commanders[cmdr_id].sprite_type = highest_id;
 
-  // put_string("       ",s_x_relative,s_y_relative);
-
   for(i=0; i<MAX_ARMY_SIZE; i++)
   {
     if(units[i+1])
@@ -2314,128 +2264,12 @@ void put_green_square(char x, char y)
 
   for(i=0; i<8; i++)
   {
-    // p[i] = addr;
     for(j=0; j<12; j++, addr++)
     {
       p[j] = addr;
     }
     load_vram(vaddr+(i*64),p,12);
   }
-}
-
-// void highlight_tile(char tile, int pal)
-// {
-//   switch(tile)
-//   {
-//     case 0: highlight_iso_tile(tile,BOT_LEFT_ADDRESS_TOP,BOT_LEFT_ADDRESS_BOT,bottom_left,pal); break;
-//     case 1: highlight_iso_tile(tile,BOT_MIDDLE_ADDRESS_TOP,BOT_MIDDLE_ADDRESS_BOT,bottom_middle,pal); break;
-//     case 2: highlight_iso_tile(tile,BOT_RIGHT_ADDRESS_TOP,BOT_RIGHT_ADDRESS_BOT,bottom_right,pal); break;
-//     case 3: highlight_iso_tile(tile,CENTER_LEFT_ADDRESS_TOP,CENTER_LEFT_ADDRESS_BOT,center_left,pal); break;
-//     case 4: highlight_iso_tile(tile,CENTER_MIDDLE_ADDRESS_TOP,CENTER_MIDDLE_ADDRESS_BOT,center_middle,pal); break;
-//     case 5: highlight_iso_tile(tile,CENTER_RIGHT_ADDRESS_TOP,CENTER_RIGHT_ADDRESS_BOT,center_right,pal); break;
-//     case 6: highlight_iso_tile(tile,TOP_LEFT_ADDRESS_TOP,TOP_LEFT_ADDRESS_BOT,top_left,pal); break;
-//     case 7: highlight_iso_tile(tile,TOP_MIDDLE_ADDRESS_TOP,TOP_MIDDLE_ADDRESS_BOT,top_middle,pal); break;
-//     case 8: highlight_iso_tile(tile,TOP_RIGHT_ADDRESS_TOP,TOP_RIGHT_ADDRESS_BOT,top_right,pal); break;
-//   }
-// }
-
-// void highlight_iso_tile(char tile_index, int address_hi[4], int address_lo[4], char pts[2], int pal)
-// {
-//   int data[4];
-//   int addr_1, addr_2, i;
-
-//   addr_1 = vram_addr(pts[0]+s_x_relative,pts[1]+s_y_relative);
-//   addr_2 = addr_1+64;
-
-//   for(i=0; i<4; i++)
-//   {
-//     data[i] = pal + address_hi[i];
-//   }
-//   if(check_top_left_highlight(tile_index))
-//   {
-//     data[0] = (check_top_left_highlight(tile_index) << 12) + TOP_LEFT_HIGHLIGHT;
-//     data[1] = (check_top_left_highlight(tile_index) << 12) + TOP_LEFT_HIGHLIGHT+1;
-//   }
-//   if(check_top_right_highlight(tile_index))
-//   {
-//     data[2] = (check_top_right_highlight(tile_index) << 12) + TOP_RIGHT_HIGHLIGHT;
-//     data[3] = (check_top_right_highlight(tile_index) << 12) + TOP_RIGHT_HIGHLIGHT + 1;
-//   }
-
-//   load_vram(addr_1,data,4);
-
-//   for(i=0; i<4; i++)
-//   {
-//     data[i] = pal + address_lo[i];
-//   }
-
-//   if(check_bot_left_highlight(tile_index))
-//   {
-//     data[0] = (check_bot_left_highlight(tile_index) << 12) + BOT_LEFT_HIGHLIGHT;
-//     data[1] = (check_bot_left_highlight(tile_index) << 12) + BOT_LEFT_HIGHLIGHT + 1;
-//   }
-
-//   if(check_bot_right_highlight(tile_index))
-//   {
-//     data[2] = (check_bot_right_highlight(tile_index) << 12) + BOT_RIGHT_HIGHLIGHT;
-//     data[3] = (check_bot_right_highlight(tile_index) << 12) + BOT_RIGHT_HIGHLIGHT + 1;
-//   }
-
-//   load_vram(addr_2,data,4);
-// }
-
-// char check_top_left_highlight(char tile_index)
-// {
-//   if(debug_flag)
-//   {
-//     put_hex(iso_map_highlight[tile_index-1],4,s_x_relative,s_y_relative);
-//   }
-//   if(tile_index%3 && iso_map_highlight[tile_index-1])
-//   {
-//     return iso_map_highlight[tile_index-1];
-//   }
-//   return 0;
-// }
-
-// char check_top_right_highlight(char tile_index)
-// {
-//   if(tile_index > 5 && iso_map_highlight[tile_index+3])
-//   {
-//     return iso_map_highlight[tile_index+3];
-//   }
-//   return 0;
-// }
-
-// char check_bot_left_highlight(char tile_index)
-// {
-//   if(tile_index > 2 && iso_map_highlight[tile_index-3])
-//   {
-//     return iso_map_highlight[tile_index-3];
-//   }
-//   return 0;
-// }
-
-// char check_bot_right_highlight(char tile_index)
-// {
-//   if((tile_index != 2 && tile_index  != 5 && tile_index != 8) && iso_map_highlight[tile_index+1])
-//   { 
-//     return iso_map_highlight[tile_index+1];
-//   }
-//   return 0;
-// }
-
-int roundUp(int num, int div)
-{
-	int whole, remainder;
-	whole = num/div;
-  if (div == 0)
-    return 0;
-
-  remainder = num % div; //1
-  if (remainder == 0)
-    return whole;
-	else
-		return whole+1;
 }
 
 int next_level(int level)
@@ -2503,7 +2337,7 @@ void flash_selector(int location_x, int location_y, unsigned char flashes)
   }
 }
 
-void start_training_battle(char cmdr_id)
+void start_battle(char cmdr_id, char battle_type)
 {
   fade_screen();
   disp_off();
@@ -2515,7 +2349,7 @@ void start_training_battle(char cmdr_id)
   add_entity(PLAYER,cmdr_id,0,party_commanders,1);
   add_entity(CPU,0,1,enemy_commanders,0);
 
-  battle_loop(0,1,1,0,0,0);
+  battle_loop(0,1,1,0,0,battle_type);
 
   cleanup_entities();
 }
@@ -2546,6 +2380,7 @@ void randomize_enemy_team()
       training_enemies_count++;
     }
   }
+  // put_number(training_enemies_count,4,s_x_relative,s_y_relative);
 }
 
 char get_next_formation(char cursor)
@@ -2592,13 +2427,18 @@ char valid_formation_placement(char index)
 }
 
 char get_random_demon()
-{                     
-  return BLOB_UNIT;
+{
+  // char ui;
+  // ui = range(0,buyable_unit_count-1);
+  // put_number(buyable_unit_count,4,s_x_relative,s_y_relative);
+  // return unlocked_units[ui];
+  // ^---- leaving for debug purposes
+  return unlocked_units[range(0,buyable_unit_count-1)];
 }
 
 char *get_random_formation()
 {
-  training_enemies_formation = range(0,2);
+  training_enemies_formation = range(castles[map_no].range_lo,castles[map_no].range_hi);
   return get_formation(training_enemies_formation);//f0+(range(0,2) * 9);
 }
 

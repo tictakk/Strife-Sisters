@@ -93,6 +93,7 @@ void training_battle()
     reset_attacks();
   }
   end_sequence();
+  destroy_entity_flag = 0;
   vsync();
 }
 
@@ -323,7 +324,7 @@ void apply_art(char target)
     transfer_units_to_stun_vram(battleunits[target].unit->id,stun_count++);
   }
   // remove_effects();
-  apply_modifier(target,get_modifier_type(art_queue_id),get_modifier_amount(art_queue_id)-modifier);
+  apply_modifier(target,get_modifier_type(art_queue_id),arts[art_queue_id].base_amt-modifier);
 }
 
 void end_sequence()
@@ -337,35 +338,49 @@ void end_sequence()
 void distribute_exp()
 {
   unsigned char i, unit_count, exp_per;
-  if(atker == player_id)
+
+  if(battle_mode != CHALLENGE_MODE)
   {
-    unit_count = team_one_count;
-  }
-  else
-  {
-    unit_count = team_two_count;
-  }
-  if(unit_count == 0)
-  {
-    return;
-  }
-  exp_per = (battle_exp / unit_count);
-  for(i=0; i<9; i++)
-  {
-    if(entities[player_id].bg->units[i].id)
+    if(atker == player_id)
     {
-      char old_level;
-      entities[player_id].bg->units[i].exp += exp_per;
-      old_level = entities[player_id].bg->units[i].level;
-      if(old_level < level_up_unit(&entities[player_id].bg->units[i]))
+      unit_count = team_one_count;
+    }
+    else
+    {
+      unit_count = team_two_count;
+    }
+    if(unit_count == 0)
+    {
+      return;
+    }
+    exp_per = (battle_exp / unit_count);
+    for(i=0; i<9; i++)
+    {
+      if(entities[player_id].bg->units[i].id)
       {
-        write_text(10,6,"new level!");
-        print_unit_fullname(entities[player_id].bg->units[i].id,10,7);
-        write_text(10,8,"level");
-        put_number(entities[player_id].bg->units[i].level,2,16,8);
-        sync(60);
+        char old_level;
+        entities[player_id].bg->units[i].exp += exp_per;
+        old_level = entities[player_id].bg->units[i].level;
+        if(old_level < level_up_unit(&entities[player_id].bg->units[i]))
+        {
+          write_text(10,6,"new level!");
+          print_unit_fullname(entities[player_id].bg->units[i].id,10,7);
+          write_text(10,8,"level");
+          put_number(entities[player_id].bg->units[i].level,2,16,8);
+          sync(60);
+        }
       }
     }
+  }
+
+  if(battle_mode != STANDARD_MODE && owned_formations[training_enemies_formation] == 0 && team_two_count == 0)
+  {
+    owned_formations[training_enemies_formation] = 1;
+    owned_formation_count++;
+    put_string("        ",10,8);
+    write_text(10,6,"formation ");
+    write_text(10,7,"unlocked! ");
+    sync(60);
   }
   sync(30);
 }
@@ -442,7 +457,8 @@ void clear_targets()
 char get_highest_speed(char team)
 {
   char i, hi_spd, highest;
-
+  // put_number(team_one_count,3,0,0);
+  // put_number(team_two_count,3,5,0);
   if(team_one_count == 0 || team_two_count == 0)
   {
     return -1;
@@ -848,18 +864,22 @@ unsigned char calc_damage(char a_id, char t_id, int a_level, int a_base, int a_b
 
 void apply_damage(char t_id, unsigned char damage)
 {
+  unsigned char apply_damage;
+  apply_damage = damage / defend_active;
   if(battleunits[t_id].ent_id != player_id)
   {
-    damage_dealt += damage;
+    damage_dealt += apply_damage;
   }
-  if(damage)//WHEN A UNIT LEVELS UP, IT'S HEALTH BAR SHRINKS BECAUSE IT GAINS MORE HEALTH THAN IT HAS
+  // put_string("    ",0,0);
+  // put_number(damage,4,0,0);
+  if(apply_damage)//WHEN A UNIT LEVELS UP, IT'S HEALTH BAR SHRINKS BECAUSE IT GAINS MORE HEALTH THAN IT HAS
 	{
     int hp_p_before, hp_p_after;
 
     bid_to_unit_header(t_id,1);
     apply_level_to_header(battleunits[t_id].unit->level,1);
     hp_p_before = get_percentage(battleunits[t_id].unit->hp,unit_header[1].hp);
-    if(damage >= battleunits[t_id].unit->hp)
+    if(apply_damage >= battleunits[t_id].unit->hp)
     {
       // put_number(damage,4,0,0);
       // put_number(battleunits[t_id].unit->hp,4,9,0);
@@ -869,7 +889,7 @@ void apply_damage(char t_id, unsigned char damage)
     }
     else
     {
-      battleunits[t_id].unit->hp = max(battleunits[t_id].unit->hp-damage,0);
+      battleunits[t_id].unit->hp = max(battleunits[t_id].unit->hp-apply_damage,0);
 
       bid_to_unit_header(t_id,1);
       apply_level_to_header(battleunits[t_id].unit->level,1);
@@ -911,6 +931,12 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t, char standard)
   crit = 0;
   attacker_effect = 0;
   target_effect = 0;
+  
+  if(entities[i1].defend || entities[i2].defend)
+  {
+    put_string("defend",0,0);
+    defend_active = 2;
+  }
 
   // attacking_bonuses = entities[i1].bg.bonuses;
   // target_bonuses = entities[i2].bg.bonuses;
@@ -970,7 +996,7 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t, char standard)
   load_pals(trgt,9);
   // battle_seq();
   // standard_battle();
-  if(standard)
+  if(battle_mode == STANDARD_MODE)
   {
     standard_battle();
   }
@@ -1169,8 +1195,11 @@ void kill_unit(char b_id)
     {
       if(entities[battleunits[b_id].ent_id].bg->units[i].id != unit_header[1].id)
       {
-        entities[battleunits[b_id].ent_id].bg->units[i].hp = 0;
-        entities[battleunits[b_id].ent_id].bg->units[i].id = 0;
+        if(entities[battleunits[b_id].ent_id].team == CPU || battle_mode == STANDARD_MODE)
+        {//I think we really want to set team to not active also
+          entities[battleunits[b_id].ent_id].bg->units[i].hp = 0;
+          entities[battleunits[b_id].ent_id].bg->units[i].id = 0;
+        }
       }
     }
   }
@@ -1181,18 +1210,25 @@ void kill_unit(char b_id)
     {
       entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].id = 0;
     }
+    else
+    {
+      entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp = 1;
+    }
   }
-  if(entities[battleunits[b_id].ent_id].team == PLAYER)
+  if(battle_mode != CHALLENGE_MODE)
   {
-    units_lost++;
-    battle_lost++;
-  }
-  else
-  {
-    units_killed++;
-    battle_killed++;
-    battle_exp += (5 * (int)(battleunits[b_id].unit->level * 2));
-    // battle_exp += battleunits[b_id].unit->unit->exp;
+    if(entities[battleunits[b_id].ent_id].team == PLAYER)
+    {
+      units_lost++;
+      battle_lost++; 
+    }
+    else
+    {
+      units_killed++;
+      battle_killed++;
+      battle_exp += (5 * (int)(battleunits[b_id].unit->level * 2));
+      // battle_exp += battleunits[b_id].unit->unit->exp;
+    }
   }
   if(battleunits[b_id].ent_id == atker)
   {   
@@ -1343,6 +1379,7 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
 
   target_bonuses = 0;
   attacker_bonuses = 0;
+  defend_active = 1;
 
 	spr_set(62);
 	spr_hide();

@@ -4,6 +4,10 @@
 #define ATTACKER_DEFEAT 2
 #define NO_DEFEAT 3
 
+#define TRAIN_MODE 0
+#define STANDARD_MODE 1
+#define CHALLENGE_MODE 2
+
 #define NO_OF_MAPS 25
 
 #define NO_UNIT 0

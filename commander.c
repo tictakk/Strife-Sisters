@@ -111,28 +111,34 @@ char get_commander_bg_size(char cmdr_id)
   return count;
 }
 
-void check_add_new_commander(char map_no)
-{
-  if(map_no == 1 && party_size < 2)
-  {
-    add_commander_to_party(name1, VIOLET);
-    load_unit_to_cmdr(1,4,VIOLET,1,1);
-  }
-  if(map_no == 3 && party_size < 3)
-  {
-    add_commander_to_party(name2,KING);
-    load_unit_to_cmdr(2,3,KING,1,3);
-    load_unit_to_cmdr(2,1,SWORD_UNIT,0,3);
-    load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
-    load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
-    return;
-  }
+// void check_add_new_commander(char map_no)
+// {
+//   if(map_no == 1 && party_size < 2)
+//   {
+//     add_commander_to_party(name1, VIOLET);
+//     load_unit_to_cmdr(1,4,VIOLET,1,2);
+//   }
+//   if(map_no == 3 && party_size < 3)
+//   {
+//     add_commander_to_party(name2,KING);
+//     party_commanders[2].bg.formation = 15;
+//     if(owned_formations[15] == 0)
+//     {
+//       owned_formations[15] = 1;
+//       owned_formation_count++;
+//     }
+//     load_unit_to_cmdr(2,3,KING,1,3);
+//     load_unit_to_cmdr(2,1,SWORD_UNIT,0,3);
+//     load_unit_to_cmdr(2,5,SPEAR_UNIT,0,3);
+//     load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
+//     return;
+//   }
 
-  if(map_no == 13 && party_size >= 4)
-  {
-    remove_party_commander_from_game(2);
-    add_commander_to_party(name4,TEARLE);
-    load_unit_to_cmdr(3,4,TEARLE,1,14);
-    return;
-  }
-}
+//   if(map_no == 13 && party_size >= 4)
+//   {
+//     remove_party_commander_from_game(2);
+//     add_commander_to_party(name4,TEARLE);
+//     load_unit_to_cmdr(3,4,TEARLE,1,14);
+//     return;
+//   }
+// }

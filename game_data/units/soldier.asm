@@ -1,10 +1,10 @@
 Soldier:
   .db 40 ;hp
-  .db 20 ;atk
-  .db 13 ;def
+  .db 19 ;atk
+  .db 14 ;def
   .db 6  ;int
   .db 8  ;res
-  .db 12 ;spd
+  .db 13 ;spd
   .db 3  ;mov
   .db 100;sta
   .db 1  ;rng

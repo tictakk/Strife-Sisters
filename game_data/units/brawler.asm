@@ -1,10 +1,10 @@
 Brawler:
   .db 50  ;hp
-  .db 22  ;atk
-  .db 12  ;def
+  .db 20  ;atk
+  .db 11  ;def
   .db 5   ;int
-  .db 12  ;res
-  .db 20  ;spd
+  .db 13  ;res
+  .db 17  ;spd
   .db 3   ;mov
   .db 120 ;sta
   .db 1   ;rng

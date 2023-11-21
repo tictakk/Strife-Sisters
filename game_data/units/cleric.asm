@@ -1,10 +1,10 @@
 Cleric:
-  .db 30  ;hp
-  .db 16  ;atk
-  .db 12  ;def
+  .db 35  ;hp
+  .db 15  ;atk
+  .db 10  ;def
   .db 24  ;int
   .db 9  ;res
-  .db 16  ;spd
+  .db 14  ;spd
   .db 3   ;mov
   .db 100 ;sta
   .db 1   ;rng

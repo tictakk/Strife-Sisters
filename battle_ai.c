@@ -124,18 +124,13 @@ void start_turn(char team)
     {
       entities[i].actionable = 1;
       entities[i].movable = 1;
+      entities[i].defend = 0;
       if(entities[i].has_cmdr)
       {
         entities[i].tactic_meter = min(entities[i].tactic_meter+3,MAX_TACTIC_METER);
       }
-      // increment_meter(i);
     }
     load_commanders_palettes();
-    // if(entities[i].team == PLAYER)
-    // {
-      // load_commander_palette(party_commanders[entities[i].id].sprite_type);
-      // load_palette(get_commander_palette(party_commanders[entities[i].id].sprite_type))
-    // }
   }
 
   camera_pos = entities[0].pos;

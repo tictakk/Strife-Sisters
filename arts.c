@@ -76,6 +76,7 @@ void init_arts()
   arts[ZAP_ART].relationship = ONE_TO_ONE;
   arts[ZAP_ART].stunning = 1;
   arts[ZAP_ART].move_type = MOVE_ART_ATTACK;
+  arts[ZAP_ART].base_amt = 5;
 
   arts[SPD_UP_ART].frame_count = 11;
   arts[SPD_UP_ART].name = "Def up ";
@@ -275,25 +276,25 @@ void animate_effects()
   }
 }
 
-char get_modifier_amount(char art_id)
-{
-  switch(art_id)
-  {
-    case ZAP_ART: return 20;
-    case RAIN_ARROW_ART: return 15;
-    // case PLUNDER_ART: return 10;
-    case SPD_UP_ART: return 10;
-    case POWER_WAVE_ART: return 20;
-    // case BLOW_BACK_ART: return 10;
-    // case CLEAVE_ART: return 10;
-    // case FRENZY_ART: return 10;
-    // case RUN_THROUGH_ART: return 15;
-    // case BOMBARD_ART: return 15;
-    // case SEDUCE_ART: return 5;
-    default: return 0;
-  }
-  return 0;
-}
+// char get_modifier_amount(char art_id)
+// {
+//   switch(art_id)
+//   {
+//     case ZAP_ART: return 20;
+//     case RAIN_ARROW_ART: return 15;
+//     // case PLUNDER_ART: return 10;
+//     case SPD_UP_ART: return 10;
+//     case POWER_WAVE_ART: return 20;
+//     // case BLOW_BACK_ART: return 10;
+//     // case CLEAVE_ART: return 10;
+//     // case FRENZY_ART: return 10;
+//     // case RUN_THROUGH_ART: return 15;
+//     // case BOMBARD_ART: return 15;
+//     // case SEDUCE_ART: return 5;
+//     default: return 0;
+//   }
+//   return 0;
+// }
 
 char get_modifier_type(char art_id)
 {

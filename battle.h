@@ -30,9 +30,6 @@
 #define LEFT_SIDE 1
 #define RIGHT_SIDE 2
 
-#define TRAIN_MODE 0
-#define STANDARD_MODE 1
-
 typedef struct {
   char ent_id, active, frame, pal, state, target_team, pos, attacks, 
        target, meter, column, a_bonus, d_bonus, s_bonus, p_bonus;
@@ -87,6 +84,7 @@ char art_queued = 0, art_unit_id = 0, art_queue_id = 0;
 char attack_side, attacker_bonuses, target_bonuses;
 char attacking_bonuses, targeted_bonuses;
 
+char defend_active = 1;
 // char stunned_count = 0;
 
 BattleUnit battleunits[18];
