@@ -70,9 +70,49 @@
 #define TACTIC_SCORCH 2
 #define TACTIC_DASH 3
 #define TACTIC_LEAP 4
+#define TACTIC_SWITCH 5
 
 #define PLAYER 1
 #define CPU 2
 
 char s_y_relative = 0;
 char s_x_relative = 0;
+
+const char *title1 = "Lead Artist";
+const char *title2 = "Lead Musician";
+const char *title3 = "Quality Assurance";
+const char *title4 = "Script Consultant";
+const char *title5 = "Game Director, Developer";
+
+const char *title6 = "Special Thanks";
+
+const char *creditname1 = "Michirin";
+const char *creditname2 = "Noelle";
+const char *creditname3 = "Jason Kersey";
+const char *creditname4 = "Robert Shmigelsky";
+const char *creditname5 = "Matthew Kersey";
+
+const char *creditname6 = "Mike Wilson";
+const char *creditname7 = "Ilya, VAW";
+const char *creditname8 = "Andrew \"I told you MML is still viable\" Darvoich (Arkhan)";
+const char *creditname9 = "DarkKobold";
+const char *creditname10 = "Punch";
+const char *creditname11 = "Nicole Express";
+const char *creditname12 = "Presely and Griffin of Game Garage, Spartanburg";
+const char *creditname13 = "Turboxray";
+const char *creditname14 = "Cabbage";
+const char *creditname15 = "Tymey";
+
+// const int titles[] = { &title1, &title2, &title3, &title4, &title5 };
+
+const char *intro1 = "Hundreds of years ago, on the continent of Obis, the nations of Velkdan, Rondby, Lyassaria, Thenes and Tsilla were at war.";
+const char *intro2 = "Babies were born, lived their whole lives and died as old men and women knowing nothing but war.";
+const char *intro3 = "In the end, with no clear winner, four of the nations agreed to end the madness and destruction.";
+const char *intro4 = "The nation of Rondby, being the last hold out and having most to lose, was forced into agreement.";
+const char *intro5 = "With leaders from all five nations together to discuss peace, the first Yearly Peace was formed.";
+const char *intro6 = "With the desire to never see war again, the nations agreed to meet every year on thatnanniversary to keep the continent at peace.";
+const char *intro7 = "The new state-free captial, Tronehan, was founded in the center of the continent. No armies were permitted inside the city.";
+const char *intro8 = "Every year, leaders of each nation lead a contingent of troops to Tronehan. Outside the city the armies particpate in games and celebration.";
+const char *intro9 = "While inside the city, leaders discuss matters of the continent and form laws.";
+const char *intro10 = "Present day, the small sea faring nation of Velkdan is lead by king Toth Strife. As he marches to Tronehan for the Yearly Peace...";
+const char *intro11 = "His two daughters, Rei and Violet Strife participate in training lead by Velkdan's most trusted commander, Kingsly.";

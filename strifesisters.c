@@ -116,7 +116,6 @@ GROWTH_SPEED_DPS = 10
     .include "game_data/units/hein.asm"
 ;_adonis:
     .include "game_data/units/adonis.asm"
-    .code
 ;_zaladin:
     .include "game_data/units/zaladin.asm"
     .code
@@ -143,11 +142,12 @@ int selector_x, selector_y, s_x, s_y, y_offset, x_offset;
 int g = 0;
 
 struct Node neighbors[4];
-struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
+struct Node map[80]; //a unit with a max move of 5 will fill 60 nodes max.
 
 #include "map_dimension.h"
 #include "paths.c"
 
+#define MAX_TACTIC_METER 50
 #define NO_TARGET 0
 #define SINGLE_HIT 1
 #define HEAL 2
@@ -159,6 +159,11 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 #define ALL_OPPONENTS 8
 #define ALL_ALLIES 9
 #define ALL_UNITS 10
+
+#define SONG_INTRO 0
+#define SONG_DIALOG 1
+#define SONG_SAD 2
+#define SONG_BATTLE 3
 
 #include "strifesisters.h"
 #include "effects.c"
@@ -251,7 +256,7 @@ struct Node map[60]; //a unit with a max move of 5 will fill 60 nodes max.
 #incpal(tinker_pal, "characters/tinker.pcx")
 #incchr(tinker_gfx, "characters/tinker_portrait.pcx")
 #incpal(tinker_gfx_pal, "characters/tinker_portrait.pcx")
-#incpal(tinker_battle_pal,"map/sprites/magebattle.pcx")
+#incpal(tinker_battle_pal,"map/sprites/archer.pcx",1,1)
 
 #incchr(calien_gfx,"characters/calien_portrait.pcx")
 #incpal(calien_gfx_pal,"characters/calien_portrait.pcx")
@@ -365,7 +370,7 @@ const char map_level_table[18] = {
   1, 2, 3, 4, 7,
   9, 8, 10, 11,
   12, 18, 18, 18,
-  18, 18, 18, 18,
+  18, 20, 18, 18,
   20
 };
 
@@ -475,30 +480,14 @@ char prebattle_flag = 99;
 char demo_select_x = 5;
 char demo_select_y = 31;
 
-char demo_flag = 0;
+char demo_flag = 1;
 
 unsigned char current_formation[9];
 
-// char *script;
-
 void main()
 {
-  // char in;
-  // training_enemies[0] = 0;
-  // training_enemies[1] = 0;
-  // training_enemies[2] = 0;
-  // training_enemies[3] = 0;
-  // training_enemies[4] = 0;
-  // training_enemies[5] = 0;
-  // training_enemies[6] = 0;
-  // training_enemies[7] = 0;
-  // training_enemies[8] = 0;
-  // training_enemies[9] = 0;
 
   owned_formations[0] = 1;
-  // owned_formations[5] = 1;
-  // owned_formations[8] = 1;
-  // owned_formations[13] = 1;
 
   owned_formation_count = 1;
 	//setup (one time)
@@ -537,6 +526,10 @@ void main()
     // simulate_battle(SWORD_UNIT,FIGHTER_UNIT);
 		// display_intro();
     display_demo();
+    if(demo_flag)
+    {
+      display_intro();
+    }
 		overworld_loop(demo_select_x,demo_select_y);
     // overworld_loop(5,31);
 
@@ -569,8 +562,17 @@ void display_demo()
   loop = 1;
   load_vram(0x4DB0,cursor,0x10);
   set_screen_size(SCR_SIZE_32x32);
-  load_palette(0,sisters_logo_pal,1);
+  load_palette(0,laconic_pal,1);
   // load_default_font();
+  cls();
+  load_background(laconic,laconic_pal,laconic_bat,32,24);
+  disp_on();
+  sync(120);
+  fade_screen();
+  sync(60);
+  disp_off();
+
+  load_palette(0,sisters_logo_pal,1);
   cls();
   load_background(sisters_logo,sisters_logo_pal,sisters_bat,32,16);
   // load_background(laconic,laconic_pal,laconic_bat,32,24);
@@ -579,9 +581,9 @@ void display_demo()
   load_palette(10,fontpal,3);
   set_font_pal(12);
   disp_on();
-  put_string("Demo",14,17);
+  // put_string("Demo",14,17);
   put_string("Press Run",12,19);
-  put_string("| Laconic Software 2023",4,24);
+  put_string("| Laconic Software 2023",4,25);
   if(demo_flag)
   {
     psgPlay(0);
@@ -599,6 +601,10 @@ void display_demo()
         select_level_menu();
       }
       loop = 0;
+    }
+    else if(joytrg(0) & JOY_SEL)
+    {
+      psgPlay(++g);
     }
     else if(ticky++ < 50)
     {
@@ -717,72 +723,130 @@ void preload_commanders_map_4()
   party_size = 0;
 
   add_commander_to_party(name0,REI);
+  load_unit_to_cmdr(0,1,REI,1,20);
+  party_commanders[0].bg.formation = 44;
+  
+  load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,20);
+  load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,20);
+  
+  load_unit_to_cmdr(0,3,BERSERKER_UNIT,0,20);
+  load_unit_to_cmdr(0,4,BERSERKER_UNIT,0,20);
+  load_unit_to_cmdr(0,5,BERSERKER_UNIT,0,20);
+
+  load_unit_to_cmdr(0,6,WITCH_UNIT,0,20);
+  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,20);
+  load_unit_to_cmdr(0,8,WITCH_UNIT,0,20);
+
   add_commander_to_party(name1,VIOLET);
+  load_unit_to_cmdr(1,4,VIOLET,1,20);
+  party_commanders[1].bg.formation = 44;
 
-  load_unit_to_cmdr(0,0,REI,1,4);
-  load_unit_to_cmdr(0,6,ARCHER_UNIT,0,4);
-  load_unit_to_cmdr(0,8,CLERIC_UNIT,0,1);
-  load_unit_to_cmdr(0,1,SWORD_UNIT,0,4);
+  load_unit_to_cmdr(1,1,LANCER_UNIT,0,20);
+  load_unit_to_cmdr(1,2,LANCER_UNIT,0,20);
+  load_unit_to_cmdr(1,0,LANCER_UNIT,0,20);
 
-  load_unit_to_cmdr(1,4,VIOLET,1,4);
-  load_unit_to_cmdr(1,0,BRAWLER_UNIT,0,1);
-  load_unit_to_cmdr(1,1,SWORD_UNIT,0,4);
-  load_unit_to_cmdr(1,7,CLERIC_UNIT,0,1);
+  load_unit_to_cmdr(1,3,DANCER_UNIT,0,20);
+  load_unit_to_cmdr(1,5,DANCER_UNIT,0,20);
 
+  load_unit_to_cmdr(1,6,WITCH_UNIT,0,20);
+  load_unit_to_cmdr(1,7,DANCER_UNIT,0,20);
+  load_unit_to_cmdr(1,8,WITCH_UNIT,0,20);
+
+  add_commander_to_party(name3,TINKER);
+  load_unit_to_cmdr(2,7,TINKER,1,20);
+  party_commanders[2].bg.formation = 44;
+
+  // load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,20);
+  // load_unit_to_cmdr(2,1,KNIGHT_UNIT,0,20);
+  // load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,20);
+
+  // load_unit_to_cmdr(2,3,LANCER_UNIT,0,20);
+  // load_unit_to_cmdr(2,4,LANCER_UNIT,0,20);
+  // load_unit_to_cmdr(2,5,LANCER_UNIT,0,20);
+
+  load_unit_to_cmdr(2,0,LANCER_UNIT,0,20);
+  load_unit_to_cmdr(2,1,LANCER_UNIT,0,20);
+  load_unit_to_cmdr(2,2,LANCER_UNIT,0,20);
+
+  load_unit_to_cmdr(2,3,KNIGHT_UNIT,0,20);
+  load_unit_to_cmdr(2,4,KNIGHT_UNIT,0,20);
+  load_unit_to_cmdr(2,5,KNIGHT_UNIT,0,20);
+
+  load_unit_to_cmdr(2,6,ARCHER_UNIT,0,20);
+  load_unit_to_cmdr(2,8,ARCHER_UNIT,0,20);
+
+  add_commander_to_party(name4,TEARLE);
+  load_unit_to_cmdr(3,1,TEARLE,1,20);
+  party_commanders[2].bg.formation = 44;
+
+  load_unit_to_cmdr(3,3,SPEAR_UNIT,0,20);
+  load_unit_to_cmdr(3,5,SPEAR_UNIT,0,20);
+  load_unit_to_cmdr(3,4,SPEAR_UNIT,0,20);
+  
+  load_unit_to_cmdr(3,0,BERSERKER_UNIT,0,20);
+  load_unit_to_cmdr(3,2,BERSERKER_UNIT,0,20);
+
+  load_unit_to_cmdr(3,6,STALKER_UNIT,0,20);
+  load_unit_to_cmdr(3,7,STALKER_UNIT,0,20);
+  load_unit_to_cmdr(3,8,STALKER_UNIT,0,20);
+  party_commanders[3].tactic_id = TACTIC_LEAP;
+  
+  // unlock_all_units();
+  unlock_unit(DANCER_UNIT);
+  unlock_unit(BRAWLER_UNIT);
+  
   unlock_unit(SWORD_UNIT);
+  unlock_unit(KNIGHT_UNIT);
+  
   unlock_unit(ARCHER_UNIT);
-  unlock_unit(CLERIC_UNIT);
+  unlock_unit(STALKER_UNIT);
 
-  player_gold = 0;
+  unlock_unit(CLERIC_UNIT);
+  unlock_unit(WITCH_UNIT);
+
+  unlock_unit(SPEAR_UNIT);
+  unlock_unit(LANCER_UNIT);
+
+  unlock_unit(RAIDER_UNIT);
+  unlock_unit(BERSERKER_UNIT);
+
+  player_gold = 1500;
 }
 
-// void preload_commanders_map_9()
-// {
-//   party_size = 0;
+void play_credits()
+{
+  int len;
+  char i;
+  char *title, *name;
+  title = title1;
+  name = creditname1;
+  
+  for(i=0; i<5; i++)
+  {
+    cls();
+    put_string(title,6,16);
+    put_string(name,7,17);
 
-//   add_commander_to_party(name0,REI);
-//   add_commander_to_party(name1,VIOLET);
-//   add_commander_to_party(name2,KING);
-//   add_commander_to_party(name3,TINKER);
+    sync(240);
+    title += strlen(title)+1;
+    name += strlen(name) + 1;
+  }
 
-//   load_unit_to_cmdr(0,1,REI,1,10);
-//   load_unit_to_cmdr(0,8,ARCHER_UNIT,0,10);
-//   load_unit_to_cmdr(0,6,ARCHER_UNIT,0,10);
-//   load_unit_to_cmdr(0,4,ARCHER_UNIT,0,10);
-//   load_unit_to_cmdr(0,7,CLERIC_UNIT,0,10);
-//   load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,10);
-//   load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,10);
+  name = creditname6;
+  for(i=0; i<10; i++)
+  {
+    cls();
+    put_string(title6,6,16);
+    put_string(name,7,17);
 
-//   load_unit_to_cmdr(1,4,VIOLET,1,10);
-//   load_unit_to_cmdr(1,0,GOLEM_UNIT,0,10);
-//   load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,10);
-//   load_unit_to_cmdr(1,2,GOLEM_UNIT,0,10);
-//   load_unit_to_cmdr(1,6,CLERIC_UNIT,0,10);
-//   load_unit_to_cmdr(1,8,WITCH_UNIT,0,10);
-//   load_unit_to_cmdr(1,7,WITCH_UNIT,0,10);
-
-//   load_unit_to_cmdr(2,4,KING,1,10);
-//   load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,10);
-//   load_unit_to_cmdr(2,1,KNIGHT_UNIT,0,10);
-//   load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,10);
-//   load_unit_to_cmdr(2,3,SPEAR_UNIT,0,10);
-//   load_unit_to_cmdr(2,5,SPEAR_UNIT,0,10);
-//   load_unit_to_cmdr(2,7,CLERIC_UNIT,0,10);
-
-//   load_unit_to_cmdr(3,6,TINKER,1,10);
-//   load_unit_to_cmdr(3,3,DANCER_UNIT,0,10);
-//   load_unit_to_cmdr(3,5,DANCER_UNIT,0,10);
-//   load_unit_to_cmdr(3,4,DANCER_UNIT,0,10);
-//   load_unit_to_cmdr(3,0,BRAWLER_UNIT,0,10);
-//   load_unit_to_cmdr(3,2,BRAWLER_UNIT,0,10);
-//   load_unit_to_cmdr(3,8,CLERIC_UNIT,0,10);
-
-//   unlock_unit(SWORD_UNIT);
-//   unlock_unit(ARCHER_UNIT);
-//   unlock_unit(CLERIC_UNIT);
-
-//   player_gold = 550;
-// }
+    sync(240);
+    title += strlen(title)+1;
+    name += strlen(name) + 1;
+  }
+  cls();
+  put_string("Thanks for playing!",7,16);
+  for(;;){}
+}
 
 void preload_default(char level)
 {
@@ -807,48 +871,79 @@ void preload_default(char level)
 void display_intro()
 {
 	// load_background(build_screen,build_pal,build_bat,32,28);
+  // disp_off();
+  psgFadeOut(10);
+  sync(10);
+  psgPlay(SONG_DIALOG);
 	cls();
 	disp_on();
-	put_string("Strife Sisters v0.9.4",6,13);
-	// wait_for_I_input();
-	// sync(60*10);
 
-	// load_background(explain_menu,explain_pal,explain_bat,32,28);
-	// while(!(joytrg(0) & JOY_RUN)){}
+  clear_and_write(3,10,25,intro1);
+  clear_and_write(3,10,25,intro2);
+  clear_and_write(3,10,25,intro3);
+  clear_and_write(3,10,25,intro4);
+  clear_and_write(3,10,25,intro5);
+  clear_and_write(3,10,25,intro6);
+  clear_and_write(3,10,25,intro7);
+  clear_and_write(3,10,25,intro8);
+  clear_and_write(3,10,25,intro9);
+  clear_and_write(3,10,25,intro10);
+  clear_and_write(3,10,25,intro11);
+
+  fade_screen();
+  sync(10);
+  psgFadeOut(10);
+  sync(10);
+  psgPlay(SONG_INTRO);
 	disp_off();
+}
+
+void clear_and_write(char x, char y, char line_len, char *str)
+{
+  cls();
+  write_text_with_line_size(x,y,line_len,str);
+  wait_for_I_input();
+  clear_joy_events(0x1F);
 }
 
 void display_outro()
 {
-  char loop = 1;
+  // char loop = 1;
+  fade_screen();
   psgFadeOut(10);
   set_screen_size(SCR_SIZE_32x32);
   clear_joy_events(0x1F);
   reset_satb();
   satb_update();
   gfx_clear(0);
-  load_font(font,125,0x4800);
 
+  load_font(font,125,0x4800);
 	scroll(0,0,0,224,0xC0);
+  // load_palette(0,overworldpal,8);
+  load_palette(10,fontpal,3);
+  set_font_pal(12);
   load_palette(0,sisters_logo_pal,1);
-  cls();
+  sync(60);
+  // cls();
   disp_on();
   if(demo_flag)
   {
     psgPlay(2);
   }
-	put_string("Thanks for playing!",7,14);
+	put_string("To be continued...",7,16);
+  sync(120);
+  play_credits();
   // vsync(30);
   // sync(2);
-  while(loop)
-  {
+  // while(loop)
+  // {
     // if(joytrg(0) & JOY_RUN)
     // {
     //   loop = 0;
     //   game_over = 1;
     // }
-  }
-  disp_off();
+  // }
+  // disp_off();
 	// wait_for_I_input();
 }
 
@@ -969,6 +1064,10 @@ void print_unit_type(char id, int x, int y)
       put_string("ZAL",x,y);
       break;
 
+    case ADONIS:
+      put_string("ADN",x,y);
+      break;
+
 		default:
       put_string("$$$",x,y);
       break;
@@ -1039,7 +1138,7 @@ char* get_unit_fullname(char unit_id)
       return "Lancer ";
 
     case BERSERKER_UNIT:
-      return "Berserkr";
+      return "Bersrkr";
 
     case RAIDER_UNIT:
       return "Raider ";
@@ -1057,7 +1156,7 @@ char* get_unit_fullname(char unit_id)
       return "Violet ";
 
     case KING:
-      return "Kingsly ";
+      return "Kingsly";
 
     case TINKER:
       return "Tinker ";
@@ -1092,11 +1191,6 @@ void draw_32x32_sprite(char type, int x, int y)
       load_palette(20,soldierpal,1);
       // load_vram(0x6E00,attack,0x100);
       break;
-
-    case SNIPER_UNIT:
-      load_palette(20,sniperbtlpal,1);
-      // load_vram(0x6E00,sniperbtl,0x100);
-    break;
 
     case BERSERKER_UNIT:
       load_palette(20,berserkerbtl,1);
@@ -1146,11 +1240,6 @@ void draw_32x32_sprite(char type, int x, int y)
     case WITCH_UNIT:
       load_palette(20,witchbtlpal,1);
       // load_vram(0x6E00,witchbtl,0x100);
-      break;
-
-    case PRIEST_UNIT:
-      load_palette(20,witchbtlpal,1);
-      // load_vram(0x6E00,priestbtl,0x100);
       break;
 
     case MAGE_UNIT:
@@ -1327,6 +1416,38 @@ int write_text(char x, char y, char *text)
 	return i;
 }
 
+int write_text_with_line_size(char x, char y, char line_size, char *text)
+{
+	int i;
+	char text_y, text_x;
+	text_x = x;
+	text_y = y;
+	i=0;
+	for(;;)
+	{
+		if(text[i] == 0)
+		{
+			break;
+		}
+		if(text[i] == 32 && text_x >= line_size)
+		{
+			text_y++;
+			text_x = x;
+			i++;
+			continue;
+		}
+		put_char(text[i],text_x,text_y);
+		i++;
+		text_x++;
+
+    if(!(get_joy_events(0,0) & JOY_I))
+    {
+      vsync(2);
+    }
+	}
+	return i;
+}
+
 void wait_for_I_input()
 {
   // char j;
@@ -1402,12 +1523,12 @@ void affirm_statement(char *line1, char *line2, char x, char y)
 
 void check_add_new_commander(char map_no)
 {
-  if(map_no == 1 && party_size < 2)
+  if(map_no == 1 && party_size < 2)//add violet
   {
     add_commander_to_party(name1, VIOLET);
     load_unit_to_cmdr(1,4,VIOLET,1,2);
   }
-  if(map_no == 3 && party_size < 3)
+  if(map_no == 3 && party_size < 3)//add king
   {
     add_commander_to_party(name2,KING);
     party_commanders[2].bg.formation = 15;
@@ -1422,8 +1543,27 @@ void check_add_new_commander(char map_no)
     load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
     return;
   }
+  if(map_no >= 7 && party_size <4)//add tinker
+  {
+    // remove_party_commander_from_game(2);
+    add_commander_to_party(name3,TINKER);
+    party_commanders[3].bg.formation = 34;
+    if(owned_formations[34] == 0)
+    {
+      owned_formations[34] = 1;
+      owned_formation_count++;
+    }
+    party_commanders[3].tactic_id = TACTIC_SWITCH;
+    load_unit_to_cmdr(3,7,TINKER,1,10);
+    load_unit_to_cmdr(3,6,ARCHER_UNIT,0,10);
+    load_unit_to_cmdr(3,8,ARCHER_UNIT,0,10);
 
-  if(map_no == 13 && party_size >= 4)
+    load_unit_to_cmdr(3,4,KNIGHT_UNIT,0,10);
+    load_unit_to_cmdr(3,3,KNIGHT_UNIT,0,10);
+    load_unit_to_cmdr(3,5,KNIGHT_UNIT,0,10);
+  }
+
+  if(map_no >= 13 && party_size >= 4)//add tearle
   {
     remove_party_commander_from_game(2);
     add_commander_to_party(name4,TEARLE);
@@ -1611,6 +1751,11 @@ void load_portrait(char cmdr_id, char index)
     case CALIEN:
 		load_vram(PORTRAIT_VRAM+(index*0x100),calien_gfx,0x100);
 		load_palette(12+index,calien_gfx_pal,1);
+    break;
+
+    case ZALADIN:
+		load_vram(PORTRAIT_VRAM+(index*0x100),zaladin_gfx,0x100);
+		load_palette(12+index,zaladin_gfx_pal,1);
     break;
 
 		default:
@@ -2433,6 +2578,7 @@ char get_random_demon()
   // put_number(buyable_unit_count,4,s_x_relative,s_y_relative);
   // return unlocked_units[ui];
   // ^---- leaving for debug purposes
+  // return BRAWLER_UNIT;
   return unlocked_units[range(0,buyable_unit_count-1)];
 }
 
@@ -2449,9 +2595,18 @@ char *get_formation(char f_num)
 
 void display_number_incrementing(char x, char y, int final_number, char num_len)
 {
-  int i;
-  i=0;
-  while((i+=6) < final_number)
+  int i, inc_amt;
+  inc_amt = 6;
+  if(final_number > 1000)
+  {
+    inc_amt += 20;
+  }
+  if(final_number > 5000)
+  {
+    inc_amt += 200;
+  }
+  i=0;  
+  while((i+=inc_amt) < final_number)
   {
     put_number(i,num_len,x,y);
     sync(1);

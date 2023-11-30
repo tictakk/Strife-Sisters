@@ -32,7 +32,7 @@
 
 typedef struct {
   char ent_id, active, frame, pal, state, target_team, pos, attacks, 
-       target, meter, column, a_bonus, d_bonus, s_bonus, p_bonus;
+       target, meter, column, a_bonus, d_bonus, s_bonus, r_bonus;
   Unit_Entity *unit;
 } BattleUnit;
 
@@ -73,10 +73,9 @@ const int target_square_tiles[] = {
                                   };
 
 char atker, trgt, meter_queued = 0, unit_meter_queued = 0;//, position_status = 0;//FINISH THIS STUFF
-
+char early_exit = 0;
 int team_one_count, team_two_count;
-int a_def_bonus, a_atk_bonus, t_def_bonus, t_atk_bonus;
-char a_terrain, t_terrain, attack_range, 
+char t_terrain, attack_range, 
      battle_clock, animating, attacker, stun_count;
 
 char art_queued = 0, art_unit_id = 0, art_queue_id = 0;
@@ -138,7 +137,7 @@ void add_battle_unit(char x, char y, char entity_id, char index, char active,
   battleunits[index].a_bonus = 0;
   battleunits[index].d_bonus = 0;
   battleunits[index].s_bonus = 0; 
-  battleunits[index].p_bonus = 0;
+  battleunits[index].r_bonus = 0;
   battleunits[index].column = position/3;
 
   load_unit_header(ue->id,0);
@@ -211,7 +210,7 @@ char find_target_unit_type(char unit_position, char attackble_units[9], char typ
   a_chart = get_attack_row_chart(battleunits[unit_position].pos);
   memcpy(attackble_chart,a_chart,9);
   modify_attack_chart(attackble_chart,battleunits[unit_position].target_team);
-
+ 
   for(i=0; i<18; i++)
   {
     if(battleunits[i].ent_id != b_unit_team)
@@ -240,15 +239,8 @@ char find_target_unit(char attacking_unit_position, char ranged, char type)
   char attackble_units[9];
   attackable_count = 0;
 
-  if(type)
-  {
-    attackable_count = find_target_unit_type(attacking_unit_position,attackble_units,type);
-  }
-  else
-  {
-    attackable_count = find_attackable_units(attacking_unit_position,attackble_units,ranged);
-  }
-
+  attackable_count = find_attackable_units(attacking_unit_position,attackble_units,ranged);
+  
   if(attackable_count == 1)
   {
     return attackble_units[0];
@@ -456,16 +448,16 @@ void target_multi_col(char b_id, char ranged)
 void target_single_unit(char b_id, char ranged)
 {
   char target;
-  if(check_battle_bonus(BONUS_SWORD,targeted_bonuses))
-  {
-    target = find_target_unit(b_id,ranged,NORMAL);
-  }
-  else
-  {
-    target = find_target_unit(b_id,ranged,NONE);
-  }
+  // if(check_battle_bonus(BONUS_SWORD,targeted_bonuses))
+  // {
+  //   target = find_target_unit(b_id,ranged,NORMAL);
+  // }
+  // else
+  // {
+  target = find_target_unit(b_id,ranged,NONE);
+  // }
   set_unit_target(target);
-  highlight_battle_square(target,0xE000);
+  // highlight_battle_square(target,0xE000);
   // load_animations_to_vram(battleunits[b_id].unit->id);
   transfer_units_to_attack_vram(battleunits[b_id].unit->id);
   // if(debug_flag)
@@ -485,7 +477,7 @@ void target_opponents(char position)
     if(battleunits[i].active && battleunits[i].ent_id == trgt_ent)
     {
       set_unit_target(i);
-      highlight_battle_square(i,0xE000);
+      // highlight_battle_square(i,0xE000);
     }
   }
   // load_animations_to_vram(battleunits[position].unit->id);
@@ -502,7 +494,7 @@ void target_allies(char position)
     if(battleunits[i].active && battleunits[i].ent_id == trgt_ent)
     {
       set_unit_target(i);
-      highlight_battle_square(i,0xE000);
+      // highlight_battle_square(i,0xE000);
     }
   }
   // load_animations_to_vram(battleunits[position].unit->id);
@@ -519,7 +511,7 @@ void target_col(char position)
     {
       // set_unit_stunned((position*3)+i);
       set_unit_target((position*3)+i);
-      highlight_battle_square((position*3)+i,0xE000);
+      // highlight_battle_square((position*3)+i,0xE000);
     }
   }
 }
@@ -534,7 +526,7 @@ void target_row(char position)
     if((((position/9)*9)+row)+(i*3) < 18 && battleunits[(((position/9)*9)+row)+(i*3)].active)
     {
       set_unit_target((((position/9)*9)+row)+(i*3));
-      highlight_battle_square((((position/9)*9)+row)+(i*3),0xE000);
+      // highlight_battle_square((((position/9)*9)+row)+(i*3),0xE000);
     }
   }
 }
@@ -549,6 +541,7 @@ void set_unit_state(char b_id, char state, char targeted, char animated)
 
 void set_unit_target(char b_id)
 {
+  highlight_battle_square(b_id,0xE000);
   battleunits[b_id].target = 1;
 }
 
@@ -702,59 +695,6 @@ void innvigorate(char b_id)
 // {
 //   sea_legs_art = 1;
 // }
-
-char frenzy(char b_id)
-{
-  int r;
-
-  r = range(1,100);
-  if(r < 75 && battleunits[get_first_target()].unit->hp > 0)
-  {
-    battleunits[b_id].frame = 0;
-    set_unit_meter(b_id);
-    animating++;
-    return 0;//trigger again
-  }
-  return 1;//done
-}
-
-void capture(char b_id){}
-
-void rapid_thrust(char b_id)
-{
-  spr_set(b_id+MAX_EFFECT_COUNT);
-  load_art(art_queue_id,spr_get_x()+8,spr_get_y()+16,!unit_direction(b_id));
-  animate_art(art_queue_id);
-  // apply_art(i);
-  remove_effects();
-  battleunits[b_id].attacks = 3;
-}
-
-void red_eye(char b_id)
-{
-  char dmg, percent_dmg, missing_amt, percent_missing, full_hp, current_hp;
-  bid_to_unit_header(b_id,0);
-  apply_level_to_header(battleunits[b_id].unit->level,0);
-  full_hp = unit_header[0].hp;
-  current_hp = battleunits[b_id].unit->hp;
-  missing_amt = full_hp - current_hp;
-
-  percent_missing = (char) get_percentage(missing_amt,full_hp);
-
-  dmg = 3 * max((percent_missing / 10),1);
-  apply_damage(get_first_target(),dmg);
-  update_healthbar(get_first_target());
-}
-
-void black_eye(char b_id)
-{
-  char target_id, dmg;
-  target_id = get_first_target();
-  dmg = calc_percentage(35,battleunits[target_id].unit->hp);
-
-  apply_damage(target_id,dmg);
-  update_healthbar(target_id);
-}
 
 void highlight_battle_square(int square, int pal)
 {

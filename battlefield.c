@@ -86,7 +86,6 @@ void battlefield_loop(char map_id)
 {
   last_command = SELECT_MODE;
   map_result_status = MAP_RESULT_NONE;
-  selected_option = -1;
   turns_count = 0;
   units_killed = 0;
   units_lost = 0;
@@ -116,8 +115,9 @@ void battlefield_loop(char map_id)
     {
       // put_number(map_type,3,0,0);
       g_abs = graph_from_x_y(sx,sy);
-      t_type =  terrain_type(tutorial_1[map_offset+g_abs]);
+      t_type = terrain_type(tutorial_1[map_offset+g_abs]);
       id = battle_grid[g_abs];
+      // put_number(id,4,0,0);
       display_position(14,1);
       display_bonuses(4,1);
       
@@ -231,8 +231,7 @@ void cycle_animations()
 void init_units()
 {
   int i;
-
-  char u_one, u_two, u_three, has_cmdr;
+  char has_cmdr;
   
   for(i=0; i<party_size; i++)
   {
@@ -484,7 +483,7 @@ void ctrls()
         selector_up();
         joy_up_held = 2;
       }
-      else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
+      else if(selector_mode == MENU_MODE || selector_mode == RUN_MENU_MODE || selector_mode == ACTION_MODE)
       {
         cursor_up();
       }
@@ -495,7 +494,7 @@ void ctrls()
       }
       else if(selector_mode == TACTIC_SELECT_MODE)
       {
-        if(valid_map_square(g_abs-16))
+        if(tactic_current == TACTIC_SWITCH || valid_map_square(g_abs-16))
         {
           selector_up();
         }
@@ -514,7 +513,7 @@ void ctrls()
         selector_down();
         joy_down_held = 2;
       }
-      else if(selector_mode == MENU_MODE || selector_mode == ACTION_MODE)
+      else if(selector_mode == MENU_MODE || selector_mode == RUN_MENU_MODE || selector_mode == ACTION_MODE)
       {
         cursor_down();
       }
@@ -525,7 +524,7 @@ void ctrls()
       }
       else if(selector_mode == TACTIC_SELECT_MODE)
       {
-        if(valid_map_square(g_abs+16))
+        if(tactic_current == TACTIC_SWITCH || valid_map_square(g_abs+16))
         {
           selector_down();
         }
@@ -559,7 +558,7 @@ void ctrls()
       }
       else if(selector_mode == TACTIC_SELECT_MODE)
       {
-        if(valid_map_square(g_abs+1))
+        if(tactic_current == TACTIC_SWITCH || valid_map_square(g_abs+1))
         {
           selector_right();
         }
@@ -593,7 +592,7 @@ void ctrls()
       }
       else if(selector_mode == TACTIC_SELECT_MODE)
       {
-        if(valid_map_square(g_abs-1))
+        if(tactic_current == TACTIC_SWITCH || valid_map_square(g_abs-1))
         {
           selector_left();
         }
@@ -725,17 +724,22 @@ void ctrls()
           break;
 
         case MENU_TAKE://calling
-          if(menu_mask & MASK_CALLING)
-          {
+          // if(menu_mask & MASK_CALLING)
+          // {
             setup_tactic();
-          }
+          // }
           break;
       }
     }
     else if(selector_mode == RUN_MENU_MODE)
     {
-      hide_cursor();
-      end_player_turn();
+      if(menu_option == 0)
+      {
+        hide_cursor();
+        end_player_turn();
+        return;
+      }
+      map_result_status = MAP_RESULT_LOSE;
     }
     else if(selector_mode == TACTIC_SELECT_MODE)
     {
@@ -822,6 +826,7 @@ void ctrls()
 
   if(j & JOY_SEL)
   {
+    // put_hex(battle_grid,6,0,0);
     // if(id > 0 && entities[id-1].has_cmdr)
     // {
     //   entities[id-1].tactic_meter = MAX_TACTIC_METER; 
@@ -877,6 +882,12 @@ void perform_tactic()
     remove_cursor();
     unhighlight();
     
+    if(!get_tactic_perform_status())
+    {
+      end_unit_turn(tactic_caster);
+      // entities[tactic_caster].actionable = 0;
+      // entities[tactic_caster].movable = 0;
+    }
     switch(tactic_current)
     {
       case TACTIC_SCORCH: scorch_tactic(); break;
@@ -886,12 +897,8 @@ void perform_tactic()
       case TACTIC_RAGE: tactic_rage(); break;
 
       case TACTIC_DASH: dash_tactic(); break;
-    }
-    if(!get_tactic_perform_status())
-    {
-      end_unit_turn(tactic_caster);
-      // entities[tactic_caster].actionable = 0;
-      // entities[tactic_caster].movable = 0;
+
+      case TACTIC_SWITCH: switch_tactic(); break;
     }
     menu_mask = 0x00;
     print_menu();
@@ -899,6 +906,33 @@ void perform_tactic()
     sync(30);
     display_selector(SELECTOR,sx,sy,16);
   }
+}
+
+void switch_tactic()
+{
+  int tmp_pos;
+  char tmp_id;
+  
+  create_art_by_type(EFFECT_POOF,(g_abs&15)<<4,((g_abs>>4)<<4)-s_y,0);
+  create_art_by_type(EFFECT_POOF,(selected_entity->pos&15)<<4,((selected_entity->pos>>4)<<4)-s_y,0);
+
+  animate_calling_effect(0,0);
+  remove_effects();
+
+  tmp_id = id;
+  tmp_pos = selected_entity->pos;
+
+  battle_grid[g_abs] = battle_grid[selected_entity->pos];
+  selected_entity->pos = g_abs;
+  
+  battle_grid[tmp_pos] = tmp_id;
+  entities[tmp_id-1].pos = tmp_pos;
+
+  display_selector(SELECTOR,sx,sy,16);
+  entities[tmp_id-1].actionable = 1;
+  entities[tmp_id-1].movable = 1;
+  tactic_current = 0;
+  selected_entity = 0;
 }
 
 void tactic_rage()
@@ -992,6 +1026,20 @@ void setup_tactic()
   set_tactic(id-1,party_commanders[entities[id-1].id].tactic_id);
   // if(tactic_distance())
   // {
+  if(tactic_current == TACTIC_SWITCH)
+  {
+    char i;
+    for(i=0; i<num_of_entities; i++)
+    {
+      if(entities[i].team == PLAYER && party_commanders[entities[i].id].tactic_id != tactic_current)
+      {
+        change_background_palette(entities[i].pos,0xC000);
+        target_target_ids[i] = i;
+      }
+    }
+    selector_mode = TACTIC_SELECT_MODE;
+    return;
+  }
   if(tactic_current == TACTIC_DASH)
   {
     get_dash_radius();
@@ -1101,7 +1149,7 @@ void display_run_menu(int x, int y)
 {
   menu_vert_size = 1;
   menu_columns = 1;
-  menu_rows = 1;
+  menu_rows = 2;
   menu_option = y/12 + ((x-152)/16);
   cursor_x = x/8;
   cursor_y = y/8;
@@ -1136,6 +1184,10 @@ void get_unit_radius(int square, int depth, char team, char ignore)
 void display_position(int x, int y)
 {
   put_number(g_abs,3,x,y);
+  // if(battle_grid[g_abs])
+  // {
+    // put_number(entities[battle_grid[g_abs]-1].id,4,0,0);
+  // }
 }
 
 void display_bonuses(char x, char y)
@@ -1182,7 +1234,7 @@ char attack_unit(int src, int dst, char art)
     cursor_x = -32;
     cursor_y = -32;
     selector_mode = SELECT_MODE;
-    result = begin_battle(attacker,target,range,tutorial_1[map_offset+dst],tutorial_1[map_offset+src]);
+    result = begin_battle(attacker,target,range,tutorial_1[map_offset+dst],terrain_type(tutorial_1[map_offset+src]));//tutorial_1[map_offset+src]);
     if(result == TARGET_DEFEAT && tactic_current == TACTIC_RAGE && attacker == tactic_caster)
     {
       entities[attacker].actionable = 1;

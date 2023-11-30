@@ -13,7 +13,7 @@ Rannon:
   .db 0   ;art
   .db 3   ;points
   .db 15   ;pow
-  .db 0   ;is_cmdr
+  .db 1   ;is_cmdr
   .db 11, 5, 0 ;attack positions
 
   ;unit growth

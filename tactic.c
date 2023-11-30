@@ -8,8 +8,9 @@
 #define TARGET_TILE_ALLY 3
 #define TARGET_TILE_ENEMY 4
 
-#define MAX_TACTIC_METER 50
+// #define MAX_TACTIC_METER 50
 
+//TINKER'S ART IS HE SWAPS PLACES WITH ANYONE ON THE MAP
 char tactic_loop = 0;
 char tactic_current = 0;
 char tactic_caster = 0;
@@ -58,6 +59,10 @@ char tactic_tile_option()
   {
     return TARGET_TILE_SELF;
   }
+  else if(tactic_current == TACTIC_SWITCH)
+  {
+    return TARGET_TILE_ALLY;
+  }
   return 0;
 }
 
@@ -90,6 +95,7 @@ char get_tactic_cost(char t_id)
     case TACTIC_LEAP: return 20;
     case TACTIC_RAGE: return 20;
     case TACTIC_SCORCH: return 30;
+    case TACTIC_SWITCH: return 25;
     case TACTIC_NONE: return 0;
   }
 }
@@ -101,7 +107,7 @@ char get_tactic_perform_status()
     case TACTIC_DASH: return 1;
     case TACTIC_LEAP: return 1;
     case TACTIC_RAGE: return 1;
-    case TACTIC_SCORCH: return 0;
+    case TACTIC_SCORCH: return 1;
     case TACTIC_NONE: return 0;
   }
 }

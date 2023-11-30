@@ -1,7 +1,7 @@
 Spearman:
-  .db 45  ;hp
-  .db 23  ;atk
-  .db 13   ;def 
+  .db 40  ;hp
+  .db 22  ;atk
+  .db 11  ;def 
   .db 10  ;int
   .db 11  ;res
   .db 15  ;spd

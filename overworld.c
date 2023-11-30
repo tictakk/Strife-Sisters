@@ -86,20 +86,22 @@ void overworld_loop(int x, int y)
 				}
 				else if(selector_y == -16 && s_y > 224)
 				{
-					s_y = 64;
-					scroll(0,s_x,s_y,0, 223, 0xC0);
-					selector_y = 224;
-					spr_y(selector_y);
-          s_x_relative = s_x / 8;
-          s_y_relative = s_y / 8;
+          // put_string("Game Over",s_x_relative,s_y_relative+6);
+          // wait_for_I_input();
+					// s_y = 64;
+					// scroll(0,s_x,s_y,0, 223, 0xC0);
+					// selector_y = 224;
+					// spr_y(selector_y);
+          // s_x_relative = s_x / 8;
+          // s_y_relative = s_y / 8;
 				}
 				else if(selector_y == 224 && s_y < 288)
 				{
-					s_y = 288;
-					scroll(0,s_x,s_y,0,223,0xC0);
-					selector_y = 16;
-          s_x_relative = s_x / 8;
-          s_y_relative = s_y / 8;
+					// s_y = 288;
+					// scroll(0,s_x,s_y,0,223,0xC0);
+					// selector_y = 16;
+          // s_x_relative = s_x / 8;
+          // s_y_relative = s_y / 8;
 				}
 		}
 		if(!party_moving)
@@ -131,6 +133,11 @@ void arrived(int pos)
     story(get_map_id_by_pos(pos),PREBATTLE,0);
   }
 //   }
+  if(map_no == 14)
+  {
+    // play_credits();
+    display_outro();
+  }
   map_no = get_map_id_by_pos(pos);
   unlock_units_by_castle(map_no);
   scroll(0,s_x,288,0, 223, 0xC0);
@@ -406,15 +413,14 @@ void init_overworld_data()
   load_castle_data(617,4,RAIDER_UNIT,6,17,SOUTH);//map 5, size, 3-4, level 7
   load_castle_data(713,5,WITCH_UNIT,11,26,SOUTHEAST);//map 6, size: 4-5, level 9
   load_castle_data(811,6,DANCER_UNIT,11,26,SOUTH);//map 7, size: 4-5, level 10
-  load_castle_data(970,7,KNIGHT_UNIT,18,35,EAST); //map 8, size: 5-6, level 12
-  load_castle_data(946,8,LANCER_UNIT,18,35,NORTH); //map 9, size: 6-7, level 14
+  load_castle_data(970,7,LANCER_UNIT,18,35,EAST); //map 8, size: 5-6, level 12
+  load_castle_data(946,8,KNIGHT_UNIT,18,35,NORTH); //map 9, size: 6-7, level 14
   load_castle_data(852,9,STALKER_UNIT,27,40,EAST); //map 10, size: 6-7, level 16
   load_castle_data(888,10,BERSERKER_UNIT,27,40,EAST); //map 11, size: 7-8, level 17
   load_castle_data(891,11,0,41,43,NORTHEAST); //map 12, size: 8, level 18
   load_castle_data(796,12,0,41,44,NORTH); //map 13, size: 9, level 19
   load_castle_data(730,13,0,44,44,WEST); //map 14, size: 9, level 19
-  load_castle_data(727,14,0,44,44,WEST); //map 15, size: 9, level 20
-  load_castle_data(692,15,0,0,0,0); //map 16
+  load_castle_data(727,14,0,44,44,NORTHWEST); //map 15, size: 9, level 20
 }
 
 void load_castle_data(int pos, int map_id, char unlock, char lo, char hi, enum Direction direction)
@@ -462,7 +468,8 @@ void print_unit_row_by_type(char type, char x, char y)
     if(unit_header[0].a_type == type)
     {
       set_font_pal(10);
-      print_unit_type(unit_header[0].id,x,y+(s_y/8)+menu_option++);
+      // print_unit_type(unit_header[0].id,x,y+(s_y/8)+menu_option++);
+      print_unit_type(unit_header[0].id,x+s_x_relative,s_y_relative+y+menu_option++);
     }
   }
   set_font_pal(10);
@@ -495,7 +502,7 @@ char get_unit_by_type(char type, char index)
 void buy_unit()
 {
   player_gold -= unit_cost;
-  add_unit_to_convoy(selected_unit,1);
+  add_unit_to_convoy(selected_unit,map_level_table[map_no]);
   update_gold_amount(2,9,6,9);
 }
 
@@ -672,7 +679,7 @@ void overworld_controls(){
       {
         cursor_column--;
         curs_left(4);
-        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,1);
+        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,(party_units[(cursor_column*8)+commander_select_cursor]>>8));
       }
       return;
     }
@@ -728,7 +735,7 @@ void overworld_controls(){
       {
         cursor_column++;
         curs_right(4);
-        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,1);
+        update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,(party_units[(cursor_column*8)+commander_select_cursor]>>8));
       }
       return;
     }
@@ -790,7 +797,7 @@ void overworld_controls(){
 				}
 				else if(menu_state == DEPLOY_SELECT_MENU  || menu_state == DISMISS_SELECT_MENU)
 				{
-          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,1);
+          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,(party_units[(cursor_column*8)+commander_select_cursor]>>8));
 				}
 			}
 			return;
@@ -839,7 +846,7 @@ void overworld_controls(){
         }
         if(menu_state == DEPLOY_SELECT_MENU || menu_state == DISMISS_SELECT_MENU)
         {
-          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,1);
+          update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,(party_units[(cursor_column*8)+commander_select_cursor]>>8));
         }
       }
       return;
@@ -986,11 +993,11 @@ void overworld_controls(){
         display_window_rel(22,0,10,14);
         if(primary_menu == TRAIN_MENU)
         {
-          update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,23,0,1);
+          update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,23,0,party_commanders[selected_cmdr].bg.units[selected_unit].level);
         }
         else
         {
-          update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,ARMY_STATS_X,ARMY_STATS_Y,1);
+          update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
         }
         return;
       }
@@ -1010,11 +1017,11 @@ void overworld_controls(){
 
       if(primary_menu == TRAIN_MENU)
       {
-        update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,23,0,1);
+        update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,23,0,party_commanders[selected_cmdr].bg.units[selected_unit].level);
       }
       else
       {
-        update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,ARMY_STATS_X,ARMY_STATS_Y,1);
+        update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
       }
 			swap_unit = 0;
 
@@ -1037,7 +1044,7 @@ void overworld_controls(){
       // reset_npcs();
       load_selector(0x68C0,31);
       display_selector(63,get_iso_x(1,17,commander_select_cursor,cursor_column),get_iso_y(1,17,commander_select_cursor,cursor_column)+14,31);
-      update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,ARMY_STATS_X,ARMY_STATS_Y,1);
+      update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[0].level);
 		}
     else if(menu_state == ARMY_MENU)
 		{
@@ -1098,11 +1105,20 @@ void overworld_controls(){
           }
           load_overworld_bg();
           load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
-          // if(game_over == 0)
-          // {
-          //   copy_commanders(party_commanders,temp_commanders);
-          //   game_over = 1;
-          // }
+          if(game_over == 0)
+          {
+            copy_commanders(party_commanders,temp_commanders);
+            game_over = 1;
+            display_castle_menu();
+            commander_select_cursor = 0;
+          }
+          else
+          {
+            if(castles[map_no].direction)
+            {
+              set_direct(castles[map_no].direction);
+            }
+          }
           
           // if(map_no == 3 || game_over == 0)
           // {
@@ -1110,10 +1126,10 @@ void overworld_controls(){
           // }
           // else
           // {
-            if(castles[map_no].direction)
-            {
-              set_direct(castles[map_no].direction);
-            }
+            // if(castles[map_no].direction)
+            // {
+            //   set_direct(castles[map_no].direction);
+            // }
           // }
 					break;
 			}
@@ -1151,10 +1167,11 @@ void overworld_controls(){
   }
 	if(j_2 & JOY_RUN)
 	{
-    put_green_square(1,17);
+    // put_green_square(1,17);
   }
 	if(j_2 & JOY_SEL)
 	{
+    // put_number(calc_percentage(10,20),4,s_x_relative,s_y_relative);
     // tile_highlight(0xE,11,TILE_FORMATION);
     // tile_highlight(0xE,8,TILE_HIGHLIGHT);
     // tile_highlight(0xE,8,TILE_GRAY);
@@ -1290,7 +1307,7 @@ void dismiss_select_I()
       update_unit_stats_window(NO_UNIT,ARMY_STATS_X,ARMY_STATS_Y,1);
       update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
     }
-    update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,1);
+    update_unit_stats_window(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,(party_units[(cursor_column*8)+commander_select_cursor]>>8));
     display_window_rel(ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y,10,14);
     load_cursor(23+(cursor_column*4),3+commander_select_cursor,SLIDER_ONE);
   }
@@ -1299,10 +1316,10 @@ void dismiss_select_I()
 void reload_overworld()
 {
 	load_overworld_bg();
-	reset_npcs();
+	reset_npcs(); 
 	satb_update();
 	menu_state = OVERWORLD;
-          
+
   load_map(0,0,0,0,MAP_WIDTH,OVERWORLD_MAP_HEIGHT);
 }
 

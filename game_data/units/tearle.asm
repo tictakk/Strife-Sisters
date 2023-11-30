@@ -13,7 +13,7 @@ Tearle:
   .db 0   ;art    
   .db 3   ;points
   .db 15  ;pow
-  .db 0   ;is_cmdr
+  .db 1   ;is_cmdr
   .db 11, 10, 7 ;attack positions
 
   ;unit growth

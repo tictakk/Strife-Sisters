@@ -2,7 +2,7 @@ Demon:
   .db 55  ;hp
   .db 27  ;atk
   .db 14  ;def
-  .db 5   ;int
+  .db 16   ;int
   .db 9   ;res
   .db 16  ;spd
   .db 3   ;mov
@@ -14,10 +14,10 @@ Demon:
   .db 3   ;points
   .db 15  ;pow
   .db 0   ;is_cmdr
-  .db 11, 5, 0 ;attack positions
+  .db 11, 5, 11 ;attack positions
 
   ;unit growth
-  .db GROWTH_DPS
+  .db GROWTH_SPEED_DPS
 
   ;graphic
   .db bank(_demonbtl)

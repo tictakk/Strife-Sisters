@@ -130,7 +130,7 @@ void update_unit_stats_window(char unit_id, char x, char y, char level)
   {
     spr_hide(1);
   }
-  print_unit_stats(unit_id,x+1,s_y_relative+y+6,party_commanders[selected_cmdr].bg.units[selected_unit].level);
+  print_unit_stats(unit_id,x+1+s_x_relative,s_y_relative+y+6,level);
   // print_unit_fullname(unit_id,x+3,s_y_relative+y+1);
 }
 
@@ -310,7 +310,7 @@ void display_dismiss_select_menu()
   load_cursor(23,3,SLIDER_ONE);
 
   update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-  update_unit_stats_window(party_units[0]&0xFF,13,14,1);
+  update_unit_stats_window(party_units[0]&0xFF,13,14,party_units[0]>>8);
 }
 
 void display_deploy_select_menu()
@@ -321,7 +321,7 @@ void display_deploy_select_menu()
   set_menu_state(DEPLOY_SELECT_MENU,CONVOY_OPTIONS,CONVOY_COLS);
   load_cursor(23+(last_selected_col*4),3+last_selected_cursor,SLIDER_ONE);
   update_convoy_window(ARMY_CONVOY_WINDOW_X,ARMY_CONVOY_WINDOW_Y);
-  update_unit_stats_window(party_units[0]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,1);
+  update_unit_stats_window(party_units[0]&0xFF,ARMY_STATS_X,ARMY_STATS_Y,party_units[0]>>8);
   commander_select_cursor = last_selected_cursor;
   cursor_column = last_selected_col;
 }
@@ -335,11 +335,11 @@ void display_oraganize_select_menu(char x, char y)
   display_selector(63,get_iso_x(x,y,commander_select_cursor,cursor_column),get_iso_y(x,y,commander_select_cursor,cursor_column)+14,31);
   if(primary_menu == TRAIN_MENU)
   {
-    update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,23,0,1);
+    update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,23,0,party_commanders[selected_cmdr].bg.units[0].level);
   }
   else
   {
-    update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,ARMY_STATS_X,ARMY_STATS_Y,1);
+    update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[0].level);
   }
   // draw_formation(selected_formation);
   // satb_update();
@@ -523,18 +523,21 @@ void start_training()
 
 void start_challenge_battle()
 {
-  start_battle(selected_cmdr,CHALLENGE_MODE);
-  reload_overworld();
-  display_train_select_menu();
-  training_enemies_count = 0;
-  set_menu_state(TRAIN_OPTIONS_MENU,4,0);
-  remove_cursor();
-  load_cursor(11,2,SLIDER_ONE);
-  commander_select_cursor = 0;
-  training_enemies[0] = NO_UNIT;
-  draw_formation(selected_formation);
-  load_cmdr_army_to_npcs(selected_cmdr);
-  refresh_battle_units();
+  if(training_enemies_count)
+  {
+    start_battle(selected_cmdr,CHALLENGE_MODE);
+    reload_overworld();
+    display_train_select_menu();
+    training_enemies_count = 0;
+    set_menu_state(TRAIN_OPTIONS_MENU,4,0);
+    remove_cursor();
+    load_cursor(11,2,SLIDER_ONE);
+    commander_select_cursor = 0;
+    training_enemies[0] = NO_UNIT;
+    draw_formation(selected_formation);
+    load_cmdr_army_to_npcs(selected_cmdr);
+    refresh_battle_units();
+  }
 }
 
 void  refresh_battle_units()
@@ -603,7 +606,7 @@ void menu_back_button()
     commander_select_cursor = swap_unit % 8;
     cursor_column = swap_unit / 8;
     set_menu_state(DEPLOY_SELECT_MENU,CONVOY_OPTIONS,CONVOY_COLS);
-    update_unit_stats_window(party_units[swap_unit]&0xFF,13,14,1);
+    update_unit_stats_window(party_units[swap_unit]&0xFF,13,14,party_units[swap_unit]>>8);
 
     // reset_cursor();
     commander_select_cursor = last_selected_cursor;

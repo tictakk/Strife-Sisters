@@ -16,10 +16,12 @@
 #define PHASE_END 6
 
 #define COUNTER_ATTACK_BONUS 15
-#define LIFE_STEAL_BONUS 25
+#define LIFE_STEAL_BONUS 50
 #define EVADE_BONUS 25
 #define CRIT_BONUS 68
 #define REGEN_BONUS 5
+
+#define MAX_MODIFIER_AMT 15
 
 // #incbin(battlemap,"tiles/battletiles.battle_backgrounds.layer-Layer 1.map001.stm")
 // #inctilepal(battletilespal,"tiles/battletiles.tiles.pcx")
@@ -53,7 +55,7 @@ void battle_end_screen()
   display_number_incrementing(19,3,battle_lost,1);
   write_text(10,4,"exp");
   sync(30);
-  display_number_incrementing(17,4,battle_exp,3);
+  display_number_incrementing(16,4,battle_exp,4);
   sync(60);
 }
 
@@ -87,7 +89,7 @@ void standard_battle()
 
 void training_battle()
 {
-  while(team_one_count > 0 && team_two_count > 0)
+  while(team_one_count > 0 && team_two_count > 0 && early_exit == 0)
   {
     battle_seq();
     reset_attacks();
@@ -176,19 +178,19 @@ void apply_modifier(char target, char modifier, char amount)
   switch(modifier)
   {
     case MOD_SPD:
-    battleunits[target].s_bonus += amount;
+    battleunits[target].s_bonus = min(battleunits[target].s_bonus+amount,MAX_MODIFIER_AMT);//+= amount;
     break;
 
-    case MOD_POW:
-    battleunits[target].p_bonus += amount;
+    case MOD_RES:
+    battleunits[target].r_bonus = min(battleunits[target].r_bonus+amount,MAX_MODIFIER_AMT); //amount;
     break;
 
     case MOD_ATK:
-    battleunits[target].a_bonus += amount;
+    battleunits[target].a_bonus = min(battleunits[target].a_bonus+amount,MAX_MODIFIER_AMT);//amount;
     break;
 
     case MOD_DEF:
-    battleunits[target].d_bonus += amount;
+    battleunits[target].d_bonus = min(battleunits[target].d_bonus+amount,MAX_MODIFIER_AMT);//amount;
     break;
 
     case MOD_HP:
@@ -209,6 +211,11 @@ void apply_modifier(char target, char modifier, char amount)
     break;
   }
   update_healthbar(target);
+}
+
+void apply_character_bonuses()
+{
+
 }
 
 void perform_art()
@@ -312,8 +319,6 @@ void clear_art_queue()
 
 void apply_art(char target)
 {
-  char modifier;  
-  modifier = 0;
   // wait_for_I_input();
   // spr_set(target+5);
   // load_art(art_queue_id,spr_get_x(),spr_get_y(),!unit_direction(target));
@@ -324,7 +329,7 @@ void apply_art(char target)
     transfer_units_to_stun_vram(battleunits[target].unit->id,stun_count++);
   }
   // remove_effects();
-  apply_modifier(target,get_modifier_type(art_queue_id),arts[art_queue_id].base_amt-modifier);
+  apply_modifier(target,get_modifier_type(art_queue_id),arts[art_queue_id].base_amt);
 }
 
 void end_sequence()
@@ -442,6 +447,10 @@ void d_battle(char team, char side)
     }
     satb_update();
     vsync();
+    if((battle_mode == TRAIN_MODE || battle_mode == CHALLENGE_MODE) && joytrg(0) && JOY_SEL)
+    {
+      early_exit = 1;
+    }
   }
 }
 
@@ -611,6 +620,10 @@ void b_u_attack(char b_id)
             // put_hex(&target_bonuses,6,0,0);
             calc_hit_damage(i,dmg,COUNTER_ATTACK_BONUS);
           }
+          else if(party_commanders[entities[atker].id].sprite_type == REI && attack_side == LEFT_SIDE)// && tactic_current == TACTIC_RAGE)
+          {
+            calc_hit_damage(i,dmg,50);
+          }
           else
           {
             calc_hit_damage(i,dmg,0);
@@ -724,13 +737,28 @@ void b_u_heal(char b_id)
   }
   else
   {
-    char i;
+    char i, heal_targets;
+    heal_targets = 0;
     for(i=0; i<18; i++)
     {
       if(battleunits[i].target)
       {
-        // calc_heal(b_id,i,0,0,0,35);
-        heal_health_percent(i,35);
+        heal_targets++;
+      //   heal_health_percent(i,35);
+      }
+    }
+    for(i=0; i<18; i++)
+    {
+      if(battleunits[i].target)
+      {
+        if(heal_targets > 1)
+        {
+          heal_health_percent(i,25);
+        }
+        else
+        {
+          heal_health_percent(i,35);
+        }
       }
     }
     set_unit_waiting(b_id);
@@ -806,8 +834,14 @@ void heal_health_percent(char target_id, int percentage)
   int heal_amt;
   bid_to_unit_header(target_id,0);
   apply_level_to_header(battleunits[target_id].unit->level,0);
-
-  heal_amt = calc_percentage(unit_header[0].hp,percentage);
+  if(check_battle_bonus(BONUS_BARE,attacker_bonuses))
+  {
+    heal_amt = calc_percentage(unit_header[0].hp,percentage+15);
+  }
+  else
+  {
+    heal_amt = calc_percentage(unit_header[0].hp,percentage);
+  }
 
   set_heal(target_id,heal_amt,0);
   battleunits[target_id].target = 0;
@@ -843,9 +877,20 @@ void calc_hit_damage(char t_id, unsigned char damage, int bonus)
 
 unsigned char calc_damage(char a_id, char t_id, int a_level, int a_base, int a_bonus, int d_bonus, int d_base, int m_pow)
 {
-  int dmg = 0, adv_modifier = 0;
+  int dmg, adv_modifier;
+  unsigned char def;
+  
+  adv_modifier = 0;
+  dmg = 0;
+  def = d_base;
+  if(d_bonus)
+  {
+    def += calc_percentage(def,d_bonus);
+  }
 
-  dmg = (m_pow + a_level) + ( max( (a_base + a_bonus) - (d_base+d_bonus),1) * (1 + crit));
+  // put_number(d_bonus,4,0,0);
+  dmg = (m_pow + a_level) + ( max( (a_base + a_bonus) - (def),1) * (1 + crit));
+  // dmg = calc_percentage(dmg,35);
   dmg /= 2;
 
   if(adv_plus_plus_flag)
@@ -872,6 +917,7 @@ void apply_damage(char t_id, unsigned char damage)
   }
   // put_string("    ",0,0);
   // put_number(damage,4,0,0);
+  // wait_for_I_input();
   if(apply_damage)//WHEN A UNIT LEVELS UP, IT'S HEALTH BAR SHRINKS BECAUSE IT GAINS MORE HEALTH THAN IT HAS
 	{
     int hp_p_before, hp_p_after;
@@ -899,13 +945,6 @@ void apply_damage(char t_id, unsigned char damage)
     }
 	}
 }
-
-// void load_animations_to_vram(char attacker)
-// {
-//   char i, count;
-//   count = 0;
-//   transfer_units_to_attack_vram(attacker);
-// }
 
 /*
 	BATTLE ROUTINE
@@ -958,7 +997,7 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t, char standard)
 	//a_atk_bonus = 0;//terrain_atk_bonus(a_terrain);
 	//a_def_bonus = 0;//terrain_def_bonus(a_terrain);
 	//t_atk_bonus = 0;//terrain_atk_bonus(t_terrain);
-	//t_def_bonus = 0;//terrain_def_bonus(t_terrain);
+	// t_def_bonus = terrain_def_bonus(t_terrain);
   screen_dimensions = 32;
   battle_mode = standard;
 
@@ -996,6 +1035,7 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t, char standard)
   load_pals(trgt,9);
   // battle_seq();
   // standard_battle();
+  // put_number(t_t,4,10,0);
   if(battle_mode == STANDARD_MODE)
   {
     standard_battle();
@@ -1102,6 +1142,11 @@ void init_armies(int player, int cpu, char t_one, char t_two)
       {
         add_battle_unit(j+4+(i/3),3+(i%3),cpu,total_count,1,0,(j*3)+i,&entities[cpu].bg->units[(j*3)+i],t_two);
         update_healthbar(total_count);
+        battleunits[total_count].d_bonus += t_terrain;
+        if(check_battle_bonus(BONUS_SWORD,targeted_bonuses))
+        {
+          battleunits[total_count].d_bonus += 35;
+        }
         team_two_count++;
       }
 		}
@@ -1175,7 +1220,13 @@ void load_pals(char entity_id, int off)
           load_palette(cmdr_count++,tearle_battle_pal,1);
           spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);    
-          break;    
+          break;
+
+        case ZALADIN:
+          load_palette(cmdr_count++,king_battle_pal,1);
+          spr_set(MAX_EFFECT_COUNT+(i+off));
+          spr_pal(cmdr_count-1);   
+          break;
 			}
 		}
 	}
@@ -1183,7 +1234,9 @@ void load_pals(char entity_id, int off)
 
 void kill_unit(char b_id)
 {
+  int single_exp;
   char i;
+  single_exp = 0;
   bid_to_unit_header(b_id,1);
   entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp = 0;
   battleunits[b_id].active = 0;
@@ -1224,14 +1277,16 @@ void kill_unit(char b_id)
     }
     else
     {
-      units_killed++;
+      // units_killed++;
       battle_killed++;
-      battle_exp += (5 * (int)(battleunits[b_id].unit->level * 2));
+      single_exp = (5 * (int)(battleunits[b_id].unit->level * 2));
+      // battle_exp += (5 * (int)(battleunits[b_id].unit->level * 2));
       // battle_exp += battleunits[b_id].unit->unit->exp;
     }
   }
   if(battleunits[b_id].ent_id == atker)
-  {   
+  {
+    single_exp *= team_one_count;
     if(destroy_entity_flag)
     {
       team_one_count = 0;
@@ -1243,6 +1298,7 @@ void kill_unit(char b_id)
   }
   else
   {
+    single_exp *= team_two_count;
     if(destroy_entity_flag)
     {
       team_two_count = 0;
@@ -1251,8 +1307,8 @@ void kill_unit(char b_id)
     {
       team_two_count--;
     }
-
   }
+  battle_exp += single_exp;
   set_bonuses(&party_commanders[entities[battleunits[b_id].ent_id].id]);
   spr_hide(MAX_EFFECT_COUNT+b_id);
   set_battle_bonuses();
@@ -1355,17 +1411,14 @@ void cleanup_battle(int player_selected_index, int cpu_selected_index)
     battleunits[i].column = 0;
     battleunits[i].s_bonus = 0;
     battleunits[i].ent_id = 0;
-    battleunits[i].p_bonus = 0;
+    battleunits[i].r_bonus = 0;
     battleunits[i].unit = 0;
   }
 
   // picker = 0;
   animating = 0;
-  a_atk_bonus = 0;
-  t_atk_bonus = 0;
-  a_def_bonus = 0;
-  t_def_bonus = 0;
   t_terrain = 0;
+  early_exit = 0;
   // team_one_judgement = 0;
   // team_two_judgement = 0;
   // position_status = 0;

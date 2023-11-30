@@ -384,24 +384,17 @@ void get_unit_cost(char unit_id)
   switch(unit_id)
   {
     case SWORD_UNIT: unit_cost = 100; break;
-    case SPEAR_UNIT: unit_cost = 250; break;
-    case AXE_UNIT: unit_cost = 250; break;
-    case KNIGHT_UNIT: unit_cost = 250; break;
-    case BERSERKER_UNIT: unit_cost = 600; break;
-    case LANCER_UNIT: unit_cost = 600; break;
-    case PALADIN_UNIT: unit_cost = 650; break;
+    case SPEAR_UNIT: unit_cost = 150; break;
+    case KNIGHT_UNIT: unit_cost = 300; break;
+    case BERSERKER_UNIT: unit_cost = 400; break;
+    case LANCER_UNIT: unit_cost = 300; break;
     case ARCHER_UNIT: unit_cost = 100; break;
-    case SNIPER_UNIT: unit_cost = 300; break;
     case STALKER_UNIT: unit_cost = 300; break;
-    case WITCH_UNIT: unit_cost = 450; break;
-    case PRIEST_UNIT: unit_cost = 450; break;
-    case FIGHTER_UNIT: unit_cost = 100; break;
-    case BRAWLER_UNIT: unit_cost = 200; break;
-    case MONK_UNIT: unit_cost = 500; break;
-    case RAIDER_UNIT: unit_cost = 100; break;
-    case THIEF_UNIT: unit_cost = 200; break;
-    case DANCER_UNIT: unit_cost = 100; break;
-    case CLERIC_UNIT: unit_cost = 250; break;
+    case WITCH_UNIT: unit_cost = 400; break;
+    case BRAWLER_UNIT: unit_cost = 100; break;
+    case RAIDER_UNIT: unit_cost = 150; break;
+    case DANCER_UNIT: unit_cost = 400; break;
+    case CLERIC_UNIT: unit_cost = 200; break;
     default: unit_cost = 0;
   }
 }

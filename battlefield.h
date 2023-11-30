@@ -54,7 +54,7 @@ Entity entities[MAX_ENTITIES];
 char selector_mode;
 int last_pos,squares;
 char num_of_entities, menu_option,
-     menu_columns, menu_vert_size, selected_option;
+     menu_columns, menu_vert_size;
 char one_total;
 char two_total;
 char turn, turns_count;
@@ -125,6 +125,8 @@ void add_entity(char team, char id, int pos, struct Commander *commanders, char 
   entities[num_of_entities].tactic_meter = 0;
   entities[num_of_entities].defend = 0;
   entities[num_of_entities].has_cmdr = has_cmdr;
+  entities[num_of_entities].tactic_meter = 0;
+  // entities[num_of_entities].tactic_meter = MAX_TACTIC_METER;
   // party_commanders[entities[num_of_entities]].meter = 0;
   if(team == PLAYER)
   {
@@ -368,18 +370,17 @@ void post_battle_screen()
     set_font_pal(9);
     put_char(grades[get_map_grade_result(map_no,total_bonus)],s_x_relative+18,s_y_relative+22);
     set_font_pal(10);
+    if(map_no == 0 || map_no == 1)
+    {
+      player_gold += 500;
+    }
+    else
+    {
+      player_gold += (payouts[get_map_grade_result(map_no,total_bonus)] + (100 * map_no));
+    }
   }
   // put_char('S',s_x_relative+18,s_y_relative+22);
   // put_number(map_grades[3],5,0,0);
-
-  if(map_no == 0 || map_no == 1)
-  {
-    player_gold += 500;
-  }
-  else
-  {
-    player_gold += payouts[get_map_grade_result(map_no,total_bonus)];
-  }
   
   wait_for_I_input();
 }
@@ -491,6 +492,7 @@ void print_menu()
 void print_run_menu()
 {
   put_string("TURN",20,1);
+  put_string("Give Up",20,2);
   menu_mask = MASK_SQUAD;
   menu_mask |= 0x1;
 }
@@ -567,11 +569,11 @@ void end_player_turn()
 
 void end_unit_turn(char entity_id)
 {
-  char item_no;
   selector_mode = SELECT_MODE;
   menu_option = MENU_ATTACK;
   entities[entity_id].actionable = 0;
-  darken_palette(26+entity_id);
+  // darken_palette(26+entity_id);
+  darken_palette(get_commander_palette(party_commanders[entities[entity_id].id].sprite_type));
   menu_mask = 0x00;
   print_menu();
   hide_cursor();

@@ -1,10 +1,10 @@
 Stalker:
-  .db 50  ;hp
-  .db 27  ;atk
+  .db 40  ;hp
+  .db 25  ;atk
   .db 12  ;def
   .db 16  ;int
-  .db 14  ;res
-  .db 20  ;spd
+  .db 17  ;res
+  .db 12  ;spd
   .db 3   ;mov
   .db 130 ;sta
   .db 3   ;rng
@@ -14,7 +14,7 @@ Stalker:
   .db 3   ;points
   .db 15   ;pow
   .db 0   ;is_cmdr
-  .db 11, 5, 0 ;attack positions
+  .db 0, 9, 2 ;attack positions
 
   ;unit growth
   .db GROWTH_RANGED_DPS

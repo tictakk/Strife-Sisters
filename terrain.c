@@ -10,36 +10,42 @@
 #incpal(cursorpal, "map/cursor.pcx");
 #incchr(run_button,"map/sprites/run_button.pcx")
 
-#incspr(chest,"map/sprites/chest.pcx")
-#incpal(chest_pal,"map/sprites/chest.pcx")
+// #incspr(chest,"map/sprites/chest.pcx")
+// #incpal(chest_pal,"map/sprites/chest.pcx")
 
-#incpal(overworldpal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
-#inctile(overworldtiles,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
+// #incpal(overworldpal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
+// #inctile(overworldtiles,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
+#incpal(overworldpal,"/Users/matthewkersey/Documents/overworld.pcx")
+// #inctile(overworldtiles,"/Users/matthewkersey/Desktop/tutorial_maps.pcx")
+#inctile(overworldtiles,"/Users/matthewkersey/Documents/overworld.pcx")
 
-#incbin(tutorial_1,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map001.stm")
-#incbin(tutorial_2,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map002.stm")
-#incbin(battlefieldbat,"map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map001.stm")
-#incbin(m0, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map002.stm")
-#incbin(m1, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map004.stm")
-#incbin(m3, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map005.stm")
-#incbin(m2, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map003.stm")
-#incbin(m4, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map006.stm")
-#incbin(m5, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map007.stm")
-#incbin(m6, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map008.stm")
-#incbin(m7, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map009.stm")
-#incbin(m8, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map010.stm")
-#incbin(m9, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map011.stm")
-#incbin(m10, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map012.stm")
-#incbin(m11, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map013.stm")
-#incbin(m12, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map014.stm")
-#incbin(m13, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map015.stm")
-#incbin(m14, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map016.stm")
-#incbin(m15, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map017.stm")
+#incbin(tutorial_1,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map001.stm")//1
+#incbin(tutorial_2,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map002.stm")//2
+#incbin(battlefieldbat,"/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map011.stm")//3
+#incbin(m0, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map012.stm")//4
+#incbin(m1, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map013.stm")//5
+#incbin(m3, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map014.stm")//6
+#incbin(m2, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map015.stm")//7
+#incbin(m4, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map003.stm")//8
+#incbin(m5, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map004.stm")//9
+#incbin(m6, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map005.stm")//10
+#incbin(m7, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map006.stm")//11
+#incbin(m8, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map007.stm")//12
+#incbin(m9, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map008.stm")//13
+#incbin(m10, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map009.stm")//14
+#incbin(m11, "/Users/matthewkersey/Desktop/tutorial_maps.strifesisterstiles.layer-Layer 1.map010.stm")//15
+// #incbin(m12, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map014.stm")//16
+// #incbin(m13, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map015.stm")//17
+// #incbin(m14, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map016.stm")//18
+// #incbin(m15, "map/backgrounds/new_assets/strifemaps.Strifemaps.layer-Layer 1.map017.stm")//19
 
 //Map images
 // #incbin(overworldmap,"tiles/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
-#incbin(overworldmap,"map/backgrounds/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
-#inctilepal(overworldtilespal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
+// #incbin(overworldmap,"map/backgrounds/strifesisters_overworld.strifersisters.layer-Layer 1.map001.stm")
+#incbin(overworldmap,"/Users/matthewkersey/Documents/overworld.overworld.layer-Layer 1.map001.stm")
+
+// #inctilepal(overworldtilespal,"map/backgrounds/new_assets/strifemaps.tiles.pcx")
+#inctilepal(overworldtilespal,"/Users/matthewkersey/Documents/overworld.pcx")
 
 #define TERRAIN_EFFECT_COUNT 5
 #define NORMAL_TERRAIN 0
@@ -48,7 +54,7 @@
 #define BUILDING_TERRAIN 3
 #define CAPTURABLE_TERRAIN 4
 
-#define TERRAIN_TYPE_COUNT 7
+#define TERRAIN_TYPE_COUNT 8
 #define GRASS 0
 #define SAND 1
 #define FOREST 2
@@ -72,10 +78,10 @@
 #define TERRAIN_ITEM_VRAM 0x5800//(TERRAIN_ICON_VRAM + 0x1C0)
 #define TERRAIN_ICON_PAL 8
 
-#define WATER_VRAM 0x2640
-#define WATER_ANIM_ZERO (overworldtiles + 0x1640)
+#define WATER_VRAM 0x2680
+#define WATER_ANIM_ZERO (overworldtiles + 0x1680)
 
-const char def_bonus[TERRAIN_EFFECT_COUNT] = { 0, 10, -10, 20, 20 };
+const char def_bonus[TERRAIN_TYPE_COUNT] = { 0, -10, 10, 0, 20, 0, 25, 0 };
 const char terrain_animation[] = { 0, 1, 0, 2 };
 
 int map_offset = 0;
@@ -127,21 +133,17 @@ char terrain_def_bonus(char te_type)
   return def_bonus[te_type];
 }
 
-
 char terrain_type(int t_type)
 {
-  if((t_type > 125 && t_type < 129) || t_type == 44) {return GRASS;}
-  if(t_type > 73 && t_type < 89) {return SAND;}
-  if(t_type > 44 && t_type < 60) {return FOREST;}
-  if(t_type > 88 && t_type < 119) {return WATER;}
-  if(t_type > 118 && t_type < 124) {return STRUCTURE;}
-  if(t_type > 0 && t_type < 40) {return MOUNTAIN;}  
-  if(t_type > 157) { return WALL; }
+  if(t_type < 30 || (t_type > 70 && t_type < 74)) {return GRASS;} 
+  if(t_type > 29 && t_type < 46) {return MOUNTAIN;}
+  if(t_type > 74 && t_type < 90) {return SAND;}
+  if(t_type > 45 && t_type < 61) {return FOREST;}
+  if( (t_type > 60 && t_type < 71) || (t_type > 151 && t_type < 163) ) {return WALL;}
+  if(t_type > 89 && t_type < 120) {return WATER;}
+  if(t_type > 119 && t_type < 129) {return STRUCTURE; }
+  // if(t_type > 157) { return WALL; }
   // if(t_type > 123 && t_type < 126){ return WALL;}
-  // if(t_type == 154) {return RED_CRYSTAL;}
-  // if(t_type == 155) {return BLUE_CRYSTAL;}
-  // if(t_type == 156) {return GREEN_CRYSTAL;}
-  // if(t_type == 157) {return CHEST;}
   // if(t_type > 131) {return ROUTE;}
   return ROUTE;
 }
