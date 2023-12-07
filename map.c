@@ -13,7 +13,13 @@
 // [ @area, map id | map x | map y | map type | p_cmdr_pos | c_cmdr_pos | c_cmdr_ids | event_pos | map_items | item_positions]
 //     1       1       1       1        1           16           40           80          16           6             12
 //                                 181 byte total
-// #define MAP_
+
+const char S = 100;
+const char A = 90;
+const char B = 80;
+const char C = 70;
+const char D = 60;
+
 char ai_objective = 0;
 unsigned char map_x = 0;
 unsigned char map_y = 0;
@@ -30,10 +36,24 @@ struct battle_map_data{
 };
 // unsigned char raw_map_data[MAP_METADATA_SIZE];
 struct battle_map_data battle_map_metadata;
-int capture_position;
 //F, D, C, B, A, S
 const char grades[] = {83,65,66,67,68,70};
-int *map_grades;
+const char map_grades[] = {
+  7, 9, 11,
+  22, 18, 15,
+  15, 15, 19,
+  19, 17, 15,
+  15, 15, 15
+};
+
+const char map_turn_bonus[] = {
+  2, 5, 3, 
+  5, 7, 11,
+  11, 8, 6,
+  12, 14, 9,
+  4, 15, 15
+};
+// int *map_grades;
 
 void init_map_data(int map_id)
 {
@@ -93,15 +113,27 @@ void load_meta_data_char(char *field, int offset, int len)
 
 char get_map_grade_result(char map_no, int score)
 {
-  // char i, grade;
-  // grade = 70;
-  // for(i=0; i<6; i++)
-  // {
-  //   if(score>=map_grades[i])
-  //   {
-  //     grade = grades[i];
-  //   }
-  // }
-  // return grade;
-  return 0;
+  unsigned int i, grade;
+  grade = get_percentage(score/100,map_grades[map_no]);
+  // grade = ;
+  if(grade>=S)
+  {
+    return grades[0];
+  }else if(grade>=A)
+  {
+    return grades[1];
+  }else if(grade>=B)
+  {
+    return grades[2];
+  }else if(grade>=C)
+  {
+    return grades[3];
+  }
+  else if(grade>=D)
+  {
+    return grades[4];
+  }else
+  {
+    return grades[5];
+  }
 }

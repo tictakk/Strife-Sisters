@@ -208,11 +208,6 @@ void draw_npcs(char sprite_offset)
 void draw_npc(char sprite_no, int x, int y, char index)
 {
   int pattern;
-  // put_number(sprite_no,4,s_x_relative,s_y_relative);
-  // put_number(index,4,s_x_relative+5,s_y_relative);
-  // wait_for_I_input();
-  // npcs[index].pos_x = x;
-  // npcs[index].pos_y = y;
   pattern = npc_vram[npcs[index].type];
   spr_make(sprite_no,x,y+yOffset,pattern+NPC_FRAMES[current_frame],FLIP_MAS|SIZE_MAS,SZ_16x32,npcs[index].pal,1);
 }
@@ -220,8 +215,6 @@ void draw_npc(char sprite_no, int x, int y, char index)
 void destroy_npc(char index)
 {
   char i;
-  // put_number(index,5,s_x_relative+5,s_y_relative);
-  // wait_for_I_input();
   for(i=index; i<npc_count; i++)
   {
     memcpy(&npcs[i],&npcs[i+1],sizeof(struct npc));

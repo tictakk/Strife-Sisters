@@ -64,19 +64,13 @@
 #define STRUCTURE 6
 #define WALL 7
 
-#define TERRAIN_CAP_PLAYER 1
-#define TERRAIN_CAP_CPU 2
-#define TERRAIN_HEAL 3
-#define TERRAIN_TREASURE 4
-#define TERRAIN_TRAP 5
-#define TERRAIN_EVENT 6
-#define MAX_EVENT_TERRAIN 10
-#define MAX_TERRAIN_ITEMS 6
-
 //#define TERRAIN_ICON_VRAM 0x4E00
 #define TERRAIN_ICON_VRAM 0x5600
 #define TERRAIN_ITEM_VRAM 0x5800//(TERRAIN_ICON_VRAM + 0x1C0)
 #define TERRAIN_ICON_PAL 8
+
+#define SQUARE_1 0xE5B0
+#define SQUARE_2 0xD500
 
 #define WATER_VRAM 0x2680
 #define WATER_ANIM_ZERO (overworldtiles + 0x1680)
@@ -98,9 +92,11 @@ void load_terrain_icons()
 {
   load_vram(TERRAIN_ICON_VRAM,terrain_icons,0x1C0);
   load_vram(0x5B00,square,0x600);
-  load_vram(0x6100,square_extra,0x200);
+  load_vram(0x5000,square,0x600);
   load_palette(TERRAIN_ICON_PAL,t_icon_pal,1);
+  // load_palette(14,square_pal,1);
   load_palette(14,square_pal,2);
+  // load_palette(13,square_pal,1);
 }
 
 void put_terrain_effect(int vram, char num, int x, int y, char pal)

@@ -350,7 +350,7 @@ void post_battle_screen()
   write_text(s_x_relative+6,s_y_relative+16,"Units lost   -");
   put_number(units_lost,2,s_x_relative+22,s_y_relative+16);
   write_text(s_x_relative+6,s_y_relative+17,"Lost bonus   -");
-  display_number_incrementing(s_x_relative+21,s_y_relative+17,lost_bonus,3);
+  display_number_incrementing(s_x_relative+20,s_y_relative+17,lost_bonus,4);
 
   put_string("$$$$$$$$$$$$$$$$$$",s_x_relative+6,s_y_relative+18);
 
@@ -368,7 +368,7 @@ void post_battle_screen()
   {
     write_text(s_x_relative+12,s_y_relative+22,"Grade");
     set_font_pal(9);
-    put_char(grades[get_map_grade_result(map_no,total_bonus)],s_x_relative+18,s_y_relative+22);
+    put_char(get_map_grade_result(map_no,total_bonus),s_x_relative+18,s_y_relative+22);
     set_font_pal(10);
     if(map_no == 0 || map_no == 1)
     {
@@ -414,13 +414,14 @@ void get_turn_bonus()
     turn_bonus = 0;
     return;
   }
-  turn_bonus = max(8-(turns_count>>2),0) * 100;
+  turn_bonus = max(map_turn_bonus[map_no]-(turns_count>>2),0) * 100;
   //max == 900 I guess? Not really possible
 }
 
 void get_total_bonus()
 {
   total_bonus = killed_bonus + lost_bonus + turn_bonus;
+  final_score += total_bonus;
 }
 
 void undo()

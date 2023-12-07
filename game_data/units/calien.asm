@@ -13,7 +13,7 @@ Calien:
   .db 0   ;art
   .db 3   ;points
   .db 10  ;pow
-  .db 0   ;is_cmdr
+  .db 1   ;is_cmdr
   .db 10, 10, 10 ;attack positions
 
   ;unit growth

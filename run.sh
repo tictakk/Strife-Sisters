@@ -1,3 +1,3 @@
-make clean
-make all
-mednafen ./strifesisters.pce
+source version.txt
+version="_$MAJOR"_"$MINOR"_"$PATCH"
+mednafen "./strifesisters$version.pce"

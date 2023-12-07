@@ -224,7 +224,6 @@ int get_attack_square(char id, char atkr)
   int pos, square;
   char i, j, len;
   square = entities[id].pos;
-  //TODO:BUG HERE, len is never initialized
   // len = get_pattern_length(atkr);
   for(i=0; i<map_size+1; i++)
   {

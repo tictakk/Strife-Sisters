@@ -30,7 +30,7 @@
 
 int battle_exp = 0, damage_dealt = 0, roll = 0;
 char battle_killed = 0, battle_lost = 0, player_id;
-char crit, evade, battle_phase, attacker_effect, target_effect;
+char crit, evade, battle_phase, attacker_effect;
 
 void battle_end_screen()
 {
@@ -43,19 +43,24 @@ void battle_end_screen()
     return;
   }
   display_window_abs(9,0,12,10);
-  write_text(10,1,"damage");
+  set_font_pal(GOLD_FONT);
+  write_text(10,1,"DMG");
+  write_text(10,2,"killed");
+  write_text(10,3,"lost");
+  write_text(10,4,"exp");
+  set_font_pal(WHITE_FONT);
+  // sync(30);
+
+  display_number_incrementing(15,1,damage_dealt,5);
   sync(30);
 
-  display_number_incrementing(17,1,damage_dealt,3);
-  write_text(10,2,"killed");
-  sync(30);
   display_number_incrementing(19,2,battle_killed,1);
-  write_text(10,3,"lost");
   sync(30);
+
   display_number_incrementing(19,3,battle_lost,1);
-  write_text(10,4,"exp");
   sync(30);
-  display_number_incrementing(16,4,battle_exp,4);
+
+  display_number_incrementing(15,4,battle_exp,5);
   sync(60);
 }
 
@@ -64,20 +69,16 @@ void battle_seq()
   satb_update();
   sync(60);
   
-  // put_hex(&target_bonuses,6,0,0);
   battle_phase = PHASE_START;
   attacking_bonuses = entities[atker].bg->bonuses;
   targeted_bonuses = entities[trgt].bg->bonuses;
   d_battle(atker,LEFT_SIDE);
-  // if(clear_eyes_called == 0)
-  // {
+
   animating = 0;
   battle_phase = PHASE_START;
   attacking_bonuses = entities[trgt].bg->bonuses;
   targeted_bonuses = entities[atker].bg->bonuses;
   d_battle(trgt,RIGHT_SIDE);
-  // }
-  // countdown(3,2,8,"end "); countdown timer at the end for what?
 }
 
 void standard_battle()
@@ -153,7 +154,6 @@ void determine_miss(char b_id, char target_id)
   }
   if(difference < -204)
   {
-    misses++;
     set_unit_evade(target_id);
     return;
   }
@@ -168,7 +168,6 @@ void determine_miss(char b_id, char target_id)
     // put_number(accuracy,5,16,0);
     // wait_for_I_input();
     set_unit_evade(target_id);
-    misses++;
   }
   // return evade;
 }
@@ -204,8 +203,8 @@ void apply_modifier(char target, char modifier, char amount)
                                     target,
                                     battleunits[art_unit_id].unit->level,
                                     unit_header[0].intel,
-                                    battleunits[art_unit_id].a_bonus,
-                                    battleunits[target].d_bonus,
+                                    0,
+                                    battleunits[target].r_bonus,
                                     unit_header[1].res,
                                     amount));
     break;
@@ -336,13 +335,16 @@ void end_sequence()
 {
   battle_end_screen();
   distribute_exp();
+  vsync();
   fade_screen();
+  satb_update();
   sync(10);
 }
 
 void distribute_exp()
 {
-  unsigned char i, unit_count, exp_per;
+  unsigned int exp_per, unit_count;
+  unsigned char i;
 
   if(battle_mode != CHALLENGE_MODE)
   {
@@ -447,7 +449,7 @@ void d_battle(char team, char side)
     }
     satb_update();
     vsync();
-    if((battle_mode == TRAIN_MODE || battle_mode == CHALLENGE_MODE) && joytrg(0) && JOY_SEL)
+    if((battle_mode == TRAIN_MODE || battle_mode == CHALLENGE_MODE) && joytrg(0) & JOY_SEL)
     {
       early_exit = 1;
     }
@@ -598,7 +600,9 @@ void b_u_attack(char b_id)
         bid_to_unit_header(i,1);
         apply_level_to_header(battleunits[i].unit->level,1);
 
-        get_advantages(unit_header[0].a_type);
+        // get_advantages(unit_header[0].a_type);
+        get_plus_plus_adv(unit_header[0].a_type);
+        get_plus_adv(unit_header[0].a_type);
         check_advantage_plus(unit_header[1].a_type);
         check_advantage_plus_plus(unit_header[1].a_type);
         // determine_crit();
@@ -862,7 +866,6 @@ void calc_hit_damage(char t_id, unsigned char damage, int bonus)
 {
   //apply bonuses here?
   // put_number(damage,4,20,0);
-  hits++;
   if(bonus)
   {
     // put_number(damage+get_percentage(damage,bonus),4,10,0);
@@ -969,7 +972,6 @@ char battle_loop(int i1, int i2, char range, char a_t, char t_t, char standard)
   cmdr_count = 28;
   crit = 0;
   attacker_effect = 0;
-  target_effect = 0;
   
   if(entities[i1].defend || entities[i2].defend)
   {
@@ -1236,11 +1238,13 @@ void kill_unit(char b_id)
 {
   int single_exp;
   char i;
+  int lvl;
   single_exp = 0;
+  lvl = 1;
   bid_to_unit_header(b_id,1);
   entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp = 0;
   battleunits[b_id].active = 0;
-
+  lvl = battleunits[b_id].unit->level;
   if(unit_header[1].is_cmdr)
   {
     destroy_entity_flag = 1;
@@ -1252,16 +1256,21 @@ void kill_unit(char b_id)
         {//I think we really want to set team to not active also
           entities[battleunits[b_id].ent_id].bg->units[i].hp = 0;
           entities[battleunits[b_id].ent_id].bg->units[i].id = 0;
+          entities[battleunits[b_id].ent_id].bg->units[i].level = 0;
+          entities[battleunits[b_id].ent_id].bg->units[i].exp = 0;
         }
       }
     }
   }
   else
   {
-    //TODO: THIS NEEDS TO BE THOROUGHLY TESTED, MAY FUCK SERIOUS SHIT UP
+    //TODO: THIS NEEDS TO BE THOROUGHLY TESTED, MAY FUCK SERIOUS SHIT UP -- fixed... it fucked shit up...
     if(entities[battleunits[b_id].ent_id].team == CPU || battle_mode == STANDARD_MODE)
     {
+      entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].hp = 0;
       entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].id = 0;
+      entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].level = 0;
+      entities[battleunits[b_id].ent_id].bg->units[battleunits[b_id].pos].exp = 0;
     }
     else
     {
@@ -1273,13 +1282,14 @@ void kill_unit(char b_id)
     if(entities[battleunits[b_id].ent_id].team == PLAYER)
     {
       units_lost++;
-      battle_lost++; 
+      battle_lost++;
     }
     else
     {
       // units_killed++;
       battle_killed++;
-      single_exp = (5 * (int)(battleunits[b_id].unit->level * 2));
+      single_exp = (lvl * lvl);
+      // single_exp = (5 * (lvl * lvl));
       // battle_exp += (5 * (int)(battleunits[b_id].unit->level * 2));
       // battle_exp += battleunits[b_id].unit->unit->exp;
     }

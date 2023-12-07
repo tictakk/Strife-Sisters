@@ -14,7 +14,7 @@ Witch:
   .db 3   ;points
   .db 15  ;pow
   .db 0   ;is_cmdr
-  .db 11, 6, 3 ;attack positions
+  .db 10, 6, 3 ;attack positions
 
   ;unit growth
   .db GROWTH_MAGIC_DPS

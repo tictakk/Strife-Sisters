@@ -10,19 +10,10 @@
 #define IDLE 0
 #define ATTACK 1
 #define STUNNED 2
-#define PARALYZED 3
-#define DYING 4
 #define WAITING 5
 #define HEALING 6
 #define METER_ATTACK 8
 #define STATE_EVADE 9
-
-#define STATUS_NORMAL 0
-#define STATUS_DAZED 1
-#define STATUS_CONFUSED 2
-#define STATUS_RAGE 3
-#define STATUS_BLOWBACK 4
-#define STATE_ACID 5
 
 #define COMMANDER_PALETTE_1 28
 #define COMMANDER_PALETTE_2 29
@@ -56,7 +47,7 @@ const char bottom_row_attack_chart[9] = {
 
 const char ranged_attack_chart[9] = { 
                                       1, 1, 1, 
-                                      1, 1, 1, 
+                                      1, 1, 1,
                                       1, 1, 1
                                     };
 // char vram_temp[256];
@@ -68,8 +59,8 @@ const int target_square_tiles[] = {
                                     482,642,802,
 
                                     497,657,817,
-                                    502,662,922,
-                                    507,667,927
+                                    502,662,822,
+                                    507,667,827
                                   };
 
 char atker, trgt, meter_queued = 0, unit_meter_queued = 0;//, position_status = 0;//FINISH THIS STUFF
@@ -616,85 +607,6 @@ char find_lowest_hp(char b_id, char team)
   }
   return id;
 }
-
-char do_art(char b_id)
-{
-  // switch(art_queue_id)
-  // {
-
-  //   case INNVIGORATE_ART:
-  //   innvigorate(b_id);
-  //   return 0;
-
-  //   case RESTORE_ART:
-  //   restore(b_id);
-  //   return 0;
-
-  //   case RED_EYE_ART:
-  //   red_eye(b_id);
-  //   return 1;
-
-  //   case BLACK_EYE_ART:
-  //   black_eye(b_id);
-  //   return 1;
-
-  //   case RAPID_THRUST_ART:
-  //   rapid_thrust(b_id);
-  //   return 1;
-  // }
-  // return 1;
-}
-
-void restore(char b_id)
-{
-  char i;
-  for(i=0; i<18; i++)
-  {
-    if(battleunits[i].target)
-    {
-      bid_to_unit_header(i,0);
-      apply_level_to_header(battleunits[i].unit->level,0);
-      battleunits[i].unit->hp =  unit_header[0].hp;//battleunits[i].unit->unit->hp;
-      update_healthbar(i);
-    }
-  }
-  // set_unit_waiting(b_id);
-  clear_targets();
-  battleunits[b_id].attacks--;
-  hide_art_name();
-}
-
-void innvigorate(char b_id)
-{
-  char i, hp;
-  for(i=0; i<18; i++)
-  {
-    if(battleunits[i].target)
-    {
-      bid_to_unit_header(i,1);
-      apply_level_to_header(battleunits[i].unit->level,1);
-      hp = (char) calc_percentage(30,unit_header[1].hp);
-      battleunits[i].unit->hp = min(battleunits[i].unit->hp+hp,unit_header[1].hp);
-      update_healthbar(i);
-    }
-  }
-  clear_targets();
-  hide_art_name();
-}
-
-// void clear_eyes(char b_id)
-// {
-//   flash_screen();
-//   reset_battle_screen();
-//   battleunits[b_id].attacks--;
-//   hide_art_name();
-//   clear_eyes_called = 1;
-// }
-
-// void sea_legs(char b_id)
-// {
-//   sea_legs_art = 1;
-// }
 
 void highlight_battle_square(int square, int pal)
 {

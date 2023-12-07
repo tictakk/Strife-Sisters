@@ -19,16 +19,16 @@
 
 //hp, atk, def, int, res, spd
 const unsigned char STAT_GROWTH_CHART[] = {
-  3,3,1,1,2,2, //DPS
-  3,3,1,2,1,2, //ranged dps
-  3,1,1,3,2,2, //magic dps
-  4,2,2,3,2,2, //magic support
-  5,2,2,1,2,1, //tank
-  4,2,2,3,3,2, //resist
+  2,3,1,1,2,2, //DPS
+  2,3,1,2,1,2, //ranged dps
+  2,1,1,3,2,2, //magic dps
+  3,2,2,3,2,2, //magic support
+  4,2,2,1,2,1, //tank
+  3,2,2,3,3,2, //resist
   4,3,3,3,3,3, //rei
   4,3,3,3,3,3, //violet
   4,3,3,3,3,3, //king
   4,3,3,3,3,3, //tinker
-  3,2,2,3,3,4,  //speed 
+  2,2,2,3,2,3,  //speed 
   4,3,3,3,3,3
 };

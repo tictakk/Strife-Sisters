@@ -75,6 +75,8 @@
 #define PLAYER 1
 #define CPU 2
 
+#define MAX_LEVEL 20
+
 char s_y_relative = 0;
 char s_x_relative = 0;
 
@@ -110,7 +112,7 @@ const char *intro2 = "Babies were born, lived their whole lives and died as old 
 const char *intro3 = "In the end, with no clear winner, four of the nations agreed to end the madness and destruction.";
 const char *intro4 = "The nation of Rondby, being the last hold out and having most to lose, was forced into agreement.";
 const char *intro5 = "With leaders from all five nations together to discuss peace, the first Yearly Peace was formed.";
-const char *intro6 = "With the desire to never see war again, the nations agreed to meet every year on thatnanniversary to keep the continent at peace.";
+const char *intro6 = "With the desire to never see war again, the nations agreed to meet every year on that anniversary to keep the continent at peace.";
 const char *intro7 = "The new state-free captial, Tronehan, was founded in the center of the continent. No armies were permitted inside the city.";
 const char *intro8 = "Every year, leaders of each nation lead a contingent of troops to Tronehan. Outside the city the armies particpate in games and celebration.";
 const char *intro9 = "While inside the city, leaders discuss matters of the continent and form laws.";

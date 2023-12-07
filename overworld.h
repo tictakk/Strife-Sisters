@@ -178,8 +178,9 @@ void update_unit_battle_info(char unit_id, char x, char y)
     load_unit_header(unit_id,0);
     // get_plus_adv(unit_header[0].a_type);
     // get_plus_plus_adv(unit_header[0].a_type);
-    get_advantages(unit_header[0].a_type);
-
+    // get_advantages(unit_header[0].a_type);
+    get_plus_plus_adv(unit_header[0].a_type);
+    get_plus_adv(unit_header[0].a_type);
     print_unit_fullname(unit_id,l_x+1,l_y+1);
     print_attack_type(unit_header[0].attacks[0],1,l_x+2,l_y+4);
     print_attack_type(unit_header[0].attacks[1],1,l_x+2,l_y+5);
@@ -223,7 +224,7 @@ void display_party_commanders_window(char x, char y)
   display_window_rel(ARMY_GROUP_UNITS_WINDOW_X,ARMY_GROUP_UNITS_WINDOW_Y,10,14);
 
   load_cursor(1,commander_select_cursor + 2,SLIDER_ONE);
-  put_green_square(1,17);
+  put_green_square(SQUARE_1,1,17);
   // load_palette(14,square_pal,2);
   draw_formation(selected_formation);
 }
@@ -239,9 +240,6 @@ void display_battle_group_window(char x, char y)
   update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
   refresh_battle_units();
 
-  put_string("Front",s_x_relative+1,s_y_relative+25);
-  put_string("Rear",s_x_relative+9,s_y_relative+15);
-
   display_selector(63,get_iso_x(1,17,commander_select_cursor,cursor_column),get_iso_y(1,17,commander_select_cursor,cursor_column)+14,31);
 
   // satb_update();
@@ -251,15 +249,9 @@ void update_battle_group_window(char cmdr, char x, char y, char offset, char end
 {
   char i;
 
-  // put_number(i+5,4,s_x_relative,s_y_relative);
-  // wait_for_I_input();
   for(i=offset; i<(npc_count-endset); i++)
   {
-    // put_string("   ",s_x_relative,s_y_relative);
-    // put_number(i,3,s_x_relative,s_y_relative);
-    // wait_for_I_input();
     draw_iso_npc(5+i,x,y,npcs[i].pos_x,npcs[i].pos_y,i);
-    // spr_show(5+i);
   }
 }
 
@@ -336,10 +328,12 @@ void display_oraganize_select_menu(char x, char y)
   if(primary_menu == TRAIN_MENU)
   {
     update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,23,0,party_commanders[selected_cmdr].bg.units[0].level);
+    put_number(party_commanders[selected_cmdr].bg.units[0].exp,s_x_relative,s_y_relative);
   }
   else
   {
     update_unit_stats_window(party_commanders[selected_cmdr].bg.units[0].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[0].level);
+    put_number(party_commanders[selected_cmdr].bg.units[0].exp,s_x_relative,s_y_relative);
   }
   // draw_formation(selected_formation);
   // satb_update();
@@ -409,8 +403,8 @@ void display_train_select_menu()
   display_window_rel(ARMY_BATTLE_GROUP_WINDOW_X,ARMY_BATTLE_GROUP_WINDOW_Y,32,14);
   display_train_options_window();
 
-  put_green_square(1,17);
-  put_green_square(19,17);
+  put_green_square(SQUARE_1,1,17);
+  put_green_square(SQUARE_2,19,17);
 
   put_string("VS",15+s_x_relative,20+s_y_relative);
   load_cursor(1,2,SLIDER_ONE);

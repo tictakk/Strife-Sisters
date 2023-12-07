@@ -88,8 +88,8 @@ typedef struct{
 
 typedef struct{
   char id;
-  unsigned char hp, sta;
-  int exp;
+  unsigned char hp;
+  unsigned int exp;
   char level;
 } Unit_Entity;
 
@@ -134,11 +134,11 @@ void check_advantage_plus_plus(char target_type)
   adv_plus_plus_flag = (adv_plus_plus == target_type);
 }
 
-void get_advantages(unsigned char weapon_type)
-{
-  get_plus_plus_adv(weapon_type);
-  get_plus_adv(weapon_type);
-}
+// void get_advantages(unsigned char weapon_type)
+// {
+  // get_plus_plus_adv(weapon_type);
+  // get_plus_adv(weapon_type);
+// }
 
 char get_plus_plus_adv(unsigned char weapon_type)
 {
@@ -401,6 +401,10 @@ void get_unit_cost(char unit_id)
 
 char level_up_unit(Unit_Entity *unit)
 {
+  if(unit->level == MAX_LEVEL)
+  {
+    return 20;
+  }
   while(unit->exp > next_level(unit->level))
   {
     unit->level++;

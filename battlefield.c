@@ -113,12 +113,9 @@ void battlefield_loop(char map_id)
     }
     else
     {
-      // put_number(map_type,3,0,0);
-      g_abs = graph_from_x_y(sx,sy);
+      g_abs = (sx>>4)+((sy>>4)<<4) - (yOffset);//graph_from_x_y(sx,sy);
       t_type = terrain_type(tutorial_1[map_offset+g_abs]);
       id = battle_grid[g_abs];
-      // put_number(id,4,0,0);
-      display_position(14,1);
       display_bonuses(4,1);
       
       display_terrain_bonus();
@@ -239,7 +236,6 @@ void init_units()
     load_group(i,PLAYER,battle_map_metadata.player_start_pos+i,party_commanders,1);//commander + max_army_size
   }
 
-  //TODO: ADD IS_CMDR CHECK AND ADD A NEW PARAM TO ADD_ENTITY
   for(i=0; i<cpu_cmdr_count; i++)
   {
     has_cmdr = 0;
@@ -724,10 +720,10 @@ void ctrls()
           break;
 
         case MENU_TAKE://calling
-          // if(menu_mask & MASK_CALLING)
-          // {
+          if(menu_mask & MASK_CALLING)
+          {
             setup_tactic();
-          // }
+          }
           break;
       }
     }
@@ -824,19 +820,19 @@ void ctrls()
     // win_condition();
   }
 
-  if(j & JOY_SEL)
-  {
+  // if(j & JOY_SEL)
+  // {
     // put_hex(battle_grid,6,0,0);
     // if(id > 0 && entities[id-1].has_cmdr)
     // {
-    //   entities[id-1].tactic_meter = MAX_TACTIC_METER; 
+    //   entities[id-1].tactic_meter = MAX_TACTIC_METER;
     // }
-    if(!demo_flag)
-    {
-      map_result_status = MAP_RESULT_WIN;
-    }
+    // if(!demo_flag)
+    // {
+      // map_result_status = MAP_RESULT_WIN;//TODO: TAKE THIS OUT OF GAME
+    // }
     // map_result_status = MAP_RESULT_LOSE;
-  }
+  // }
 }
 
 void damage_group(char target_id, char attacker_id)
@@ -868,7 +864,7 @@ void damage_group(char target_id, char attacker_id)
                         0,
                         0,
                         unit_header[1].res,
-                        20); //TODO: m_power should vary based on move
+                        20);
       entities[target_id].bg->units[i].hp = max(entities[target_id].bg->units[i].hp - dmg, 1);
     }
   } 
@@ -1125,10 +1121,10 @@ void set_cursor_pos(int pos)
   spr_y(sy);
 }
 
-int graph_from_x_y(int x, int y)
-{
-  return (x>>4)+((y>>4)<<4) - (yOffset);
-}
+// int graph_from_x_y(int x, int y)
+// {
+//   return (x>>4)+((y>>4)<<4) - (yOffset);
+// }
 
 void display_menu(int x, int y)
 {

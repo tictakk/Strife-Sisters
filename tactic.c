@@ -112,7 +112,6 @@ char get_tactic_perform_status()
   }
 }
 
-
 char is_self_tile(char tile)
 {
   return tactic_caster == tile-1;
@@ -123,9 +122,9 @@ char is_enemy_tile(char tile)
   return entities[tactic_caster].team != entities[tile-1].team;
 }
 
-char is_ally_tile(char tile)
+char is_ally_tile(char tile)//need to double check this one.
 {
-  return entities[tactic_caster].team == entities[tile-1].team;
+  return entities[tactic_caster].team == entities[tile-1].team && tactic_caster != tile-1;
 }
 
 char is_empty_tile(char tile)

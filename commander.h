@@ -6,15 +6,15 @@
 //names
 const char *name0 = "Rei";
 const char *name1 = "Violet";
-const char *name2 = "King";
+const char *name2 = "Kingsly";
 const char *name3 = "Tinker";
 const char *name4 = "Tearle";
 const char *name5 = "Calien";
 
 const char *name20 = "Generic";
 
-const char *unlock_text = "\nUnlocked";
-const char *unit_name = "Soldier";
+// const char *unlock_text = "\nUnlocked";
+// const char *unit_name = "Soldier";
 
 //tactics, wisdom, fortitude
 // const char COMMANDER_STATS_DISTRIBUTION_CHART[] = {

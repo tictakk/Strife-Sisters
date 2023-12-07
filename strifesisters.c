@@ -13,13 +13,10 @@ int TimerCnt;
 int MainCnt;
 int SubCnt;
 
-int hits=0;
-int misses=0;
-
 typedef struct {
     char idx;
-    char bank[4];
-    int  addr[4];
+    char bank[3];
+    int  addr[3];
 } Pointers;
 Pointers myPointers;
 
@@ -184,7 +181,7 @@ struct Node map[80]; //a unit with a max move of 5 will fill 60 nodes max.
 #define SLIDER_ONE 1
 #define SLIDER_TWO 2
 
-#define PORTRAIT_VRAM 0x4400//0x3C00
+#define PORTRAIT_VRAM 0x6200//0x4400//move to 0x6200???
 #define RECRUIT_VRAM 0x4600
 #define DIALOGUE_VRAM 0x4000
 #define P_BORDER_VRAM 0x4000
@@ -366,12 +363,11 @@ const health_1_24[] = {BAR_1_8, BAR_0_8, BAR_0_8};
 
 const health_none[] = {BAR_0_8, BAR_0_8, BAR_0_8}; 
 
-const char map_level_table[18] = {
+const char map_level_table[15] = {
   1, 2, 3, 4, 7,
-  9, 8, 10, 11,
-  12, 18, 18, 18,
-  18, 20, 18, 18,
-  20
+  9, 11, 12, 14,
+  15, 16, 17, 18,
+  19, 20
 };
 
 const int payouts[5] = {700, 650, 600, 550, 500};
@@ -452,9 +448,7 @@ char formation_cursor = 0;
 // #incpal(sniperpal,"characters/sniper_small.pcx")
 #incpal(golpal,"characters/golem_small.pcx")
 
-
-int final_score_hi = 0;
-int final_score_lo = 0;
+unsigned int final_score = 0;
 unsigned int player_gold = 0;
 int party_units[MAX_PARTY_UNIT_SIZE];
 
@@ -486,10 +480,10 @@ unsigned char current_formation[9];
 
 void main()
 {
-
   owned_formations[0] = 1;
+  owned_formations[1] = 1;
 
-  owned_formation_count = 1;
+  owned_formation_count = 2;
 	//setup (one time)
   psgInit(5);
   psgOn(0);
@@ -507,7 +501,7 @@ void main()
   // add_commander_to_party(name0,REI);
   // add_commander_to_party(name1,VIOLET);
 
-	player_gold = 0;//1000;
+	player_gold = 250;//1000;
 	// no_of_party_items = 0;
 
   // set_commander_stats(0,1,10,8,8);
@@ -519,6 +513,7 @@ void main()
   party_commanders[0].tactic_id = TACTIC_RAGE;
   party_commanders[1].tactic_id = TACTIC_SCORCH;
   party_commanders[2].tactic_id = TACTIC_DASH;
+  party_commanders[3].tactic_id = TACTIC_SWITCH;
 	for(;;)
 	{
     // unlock_all_units();
@@ -659,26 +654,22 @@ void select_level(char level)
   preload_commanders_map_1();
   switch(level)
   {
-    case 0: demo_select_x = 5; demo_select_y = 31; return; //preload_commanders_map_1(); return;
-    case 1: demo_select_x = 3; demo_select_y = 27; return; //preload_commanders_map_1(); return;
-    case 2: demo_select_x = 1; demo_select_y = 23; return; //preload_commanders_map_1(); return;
-    case 3: demo_select_x = 5; demo_select_y = 19; return; //preload_commanders_map_4(); return;
-    case 4: demo_select_x = 9; demo_select_y = 19; return; //preload_commanders_map_4(); return;
-    case 5: demo_select_x = 9; demo_select_y = 22; return; //preload_commanders_map_4(); return;
-    case 6: demo_select_x = 11; demo_select_y = 25; return; //preload_commanders_map_4(); return;
-    case 7: demo_select_x = 10; demo_select_y = 30; return; //preload_commanders_map_8(); return;
-    case 8: demo_select_x = 18; demo_select_y = 29; return; //preload_commanders_map_9(); return;
-    case 9: demo_select_x = 20; demo_select_y = 26; return; //preload_default(15); return;
-    case 10: demo_select_x = 24; demo_select_y = 27; return; //preload_default(16); return;
-    case 11: demo_select_x = 27; demo_select_y = 27; return; //preload_default(17); return;
-    case 12: demo_select_x = 28; demo_select_y = 24; return; //preload_default(18); return;
-    case 13: demo_select_x = 26; demo_select_y = 22; return; //preload_default(19); return;
-    case 14: demo_select_x = 23; demo_select_y = 22; return; //preload_default(20); return;
-    case 15: demo_select_x = 20; demo_select_y = 21; return; //preload_default(20); return;
-    // default: demo_select_x = 10; demo_select_y = 30; preload_default(); return;
-    // default: 
-    // demo_select_x = 5; demo_select_y = 31; preload_commanders_map_1(); return;
-    // return;
+    case 0: demo_select_x = 5; demo_select_y = 31; return;
+    case 1: demo_select_x = 3; demo_select_y = 27; return;
+    case 2: demo_select_x = 1; demo_select_y = 23; return;
+    case 3: demo_select_x = 5; demo_select_y = 19; return;
+    case 4: demo_select_x = 9; demo_select_y = 19; return;
+    case 5: demo_select_x = 9; demo_select_y = 22; return;
+    case 6: demo_select_x = 11; demo_select_y = 25; return;
+    case 7: demo_select_x = 10; demo_select_y = 30; return;
+    case 8: demo_select_x = 18; demo_select_y = 29; return;
+    case 9: demo_select_x = 20; demo_select_y = 26; return; 
+    case 10: demo_select_x = 24; demo_select_y = 27; return;
+    case 11: demo_select_x = 27; demo_select_y = 27; return;
+    case 12: demo_select_x = 28; demo_select_y = 24; return;
+    case 13: demo_select_x = 26; demo_select_y = 22; return;
+    case 14: demo_select_x = 23; demo_select_y = 22; return;
+    // case 15: demo_select_x = 20; demo_select_y = 21; return;
   }
 }
 
@@ -693,7 +684,7 @@ void load_unit_header(int id, char header_no)
 void apply_level_to_header(char level, char header_no)
 {
   unsigned char l, offset;
-  l = level - 1;
+  l = min(level - 1,MAX_LEVEL);
   offset = 6 * unit_header[header_no].growth_chart;
   unit_header[header_no].hp += (STAT_GROWTH_CHART[offset+0] * l);
   unit_header[header_no].atk += (STAT_GROWTH_CHART[offset+1] * l);
@@ -708,109 +699,67 @@ void preload_commanders_map_1()
   party_size = 0;
   add_commander_to_party(name0,REI);
   // add_commander_to_party(name1,VIOLET);
+  // add_commander_to_party(name2,KING);
+  // add_commander_to_party(name3,TINKER);
 
-  party_commanders[0].bg.formation = 0;
+  // party_commanders[0].bg.formation = 0;
+  // party_commanders[1].bg.formation = 0;
+  // party_commanders[2].bg.formation = 0;
+  // party_commanders[3].bg.formation = 0;
+
   load_unit_to_cmdr(0,4,REI,1,1);
+  // load_unit_to_cmdr(1,4,VIOLET,1,14);
+  // load_unit_to_cmdr(2,4,KING,1,14);
+  // load_unit_to_cmdr(3,7,TINKER,1,14);
+
+  // for(owned_formation_count=0; owned_formation_count<44; owned_formation_count++)
+  // {
+  //   owned_formations[owned_formation_count] = 1;
+  // }
+
+  // load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,16);
+  // load_unit_to_cmdr(0,1,KNIGHT_UNIT,0,16);
+  // load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,16);
+  // load_unit_to_cmdr(0,3,DANCER_UNIT,0,16);
+  // load_unit_to_cmdr(0,5,DANCER_UNIT,0,16);
+  // load_unit_to_cmdr(0,7,CLERIC_UNIT,0,16);
+
+  // load_unit_to_cmdr(1,0,BRAWLER_UNIT,0,16);
+  // load_unit_to_cmdr(1,1,BRAWLER_UNIT,0,16);
+  // load_unit_to_cmdr(1,2,BRAWLER_UNIT,0,16);
+  // load_unit_to_cmdr(1,3,DANCER_UNIT,0,16);
+  // load_unit_to_cmdr(1,5,DANCER_UNIT,0,16);
+  // load_unit_to_cmdr(1,7,CLERIC_UNIT,0,16);
+
+  // load_unit_to_cmdr(2,0,LANCER_UNIT,0,16);
+  // load_unit_to_cmdr(2,1,LANCER_UNIT,0,16);
+  // load_unit_to_cmdr(2,2,LANCER_UNIT,0,16);
+  // load_unit_to_cmdr(2,3,SPEAR_UNIT,0,16);
+  // load_unit_to_cmdr(2,5,SPEAR_UNIT,0,16);
+  // load_unit_to_cmdr(2,7,CLERIC_UNIT,0,16);
+
+  // load_unit_to_cmdr(3,0,KNIGHT_UNIT,0,16); //39
+  // load_unit_to_cmdr(3,1,KNIGHT_UNIT,0,16);
+  // load_unit_to_cmdr(3,2,KNIGHT_UNIT,0,16);
+  // load_unit_to_cmdr(3,4,STALKER_UNIT,0,16);
+  // load_unit_to_cmdr(3,6,ARCHER_UNIT,0,16);
+  // load_unit_to_cmdr(3,8,ARCHER_UNIT,0,16);
+
+  // party_commanders[0].bg.formation = 36;
+  // party_commanders[1].bg.formation = 36;
+  // party_commanders[2].bg.formation = 36;
+  // party_commanders[3].bg.formation = 39;
+
+  // unlock_all_units();
+  // for(i=1; i<9; i++)
+  // {
+  //   unlock_units_by_castle(i);
+  // }
   // load_unit_to_cmdr(0,0,REI,1,4);
   // load_unit_to_cmdr(0,2,SWORD_UNIT,0,3);
-
   // load_unit_to_cmdr(1,4,VIOLET,1,3);
-  player_gold = 250;
-}
-
-void preload_commanders_map_4()
-{
-  party_size = 0;
-
-  add_commander_to_party(name0,REI);
-  load_unit_to_cmdr(0,1,REI,1,20);
-  party_commanders[0].bg.formation = 44;
-  
-  load_unit_to_cmdr(0,0,KNIGHT_UNIT,0,20);
-  load_unit_to_cmdr(0,2,KNIGHT_UNIT,0,20);
-  
-  load_unit_to_cmdr(0,3,BERSERKER_UNIT,0,20);
-  load_unit_to_cmdr(0,4,BERSERKER_UNIT,0,20);
-  load_unit_to_cmdr(0,5,BERSERKER_UNIT,0,20);
-
-  load_unit_to_cmdr(0,6,WITCH_UNIT,0,20);
-  load_unit_to_cmdr(0,7,CLERIC_UNIT,0,20);
-  load_unit_to_cmdr(0,8,WITCH_UNIT,0,20);
-
-  add_commander_to_party(name1,VIOLET);
-  load_unit_to_cmdr(1,4,VIOLET,1,20);
-  party_commanders[1].bg.formation = 44;
-
-  load_unit_to_cmdr(1,1,LANCER_UNIT,0,20);
-  load_unit_to_cmdr(1,2,LANCER_UNIT,0,20);
-  load_unit_to_cmdr(1,0,LANCER_UNIT,0,20);
-
-  load_unit_to_cmdr(1,3,DANCER_UNIT,0,20);
-  load_unit_to_cmdr(1,5,DANCER_UNIT,0,20);
-
-  load_unit_to_cmdr(1,6,WITCH_UNIT,0,20);
-  load_unit_to_cmdr(1,7,DANCER_UNIT,0,20);
-  load_unit_to_cmdr(1,8,WITCH_UNIT,0,20);
-
-  add_commander_to_party(name3,TINKER);
-  load_unit_to_cmdr(2,7,TINKER,1,20);
-  party_commanders[2].bg.formation = 44;
-
-  // load_unit_to_cmdr(2,0,KNIGHT_UNIT,0,20);
-  // load_unit_to_cmdr(2,1,KNIGHT_UNIT,0,20);
-  // load_unit_to_cmdr(2,2,KNIGHT_UNIT,0,20);
-
-  // load_unit_to_cmdr(2,3,LANCER_UNIT,0,20);
-  // load_unit_to_cmdr(2,4,LANCER_UNIT,0,20);
-  // load_unit_to_cmdr(2,5,LANCER_UNIT,0,20);
-
-  load_unit_to_cmdr(2,0,LANCER_UNIT,0,20);
-  load_unit_to_cmdr(2,1,LANCER_UNIT,0,20);
-  load_unit_to_cmdr(2,2,LANCER_UNIT,0,20);
-
-  load_unit_to_cmdr(2,3,KNIGHT_UNIT,0,20);
-  load_unit_to_cmdr(2,4,KNIGHT_UNIT,0,20);
-  load_unit_to_cmdr(2,5,KNIGHT_UNIT,0,20);
-
-  load_unit_to_cmdr(2,6,ARCHER_UNIT,0,20);
-  load_unit_to_cmdr(2,8,ARCHER_UNIT,0,20);
-
-  add_commander_to_party(name4,TEARLE);
-  load_unit_to_cmdr(3,1,TEARLE,1,20);
-  party_commanders[2].bg.formation = 44;
-
-  load_unit_to_cmdr(3,3,SPEAR_UNIT,0,20);
-  load_unit_to_cmdr(3,5,SPEAR_UNIT,0,20);
-  load_unit_to_cmdr(3,4,SPEAR_UNIT,0,20);
-  
-  load_unit_to_cmdr(3,0,BERSERKER_UNIT,0,20);
-  load_unit_to_cmdr(3,2,BERSERKER_UNIT,0,20);
-
-  load_unit_to_cmdr(3,6,STALKER_UNIT,0,20);
-  load_unit_to_cmdr(3,7,STALKER_UNIT,0,20);
-  load_unit_to_cmdr(3,8,STALKER_UNIT,0,20);
-  party_commanders[3].tactic_id = TACTIC_LEAP;
-  
-  // unlock_all_units();
-  unlock_unit(DANCER_UNIT);
-  unlock_unit(BRAWLER_UNIT);
-  
-  unlock_unit(SWORD_UNIT);
-  unlock_unit(KNIGHT_UNIT);
-  
-  unlock_unit(ARCHER_UNIT);
-  unlock_unit(STALKER_UNIT);
-
-  unlock_unit(CLERIC_UNIT);
-  unlock_unit(WITCH_UNIT);
-
-  unlock_unit(SPEAR_UNIT);
-  unlock_unit(LANCER_UNIT);
-
-  unlock_unit(RAIDER_UNIT);
-  unlock_unit(BERSERKER_UNIT);
-
-  player_gold = 1500;
+  // load_unit_to_cmdr(2,4,KING,1,3);
+  player_gold = 250;//9000;
 }
 
 void play_credits()
@@ -845,6 +794,8 @@ void play_credits()
   }
   cls();
   put_string("Thanks for playing!",7,16);
+  put_string("Final Score",7,17);
+  put_number(final_score,7,8,18);
   for(;;){}
 }
 
@@ -1193,7 +1144,7 @@ void draw_32x32_sprite(char type, int x, int y)
       break;
 
     case BERSERKER_UNIT:
-      load_palette(20,berserkerbtl,1);
+      load_palette(20,soldierpal,1);
       // load_vram(0x6E00,berserkerbtl,0x100);
     break;
 
@@ -1281,6 +1232,10 @@ void draw_32x32_sprite(char type, int x, int y)
 
     case TINKER:
       load_palette(20,tinker_battle_pal,1);
+      break;
+
+    case KING:
+      load_palette(20,king_battle_pal,1);
       break;
     
     case DANCER_UNIT:
@@ -1543,7 +1498,7 @@ void check_add_new_commander(char map_no)
     load_unit_to_cmdr(2,7,CLERIC_UNIT,0,3);
     return;
   }
-  if(map_no >= 7 && party_size <4)//add tinker
+  if(map_no == 7)//add tinker
   {
     // remove_party_commander_from_game(2);
     add_commander_to_party(name3,TINKER);
@@ -1554,20 +1509,33 @@ void check_add_new_commander(char map_no)
       owned_formation_count++;
     }
     party_commanders[3].tactic_id = TACTIC_SWITCH;
-    load_unit_to_cmdr(3,7,TINKER,1,10);
-    load_unit_to_cmdr(3,6,ARCHER_UNIT,0,10);
-    load_unit_to_cmdr(3,8,ARCHER_UNIT,0,10);
+    load_unit_to_cmdr(3,7,TINKER,1,11);
+    load_unit_to_cmdr(3,6,ARCHER_UNIT,0,11);
+    load_unit_to_cmdr(3,8,ARCHER_UNIT,0,11);
 
-    load_unit_to_cmdr(3,4,KNIGHT_UNIT,0,10);
-    load_unit_to_cmdr(3,3,KNIGHT_UNIT,0,10);
-    load_unit_to_cmdr(3,5,KNIGHT_UNIT,0,10);
+    load_unit_to_cmdr(3,4,KNIGHT_UNIT,0,11);
+    load_unit_to_cmdr(3,3,KNIGHT_UNIT,0,11);
+    load_unit_to_cmdr(3,5,KNIGHT_UNIT,0,11);
   }
 
-  if(map_no >= 13 && party_size >= 4)//add tearle
+  if(map_no == 13)//add tearle
   {
-    remove_party_commander_from_game(2);
+    // remove_party_commander_from_game(2);
     add_commander_to_party(name4,TEARLE);
-    load_unit_to_cmdr(3,4,TEARLE,1,14);
+    party_commanders[3].bg.formation = 44;
+    party_commanders[3].tactic_id = TACTIC_LEAP;
+
+    load_unit_to_cmdr(3,0,KNIGHT_UNIT,0,18);
+    load_unit_to_cmdr(3,1,KNIGHT_UNIT,0,18);
+    load_unit_to_cmdr(3,2,KNIGHT_UNIT,0,18);
+
+    load_unit_to_cmdr(3,3,BRAWLER_UNIT,0,18);
+    load_unit_to_cmdr(3,4,TEARLE,1,18);
+    load_unit_to_cmdr(3,5,BRAWLER_UNIT,0,18);
+
+    load_unit_to_cmdr(3,6,WITCH_UNIT,0,18);
+    load_unit_to_cmdr(3,7,CLERIC_UNIT,0,18);
+    load_unit_to_cmdr(3,8,WITCH_UNIT,0,18);
     return;
   }
 }
@@ -1590,7 +1558,6 @@ initialize_commanders()
       cmdr->bg.units[j].hp = 0;
       cmdr->bg.units[j].exp = 0;
       cmdr->bg.units[j].level = 0;
-      cmdr->bg.units[j].sta = 0;
       cmdr->bg.formation = 0;
     }
     // cmdr->bg.calling_stone = 0;
@@ -1617,6 +1584,7 @@ void fade_screen()
     {
       darken_palette(i);
     }
+    vsync();
   }
 }
 
@@ -1691,7 +1659,7 @@ void modify_palette(int pal_num, char modifier)
 void tile_highlight(int pal_num, char pal_index, int rgb)
 {
   set_color((pal_num<<4)+(pal_index+5),rgb);
-} 
+}
 
 void display_item(char cmdr_id, int index, int x, int y)
 {
@@ -2314,7 +2282,6 @@ void load_unit_to_cmdr(char cmdr_id, char unit_pos, char unit_type, char is_cmdr
   apply_level_to_header(level,0);
   party_commanders[cmdr_id].bg.units[unit_pos].id = unit_type;//&unit_list[unit_type];
   party_commanders[cmdr_id].bg.units[unit_pos].hp = unit_header[0].hp;//unit_list[unit_type].hp;
-  party_commanders[cmdr_id].bg.units[unit_pos].sta = unit_header[0].sta;//unit_list[unit_type].sta;
   party_commanders[cmdr_id].bg.units[unit_pos].exp = (level > 1)? next_level(level-1) : 0;
   party_commanders[cmdr_id].bg.units[unit_pos].level = level;
 }
@@ -2354,7 +2321,7 @@ void display_popup(char *str, char screen)
 
 void swap_commander_units(char cmdr_id, char first, char second)
 {
-  unsigned char tmp_hp, tmp_sta, tmp_lvl;
+  unsigned char tmp_hp, tmp_lvl;
   char tmp_id;
   int tmp_exp;
 
@@ -2362,19 +2329,16 @@ void swap_commander_units(char cmdr_id, char first, char second)
 
   tmp_hp = party_commanders[cmdr_id].bg.units[first].hp;
   tmp_id = party_commanders[cmdr_id].bg.units[first].id;
-  tmp_sta = party_commanders[cmdr_id].bg.units[first].sta;
   tmp_exp = party_commanders[cmdr_id].bg.units[first].exp;
   tmp_lvl = party_commanders[cmdr_id].bg.units[first].level;
 
   party_commanders[cmdr_id].bg.units[first].hp = party_commanders[cmdr_id].bg.units[second].hp;
   party_commanders[cmdr_id].bg.units[first].id = party_commanders[cmdr_id].bg.units[second].id;
-  party_commanders[cmdr_id].bg.units[first].sta = party_commanders[cmdr_id].bg.units[second].sta;
   party_commanders[cmdr_id].bg.units[first].exp = party_commanders[cmdr_id].bg.units[second].exp;
   party_commanders[cmdr_id].bg.units[first].level = party_commanders[cmdr_id].bg.units[second].level;
 
   party_commanders[cmdr_id].bg.units[second].hp = tmp_hp;
   party_commanders[cmdr_id].bg.units[second].id = tmp_id;
-  party_commanders[cmdr_id].bg.units[second].sta = tmp_sta;
   party_commanders[cmdr_id].bg.units[second].exp = tmp_exp;
   party_commanders[cmdr_id].bg.units[second].level = tmp_lvl;
 }
@@ -2386,25 +2350,42 @@ void swap_convoy_units(char cmdr_id, char unit_id, char convoy_id)
   load_unit_header(party_commanders[cmdr_id].bg.units[unit_id].id,0);
   load_unit_header(party_units[convoy_id]&0xFF,1);
 
-  tmp_id = party_commanders[cmdr_id].bg.units[unit_id].id;
-  tmp_id += party_commanders[cmdr_id].bg.units[unit_id].level << 8;
+  if(party_commanders[cmdr_id].bg.units[unit_id].id == 0)//unit going to the convoy
+  {
+    tmp_id = 0;
+  }
+  else
+  {
+    tmp_id = party_commanders[cmdr_id].bg.units[unit_id].id;
+    tmp_id += party_commanders[cmdr_id].bg.units[unit_id].level << 8;
+  }
 
-  party_commanders[cmdr_id].bg.units[unit_id].hp = unit_header[1].hp;//unit_list[party_units[convoy_id]].hp;
-  party_commanders[cmdr_id].bg.units[unit_id].id = unit_header[1].id;//&unit_list[party_units[convoy_id]];
-  party_commanders[cmdr_id].bg.units[unit_id].exp = 0;
-  party_commanders[cmdr_id].bg.units[unit_id].level = party_units[convoy_id]>>8;
+  if((party_units[convoy_id]&0xFF) == 0)//unit coming from the convoy
+  {
+    party_commanders[cmdr_id].bg.units[unit_id].hp = 0;//unit_header[1].hp;//unit_list[party_units[convoy_id]].hp;
+    party_commanders[cmdr_id].bg.units[unit_id].id = 0;///unit_header[1].id;//&unit_list[party_units[convoy_id]];
+    party_commanders[cmdr_id].bg.units[unit_id].exp = 0;//next_level((party_units[convoy_id]>>8)-1);
+    party_commanders[cmdr_id].bg.units[unit_id].level = 0;//party_units[convoy_id]>>8;
+  }
+  else
+  {
+    party_commanders[cmdr_id].bg.units[unit_id].hp = unit_header[1].hp;//unit_list[party_units[convoy_id]].hp;
+    party_commanders[cmdr_id].bg.units[unit_id].id = unit_header[1].id;//&unit_list[party_units[convoy_id]];
+    party_commanders[cmdr_id].bg.units[unit_id].exp = next_level((party_units[convoy_id]>>8)-1);
+    party_commanders[cmdr_id].bg.units[unit_id].level = party_units[convoy_id]>>8;
+  }
 
   party_units[convoy_id] = tmp_id;
 }
 
-void put_green_square(char x, char y)
+void put_green_square(int address, char x, char y)
 {
   int addr;
   int p[12];
   int vaddr;
   char i, j;
-
-  addr = 0xE5B0;
+  load_palette(13,square_pal,1);
+  addr = address; //0xE5B0;
   vaddr = vram_addr(x+s_x_relative,y+s_y_relative);
 
   for(i=0; i<8; i++)
@@ -2417,7 +2398,7 @@ void put_green_square(char x, char y)
   }
 }
 
-int next_level(int level)
+unsigned int next_level(int level)
 {
   return (cube(level)*6/4) + ((level*level) / 2) + (2*level);
 }
@@ -2430,7 +2411,7 @@ int next_level(int level)
 // 6) 324 + 18 + 12 = 354 -> 88 blobs
 // 7) 514 + 24 + 14 = 552 -> 128 blobs
 
-int cube(int number)
+unsigned int cube(int number)
 {
   number*number*number;
 }
@@ -2471,10 +2452,9 @@ void cycle_selector()
 
 void flash_selector(int location_x, int location_y, unsigned char flashes)
 {
-  //TODO: I think this cycles too long
   char i;
   display_selector(0,location_x,location_y,16);
-  for(i=0; i<(flashes*5); i++)
+  for(i=0; i<(flashes*3); i++)
   {
     cycle_selector();
     satb_update();
@@ -2512,6 +2492,7 @@ void randomize_enemy_team()
 
   srand(clock_tt());
   random_demon = get_random_demon();
+  srand(clock_tt());
   formation = get_random_formation();
 
   training_enemies[0] = random_demon;
@@ -2573,12 +2554,6 @@ char valid_formation_placement(char index)
 
 char get_random_demon()
 {
-  // char ui;
-  // ui = range(0,buyable_unit_count-1);
-  // put_number(buyable_unit_count,4,s_x_relative,s_y_relative);
-  // return unlocked_units[ui];
-  // ^---- leaving for debug purposes
-  // return BRAWLER_UNIT;
   return unlocked_units[range(0,buyable_unit_count-1)];
 }
 
@@ -2613,6 +2588,32 @@ void display_number_incrementing(char x, char y, int final_number, char num_len)
   }
   put_number(final_number,num_len,x,y);
 }
+
+char get_convoy_size()
+{
+  char i, c_size;
+  for(i=0, c_size=0; i<MAX_PARTY_UNIT_SIZE; i++)
+  {
+    if((party_units[i]&0xFF))
+    {
+      c_size++;
+    }
+  }
+  return c_size;
+}
+
+// char get_next_convoy_spot()
+// {
+//   char i;
+//   for(i=0; i<MAX_PARTY_UNIT_SIZE; i++)
+//   {
+//     if((party_units[i]&0xFF) == 0)
+//     {
+//       return i;
+//     }
+//   }
+//   return -1;
+// }
 
 #include "overworld.c"
 #include "battle.c"
