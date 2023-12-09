@@ -481,9 +481,8 @@ unsigned char current_formation[9];
 void main()
 {
   owned_formations[0] = 1;
-  owned_formations[1] = 1;
 
-  owned_formation_count = 2;
+  owned_formation_count = 1;
 	//setup (one time)
   psgInit(5);
   psgOn(0);

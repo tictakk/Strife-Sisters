@@ -125,9 +125,7 @@ void add_entity(char team, char id, int pos, struct Commander *commanders, char 
   entities[num_of_entities].tactic_meter = 0;
   entities[num_of_entities].defend = 0;
   entities[num_of_entities].has_cmdr = has_cmdr;
-  entities[num_of_entities].tactic_meter = 0;
-  // entities[num_of_entities].tactic_meter = MAX_TACTIC_METER;
-  // party_commanders[entities[num_of_entities]].meter = 0;
+
   if(team == PLAYER)
   {
     add_npc(pos%16,pos/16,commanders[id].sprite_type,CMDR_PALETTE);

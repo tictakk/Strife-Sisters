@@ -927,6 +927,8 @@ void switch_tactic()
   display_selector(SELECTOR,sx,sy,16);
   entities[tmp_id-1].actionable = 1;
   entities[tmp_id-1].movable = 1;
+  entities[tmp_id-1].defend = 0;
+  load_commander_palette(party_commanders[entities[tmp_id-1].id].sprite_type);
   tactic_current = 0;
   selected_entity = 0;
 }

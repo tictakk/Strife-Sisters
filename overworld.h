@@ -161,7 +161,7 @@ void update_unit_battle_info(char unit_id, char x, char y)
   // put_string("Upgrade",l_x+1,l_y+3);
   set_font_pal(GOLD_FONT);
   put_string("Targets",l_x+1,l_y+3);
-  put_string("Advantage",l_x+1,l_y+8);
+  put_string("Advant.",l_x+1,l_y+8);
   put_char('*',l_x+1,l_y+9);
   put_char('+',l_x+1,l_y+10);
   put_char('}',l_x+1,l_y+11);
@@ -176,9 +176,6 @@ void update_unit_battle_info(char unit_id, char x, char y)
   if(unit_id > 0)
   {
     load_unit_header(unit_id,0);
-    // get_plus_adv(unit_header[0].a_type);
-    // get_plus_plus_adv(unit_header[0].a_type);
-    // get_advantages(unit_header[0].a_type);
     get_plus_plus_adv(unit_header[0].a_type);
     get_plus_adv(unit_header[0].a_type);
     print_unit_fullname(unit_id,l_x+1,l_y+1);
@@ -194,17 +191,17 @@ void update_unit_battle_info(char unit_id, char x, char y)
   }
   else
   {
-    put_string("         ",l_x+1,l_y+1);
-    put_string("         ",l_x+1,l_y+3);
-    put_string("         ",l_x+1,l_y+4);
-    put_string("         ",l_x+1,l_y+5);
-    put_string("         ",l_x+1,l_y+6);
+    put_string("        ",l_x+1,l_y+1);
+    put_string("        ",l_x+1,l_y+3);
+    put_string("        ",l_x+1,l_y+4);
+    put_string("        ",l_x+1,l_y+5);
+    put_string("        ",l_x+1,l_y+6);
 
-    put_string("         ",l_x+1,l_y+8);
-    put_string("         ",l_x+1,l_y+9);
-    put_string("         ",l_x+1,l_y+10);
-    put_string("         ",l_x+1,l_y+11);
-    put_string("         ",l_x+1,l_y+12);
+    put_string("        ",l_x+1,l_y+8);
+    put_string("        ",l_x+1,l_y+9);
+    put_string("        ",l_x+1,l_y+10);
+    put_string("        ",l_x+1,l_y+11);
+    put_string("        ",l_x+1,l_y+12);
   }
 }
 
@@ -238,6 +235,7 @@ void display_battle_group_window(char x, char y)
   load_selector(0x68C0,31);
   
   update_unit_stats_window(party_commanders[selected_cmdr].bg.units[selected_unit].id,ARMY_STATS_X,ARMY_STATS_Y,party_commanders[selected_cmdr].bg.units[selected_unit].level);
+  update_unit_battle_info(party_commanders[selected_cmdr].bg.units[selected_unit].id,22,14);
   refresh_battle_units();
 
   display_selector(63,get_iso_x(1,17,commander_select_cursor,cursor_column),get_iso_y(1,17,commander_select_cursor,cursor_column)+14,31);
@@ -583,6 +581,7 @@ void menu_back_button()
     {
       // display_party_commanders_window(0,0);
       display_party_options_window(10,0);
+      update_unit_battle_info(NO_UNIT,22,14);
     }
     return;
   }
@@ -601,7 +600,7 @@ void menu_back_button()
     cursor_column = swap_unit / 8;
     set_menu_state(DEPLOY_SELECT_MENU,CONVOY_OPTIONS,CONVOY_COLS);
     update_unit_stats_window(party_units[swap_unit]&0xFF,13,14,party_units[swap_unit]>>8);
-
+    update_unit_battle_info(party_units[swap_unit]&0xFF,22,14);
     // reset_cursor();
     commander_select_cursor = last_selected_cursor;
     cursor_column = last_selected_col;
