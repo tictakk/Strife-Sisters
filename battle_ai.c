@@ -25,12 +25,15 @@ char ai_tracker;
 int hit_radius_size;
 int opp_hit_radius[26];
 struct Ai_Entity ai_entities[15];
+char pace = 0;
 
 init_ai()
 {
   char i,j;
+  pace = 60;
   num_of_ai = 0;
   j = 0;
+
   for(i=0; i<num_of_entities; i++)
   {
     if(entities[i].team == CPU)
@@ -70,9 +73,9 @@ int find_weakest_opp_in_range(char id, char range)
 
 ai()
 {
+  clear_joy_events(0x1F);
   for(ai_tracker=0; ai_tracker<num_of_ai; ai_tracker++)
   {
-
     ai_do_state(ai_entities[ai_tracker].id);
     check_battle_complete();
     if(map_result_status != MAP_RESULT_NONE)
@@ -89,6 +92,13 @@ ai()
   // }
 }
 
+void check_pace_change()
+{
+  if(joy(0) && JOY_I)
+  {
+    pace = 0;
+  }
+}
 void start_turn(char team)
 {
   int camera_pos;
@@ -408,7 +418,7 @@ void move_ai_unit(char ai_id, int dest)
   // highlight(entities[ai_entities[ai_id].entity_id].pos,0xC000);
   if(battle_grid[dest] != 0)
   {
-    sync(60);
+    sync(pace);
     unhighlight();
     return;
   }
@@ -427,7 +437,7 @@ void ai_do_state(char ai_id)
   center_camera(entities[ai_entities[ai_id].entity_id].pos);
   set_cursor_pos(entities[ai_entities[ai_id].entity_id].pos);
   satb_update();
-  sync(60);
+  sync(pace);
   if(ai_entities[ai_id].state == READY){ do_ready(ai_id); }
   if(ai_entities[ai_id].state == MOVING){ do_move(ai_id); }
   if(ai_entities[ai_id].state == ATTACKING){ do_attack(ai_id); }
@@ -436,6 +446,7 @@ void ai_do_state(char ai_id)
 
 void do_ready(char ai_id)
 {
+  check_pace_change();
   switch(map_type)
   {
     case MAP_DEFEND: do_capture_objective(ai_id); break;
@@ -447,6 +458,7 @@ void do_ready(char ai_id)
 
 void do_move(char ai_id)
 {
+  check_pace_change();
   if(ai_entities[ai_id].dest && ai_entities[ai_id].dest != entities[ai_entities[ai_id].entity_id].pos)
   {
     move_ai_unit(ai_id,ai_entities[ai_id].dest);
@@ -475,13 +487,13 @@ void do_move(char ai_id)
 void do_attack(char ai_id)
 {
   char result, i;
-
+  check_pace_change();
   result = -1;
   satb_update();
-  sync(30);
+  sync(pace/2);
   set_cursor_pos(entities[ai_entities[ai_id].target].pos);
   satb_update();
-  sync(30);
+  sync(pace/2);
   result = attack_unit(entities[ai_entities[ai_id].target].pos,entities[ai_entities[ai_id].entity_id].pos,0);
   ai_entities[ai_id].target = 0;
   if(result == ATTACKER_DEFEAT)//ai died attacking
@@ -524,6 +536,7 @@ void do_attack(char ai_id)
 
 void do_pass(char ai_id)
 {
+  check_pace_change();
   entities[ai_entities[ai_id].entity_id].actionable = 0;
   unhighlight();
   // check_battle_complete();

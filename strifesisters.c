@@ -209,6 +209,8 @@ struct Node map[80]; //a unit with a max move of 5 will fill 60 nodes max.
 #define TILE_FORMATION 353
 #define TILE_GRAY 291
 
+#define MAX_PLAYER_GOLD 25000
+
 #incchr(laconic,"assets/laconic.pcx")
 #incpal(laconic_pal,"assets/laconic.pcx")
 #incbat(laconic_bat,"assets/laconic.pcx",0x1000,0,0,32,24)
@@ -481,7 +483,6 @@ unsigned char current_formation[9];
 void main()
 {
   owned_formations[0] = 1;
-
   owned_formation_count = 1;
 	//setup (one time)
   psgInit(5);
@@ -499,9 +500,6 @@ void main()
   // init_overworld_data();
   // add_commander_to_party(name0,REI);
   // add_commander_to_party(name1,VIOLET);
-
-	player_gold = 250;//1000;
-	// no_of_party_items = 0;
 
   // set_commander_stats(0,1,10,8,8);
   // set_commander_stats(1,1,7,10,8);
@@ -793,29 +791,9 @@ void play_credits()
   }
   cls();
   put_string("Thanks for playing!",7,16);
-  put_string("Final Score",7,17);
-  put_number(final_score,7,8,18);
+  put_string("Final Score",8,18);
+  put_number(final_score,7,9,19);
   for(;;){}
-}
-
-void preload_default(char level)
-{
-  party_size = 0;
-  add_commander_to_party(name0,REI);
-  add_commander_to_party(name1,VIOLET);
-  add_commander_to_party(name2,KING);
-
-  load_unit_to_cmdr(0,4,REI,1,level);
-  load_unit_to_cmdr(1,4,VIOLET,1,level);
-  load_unit_to_cmdr(2,1,KING,1,level);
-
-  if(level > 13)
-  {
-    add_commander_to_party(name3,TINKER);
-    load_unit_to_cmdr(3,4,TINKER,1,level);
-  }
-
-  player_gold = 5000;
 }
 
 void display_intro()
@@ -1528,9 +1506,9 @@ void check_add_new_commander(char map_no)
     load_unit_to_cmdr(3,1,KNIGHT_UNIT,0,18);
     load_unit_to_cmdr(3,2,KNIGHT_UNIT,0,18);
 
-    load_unit_to_cmdr(3,3,BRAWLER_UNIT,0,18);
+    load_unit_to_cmdr(3,3,BERSERKER_UNIT,0,18);
     load_unit_to_cmdr(3,4,TEARLE,1,18);
-    load_unit_to_cmdr(3,5,BRAWLER_UNIT,0,18);
+    load_unit_to_cmdr(3,5,BERSERKER_UNIT,0,18);
 
     load_unit_to_cmdr(3,6,WITCH_UNIT,0,18);
     load_unit_to_cmdr(3,7,CLERIC_UNIT,0,18);
@@ -2399,6 +2377,14 @@ void put_green_square(int address, char x, char y)
 
 unsigned int next_level(int level)
 {
+  if(level == 18)
+  {
+    return 0x22F2;
+  }
+  if(level == 19)
+  {
+    return 0x290A;
+  }
   return (cube(level)*6/4) + ((level*level) / 2) + (2*level);
 }
 
@@ -2582,6 +2568,11 @@ void display_number_incrementing(char x, char y, int final_number, char num_len)
   i=0;  
   while((i+=inc_amt) < final_number)
   {
+    if(joy(0) && JOY_I)
+    {
+      put_number(final_number,num_len,x,y);
+      return;
+    }
     put_number(i,num_len,x,y);
     sync(1);
   }

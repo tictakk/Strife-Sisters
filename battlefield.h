@@ -374,7 +374,7 @@ void post_battle_screen()
     }
     else
     {
-      player_gold += (payouts[get_map_grade_result(map_no,total_bonus)] + (100 * map_no));
+      player_gold = min((payouts[get_map_grade_result(map_no,total_bonus)] + (100 * map_no)) + player_gold,MAX_PLAYER_GOLD);
     }
   }
   // put_char('S',s_x_relative+18,s_y_relative+22);

@@ -68,7 +68,7 @@ void init_arts()
   arts[POWER_SHOT].target = MULTI_ROW;
   arts[POWER_SHOT].relationship = ONE_TO_MANY;
   arts[POWER_SHOT].stunning = 1;
-  arts[POWER_SHOT].base_amt = 3;
+  arts[POWER_SHOT].base_amt = 8;
   arts[POWER_SHOT].move_type = MOVE_ART_ATTACK;
 
   arts[ICE_ART].frame_count = 12;
@@ -80,7 +80,7 @@ void init_arts()
   arts[ICE_ART].move_type = MOVE_ART_ATTACK;
 
   arts[SPD_UP_ART].frame_count = 11;
-  arts[SPD_UP_ART].name = "SPDup";
+  arts[SPD_UP_ART].name = "SPDup ";
   arts[SPD_UP_ART].target = ALL_ALLIES;
   arts[SPD_UP_ART].relationship = MANY_TO_MANY;
   arts[SPD_UP_ART].stunning = 0;
@@ -88,7 +88,7 @@ void init_arts()
   arts[SPD_UP_ART].move_type = MOVE_ART_SUPPORT;
 
   arts[DEF_UP_ART].frame_count = 11;
-  arts[DEF_UP_ART].name = "DEFup";
+  arts[DEF_UP_ART].name = "DEFup ";
   arts[DEF_UP_ART].target = ALL_ALLIES;
   arts[DEF_UP_ART].relationship = MANY_TO_MANY;
   arts[DEF_UP_ART].stunning = 0;
@@ -96,7 +96,7 @@ void init_arts()
   arts[DEF_UP_ART].move_type = MOVE_ART_SUPPORT;
   
   arts[RES_UP_ART].frame_count = 11;
-  arts[RES_UP_ART].name = "RESup";
+  arts[RES_UP_ART].name = "RESup ";
   arts[RES_UP_ART].target = ALL_ALLIES;
   arts[RES_UP_ART].relationship = MANY_TO_MANY;
   arts[RES_UP_ART].stunning = 0;
@@ -104,7 +104,7 @@ void init_arts()
   arts[RES_UP_ART].move_type = MOVE_ART_SUPPORT;
 
   arts[ATK_UP_ART].frame_count = 11;
-  arts[ATK_UP_ART].name = "ATKup";
+  arts[ATK_UP_ART].name = "ATKup ";
   arts[ATK_UP_ART].target = ALL_ALLIES;
   arts[ATK_UP_ART].relationship = MANY_TO_MANY;
   arts[ATK_UP_ART].stunning = 0;
@@ -120,7 +120,7 @@ void init_arts()
   arts[POWER_WAVE_ART].base_amt = 10;
 
   arts[HEAL_ART].frame_count = 11;
-  arts[HEAL_ART].name = "Heal ";
+  arts[HEAL_ART].name = "Heal  ";
   arts[HEAL_ART].target = HEAL;
   arts[HEAL_ART].relationship = NONE_TO_NONE;
   arts[HEAL_ART].stunning = 0;
@@ -128,14 +128,14 @@ void init_arts()
   arts[HEAL_ART].move_type = MOVE_HEAL;
 
   arts[HEAL_ALL_ART].frame_count = 0;
-  arts[HEAL_ALL_ART].name = "Heal ";
+  arts[HEAL_ALL_ART].name = "Heal  ";
   arts[HEAL_ALL_ART].target = HEAL_ALL;
   arts[HEAL_ALL_ART].relationship = NONE_TO_NONE;
   arts[HEAL_ALL_ART].stunning = 0;
   arts[HEAL_ALL_ART].move_type = MOVE_HEAL;
 
   arts[RANGED_SINGLE_ATTACK].frame_count = 0;
-  arts[RANGED_SINGLE_ATTACK].name = "Range";
+  arts[RANGED_SINGLE_ATTACK].name = "Range ";
   arts[RANGED_SINGLE_ATTACK].target = SINGLE_HIT;
   arts[RANGED_SINGLE_ATTACK].relationship = NONE_TO_NONE;
   arts[RANGED_SINGLE_ATTACK].stunning = 1;
@@ -143,7 +143,7 @@ void init_arts()
   arts[RANGED_SINGLE_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
   arts[RANGED_COLUMN_ATTACK].frame_count = 0;
-  arts[RANGED_COLUMN_ATTACK].name = "Range";
+  arts[RANGED_COLUMN_ATTACK].name = "Range ";
   arts[RANGED_COLUMN_ATTACK].target = MULTI_COL_3;
   arts[RANGED_COLUMN_ATTACK].relationship = NONE_TO_NONE;
   arts[RANGED_COLUMN_ATTACK].stunning = 1;
@@ -151,7 +151,7 @@ void init_arts()
   arts[RANGED_COLUMN_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
   arts[RANGED_ROW_ATTACK].frame_count = 0;
-  arts[RANGED_ROW_ATTACK].name = "Range";
+  arts[RANGED_ROW_ATTACK].name = "Range ";
   arts[RANGED_ROW_ATTACK].target = MULTI_ROW;
   arts[RANGED_ROW_ATTACK].relationship = NONE_TO_NONE;
   arts[RANGED_ROW_ATTACK].stunning = 1;
@@ -159,7 +159,7 @@ void init_arts()
   arts[RANGED_ROW_ATTACK].move_type = MOVE_RANGED_ATTACK;
 
   arts[PHYSICAL_SINGLE_ATTACK].frame_count = 0;
-  arts[PHYSICAL_SINGLE_ATTACK].name = "Melee";
+  arts[PHYSICAL_SINGLE_ATTACK].name = "Melee ";
   arts[PHYSICAL_SINGLE_ATTACK].target = SINGLE_HIT;
   arts[PHYSICAL_SINGLE_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_SINGLE_ATTACK].stunning = 1;
@@ -167,7 +167,7 @@ void init_arts()
   arts[PHYSICAL_SINGLE_ATTACK].base_amt = 10;
 
   arts[PHYSICAL_COLUMN_ATTACK].frame_count = 0;
-  arts[PHYSICAL_COLUMN_ATTACK].name = "Melee";
+  arts[PHYSICAL_COLUMN_ATTACK].name = "Melee ";
   arts[PHYSICAL_COLUMN_ATTACK].target = MULTI_COL_3;
   arts[PHYSICAL_COLUMN_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_COLUMN_ATTACK].stunning = 1;
@@ -175,7 +175,7 @@ void init_arts()
   arts[PHYSICAL_COLUMN_ATTACK].base_amt = 7;
 
   arts[PHYSICAL_ROW_ATTACK].frame_count = 0;
-  arts[PHYSICAL_ROW_ATTACK].name = "Melee";
+  arts[PHYSICAL_ROW_ATTACK].name = "Melee ";
   arts[PHYSICAL_ROW_ATTACK].target = MULTI_ROW;
   arts[PHYSICAL_ROW_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_ROW_ATTACK].stunning = 1;
@@ -183,7 +183,7 @@ void init_arts()
   arts[PHYSICAL_ROW_ATTACK].base_amt = 7;
   
   arts[PHYSICAL_ALL_ATTACK].frame_count = 0;
-  arts[PHYSICAL_ALL_ATTACK].name = "Melee";
+  arts[PHYSICAL_ALL_ATTACK].name = "Melee ";
   arts[PHYSICAL_ALL_ATTACK].target = ALL_OPPONENTS;
   arts[PHYSICAL_ALL_ATTACK].relationship = NONE_TO_NONE;
   arts[PHYSICAL_ALL_ATTACK].stunning = 1;

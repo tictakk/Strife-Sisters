@@ -366,15 +366,19 @@ void distribute_exp()
       if(entities[player_id].bg->units[i].id)
       {
         char old_level;
-        entities[player_id].bg->units[i].exp += exp_per;
         old_level = entities[player_id].bg->units[i].level;
-        if(old_level < level_up_unit(&entities[player_id].bg->units[i]))
+        if(old_level < MAX_LEVEL)
         {
-          write_text(10,6,"new level!");
-          print_unit_fullname(entities[player_id].bg->units[i].id,10,7);
-          write_text(10,8,"level");
-          put_number(entities[player_id].bg->units[i].level,2,16,8);
-          sync(60);
+          entities[player_id].bg->units[i].exp += exp_per;
+          // old_level = entities[player_id].bg->units[i].level;
+          if(old_level < level_up_unit(&entities[player_id].bg->units[i]))
+          {
+            write_text(10,6,"new level!");
+            print_unit_fullname(entities[player_id].bg->units[i].id,10,7);
+            write_text(10,8,"level");
+            put_number(entities[player_id].bg->units[i].level,2,16,8);
+            sync(40);
+          }
         }
       }
     }
@@ -412,11 +416,11 @@ void d_battle(char team, char side)
   // put_number(target_bonuses,5,10,0);
   while(battle_phase != PHASE_END)
   {
-    if(b_ticker++ == 2)
-    {
+    // if(b_ticker++ == 2)
+    // {
       // put_number(animating,3,0,0);
       // cycle_button_press(10,1);
-      b_ticker = 0;
+      // b_ticker = 0;
 
       if(animating == 0)
       {
@@ -446,7 +450,7 @@ void d_battle(char team, char side)
         perform_art();
       }
       // animate_effects();
-    }
+    // }
     satb_update();
     vsync();
     if((battle_mode == TRAIN_MODE || battle_mode == CHALLENGE_MODE) && joytrg(0) & JOY_SEL)
@@ -1226,6 +1230,12 @@ void load_pals(char entity_id, int off)
 
         case ZALADIN:
           load_palette(cmdr_count++,king_battle_pal,1);
+          spr_set(MAX_EFFECT_COUNT+(i+off));
+          spr_pal(cmdr_count-1);   
+          break;
+
+        case CALIEN:
+          load_palette(cmdr_count++,calien_battle_pal,1);
           spr_set(MAX_EFFECT_COUNT+(i+off));
           spr_pal(cmdr_count-1);   
           break;

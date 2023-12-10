@@ -85,7 +85,7 @@ typedef struct{
   char growth_chart;
   char bank; int address;
 } Unit;
-
+ 
 typedef struct{
   char id;
   unsigned char hp;

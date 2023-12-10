@@ -167,7 +167,8 @@ void update_unit_battle_info(char unit_id, char x, char y)
   put_char('}',l_x+1,l_y+11);
   put_char('~',l_x+1,l_y+12);
 
-  // set_font_pal(GOLD_FONT);  
+  put_string("RNG",l_x+1,l_y+7);
+  // set_font_pal(GOLD_FONT);
   put_char('F',l_x+1,l_y+4);
   put_char('M',l_x+1,l_y+5);
   put_char('R',l_x+1,l_y+6);
@@ -182,6 +183,7 @@ void update_unit_battle_info(char unit_id, char x, char y)
     print_attack_type(unit_header[0].attacks[0],1,l_x+2,l_y+4);
     print_attack_type(unit_header[0].attacks[1],1,l_x+2,l_y+5);
     print_attack_type(unit_header[0].attacks[2],1,l_x+2,l_y+6);
+    put_number(unit_header[0].rng,1,l_x+4,l_y+7);
     print_unit_attack_icon(adv_plus_plus,l_x+3,l_y+9);
     print_unit_attack_icon(adv_plus[0],l_x+3,l_y+10);
     print_unit_attack_icon(adv_plus[1],l_x+4,l_y+10);
@@ -196,7 +198,7 @@ void update_unit_battle_info(char unit_id, char x, char y)
     put_string("        ",l_x+1,l_y+4);
     put_string("        ",l_x+1,l_y+5);
     put_string("        ",l_x+1,l_y+6);
-
+    put_string("        ",l_x+1,l_y+7);
     put_string("        ",l_x+1,l_y+8);
     put_string("        ",l_x+1,l_y+9);
     put_string("        ",l_x+1,l_y+10);

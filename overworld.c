@@ -476,7 +476,7 @@ char get_unit_by_type(char type, char index)
 void buy_unit()
 {
   player_gold -= unit_cost;
-  add_unit_to_convoy(selected_unit,max(map_no,1));
+  add_unit_to_convoy(selected_unit,map_no+1);
   update_gold_amount(2,9,6,9);
 }
 
@@ -906,6 +906,7 @@ void overworld_controls(){
             update_unit_battle_info(party_units[(cursor_column*8)+commander_select_cursor]&0xFF,22,14);
             reset_npcs();
             load_cmdr_army_to_npcs(selected_cmdr);
+            load_cmdr_army_to_npcs(MAX_PARTY_COMMANDERS);
             refresh_battle_units();
             spr_show(63);
           }
@@ -1105,9 +1106,13 @@ void overworld_controls(){
   }
 	// if(j_2 & JOY_RUN)
 	// {
+    // put_number(player_gold,6,s_x_relative,s_y_relative);
   // }
 	// if(j_2 & JOY_SEL)
 	// {
+  //  put_hex(next_level(19),8,s_x_relative,s_y_relative); 
+    // player_gold += 
+    // player_gold = min(500 + player_gold,MAX_PLAYER_GOLD);
   // }
 }
 
