@@ -1,0 +1,1 @@
+The is my first time building a game / using C. Most of this is a hot mess since the game has gone through many changes and I didn't have a clue what I was doing at the start. I will try to add all the assets over time to make this fully buildable. Some of the code was borrowed from space ava 201 https://github.com/nicolebranagan/spaceava201
